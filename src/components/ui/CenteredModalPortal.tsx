@@ -1,4 +1,4 @@
-import { type ReactNode, type RefObject } from 'react';
+import { type ReactNode, type RefObject, type LegacyRef } from 'react';
 import { createPortal } from 'react-dom';
 
 type CenteredModalPortalProps = {
@@ -49,7 +49,7 @@ export function CenteredModalPortal({
         onClick={onClose}
       />
       <div
-        ref={panelRef}
+        ref={panelRef as LegacyRef<HTMLDivElement> | undefined}
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabel}

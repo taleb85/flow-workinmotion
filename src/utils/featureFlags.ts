@@ -90,12 +90,20 @@ export async function updateFeatureFlagInSupabase(slug: string, enabled: boolean
     // Read current stored flags, merge the change, then write back
     const current = await loadFeatureFlagsFromSupabase().catch(() => null);
     const merged: FeatureFlags = { ...buildDefaults(), ...(current ?? {}), [slug]: enabled };
-    const blob = new Blob([JSON.stringify(merged)], { type: 'application/json' });
-    await supabase.storage.from(BUCKET).upload(FILE_PATH, blob, {
-      upsert: true,
-      contentType: 'application/json',
-    });
+    await writeAllFeatureFlagsToSupabase(merged);
   } catch {
     // Storage unavailable — localStorage is the authoritative fallback
   }
+}
+
+/** Scrive l’intero oggetto flag su Storage (es. bundle impostazioni globale). */
+export async function writeAllFeatureFlagsToSupabase(flags: FeatureFlags): Promise<void> {
+  if (!supabase) return;
+  if (import.meta.env.VITE_FEATURE_FLAGS_STORAGE_ENABLED === 'false') return;
+  const merged: FeatureFlags = { ...buildDefaults(), ...flags };
+  const blob = new Blob([JSON.stringify(merged)], { type: 'application/json' });
+  await supabase.storage.from(BUCKET).upload(FILE_PATH, blob, {
+    upsert: true,
+    contentType: 'application/json',
+  });
 }

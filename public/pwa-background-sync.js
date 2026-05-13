@@ -3,7 +3,6 @@
  * Alla riconnessione il browser può risvegliare lo SW con l’evento `sync` e notificare le finestre aperte.
  * @see https://developer.chrome.com/docs/workbox/modules/workbox-background-sync/ (pattern analogo)
  */
-/* eslint-disable no-restricted-globals -- service worker globale */
 (function () {
   var TAG = 'osteria-data-sync';
   var MSG = 'OSTERIA_BACKGROUND_SYNC';

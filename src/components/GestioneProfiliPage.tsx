@@ -30,9 +30,9 @@ export default function GestioneProfiliPage() {
           <div>
             <h1 className="text-slate-800 text-xl font-bold leading-tight">Gestione Profili</h1>
             <p className="text-slate-500 text-sm mt-0.5">
-              Anteprima permessi (ruolo + template). Ruolo singolo: Impostazioni → team. Template <strong>Proprietario</strong> /{' '}
-              <strong>Manager·Assistant</strong> / <strong>Staff</strong> e moduli scheda Admin globali: tab <strong>Permessi ruoli</strong>{' '}
-              (solo Admin).
+              Anteprima permessi (ruolo + template). Ruolo singolo: Impostazioni → team. Template{' '}
+              <strong>Manager·Assistant</strong> / <strong>Capo</strong> / <strong>Staff</strong> e moduli scheda Admin globali: tab{' '}
+              <strong>Permessi ruoli</strong> (solo Admin).
             </p>
           </div>
         </div>

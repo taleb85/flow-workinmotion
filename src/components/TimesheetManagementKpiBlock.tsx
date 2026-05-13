@@ -98,6 +98,7 @@ export default function TimesheetManagementKpiBlock({ visibleWeekDays, showDetai
       const { start, end } = getResolvedStartEndForHours(s, punchRecords);
       if (!start || !end || start === end) continue;
       const u = users.find((x) => x.id === s.user_id);
+      if (!u || u.status !== 'active') continue;
       const mins = getNetShiftMinutes(s, start, end, u ?? undefined, breakRules, breakComputeOpts);
       const raw = u?.hourly_rate_eur;
       const rate = typeof raw === 'string' ? parseFloat(raw) : raw;

@@ -3,6 +3,8 @@
 interface ImportMetaEnv {
   /** Se "true", utenti loggati possono usare l'app nel browser senza PWA installata (solo build con questo env). */
   readonly VITE_ALLOW_BROWSER_APP?: string;
+  /** Se "false", disattiva pull/push Storage config, revisione client e segnale Realtime impostazioni (DB/turni restano attivi). */
+  readonly VITE_APP_CLOUD_SYNC?: string;
 }
 
 interface ImportMeta {

@@ -12,7 +12,14 @@ import { getPunchPairForShift, getResolvedStartEndForHours } from '../utils/shif
 import { getTranslations, getDateLocale, getIntlLocale, formatTrans } from '../utils/translations';
 import { getShiftViolations } from '../utils/workRules';
 import { getBreakMinutesForShift, getNetShiftMinutes } from '../utils/breakRules';
-import { isPurelyManagementRole, isManagementRole, isUserVisibleOnTeamSchedule } from '../utils/permissions';
+import {
+  isPurelyManagementRole,
+  isManagementRole,
+  isUserVisibleOnTeamSchedule,
+  canOperateTeamSchedule,
+  canPublishScheduleDrafts,
+  canApproveShiftActions,
+} from '../utils/permissions';
 import { isUiWidgetVisible } from '../utils/uiScreenWidgets';
 import { isFeatureEnabled, isAdminModuleEnabled } from '../utils/enabledFeatures';
 import { exportSchedulePDF } from '../utils/exportSchedulePDF';
@@ -31,8 +38,10 @@ import {
 import { getPayrollPaymentDateForCalendarMonth } from '../utils/payrollSchedule';
 import { saveTimesheetPeriodToSupabase } from '../utils/timesheetPeriodSupabase';
 import { motion, AnimatePresence } from 'framer-motion';
-import DatePickerField, { isDatePickerPortalClick } from './DatePickerField';
+import DatePickerField from './DatePickerField';
+import { isDatePickerPortalClick } from '../utils/datePickerPortal';
 import { HorizontalScrollArea } from './HorizontalScrollArea';
+import { usePunchPresenceVerification } from '../hooks/usePunchPresenceVerification';
 
 /**
  * ── WEB vs MOBILE (breakpoint sm = 640px) ─────────────────────────────────────
@@ -348,7 +357,22 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
   void setSavingOrder; // reserved for future drag-reorder save
   const isWideShiftViewport = useMinViewportMd();
   const { users, shifts, holidays, availability, toggleAvailability, updateShift, updateUser, currentUser, punchRecords, addShift, updatePunchRecord, addPunchRecord, deleteShifts, showError, showSuccess, silentRefreshData, requestConfirmAndSaveOrder, requestConfirmAndPublishWeek, postRefreshLocked, effectiveLanguage, approveShiftSoft, workRules, breakRules, featureFlags } = useApp();
+  const { requestProof, modal: presenceVerificationModal } = usePunchPresenceVerification(effectiveLanguage);
   const t = getTranslations(effectiveLanguage);
+  const addPunchWithPresence = useCallback(
+    async (userId: string, type: 'in' | 'out', opts?: { timestamp?: string; shift_id?: string }) => {
+      try {
+        const proof = await requestProof(userId);
+        return addPunchRecord(userId, type, { ...opts, ...(proof ? { presenceProof: proof } : {}) });
+      } catch (e) {
+        if (e instanceof Error && e.message === 'presence_cancelled') {
+          return { error: t.punch_presence_cancelled };
+        }
+        throw e;
+      }
+    },
+    [requestProof, addPunchRecord, t.punch_presence_cancelled]
+  );
   const breakComputeOpts = useMemo(
     () => ({ autoBreaksFeatureEnabled: featureFlags['auto_breaks'] !== false }),
     [featureFlags]
@@ -538,15 +562,24 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
   }, [shifts, updateShift, trackSave, showSuccess, showError, t]);
 
   const isManagement = currentUser ? isManagementRole(currentUser.role) : false;
-  const canCreateShifts = currentUser?.can_create_shifts ?? false;
-  const canEditShifts = isManagement;
+  const canShiftOps =
+    !!currentUser &&
+    canOperateTeamSchedule(currentUser) &&
+    (currentUser.role === 'admin' || isFeatureEnabled(currentUser, 'edit_shifts'));
+  const canEditShifts = canShiftOps;
   /** Tablet / desktop (≥768px): modifica e creazione turni. Telefono: solo lettura. */
   const canEditInApp = canEditShifts && isWideShiftViewport;
   /** Strumenti gestione (template, drag nomi, ecc.): stessa soglia viewport. */
-  const canUseShiftManagementChrome = isManagement && isWideShiftViewport;
+  const canUseShiftManagementChrome = canShiftOps && isWideShiftViewport;
   const canViewTotalHours = currentUser ? isFeatureEnabled(currentUser, 'view_stats') : false;
-  const canManageDrafts = currentUser ? isFeatureEnabled(currentUser, 'edit_shifts') : false;
-  const canApproveShifts = currentUser ? isFeatureEnabled(currentUser, 'approve_shifts') : false;
+  const canManageDrafts =
+    !!currentUser &&
+    canPublishScheduleDrafts(currentUser) &&
+    (currentUser.role === 'admin' || isFeatureEnabled(currentUser, 'edit_shifts'));
+  const canApproveShifts =
+    !!currentUser &&
+    canApproveShiftActions(currentUser) &&
+    (currentUser.role === 'admin' || isFeatureEnabled(currentUser, 'approve_shifts'));
   const isStaff = !isManagement;
 
   const handleSavePeriodConfigWst = useCallback(() => {
@@ -974,7 +1007,10 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
               // Crea punch record solo se il turno è già iniziato (data passata o oggi e orario raggiunto)
               const shiftStartTs = new Date(toTimestampISO(shift.date, startVal));
               if (shiftStartTs <= new Date()) {
-                const pr = await addPunchRecord(shift.user_id, 'in', { shift_id: shift.id, timestamp: toTimestampISO(shift.date, startVal) });
+                const pr = await addPunchWithPresence(shift.user_id, 'in', {
+                  shift_id: shift.id,
+                  timestamp: toTimestampISO(shift.date, startVal),
+                });
                 if (pr && typeof pr === 'object' && 'error' in pr && pr.error) {
                   showError(pr.error);
                   return;
@@ -993,7 +1029,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
     } finally {
       setSidebarSaving(false);
     }
-  }, [sidebarDay, sidebarEdits, visibleShifts, shifts, punchRecords, updateShift, updatePunchRecord, addPunchRecord, showError, showSuccess, trackSave, t]);
+  }, [sidebarDay, sidebarEdits, visibleShifts, shifts, punchRecords, updateShift, updatePunchRecord, addPunchWithPresence, showError, showSuccess, trackSave, t]);
 
   /** Save orari + timbrature manuale dal drawer singolo. */
   const handleDrawerSave = useCallback(async (shiftId: string) => {
@@ -1030,7 +1066,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
           if (existingIn) {
             await updatePunchRecord(existingIn.id, { timestamp: ts, calculated_time: calc });
           } else {
-            const pr = await addPunchRecord(shift.user_id, 'in', { shift_id: shiftId, timestamp: ts });
+            const pr = await addPunchWithPresence(shift.user_id, 'in', { shift_id: shiftId, timestamp: ts });
             if (pr && typeof pr === 'object' && 'error' in pr && pr.error) {
               showError?.(pr.error);
               return;
@@ -1054,7 +1090,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
     } finally {
       setDrawerSaving(false);
     }
-  }, [shifts, sidebarEdits, drawerPunchEdits, punchRecords, updateShift, updatePunchRecord, addPunchRecord, showError, showSuccess, t]);
+  }, [shifts, sidebarEdits, drawerPunchEdits, punchRecords, updateShift, updatePunchRecord, addPunchWithPresence, showError, showSuccess, t]);
 
   const handleUnlockShift = async (shiftId: string, pin: string) => {
     if (!currentUser) return;
@@ -1541,7 +1577,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                 </button>
                 {wstToolbarDrawerSection === 'actions' && (
                   <div className="py-2">
-                {isManagement && (
+                {canShiftOps && (
                   <>
                     <div className="px-3 pb-1">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
@@ -2163,7 +2199,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                       const payrollTitleBar = isPayrollDayBar
                         ? `${format(day, 'EEEE d MMMM yyyy', { locale: getDateLocale(effectiveLanguage) ?? it })} — ${trBar.ts_payroll_day_abbr ?? 'Paga'}`
                         : '';
-                      const mgmtTitleBar = isManagement
+                      const mgmtTitleBar = canShiftOps
                         ? hiddenDates.has(dayStr)
                           ? t.wst_day_visible_tooltip
                           : t.wst_day_hide_tooltip
@@ -2180,7 +2216,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                       } ${canEditInApp && !isStaff && hasShifts ? 'cursor-pointer hover:bg-slate-100/80 active:bg-slate-200/80 transition-colors rounded-xl' : ''} ${isManagement ? 'select-none' : ''}`;
                       const dayBarInner = (
                         <>
-                          {isManagement && hiddenDates.has(dayStr) && (
+                          {canShiftOps && hiddenDates.has(dayStr) && (
                             <EyeOff className="w-3 h-3 text-slate-400 flex-shrink-0" />
                           )}
                           <span
@@ -2195,7 +2231,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                           </span>
                         </>
                       );
-                      const onDayBarContextMenu = isManagement
+                      const onDayBarContextMenu = canShiftOps
                         ? (e: ReactMouseEvent<HTMLButtonElement | HTMLDivElement>) => {
                             e.preventDefault();
                             const next = toggleHiddenDate(dayStr);
@@ -2535,7 +2571,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
           </HorizontalScrollArea>
         ) : (
               activeUsers.map((user, userIdx) => {
-                const canManageThisUser = canEditInApp && !isPurelyManagementRole(user.role) && canCreateShifts;
+                const canManageThisUser = canEditInApp && !isPurelyManagementRole(user.role);
 
                 return (
                   <motion.div
@@ -2543,7 +2579,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                     initial={{ y: -10, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.04 + 0.03 * userIdx, duration: 0.28 }}
-                    draggable={isManagement}
+                    draggable={canShiftOps}
                     onDragStart={(e) => {
                       const ev = e as unknown as React.DragEvent;
                       ev.dataTransfer.setData('dragType', 'user');
@@ -3634,6 +3670,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
         );
       })()}
 
+      {presenceVerificationModal}
 
     </div>
   );
@@ -3655,15 +3692,18 @@ interface ShiftEditPanelProps {
 
 function ShiftEditPanel({ shift, onClose, onSaved, embedded = false, showCloseButton = true, otherShiftsSameDay = [], multiEditMode, onConfirmAndNext }: ShiftEditPanelProps) {
   const { users, punchRecords, updateShift, updatePunchRecord, addPunchRecord, currentUser, showError, effectiveLanguage, breakRules, featureFlags } = useApp();
+  const { requestProof, modal: shiftEditPresenceModal } = usePunchPresenceVerification(effectiveLanguage);
   const t = getTranslations(effectiveLanguage);
   const [startTime, setStartTime] = useState((shift.start_time || '').trim().slice(0, 5));
   const [endTime, setEndTime] = useState((shift.end_time || '').trim().slice(0, 5));
   const [deductBreak, setDeductBreak] = useState(shift.deduct_break !== false);
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  /** Admin, Manager, Assistant Manager: libertà totale di modifica. Altri: can_create_shifts. */
-  const isManagement = currentUser ? isManagementRole(currentUser.role) : false;
-  const canEdit = isManagement || (currentUser?.can_create_shifts ?? false);
+  /** Admin sempre; altri solo con `can_create_shifts` (+ feature `edit_shifts` nel tabellone principale). */
+  const canEdit =
+    !!currentUser &&
+    canOperateTeamSchedule(currentUser) &&
+    (currentUser.role === 'admin' || isFeatureEnabled(currentUser, 'edit_shifts'));
 
   const actual = getActualShiftTime(shift, punchRecords);
   const canConfirmEntry = !actual.isCompleted;
@@ -3703,7 +3743,18 @@ function ShiftEditPanel({ shift, onClose, onSaved, embedded = false, showCloseBu
   const handleConfirmEntry = async () => {
     setConfirming(true);
     try {
-      const pr = await addPunchRecord(shift.user_id, 'in', { shift_id: shift.id });
+      let presenceProof: string | undefined;
+      try {
+        const proof = await requestProof(shift.user_id);
+        presenceProof = proof || undefined;
+      } catch (e) {
+        if (e instanceof Error && e.message === 'presence_cancelled') {
+          showError(t.punch_presence_cancelled);
+          return;
+        }
+        throw e;
+      }
+      const pr = await addPunchRecord(shift.user_id, 'in', { shift_id: shift.id, presenceProof });
       if (pr && typeof pr === 'object' && 'error' in pr && pr.error) {
         showError(pr.error);
         return;
@@ -3865,10 +3916,15 @@ function ShiftEditPanel({ shift, onClose, onSaved, embedded = false, showCloseBu
       </div>
     </div>
   );
-  return embedded ? (
-    <div className="bg-slate-50/80 border-t border-slate-100">{content}</div>
-  ) : (
-    <div className="rounded-xl shadow-lg bg-white border border-slate-200">{content}</div>
+  return (
+    <>
+      {embedded ? (
+        <div className="bg-slate-50/80 border-t border-slate-100">{content}</div>
+      ) : (
+        <div className="rounded-xl shadow-lg bg-white border border-slate-200">{content}</div>
+      )}
+      {shiftEditPresenceModal}
+    </>
   );
 }
 

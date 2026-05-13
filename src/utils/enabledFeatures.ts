@@ -6,7 +6,11 @@
 import type { RoleFeatureTemplatesOnDisk, RoleTemplateGroup } from './roleFeatureTemplates';
 import { getRoleFeatureTemplatesCache } from './roleFeatureTemplates';
 import { getAdminModulesGlobalCache } from './adminModulesGlobal';
-import { SETTINGS_OPERATIONAL_PERM_KEYS, type SettingsOperationalPermKey } from './settingsPermissionRows';
+import {
+  SETTINGS_OPERATIONAL_PERM_KEYS,
+  defaultOperationalTemplateBase,
+  type SettingsOperationalPermKey,
+} from './settingsPermissionRows';
 
 export type { SettingsOperationalPermKey };
 
@@ -115,6 +119,49 @@ export function roleTemplateSectionTitleKey(id: RoleTemplateSectionId): string {
   }
 }
 
+/** Raggruppamento UI template: 5 schede barra → espandi per i singoli permessi. */
+export const ROLE_TEMPLATE_TAB_SHEET_GROUPS = [
+  { id: 'dashboard', titleKey: 'role_template_tab_group_dashboard' as const, keys: ['home_tab'] as const },
+  {
+    id: 'turni',
+    titleKey: 'role_template_tab_group_turni' as const,
+    keys: ['team_view', 'export_pdf', 'edit_shifts', 'approve_shifts'] as const,
+  },
+  { id: 'ferie', titleKey: 'role_template_tab_group_ferie' as const, keys: ['ferie_tab'] as const },
+  { id: 'presenze', titleKey: 'role_template_tab_group_presenze' as const, keys: ['timesheet_tab'] as const },
+  {
+    id: 'statistiche',
+    titleKey: 'role_template_tab_group_statistiche' as const,
+    keys: ['view_stats', 'view_estimated_cost'] as const,
+  },
+] as const;
+
+export type RoleTemplateTabSheetGroupId = (typeof ROLE_TEMPLATE_TAB_SHEET_GROUPS)[number]['id'];
+
+const TAB_SHEET_GROUP_KEY_SET = new Set<EnabledFeatureKey>(
+  ROLE_TEMPLATE_TAB_SHEET_GROUPS.flatMap((g) => [...g.keys])
+);
+
+export function isFeatureKeyInTabSheetGroups(key: EnabledFeatureKey): boolean {
+  return TAB_SHEET_GROUP_KEY_SET.has(key);
+}
+
+/** Sezione etichette per riga figlia (tab-first vs nome funzione). */
+export function featureKeyTemplateSection(key: EnabledFeatureKey): RoleTemplateSectionId {
+  if (
+    key === 'home_tab' ||
+    key === 'team_view' ||
+    key === 'ferie_tab' ||
+    key === 'timesheet_tab' ||
+    key === 'export_pdf' ||
+    key === 'view_stats'
+  ) {
+    return 'tabs_nav';
+  }
+  if (key === 'edit_shifts' || key === 'approve_shifts') return 'shift_ops';
+  return 'other';
+}
+
 /** Funzioni della scheda Impostazioni: config globale (solo Admin modifica), stessi valori per tutti i profili gestionali. */
 export const ADMIN_MODULE_KEYS = [
   'visibility_management',
@@ -131,25 +178,26 @@ const DEFAULT_ADMIN_FEATURES: EnabledFeatures = Object.fromEntries(
   ENABLED_FEATURE_KEYS.map((k) => [k, true])
 ) as EnabledFeatures;
 
-/** Default codice: Manager e Assistant Manager (template gruppo `management`). */
+/** Default codice: Manager e Assistant Manager (template gruppo `management`). Operatività e export partono spenti finché l’Admin non li abilita (template o profilo). */
 const DEFAULT_MANAGER_FEATURES: EnabledFeatures = {
   home_tab: true,
   team_view: true,
-  edit_shifts: true,
-  approve_shifts: true,
+  edit_shifts: false,
+  approve_shifts: false,
   timesheet_tab: true,
-  export_pdf: true,
-  view_stats: true,
-  view_estimated_cost: true,
+  export_pdf: false,
+  view_stats: false,
+  view_estimated_cost: false,
   desktop_access: true,
   ferie_tab: true,
   /** Solo il ruolo `admin` vede la scheda Impostazioni / profili in barra (ignora template e JSONB). */
   admin_tab: false,
 };
 
-/** Default staff: come management (stesso `admin_tab` false). */
+/** Default staff: stessi limiti management; tabellone team spento di default (template può riaccenderlo). */
 const DEFAULT_STAFF_FEATURES: EnabledFeatures = {
   ...DEFAULT_MANAGER_FEATURES,
+  team_view: false,
 };
 
 export function getDefaultEnabledFeatures(role: string): EnabledFeatures {
@@ -218,15 +266,12 @@ export function getTemplateDefaultTeamScheduleVisible(role: string): boolean {
   return getTemplateGroupTeamScheduleVisible(grp, disk);
 }
 
-/** Permessi operativi (DB) nel template: default tutti attivi, merge da file. */
+/** Permessi operativi (DB) nel template: ferie/timbratura on di default; flag gestionali off; merge da file. */
 export function buildMergedOperationalTemplateForGroup(
   group: RoleTemplateGroup,
   disk: RoleFeatureTemplatesOnDisk | null
 ): Record<SettingsOperationalPermKey, boolean> {
-  const base = Object.fromEntries(SETTINGS_OPERATIONAL_PERM_KEYS.map((k) => [k, true])) as Record<
-    SettingsOperationalPermKey,
-    boolean
-  >;
+  const base = defaultOperationalTemplateBase();
   const partial = disk?.[group];
   if (!partial) return base;
   const out = { ...base };
@@ -251,6 +296,8 @@ export function serializeTemplateGroupForDisk(
       out[k] = operational[k] === true;
     }
   }
+  /** La dashboard è sempre in barra; il JSON non può spegnerla (allineato a `RoleFeatureSectionsBlock` lock). */
+  out.home_tab = true;
   return out;
 }
 
@@ -347,7 +394,7 @@ export function buildMergedAdminModulesForAdminEditor(): Record<AdminModuleKey, 
 
 /**
  * Moduli scheda Impostazioni: **solo config globale** (sincronizzata per tutti).
- * Proprietario / Manager / Assistant: stessi flag; Admin: sempre tutti attivi; Staff: nessuno.
+ * Capo / Manager / Assistant: stessi flag; Admin: sempre tutti attivi in lettura; Staff: nessuno.
  */
 export function getAdminModuleEnabled(user: { role: string; enabled_features?: unknown }): Partial<Record<AdminModuleKey, boolean>> {
   // Admin: in UI mostra gli stessi flag globali dei manager (lettura coerente con Storage); l’accesso resta sempre sbloccato in isAdminModuleEnabled.

@@ -23,7 +23,12 @@ import { loadPeriodConfig, getPeriodDateRange } from '../utils/periodConfig';
 import { formatMinutesToHoursAndMinutes } from '../utils/timeCalculations';
 import { getNetShiftMinutes } from '../utils/breakRules';
 import { getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
-import { isManagementRole, isPurelyManagementRole, isUserVisibleOnTeamSchedule } from '../utils/permissions';
+import {
+  isManagementRole,
+  isPurelyManagementRole,
+  isUserVisibleOnTeamSchedule,
+  canViewAllTeamHours,
+} from '../utils/permissions';
 import { isUiWidgetVisible } from '../utils/uiScreenWidgets';
 import { isFeatureEnabled } from '../utils/enabledFeatures';
 import { motion } from 'framer-motion';
@@ -55,10 +60,13 @@ export default function Statistics() {
     () => ({ autoBreaksFeatureEnabled: featureFlags['auto_breaks'] !== false }),
     [featureFlags]
   );
-  /** Vista “gestione” completa solo se ruolo gestionale e matrice `view_stats` attiva. */
+  /** Vista gestione team: ruolo gestionale, `view_stats` e (admin o `can_view_total_hours`). */
   const isManagementRoleUser = currentUser ? isManagementRole(currentUser.role) : false;
   const showManagementStatsChrome =
-    currentUser && isManagementRoleUser && isFeatureEnabled(currentUser, 'view_stats');
+    currentUser &&
+    isManagementRoleUser &&
+    isFeatureEnabled(currentUser, 'view_stats') &&
+    canViewAllTeamHours(currentUser);
 
   const initialPeriod = getInitialPeriodRange();
   const [preset, setPreset]     = useState<Preset>('period');

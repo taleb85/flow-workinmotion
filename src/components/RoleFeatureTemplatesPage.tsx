@@ -5,7 +5,6 @@ import { useApp } from '../context/AppContext';
 import { canEditRoleFeatureTemplates } from '../utils/permissions';
 import {
   ADMIN_MODULE_KEYS,
-  ENABLED_FEATURE_KEYS,
   type EnabledFeatures,
   type EnabledFeatureKey,
   type AdminModuleKey,
@@ -21,7 +20,7 @@ import AdminRow from './ui/AdminRow';
 import { getRoleFeatureTemplatesCache, type RoleFeatureTemplatesOnDisk, type RoleTemplateGroup } from '../utils/roleFeatureTemplates';
 import { serializeAdminModulesForDisk } from '../utils/adminModulesGlobal';
 import { getAdminModuleLabel, getTranslations } from '../utils/translations';
-import { buildSettingsPermissionRows, SETTINGS_OPERATIONAL_PERM_KEYS } from '../utils/settingsPermissionRows';
+import { buildSettingsPermissionRows } from '../utils/settingsPermissionRows';
 import { operationalPayloadForUser } from '../utils/roleTemplateUserSync';
 
 const ACCENT = '#2D5A27';
@@ -50,13 +49,6 @@ function groupTitle(g: RoleTemplateGroup, tv: Record<string, string>): string {
 
 type Props = { variant?: RoleFeatureTemplatesPanelVariant };
 
-function allOperationalTrue(): Record<SettingsOperationalPermKey, boolean> {
-  return Object.fromEntries(SETTINGS_OPERATIONAL_PERM_KEYS.map((k) => [k, true])) as Record<
-    SettingsOperationalPermKey,
-    boolean
-  >;
-}
-
 /** Template permessi per gruppo ruolo + moduli scheda Admin. Usabile in pagina dedicata o dentro Impostazioni. */
 export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   const {
@@ -74,11 +66,15 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   const t = getTranslations(effectiveLanguage);
   const permRows = useMemo(() => buildSettingsPermissionRows(t as Record<string, string>), [t]);
 
-  const allOnInit = () =>
-    Object.fromEntries(ENABLED_FEATURE_KEYS.map((k) => [k, true])) as EnabledFeatures;
-  const [mgmt, setMgmt] = useState<EnabledFeatures>(allOnInit);
-  const [capo, setCapo] = useState<EnabledFeatures>(allOnInit);
-  const [staff, setStaff] = useState<EnabledFeatures>(allOnInit);
+  const [mgmt, setMgmt] = useState<EnabledFeatures>(() =>
+    buildMergedTemplateForAdminEditor('management', getRoleFeatureTemplatesCache())
+  );
+  const [capo, setCapo] = useState<EnabledFeatures>(() =>
+    buildMergedTemplateForAdminEditor('capo', getRoleFeatureTemplatesCache())
+  );
+  const [staff, setStaff] = useState<EnabledFeatures>(() =>
+    buildMergedTemplateForAdminEditor('staff', getRoleFeatureTemplatesCache())
+  );
   const [teamScheduleMgmt, setTeamScheduleMgmt] = useState(true);
   const [teamScheduleCapo, setTeamScheduleCapo] = useState(true);
   const [teamScheduleStaff, setTeamScheduleStaff] = useState(true);
@@ -184,28 +180,6 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       if (group === 'management') setOpMgmt(apply);
       else if (group === 'capo') setOpCapo(apply);
       else setOpStaff(apply);
-    },
-    [markTemplatePanelDirty]
-  );
-
-  const resetGroupAllOn = useCallback(
-    (group: RoleTemplateGroup) => {
-      markTemplatePanelDirty();
-      const allOn = Object.fromEntries(ENABLED_FEATURE_KEYS.map((k) => [k, true])) as EnabledFeatures;
-      const allOp = allOperationalTrue();
-      if (group === 'management') {
-        setMgmt(allOn);
-        setTeamScheduleMgmt(true);
-        setOpMgmt(allOp);
-      } else if (group === 'capo') {
-        setCapo(allOn);
-        setTeamScheduleCapo(true);
-        setOpCapo(allOp);
-      } else {
-        setStaff(allOn);
-        setTeamScheduleStaff(true);
-        setOpStaff(allOp);
-      }
     },
     [markTemplatePanelDirty]
   );
@@ -382,26 +356,18 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
     const expanded = roleGroupExpanded[group];
     return (
       <div key={group} className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-        <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+        <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
           <button
             type="button"
             onClick={() => toggleRoleGroupExpanded(group)}
             aria-expanded={expanded}
-            className="flex items-center gap-2 min-w-0 flex-1 text-left rounded-lg -m-1 p-1 hover:bg-white/60 transition-colors"
+            className="flex w-full items-center gap-2 min-w-0 text-left rounded-lg -m-1 p-1 hover:bg-white/60 transition-colors"
           >
             <ChevronDown
               className={`w-4 h-4 shrink-0 text-slate-500 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
               aria-hidden
             />
             <h2 className="ui-section-title text-slate-700">{groupTitle(group, t as Record<string, string>)}</h2>
-          </button>
-          <button
-            type="button"
-            onClick={() => resetGroupAllOn(group)}
-            className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500 hover:text-slate-800 px-2 py-1 rounded-lg border border-slate-200 hover:bg-white"
-          >
-            <RotateCcw className="w-3 h-3" />
-            {t.role_templates_default_all_on}
           </button>
         </div>
         <AnimatePresence initial={false}>
@@ -414,12 +380,15 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
               className="overflow-hidden"
             >
               <div className="p-4 space-y-4">
-                <RoleFeatureSectionsBlock
-                  mode="toggles"
-                  features={state}
-                  language={effectiveLanguage}
-                  onToggle={(key) => toggleRole(group, key)}
-                />
+                <div className="rounded-2xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/50 p-3 sm:p-4 shadow-sm ring-1 ring-slate-100/60">
+                  <RoleFeatureSectionsBlock
+                    mode="toggles"
+                    features={state}
+                    language={effectiveLanguage}
+                    lockAlwaysOnFeatures={['home_tab']}
+                    onToggle={(key) => toggleRole(group, key)}
+                  />
+                </div>
                 <div className="pt-3 border-t border-slate-100">
                   <div className="rounded-xl border border-slate-200 bg-white">
                     <AdminRow

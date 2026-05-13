@@ -7,7 +7,7 @@ import { getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
 import { motion } from 'framer-motion';
 import { TrendingUp } from 'lucide-react';
 import { translateRole } from '../utils/roles';
-import { isPurelyManagementRole, isManagementRole, isUserVisibleOnTeamSchedule } from '../utils/permissions';
+import { isPurelyManagementRole, isManagementRole, isUserVisibleOnTeamSchedule, canViewAllTeamHours } from '../utils/permissions';
 import { isFeatureEnabled } from '../utils/enabledFeatures';
 import { getTranslations, getDateLocale, formatTrans } from '../utils/translations';
 import { it } from 'date-fns/locale';
@@ -21,7 +21,8 @@ export default function MonthlySummaryTable() {
   );
   if (!currentUser) return null;
   const t = getTranslations(effectiveLanguage);
-  const hasManagementAccess = isManagementRole(currentUser.role);
+  const hasManagementAccess =
+    isManagementRole(currentUser.role) && canViewAllTeamHours(currentUser);
   const getLocale = () => getDateLocale(effectiveLanguage) ?? it;
 
   const now = new Date();

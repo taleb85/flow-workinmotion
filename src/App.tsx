@@ -9,6 +9,7 @@ import MobileProfileHeader from './components/MobileProfileHeader';
 import HeaderTodayCoworkersCard from './components/HeaderTodayCoworkersCard';
 import RefreshLockOverlay from './components/RefreshLockOverlay';
 import BodyPullToRefresh from './components/BodyPullToRefresh';
+import DataSyncBanner from './components/DataSyncBanner';
 import HomePage from './components/HomePage';
 import PunchInKiosk from './components/PunchInKiosk';
 import LoginPage from './components/LoginPage';
@@ -72,7 +73,7 @@ function KioskOffPage() {
 // ─── Kiosk Route ──────────────────────────────────────────────────────────────
 function KioskRoute() {
   const navigate = useNavigate();
-  const { currentUser, featureFlags } = useApp();
+  const { currentUser, featureFlags, dataSyncInProgress, isGlobalRefreshing, effectiveLanguage } = useApp();
 
   useEffect(() => {
     const prevLang = document.documentElement.lang;
@@ -92,6 +93,11 @@ function KioskRoute() {
 
   return (
     <div className="min-h-screen w-full flex flex-col safe-area-pad bg-surface font-sans antialiased">
+      {dataSyncInProgress && !isGlobalRefreshing && (
+        <div className="shrink-0 px-4 pt-2">
+          <DataSyncBanner language={effectiveLanguage} />
+        </div>
+      )}
       <PunchInKiosk onGoToLogin={() => navigate(PATH_PROFILO)} />
     </div>
   );
@@ -100,7 +106,7 @@ function KioskRoute() {
 // ─── Login Route ───────────────────────────────────────────────────────────────
 function LoginRoute() {
   const navigate = useNavigate();
-  const { currentUser } = useApp();
+  const { currentUser, dataSyncInProgress, isGlobalRefreshing, effectiveLanguage } = useApp();
 
   useEffect(() => {
     if (currentUser) navigate('/app', { replace: true });
@@ -110,9 +116,16 @@ function LoginRoute() {
   const handleBack = () => navigate(PATH_TIMBRATURA, { replace: true });
 
   return (
-    <AnimatePresence mode="wait">
-      <LoginPage key="login" onLogin={handleLogin} onBack={handleBack} />
-    </AnimatePresence>
+    <>
+      {dataSyncInProgress && !isGlobalRefreshing && (
+        <div className="px-4 pt-[max(12px,env(safe-area-inset-top,0px))] pb-1 max-w-lg mx-auto w-full">
+          <DataSyncBanner language={effectiveLanguage} />
+        </div>
+      )}
+      <AnimatePresence mode="wait">
+        <LoginPage key="login" onLogin={handleLogin} onBack={handleBack} />
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -123,6 +136,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     currentUser,
     effectiveLanguage,
     isGlobalRefreshing,
+    dataSyncInProgress,
     postRefreshLocked,
     silentRefreshData,
     featureFlags,
@@ -133,12 +147,14 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
 
   /** `roleTemplatesRevision` deve essere nelle dipendenze: `getEnabledFeatures` legge il template da cache modulo; dopo PIN/sync il memo altrimenti resta sulla lista schede vecchia. */
   const visibleNavTabs = useMemo((): AppNavTab[] => {
+    void roleTemplatesRevision;
     if (!currentUser) return ['home'];
     return getUnifiedNavTabs(currentUser, isManagement, featureFlags);
   }, [currentUser, isManagement, featureFlags, roleTemplatesRevision]);
 
   /** Bottom bar: staff con ordine ferie → turni (Statistiche in barra se abilitata). */
   const bottomNavTabs = useMemo((): AppNavTab[] => {
+    void roleTemplatesRevision;
     if (!currentUser) return ['home'];
     return getBottomNavTabsForMainApp(currentUser, isManagement, featureFlags);
   }, [currentUser, isManagement, featureFlags, roleTemplatesRevision]);
@@ -357,6 +373,12 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
           </div>
         )}
       </header>
+
+      {currentUser && dataSyncInProgress && !isGlobalRefreshing && !postRefreshLocked && (
+        <div className="shrink-0 z-30 px-4 sm:px-6 pt-1">
+          <DataSyncBanner language={effectiveLanguage} />
+        </div>
+      )}
 
       <main
         className={`flex-1 flex flex-col w-full min-h-0 ${isGlobalRefreshing || postRefreshLocked ? 'blur-md pointer-events-none' : ''}`}

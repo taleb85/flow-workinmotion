@@ -88,7 +88,6 @@ export async function loadBreakRulesFromSupabase(): Promise<BreakRule[] | null> 
     if (!text) return null;
     const parsed = JSON.parse(text) as BreakRule[];
     const rules = Array.isArray(parsed) ? parsed : [];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(rules));
     return rules;
   } catch {
     return null;
@@ -100,12 +99,11 @@ export async function saveBreakRulesToSupabase(rules: BreakRule[]): Promise<void
   const { supabase } = await import('../lib/supabase');
   if (!supabase) return;
   try {
-    saveBreakRules(rules);
     const blob = new Blob([JSON.stringify(rules)], { type: 'application/json' });
     await supabase.storage.from(BUCKET).upload(FILE_PATH, blob, { upsert: true, contentType: 'application/json' });
     clearBreakRulesStorageSkip();
   } catch {
-    // Fallback: solo localStorage
+    /* Storage non disponibile */
   }
 }
 

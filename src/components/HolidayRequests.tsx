@@ -3,7 +3,7 @@ import { Calendar, Check, X, Palmtree } from 'lucide-react';
 import { getTranslations } from '../utils/translations';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { isManagementRole } from '../utils/permissions';
+import { canApproveShiftActions } from '../utils/permissions';
 import { isUiWidgetVisible } from '../utils/uiScreenWidgets';
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -46,7 +46,7 @@ export default function HolidayRequests() {
     );
   }
 
-  const isAdmin = isManagementRole(currentUser.role);
+  const isAdmin = canApproveShiftActions(currentUser);
   const uiW = (key: string) => isUiWidgetVisible(currentUser, key);
 
   const myHolidays     = holidays.filter((h) => h.user_id === currentUser.id && h.type !== 'indisponibilita');

@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, AlertTriangle, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, Users, MapPin, UserPlus } from 'lucide-react';
+import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, AlertTriangle, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, Users, MapPin, UserPlus, LocateFixed, Nfc, QrCode, UploadCloud } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import type { User, UserRole } from '../types';
 import { translateRole } from '../utils/roles';
@@ -25,9 +25,14 @@ import { FEATURE_DEFINITIONS } from '../utils/featureFlags';
 import { getEnabledFeatures, ADMIN_MODULE_KEYS, getAdminModuleEnabled, isAdminModuleEnabled } from '../utils/enabledFeatures';
 import RoleFeatureSectionsBlock, { PERMISSION_SUMMARY_LIST_CLASS } from './RoleFeatureSectionsBlock';
 import AdminRow from './ui/AdminRow';
+import { SettingsAccordionSection } from './ui/SettingsAccordionSection';
 import { CenteredModalPortal } from './ui/CenteredModalPortal';
 import { RoleFeatureTemplatesPanel } from './RoleFeatureTemplatesPage';
 import type { WorkRules } from '../utils/workRules';
+import { getCurrentPositionCoords } from '../utils/geo';
+import { readNfcTagOnce } from '../utils/nfc';
+import { resolveEffectiveVerificationToken, generateRandomVerificationToken } from '../utils/presenceVerificationPayload';
+import { generatePresenceQrDataUrl, openPresenceQrPrintWindow } from '../utils/qrPresence';
 
 const SETTINGS_TEAM_EXPANDED_KEY = 'osteria_settings_team_expanded';
 
@@ -133,8 +138,20 @@ export default function SettingsPage() {
     setBreakRules,
     geofenceEffectiveConfig,
     saveGeofenceConfig,
+    presenceVerificationConfig,
+    savePresenceVerificationConfig,
+    silentRefreshData,
+    pushSettingsToCloud,
+    settingsCloudLastSyncedAt,
+    settingsCloudPushBusy,
+    dataSyncInProgress,
   } = useApp();
   const t = getTranslations(effectiveLanguage);
+
+  useEffect(() => {
+    if (!currentUser || !isAdminOnly(currentUser)) return;
+    void silentRefreshData({ pullRemoteConfig: true });
+  }, [currentUser, silentRefreshData]);
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showCreateStaff, setShowCreateStaff] = useState(false);
@@ -143,7 +160,6 @@ export default function SettingsPage() {
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const [showAdminAdvancedSection, setShowAdminAdvancedSection] = useState(false);
   const [teamSectionExpanded, setTeamSectionExpanded] = useState(readTeamSectionExpanded);
   const [resettingData, setResettingData] = useState(false);
   const [seedingDemoProfile, setSeedingDemoProfile] = useState(false);
@@ -151,6 +167,9 @@ export default function SettingsPage() {
   const [geoLng, setGeoLng] = useState('');
   const [geoRadius, setGeoRadius] = useState('120');
   const [geoSaving, setGeoSaving] = useState(false);
+  const [geoAcquiring, setGeoAcquiring] = useState(false);
+  const [presenceNfcBusy, setPresenceNfcBusy] = useState(false);
+  const [presenceQrBusy, setPresenceQrBusy] = useState(false);
 
   useEffect(() => {
     if (geofenceEffectiveConfig) {
@@ -315,7 +334,16 @@ export default function SettingsPage() {
           )}
         </AnimatePresence>
 
-        {canEditRoleFeatureTemplates(currentUser) && <RoleFeatureTemplatesPanel variant="embedded" />}
+        {canEditRoleFeatureTemplates(currentUser) && (
+          <SettingsAccordionSection
+            storageKey="osteria_settings_acc_role_templates"
+            title={t.role_templates_page_title}
+            subtitle={t.role_templates_embedded_collapsed_hint}
+            defaultOpen
+          >
+            <RoleFeatureTemplatesPanel variant="embedded" />
+          </SettingsAccordionSection>
+        )}
 
         {/* Gestione Team */}
         <section className="mb-6">
@@ -576,10 +604,11 @@ export default function SettingsPage() {
 
         {/* Reparti (se abilitata in Impostazioni e profilo ha permesso) */}
         {isAdminModuleEnabled(currentUser, 'department_creation') && (featureFlags.department_creation ?? true) && (
-          <section className="mb-6">
-            <h2 className="ui-section-title mb-3 text-slate-600">
-              {t.settings_departments_section_title}
-            </h2>
+          <SettingsAccordionSection
+            storageKey="osteria_settings_acc_departments"
+            title={t.settings_departments_section_title}
+            defaultOpen={false}
+          >
             <div className="panel p-4 rounded-xl space-y-4">
               {/* Lista reparti */}
               <div className="flex flex-wrap gap-2">
@@ -805,22 +834,17 @@ export default function SettingsPage() {
               </div>
               <p className="text-[11px] text-slate-400">{t.settings_builtin_depts_hint}</p>
             </div>
-          </section>
+          </SettingsAccordionSection>
         )}
 
         {/* ── REGOLE VIOLAZIONI (se abilitata in Impostazioni e profilo ha permesso) ───────── */}
         {isAdminModuleEnabled(currentUser, 'violation_rules') && (featureFlags.violation_rules ?? true) && (
-          <section className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
-              </div>
-              <div>
-                <h2 className="text-slate-800 text-sm font-bold leading-none">{t.settings_violation_rules_title}</h2>
-                <p className="text-[11px] text-slate-400 mt-0.5">{t.settings_violation_rules_subtitle}</p>
-              </div>
-            </div>
-
+          <SettingsAccordionSection
+            storageKey="osteria_settings_acc_violation_rules"
+            title={t.settings_violation_rules_title}
+            subtitle={t.settings_violation_rules_subtitle}
+            defaultOpen={false}
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {/* Critico */}
               <div className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3">
@@ -943,26 +967,21 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
-          </section>
+          </SettingsAccordionSection>
         )}
 
         {/* ── Pause Automatiche (se abilitata in Impostazioni e profilo ha permesso) ───────── */}
         {isAdminModuleEnabled(currentUser, 'auto_breaks') && (featureFlags.auto_breaks ?? true) && (
-          <section className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                <Coffee className="w-3.5 h-3.5 text-amber-600" />
-              </div>
-              <div>
-                <h2 className="text-slate-800 text-sm font-bold leading-none">{t.settings_auto_breaks_section}</h2>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  {breakRules.length > 0
-                    ? `${breakRules.length} regol${breakRules.length === 1 ? 'a' : 'e'} configurat${breakRules.length === 1 ? 'a' : 'e'}`
-                    : t.settings_break_empty}
-                </p>
-              </div>
-            </div>
-
+          <SettingsAccordionSection
+            storageKey="osteria_settings_acc_auto_breaks"
+            title={t.settings_auto_breaks_section}
+            subtitle={
+              breakRules.length > 0
+                ? `${breakRules.length} regol${breakRules.length === 1 ? 'a' : 'e'} configurat${breakRules.length === 1 ? 'a' : 'e'}`
+                : t.settings_break_empty
+            }
+            defaultOpen={false}
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {breakRules.map((rule) => {
                 const isEnabled = rule.enabled !== false;
@@ -1032,24 +1051,182 @@ export default function SettingsPage() {
                 <span className="text-xs font-semibold">{t.settings_break_new_rule}</span>
               </button>
             </div>
-          </section>
+          </SettingsAccordionSection>
+        )}
+
+        {isManager && (
+          <SettingsAccordionSection
+            storageKey="osteria_settings_acc_presence_nfc_qr"
+            title={t.settings_presence_accordion_title}
+            subtitle={t.settings_presence_accordion_subtitle}
+            defaultOpen={true}
+          >
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <p className="text-[11px] text-slate-500 mb-3 leading-snug">{t.settings_presence_section_hint}</p>
+              {(() => {
+                const effectiveTok = resolveEffectiveVerificationToken(presenceVerificationConfig);
+                const diskTok = presenceVerificationConfig.verificationToken?.trim() ?? '';
+                const preview =
+                  effectiveTok.length > 20 ? `${effectiveTok.slice(0, 20)}…` : effectiveTok || '—';
+                return (
+                  <div className="mb-3 space-y-1.5 rounded-xl border border-slate-200/90 bg-white/90 px-3 py-2">
+                    <p className="text-[11px] text-slate-700 leading-snug">
+                      {effectiveTok
+                        ? formatTrans(t.settings_presence_effective_token_preview, { preview })
+                        : t.settings_presence_token_none}
+                    </p>
+                    {!diskTok && effectiveTok ? (
+                      <p className="text-[10px] text-slate-500 leading-snug">{t.settings_presence_token_env_only}</p>
+                    ) : null}
+                    {presenceVerificationConfig.nfcLastRegisteredAt ? (
+                      <p className="text-[10px] text-slate-500">
+                        {formatTrans(t.settings_presence_nfc_last, {
+                          date: new Date(presenceVerificationConfig.nfcLastRegisteredAt).toLocaleString(),
+                        })}
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              })()}
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 mb-3">
+                <span className="text-xs font-semibold text-slate-800">{t.settings_presence_require_label}</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={presenceVerificationConfig.requireVerification === true}
+                  onClick={async () => {
+                    try {
+                      await savePresenceVerificationConfig({
+                        ...presenceVerificationConfig,
+                        requireVerification: !presenceVerificationConfig.requireVerification,
+                      });
+                      showSuccess?.(t.settings_presence_saved);
+                    } catch (e) {
+                      showError?.(e instanceof Error ? e.message : t.settings_presence_save_error);
+                    }
+                  }}
+                  className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${
+                    presenceVerificationConfig.requireVerification ? 'bg-accent' : 'bg-slate-200'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                      presenceVerificationConfig.requireVerification ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  disabled={presenceNfcBusy}
+                  onClick={async () => {
+                    setPresenceNfcBusy(true);
+                    try {
+                      const res = await readNfcTagOnce();
+                      if (!res.ok) {
+                        showError?.(t.settings_presence_nfc_error);
+                        return;
+                      }
+                      const text = res.text.trim();
+                      if (!text) {
+                        showError?.(t.settings_presence_nfc_error);
+                        return;
+                      }
+                      await savePresenceVerificationConfig({
+                        ...presenceVerificationConfig,
+                        verificationToken: text,
+                        nfcLastRegisteredAt: new Date().toISOString(),
+                      });
+                      showSuccess?.(t.settings_presence_nfc_saved);
+                    } catch (e) {
+                      showError?.(e instanceof Error ? e.message : t.settings_presence_nfc_error);
+                    } finally {
+                      setPresenceNfcBusy(false);
+                    }
+                  }}
+                  className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold uppercase tracking-wider text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                >
+                  <Nfc className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+                  {presenceNfcBusy ? t.ui_ellipsis : t.settings_presence_register_nfc}
+                </button>
+                <button
+                  type="button"
+                  disabled={presenceQrBusy}
+                  onClick={async () => {
+                    setPresenceQrBusy(true);
+                    try {
+                      let token = resolveEffectiveVerificationToken(presenceVerificationConfig);
+                      if (!token) {
+                        token = generateRandomVerificationToken();
+                        await savePresenceVerificationConfig({
+                          ...presenceVerificationConfig,
+                          verificationToken: token,
+                        });
+                      }
+                      if (!token) {
+                        showError?.(t.settings_presence_qr_need_token);
+                        return;
+                      }
+                      const dataUrl = await generatePresenceQrDataUrl(token);
+                      openPresenceQrPrintWindow(dataUrl, t.settings_presence_qr_print_subtitle);
+                    } catch (e) {
+                      showError?.(e instanceof Error ? e.message : t.settings_presence_save_error);
+                    } finally {
+                      setPresenceQrBusy(false);
+                    }
+                  }}
+                  className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60"
+                >
+                  <QrCode className="h-4 w-4 shrink-0 text-white" aria-hidden />
+                  {presenceQrBusy ? t.ui_ellipsis : t.settings_presence_generate_qr}
+                </button>
+              </div>
+            </div>
+          </SettingsAccordionSection>
+        )}
+
+        {adminOnly && (
+          <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 dark:border-emerald-900/40 dark:bg-emerald-950/20 p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-3 min-w-0">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                <UploadCloud className="h-5 w-5" aria-hidden />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{t.settings_cloud_sync_heading}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">{t.settings_cloud_sync_hint}</p>
+                <p className="text-[11px] font-medium text-emerald-800/90 dark:text-emerald-300/90 mt-1.5">
+                  {settingsCloudLastSyncedAt
+                    ? formatTrans(t.settings_cloud_synced_at, {
+                        when: new Date(settingsCloudLastSyncedAt).toLocaleString(
+                          effectiveLanguage === 'en' ? 'en-GB' : effectiveLanguage === 'es' ? 'es-ES' : effectiveLanguage === 'fr' ? 'fr-FR' : 'it-IT',
+                          { dateStyle: 'short', timeStyle: 'short' }
+                        ),
+                      })
+                    : t.settings_cloud_never}
+                  {dataSyncInProgress ? ` · ${t.ui_ellipsis}` : ''}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={settingsCloudPushBusy}
+              onClick={() => void pushSettingsToCloud()}
+              className="inline-flex min-h-[40px] shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-emerald-800 disabled:opacity-60 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+            >
+              {settingsCloudPushBusy ? t.ui_ellipsis : t.settings_cloud_save_all_devices}
+            </button>
+          </div>
         )}
 
         {/* ── MASTER CONTROL PANEL (solo Admin — le funzioni si assegnano da Impostazioni e Permessi) ── */}
         {adminOnly && (
-          <section className="mb-6">
-            {/* Header */}
-            <div className="flex items-center gap-2 mb-3 min-w-0">
-              <div className="w-7 h-7 rounded-xl bg-slate-800 flex items-center justify-center flex-shrink-0">
-                <Wrench className="w-3.5 h-3.5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-slate-800 text-sm font-bold leading-none">{t.settings_master_panel_title}</h2>
-                <p className="text-[11px] text-slate-400 mt-0.5">{t.settings_master_panel_sub}</p>
-              </div>
-            </div>
-
-            {/* Card grid */}
+          <SettingsAccordionSection
+            storageKey="osteria_settings_acc_master_panel"
+            title={t.settings_master_panel_title}
+            subtitle={t.settings_master_panel_sub}
+            defaultOpen={false}
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {FEATURE_DEFINITIONS.map((feature) => {
                 const { label: featureLabel, description: featureDescription } = getFeatureStrings(t, feature.slug);
@@ -1197,50 +1374,76 @@ export default function SettingsPage() {
                   />
                 </label>
               </div>
-              <button
-                type="button"
-                disabled={geoSaving}
-                onClick={async () => {
-                  const lat = Number.parseFloat(geoLat.replace(',', '.'));
-                  const lng = Number.parseFloat(geoLng.replace(',', '.'));
-                  const radiusM = Number.parseFloat(geoRadius.replace(',', '.'));
-                  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-                    showError?.(t.settings_geofence_invalid);
-                    return;
-                  }
-                  const r = Number.isFinite(radiusM) && radiusM > 0 ? radiusM : 120;
-                  setGeoSaving(true);
-                  try {
-                    await saveGeofenceConfig({ lat, lng, radiusM: r });
-                    showSuccess?.(t.settings_geofence_saved);
-                  } catch (e) {
-                    showError?.(e instanceof Error ? e.message : t.settings_geofence_save_error);
-                  } finally {
-                    setGeoSaving(false);
-                  }
-                }}
-                className="min-h-[40px] rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60"
-              >
-                {geoSaving ? t.ui_ellipsis : t.settings_geofence_save}
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  disabled={geoAcquiring || geoSaving}
+                  onClick={async () => {
+                    setGeoAcquiring(true);
+                    try {
+                      const pos = await getCurrentPositionCoords();
+                      const radiusM = Number.parseFloat(geoRadius.replace(',', '.'));
+                      const r = Number.isFinite(radiusM) && radiusM > 0 ? radiusM : 120;
+                      await saveGeofenceConfig({ lat: pos.lat, lng: pos.lng, radiusM: r });
+                      setGeoLat(String(pos.lat));
+                      setGeoLng(String(pos.lng));
+                      showSuccess?.(t.settings_geofence_acquire_success);
+                    } catch (e: unknown) {
+                      const err = e as { code?: number };
+                      const code = typeof err?.code === 'number' ? err.code : -1;
+                      if (code === 1) {
+                        showError?.(t.punch_geofence_denied);
+                      } else {
+                        showError?.(t.settings_geofence_acquire_error);
+                      }
+                    } finally {
+                      setGeoAcquiring(false);
+                    }
+                  }}
+                  className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold uppercase tracking-wider text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                >
+                  <LocateFixed className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+                  {geoAcquiring ? t.ui_ellipsis : t.settings_geofence_acquire_gps}
+                </button>
+                <button
+                  type="button"
+                  disabled={geoSaving || geoAcquiring}
+                  onClick={async () => {
+                    const lat = Number.parseFloat(geoLat.replace(',', '.'));
+                    const lng = Number.parseFloat(geoLng.replace(',', '.'));
+                    const radiusM = Number.parseFloat(geoRadius.replace(',', '.'));
+                    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                      showError?.(t.settings_geofence_invalid);
+                      return;
+                    }
+                    const r = Number.isFinite(radiusM) && radiusM > 0 ? radiusM : 120;
+                    setGeoSaving(true);
+                    try {
+                      await saveGeofenceConfig({ lat, lng, radiusM: r });
+                      showSuccess?.(t.settings_geofence_saved);
+                    } catch (e) {
+                      showError?.(e instanceof Error ? e.message : t.settings_geofence_save_error);
+                    } finally {
+                      setGeoSaving(false);
+                    }
+                  }}
+                  className="min-h-[40px] rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60"
+                >
+                  {geoSaving ? t.ui_ellipsis : t.settings_geofence_save}
+                </button>
+              </div>
             </div>
-          </section>
+          </SettingsAccordionSection>
         )}
 
         {adminOnly && (
-          <section className="mb-6">
-            <button
-              type="button"
-              onClick={() => setShowAdminAdvancedSection(!showAdminAdvancedSection)}
-              className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors text-slate-700 text-[11px] font-semibold uppercase tracking-wider"
-            >
-              <span>{t.settings_advanced_tools_admin}</span>
-              <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${showAdminAdvancedSection ? 'rotate-180' : ''}`} />
-            </button>
-            {showAdminAdvancedSection && (
-              <div className="mt-3">
-                <div className="rounded-xl border border-slate-200 bg-white">
-                    <div className="p-4 space-y-3">
+          <SettingsAccordionSection
+            storageKey="osteria_settings_acc_admin_advanced"
+            title={t.settings_advanced_tools_admin}
+            defaultOpen={false}
+          >
+            <div className="rounded-xl border border-slate-200 bg-white">
+              <div className="p-4 space-y-3">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t.settings_backup_data_section}</p>
                       <div className="flex flex-wrap gap-2">
                         <button
@@ -1350,9 +1553,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
                   </div>
-                </div>
-            )}
-          </section>
+          </SettingsAccordionSection>
         )}
 
       </motion.div>

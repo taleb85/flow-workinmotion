@@ -14,20 +14,19 @@ export function isManagementRole(role: string): boolean {
 
 /**
  * Restituisce true se il ruolo è puramente gestionale (solo Admin).
- * Questi utenti non compaiono nel tabellone turni, presenze, PDF, ecc.
- * Proprietario è allineato al Manager e compare nelle liste operative.
+ * L’Admin non compare nel tabellone turni / liste operative come dipendente; gli altri ruoli sì, se visibili.
  */
 export function isPurelyManagementRole(role: string): boolean {
   return PURELY_MANAGEMENT_ROLES.includes(role as (typeof PURELY_MANAGEMENT_ROLES)[number]);
 }
 
 /**
- * Restituisce true se l'utente può modificare turni, ferie e dati anagrafici dei dipendenti.
- * Include: admin, manager, assistant_manager, capo.
+ * Modifica Impostazioni / anagrafica team / strumenti admin nella scheda collegata.
+ * Solo **Admin**: manager e altri ruoli gestionali non hanno accesso finché non promossi ad admin.
  */
 export function canUserEdit(user: User | null): boolean {
   if (!user) return false;
-  return isManagementRole(user.role);
+  return isAdminOnly(user);
 }
 
 /**
@@ -39,18 +38,46 @@ export function isAdminOnly(user: User | null): boolean {
   return user.role === 'admin';
 }
 
-/** Template Permessi ruoli + salvataggio moduli scheda Admin (file globali). */
+/** Template permessi ruoli + moduli scheda Admin (file Storage): solo Admin. */
 export function canEditRoleFeatureTemplates(user: User | null): boolean {
   if (!user) return false;
-  return user.role === 'admin' || user.role === 'manager';
+  return user.role === 'admin';
 }
 
-/**
- * Restituisce true se l'utente può vedere i dipendenti sospesi (Admin, Manager, Assistente).
- */
+/** Elenco sospesi/inattivi in Impostazioni: solo Admin. */
 export function canViewSuspended(user: User | null): boolean {
   if (!user) return false;
-  return isManagementRole(user.role);
+  return isAdminOnly(user);
+}
+
+/** Tabellone turni: creazione/modifica turni (drag, celle, contestuali). Admin sempre, altri solo se `can_create_shifts`. */
+export function canOperateTeamSchedule(user: User | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || user.can_create_shifts === true;
+}
+
+/** Approvazione turni (freeze) e ferie: Admin o `can_approve_shifts`. */
+export function canApproveShiftActions(user: User | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || user.can_approve_shifts === true;
+}
+
+/** Pubblicazione settimana / bozze → confermati: Admin o `can_manage_drafts`. */
+export function canPublishScheduleDrafts(user: User | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || user.can_manage_drafts === true;
+}
+
+/** Ore totali / viste payroll di gruppo: Admin o `can_view_total_hours`. */
+export function canViewAllTeamHours(user: User | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || user.can_view_total_hours === true;
+}
+
+/** Modifica PIN altrui: Admin o `can_edit_staff_pins`. */
+export function canEditOtherStaffPins(user: User | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || user.can_edit_staff_pins === true;
 }
 
 /**

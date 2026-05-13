@@ -58,6 +58,7 @@ export default function ImpostazioniPage({ onOpenProfilesTab }: ImpostazioniPage
     silentRefreshData,
     hardReloadFromDatabase,
     isGlobalRefreshing,
+    dataSyncInProgress,
     seedDemoProfileForUser,
   } = useApp();
   const t = getTranslations(effectiveLanguage);
@@ -65,7 +66,7 @@ export default function ImpostazioniPage({ onOpenProfilesTab }: ImpostazioniPage
   const [detailOpen, setDetailOpen] = useState<Record<string, boolean>>({});
   const [cloudSyncing, setCloudSyncing] = useState(false);
   const [hardReloading, setHardReloading] = useState(false);
-  const syncBusy = cloudSyncing || hardReloading || isGlobalRefreshing;
+  const syncBusy = cloudSyncing || hardReloading || isGlobalRefreshing || dataSyncInProgress;
 
   const toggleDetail = useCallback((slug: string) => {
     setDetailOpen((prev) => ({ ...prev, [slug]: !prev[slug] }));

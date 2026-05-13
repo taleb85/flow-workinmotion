@@ -19,7 +19,8 @@ import { format } from 'date-fns';
 import { getTranslations, getDateLocale } from '../utils/translations';
 import { roundToNext5Minutes } from '../utils/timeCalculations';
 import { forceLightTheme } from '../utils/theme';
-import { isPurelyManagementRole, isManagementRole } from '../utils/permissions';
+import { isPurelyManagementRole, canOperateTeamSchedule } from '../utils/permissions';
+import { usePunchPresenceVerification } from '../hooks/usePunchPresenceVerification';
 
 /** Terminale /timbratura: UI sempre in inglese (dispositivo condiviso in sala). */
 const KIOSK_UI_LANGUAGE: Language = 'en';
@@ -86,6 +87,7 @@ function GiantBrandHeader({ now, locale, children }: { now: Date; locale: Return
 
 export default function PunchInKiosk({ onGoToLogin }: PunchInKioskProps) {
   const { users, shifts, punchRecords, addPunchRecord, showError } = useApp();
+  const { requestProof, modal: presenceModal } = usePunchPresenceVerification(KIOSK_UI_LANGUAGE);
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   /** 'in' = timbratura entrata, 'out' = timbratura uscita (solo turni pranzo) */
@@ -247,8 +249,8 @@ export default function PunchInKiosk({ onGoToLogin }: PunchInKioskProps) {
       const user = users.find((u) => u.pin === pinValue);
       if (!user) return { error: t.pin_invalid };
       if (user.status !== 'active') return { error: t.user_suspended_punch };
-      const isManager = isManagementRole(user.role);
-      if (!isManager && user.id !== shift.user_id) return { error: t.pin_mismatch };
+      const canPunchForOthers = canOperateTeamSchedule(user);
+      if (!canPunchForOthers && user.id !== shift.user_id) return { error: t.pin_mismatch };
       return { user };
     },
     [users, t.pin_mismatch, t.pin_invalid, t.user_suspended_punch]
@@ -272,7 +274,25 @@ export default function PunchInKiosk({ onGoToLogin }: PunchInKioskProps) {
       setIsLoading(true);
       setError('');
       try {
-        const geoIn = await addPunchRecord(employeeId, 'in', { timestamp: clickTimestamp, shift_id: shift.id });
+        let presenceProof: string | undefined;
+        try {
+          const proof = await requestProof(employeeId);
+          presenceProof = proof || undefined;
+        } catch (e) {
+          if (e instanceof Error && e.message === 'presence_cancelled') {
+            setError(t.punch_presence_cancelled);
+            showError(t.punch_presence_cancelled);
+            setPin('');
+            setTimeout(() => setError(''), 3500);
+            return;
+          }
+          throw e;
+        }
+        const geoIn = await addPunchRecord(employeeId, 'in', {
+          timestamp: clickTimestamp,
+          shift_id: shift.id,
+          presenceProof,
+        });
         if (geoIn && typeof geoIn === 'object' && 'error' in geoIn && geoIn.error) {
           setError(geoIn.error);
           showError(geoIn.error);
@@ -310,7 +330,19 @@ export default function PunchInKiosk({ onGoToLogin }: PunchInKioskProps) {
         setIsLoading(false);
       }
     },
-    [t.punch_error, t.punch_save_error, t.already_punched, t.punch_db_error_400, t.punch_db_error_rls, addPunchRecord, showError, users, isPunched]
+    [
+      t.punch_error,
+      t.punch_save_error,
+      t.already_punched,
+      t.punch_db_error_400,
+      t.punch_db_error_rls,
+      t.punch_presence_cancelled,
+      addPunchRecord,
+      requestProof,
+      showError,
+      users,
+      isPunched,
+    ]
   );
 
   /** Registra la timbratura di USCITA per i turni PRANZO. La cena è manager-only. */
@@ -326,7 +358,25 @@ export default function PunchInKiosk({ onGoToLogin }: PunchInKioskProps) {
       setIsLoading(true);
       setError('');
       try {
-        const geoOut = await addPunchRecord(employeeId, 'out', { timestamp: clickTimestamp, shift_id: shift.id });
+        let presenceProof: string | undefined;
+        try {
+          const proof = await requestProof(employeeId);
+          presenceProof = proof || undefined;
+        } catch (e) {
+          if (e instanceof Error && e.message === 'presence_cancelled') {
+            setError(t.punch_presence_cancelled);
+            showError(t.punch_presence_cancelled);
+            setPin('');
+            setTimeout(() => setError(''), 3500);
+            return;
+          }
+          throw e;
+        }
+        const geoOut = await addPunchRecord(employeeId, 'out', {
+          timestamp: clickTimestamp,
+          shift_id: shift.id,
+          presenceProof,
+        });
         if (geoOut && typeof geoOut === 'object' && 'error' in geoOut && geoOut.error) {
           setError(geoOut.error);
           showError(geoOut.error);
@@ -358,7 +408,16 @@ export default function PunchInKiosk({ onGoToLogin }: PunchInKioskProps) {
         setIsLoading(false);
       }
     },
-    [addPunchRecord, showError, users, t.punch_error, t.punch_save_error, t.punch_dinner_exit_contact_manager]
+    [
+      addPunchRecord,
+      requestProof,
+      showError,
+      users,
+      t.punch_error,
+      t.punch_save_error,
+      t.punch_dinner_exit_contact_manager,
+      t.punch_presence_cancelled,
+    ]
   );
 
   useEffect(() => {
@@ -803,6 +862,7 @@ export default function PunchInKiosk({ onGoToLogin }: PunchInKioskProps) {
           </motion.div>
         )}
       </AnimatePresence>
+      {presenceModal}
     </div>
   );
 }

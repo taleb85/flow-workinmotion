@@ -92,7 +92,6 @@ export async function loadWorkRulesFromSupabase(): Promise<WorkRules | null> {
     if (!text) return null;
     const parsed = JSON.parse(text) as Partial<WorkRules>;
     const merged = { ...DEFAULT_WORK_RULES, ...parsed };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
     return merged;
   } catch {
     return null;
@@ -104,12 +103,11 @@ export async function saveWorkRulesToSupabase(rules: WorkRules): Promise<void> {
   const { supabase } = await import('../lib/supabase');
   if (!supabase) return;
   try {
-    saveWorkRules(rules);
     const blob = new Blob([JSON.stringify(rules)], { type: 'application/json' });
     await supabase.storage.from(BUCKET).upload(FILE_PATH, blob, { upsert: true, contentType: 'application/json' });
     clearWorkRulesStorageSkip();
   } catch {
-    // Fallback: solo localStorage
+    /* Storage non disponibile */
   }
 }
 

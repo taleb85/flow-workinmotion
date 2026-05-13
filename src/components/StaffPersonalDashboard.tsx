@@ -34,7 +34,13 @@ interface StaffPersonalDashboardProps {
 const showProfileDemoSeed =
   import.meta.env.DEV || import.meta.env.VITE_ENABLE_PROFILE_DEMO_SEED === 'true';
 
-export default function StaffPersonalDashboard({ user, onLogout, activeTab, onTabChange }: StaffPersonalDashboardProps) {
+export default function StaffPersonalDashboard({
+  user,
+  onLogout,
+  activeTab,
+  onTabChange: _onTabChange,
+}: StaffPersonalDashboardProps) {
+  void _onTabChange;
   const {
     setCurrentUser,
     users,
@@ -213,15 +219,15 @@ export default function StaffPersonalDashboard({ user, onLogout, activeTab, onTa
   }, [activeTab]);
 
   /** Sempre prima di qualsiasi return anticipato (loading / profilo gestionale) — altrimenti React #310. */
-  const visibleStaffTabs = useMemo(
-    () => getVisibleStaffTabs(displayUser, featureFlags),
-    [displayUser, featureFlags, roleTemplatesRevision]
-  );
+  const visibleStaffTabs = useMemo(() => {
+    void roleTemplatesRevision;
+    return getVisibleStaffTabs(displayUser, featureFlags);
+  }, [displayUser, featureFlags, roleTemplatesRevision]);
 
-  const staffUnifiedTabs = useMemo(
-    () => getUnifiedNavTabs(displayUser, false, featureFlags),
-    [displayUser, featureFlags, roleTemplatesRevision]
-  );
+  const staffUnifiedTabs = useMemo(() => {
+    void roleTemplatesRevision;
+    return getUnifiedNavTabs(displayUser, false, featureFlags);
+  }, [displayUser, featureFlags, roleTemplatesRevision]);
 
   const showHomeKpiStrip =
     totalApprovedMinutes > 0 || todayShifts.length + upcomingShifts.length > 0;

@@ -3,6 +3,8 @@ import { User, Shift, HolidayRequest, PunchRecord, PunchAuditEntry } from '../ty
 import { sanitizeUiSectionOverrides } from '../utils/uiScreenWidgets';
 import { buildDemoCoworkerShiftsToday, buildDemoProfileData, punchRecordsFromSpecs } from '../utils/seedDemoProfileData';
 import { isUserVisibleOnTeamSchedule } from '../utils/permissions';
+import { isAppSettingsSyncSignalRestSkipped } from '../utils/globalSettingsCloud';
+import { isAppCloudSyncEnabled } from '../utils/appCloudSync';
 
 /** Evita 400 su jsonb / tipi non validi. */
 function sanitizeUserUpdatePayload(payload: Record<string, unknown>): Record<string, unknown> {
@@ -112,7 +114,7 @@ function stripMissingUserColumns(payload: Record<string, unknown>, error: unknow
 }
 
 /** Solo queste colonne su INSERT: `approved_*` va impostato con `shifts.update` (altrimenti 400 se colonne assenti o vincoli). */
-const SHIFT_INSERT_ALLOW: (keyof Shift)[] = [
+const SHIFT_INSERT_ALLOW: (keyof Omit<Shift, 'id'>)[] = [
   'user_id',
   'date',
   'start_time',
@@ -1178,6 +1180,34 @@ export const database = {
           if (status === 'SUBSCRIBED') void pull();
           else if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && import.meta.env.DEV) {
             console.warn('[realtime holidays+availability]', status, topic);
+          }
+        });
+      return () => {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        supabase!.removeChannel(channel);
+      };
+    },
+    /** Dopo push del bundle impostazioni su Storage: altri client eseguono pull config. */
+    subscribeToAppSettingsSyncSignal(onSignal: () => void) {
+      if (!supabase || !isAppCloudSyncEnabled() || isAppSettingsSyncSignalRestSkipped()) return () => {};
+      let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+      const topic = `app-settings-sync:${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`}`;
+      const channel = supabase!
+        .channel(topic)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'app_settings_sync_signal' },
+          () => {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+              debounceTimer = null;
+              onSignal();
+            }, 300);
+          }
+        )
+        .subscribe((status) => {
+          if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && import.meta.env.DEV) {
+            console.warn('[realtime app_settings_sync_signal]', status, topic);
           }
         });
       return () => {

@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { isAppCloudSyncEnabled } from './appCloudSync';
 
 const BUCKET = 'app-config';
 const FILE_PATH = 'client_sync_revision.json';
@@ -33,7 +34,7 @@ export function writeAckClientSyncRevision(revision: number): void {
  * `null` = file assente o errore (nessun lock lato client).
  */
 export async function fetchClientSyncRevisionFromSupabase(): Promise<number | null> {
-  if (!supabase) return null;
+  if (!supabase || !isAppCloudSyncEnabled()) return null;
   try {
     const { data, error } = await supabase.storage.from(BUCKET).download(FILE_PATH);
     if (error || !data) {
@@ -54,7 +55,7 @@ export async function fetchClientSyncRevisionFromSupabase(): Promise<number | nu
 
 /** Incrementa la revisione su Storage (dopo salvataggio permessi / profilo critico). */
 export async function bumpClientSyncRevisionOnSupabase(): Promise<number | null> {
-  if (!supabase) return null;
+  if (!supabase || !isAppCloudSyncEnabled()) return null;
   try {
     const current = (await fetchClientSyncRevisionFromSupabase()) ?? 0;
     const next = current + 1;

@@ -1,32 +1,27 @@
 ---
-description: Regola permessi modifica turni — Admin, Manager, Assistant Manager hanno libertà totale
+description: Regola permessi modifica turni — solo Admin ha controllo completo di default; altri con permessi espliciti
 alwaysApply: false
 ---
 
-# Osteria Basilico — Modifica turni (Management)
+# Osteria Basilico — Modifica turni
 
-**Regola: Admin, Manager e Assistant Manager hanno libertà totale di modificare qualsiasi turno.**
+**Regola: il ruolo `admin` ha sempre libertà operativa sui turni (creazione, modifica, pubblicazione, approvazione secondo i flag DB).**
 
-## Ruoli con accesso completo
-- `admin`
-- `manager`
-- `assistant_manager`
+Gli altri utenti (manager, assistant_manager, capo, staff) possono agire **solo** se l’Admin ha abilitato i corrispondenti permessi sul loro profilo:
+
+- `can_create_shifts` — creare/modificare turni, tabellone, drag, contestuali
+- `can_manage_drafts` — pubblicare settimane / confermare bozze
+- `can_approve_shifts` — approvazione definitiva turni e gestione richieste ferie (accetta/rifiuta)
 
 ## Regola conflitti (stesso dipendente, stesso giorno)
-- L'orario di inizio di ogni turno deve essere **sempre dopo** l'orario di uscita del turno precedente
-- Non creare turni sovrapposti: nessun conflitto di orari per lo stesso dipendente nella stessa giornata
 
-## Permessi
-- Modificare orari (inizio/fine) di qualsiasi turno
-- Modificare pausa (deduct_break)
-- Confermare entrata
-- Modificare orario timbratura
-- Nessun limite su stato del turno (draft, confirmed, approved)
-- Nessun limite su quantità di turni selezionabili
+- L’orario di inizio di ogni turno deve essere **sempre dopo** l’orario di uscita del turno precedente
+- Non creare turni sovrapposti per lo stesso dipendente nella stessa giornata
 
 ## Menu funzioni
-- Visibile **solo quando c'è almeno un turno selezionato**
-- Nessun limite sulla quantità di turni selezionati (1, 2, 3, ... N)
-- **1 turno**: form completo (orari, pausa, conferma entrata, salva) + Deseleziona tutto
-- **Più turni**: form completo (stesso del singolo) + Raggruppa tutto (applica orari/pausa a tutti i turni selezionati)
+
+- Visibile **solo quando c’è almeno un turno selezionato**
+- Nessun limite sulla quantità di turni selezionati (1, 2, 3, … N)
+- **1 turno**: form completo + Deseleziona tutto
+- **Più turni**: form completo + Raggruppa tutto
 - Mostra solo una di: Deseleziona tutto (1 turno) | Raggruppa tutto (più turni)

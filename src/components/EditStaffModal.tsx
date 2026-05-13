@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { User as UserType } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { getTranslations } from '../utils/translations';
+import { getTranslations, formatTrans } from '../utils/translations';
+import { findActiveUserWithSamePin } from '../utils/loginIdentifier';
 import { ProfileFormAdmin, type ProfileFormAdminData } from './UserProfile';
 
 interface EditStaffModalProps {
@@ -13,7 +14,7 @@ interface EditStaffModalProps {
 }
 
 export default function EditStaffModal({ isOpen, onClose, user }: EditStaffModalProps) {
-  const { updateUser, currentUser, effectiveLanguage, showError } = useApp();
+  const { updateUser, currentUser, effectiveLanguage, showError, users } = useApp();
   const t = getTranslations(effectiveLanguage);
   const hourlyStr =
     user.hourly_rate_eur != null && Number.isFinite(user.hourly_rate_eur)
@@ -52,8 +53,23 @@ export default function EditStaffModal({ isOpen, onClose, user }: EditStaffModal
     }
   }, [isOpen, user]);
 
+  const activePinConflictMessage = useMemo(() => {
+    const pinDigits = formData.pin.replace(/\D/g, '');
+    if (pinDigits.length !== 4) return null;
+    if (formData.status !== 'active') return null;
+    const other = findActiveUserWithSamePin(users, pinDigits, user.id);
+    if (!other) return null;
+    const name = `${other.first_name ?? ''} ${other.last_name ?? ''}`.trim() || other.email;
+    const tr = getTranslations(effectiveLanguage);
+    return formatTrans(tr.employee_pin_taken_by_active, { name });
+  }, [users, formData.pin, formData.status, user.id, effectiveLanguage]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (activePinConflictMessage) {
+      showError?.(activePinConflictMessage);
+      return;
+    }
     setIsSaving(true);
     try {
       const raw = formData.hourly_rate_eur.replace(',', '.').trim();
@@ -121,6 +137,7 @@ export default function EditStaffModal({ isOpen, onClose, user }: EditStaffModal
               onSubmit={handleSubmit}
               onClose={onClose}
               isSaving={isSaving}
+              activePinConflictMessage={activePinConflictMessage}
             />
           </div>
         </motion.div>

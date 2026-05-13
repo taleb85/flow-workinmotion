@@ -31,12 +31,12 @@ export function findUsersMatchingName(users: User[], nameRaw: string): User[] {
 }
 
 /**
- * Login: nome + PIN. Preferisce nome e cognome esatto; se più omonimi con lo stesso solo nome, fallisce (serve cognome).
+ * Login: nome + PIN (qualsiasi stato account). Usare poi `status === 'active'` per consentire la sessione.
  */
-export function findUserByNameAndPin(users: User[], nameRaw: string, pin: string): User | undefined {
+export function findUserByNameAndPinAnyStatus(users: User[], nameRaw: string, pin: string): User | undefined {
   const id = normalizeStaffName(nameRaw);
   if (!id || !pin.trim()) return undefined;
-  const withPin = users.filter((u) => u.status === 'active' && pinMatchesStored(u, pin));
+  const withPin = users.filter((u) => pinMatchesStored(u, pin));
 
   const fullHits = withPin.filter((u) => fullNameNorm(u) === id);
   if (fullHits.length === 1) return fullHits[0];
@@ -45,4 +45,47 @@ export function findUserByNameAndPin(users: User[], nameRaw: string, pin: string
   const firstHits = withPin.filter((u) => firstNameNorm(u) === id);
   if (firstHits.length === 1) return firstHits[0];
   return undefined;
+}
+
+/**
+ * Login: nome + PIN. Preferisce nome e cognome esatto; se più omonimi con lo stesso solo nome, fallisce (serve cognome).
+ * Solo dipendenti `active` (sospesi/inattivi esclusi).
+ */
+export function findUserByNameAndPin(users: User[], nameRaw: string, pin: string): User | undefined {
+  const u = findUserByNameAndPinAnyStatus(users, nameRaw, pin);
+  return u && u.status === 'active' ? u : undefined;
+}
+
+export type LoginNamePinFailureKind = 'no_name_match' | 'wrong_pin' | 'homonym_or_ambiguous';
+
+/**
+ * Per messaggi di errore mirati quando `findUserByNameAndPinAnyStatus` non trova un utente.
+ */
+export function getLoginNamePinFailureKind(
+  users: User[],
+  nameRaw: string,
+  pin: string
+): LoginNamePinFailureKind | 'empty_input' {
+  const id = normalizeStaffName(nameRaw);
+  if (!id || !pin.trim()) return 'empty_input';
+  const matches = findUsersMatchingName(users, nameRaw);
+  if (matches.length === 0) return 'no_name_match';
+  if (matches.length === 1) return 'wrong_pin';
+  return 'homonym_or_ambiguous';
+}
+
+/** Altro dipendente attivo con lo stesso PIN (conflitto login). */
+export function findActiveUserWithSamePin(
+  users: User[],
+  pinRaw: string,
+  excludeUserId?: string
+): User | undefined {
+  const pin = pinRaw.replace(/\D/g, '');
+  if (pin.length !== 4) return undefined;
+  return users.find(
+    (u) =>
+      u.id !== excludeUserId &&
+      u.status === 'active' &&
+      pinMatchesStored(u, pin)
+  );
 }

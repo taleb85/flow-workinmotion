@@ -3,7 +3,8 @@ import { X } from 'lucide-react';
 import { User as UserType } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { getTranslations } from '../utils/translations';
+import { getTranslations, formatTrans } from '../utils/translations';
+import { findActiveUserWithSamePin } from '../utils/loginIdentifier';
 import { ProfileFormAdmin, type ProfileFormAdminData } from './UserProfile';
 
 const PHANTOM_USER: UserType = {
@@ -43,7 +44,7 @@ interface CreateStaffModalProps {
 }
 
 export default function CreateStaffModal({ isOpen, onClose, onCreated }: CreateStaffModalProps) {
-  const { createUser, currentUser, effectiveLanguage, showError } = useApp();
+  const { createUser, currentUser, effectiveLanguage, showError, users } = useApp();
   const t = getTranslations(effectiveLanguage);
   const [formData, setFormData] = useState<ProfileFormAdminData>(emptyForm);
   const [isSaving, setIsSaving] = useState(false);
@@ -57,11 +58,25 @@ export default function CreateStaffModal({ isOpen, onClose, onCreated }: CreateS
 
   const phantom = useMemo(() => ({ ...PHANTOM_USER, role: formData.role }), [formData.role]);
 
+  const activePinConflictMessage = useMemo(() => {
+    const pinDigits = formData.pin.replace(/\D/g, '');
+    if (pinDigits.length !== 4) return null;
+    const other = findActiveUserWithSamePin(users, pinDigits);
+    if (!other) return null;
+    const name = `${other.first_name ?? ''} ${other.last_name ?? ''}`.trim() || other.email;
+    const tr = getTranslations(effectiveLanguage);
+    return formatTrans(tr.employee_pin_taken_by_active, { name });
+  }, [users, formData.pin, effectiveLanguage]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const pinDigits = formData.pin.replace(/\D/g, '');
     if (pinDigits.length !== 4) {
       showError?.(t.create_employee_pin_required);
+      return;
+    }
+    if (activePinConflictMessage) {
+      showError?.(activePinConflictMessage);
       return;
     }
     const first = formData.first_name.trim();
@@ -137,6 +152,7 @@ export default function CreateStaffModal({ isOpen, onClose, onCreated }: CreateS
               onClose={onClose}
               isSaving={isSaving}
               variant="create"
+              activePinConflictMessage={activePinConflictMessage}
             />
           </div>
         </motion.div>

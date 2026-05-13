@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { format } from 'date-fns';
 import { getTranslations } from '../utils/translations';
+import { usePunchPresenceVerification } from '../hooks/usePunchPresenceVerification';
 
 interface PunchClockTerminalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export default function PunchClockTerminal({ isOpen, onClose }: PunchClockTermin
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const { users, addPunchRecord, effectiveLanguage, showError } = useApp();
+  const { requestProof, modal: presenceModal } = usePunchPresenceVerification(effectiveLanguage);
   const t = getTranslations(effectiveLanguage);
 
   const handleNumber = (num: string) => {
@@ -51,7 +53,24 @@ export default function PunchClockTerminal({ isOpen, onClose }: PunchClockTermin
       return;
     }
 
-    const pr = await addPunchRecord(user.id, 'in');
+    let presenceProof: string | undefined;
+    try {
+      const proof = await requestProof(user.id);
+      presenceProof = proof || undefined;
+    } catch (e) {
+      if (e instanceof Error && e.message === 'presence_cancelled') {
+        setMessageType('error');
+        setMessage(t.punch_presence_cancelled);
+        showError?.(t.punch_presence_cancelled);
+        setTimeout(() => {
+          setPin('');
+          setMessage('');
+        }, 3500);
+        return;
+      }
+      throw e;
+    }
+    const pr = await addPunchRecord(user.id, 'in', { presenceProof });
     if (pr && typeof pr === 'object' && 'error' in pr && pr.error) {
       setMessageType('error');
       setMessage(pr.error);
@@ -80,6 +99,7 @@ export default function PunchClockTerminal({ isOpen, onClose }: PunchClockTermin
   ];
 
   return (
+    <>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -193,5 +213,7 @@ export default function PunchClockTerminal({ isOpen, onClose }: PunchClockTermin
         </motion.div>
       )}
     </AnimatePresence>
+    {presenceModal}
+    </>
   );
 }

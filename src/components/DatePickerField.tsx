@@ -15,18 +15,7 @@ import { it } from 'date-fns/locale';
 import { useApp } from '../context/AppContext';
 import { getTranslations, getDateLocale } from '../utils/translations';
 import { CenteredModalPortal } from './ui/CenteredModalPortal';
-
 import 'react-day-picker/style.css';
-
-export function isDatePickerPortalClick(target: EventTarget | null): boolean {
-  const el =
-    target instanceof Element
-      ? target
-      : target instanceof Node && target.parentElement
-        ? target.parentElement
-        : null;
-  return Boolean(el?.closest('[data-osteria-date-picker-portal]'));
-}
 
 /** yyyy-MM-dd come data locale (mezzogiorno), senza shift UTC di parseISO. */
 function parseLocalDateOnly(iso: string): Date | undefined {

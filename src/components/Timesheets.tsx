@@ -20,7 +20,12 @@ import { useApp } from '../context/AppContext';
 import { getTranslations, getDateLocale, formatTrans } from '../utils/translations';
 import { calculateShiftMinutesGross, formatMinutesToHoursAndMinutes } from '../utils/timeCalculations';
 import { getBreakMinutesForShift, getNetShiftMinutes } from '../utils/breakRules';
-import { isPurelyManagementRole, isManagementRole, isUserVisibleOnTeamSchedule } from '../utils/permissions';
+import {
+  isPurelyManagementRole,
+  isUserVisibleOnTeamSchedule,
+  canOperateTeamSchedule,
+  canApproveShiftActions,
+} from '../utils/permissions';
 import { isFeatureEnabled } from '../utils/enabledFeatures';
 import { isUiWidgetVisible } from '../utils/uiScreenWidgets';
 import { getShiftHistory, type HistoryEntry } from '../utils/scheduleHistory';
@@ -38,7 +43,8 @@ import { saveTimesheetPeriodToSupabase } from '../utils/timesheetPeriodSupabase'
 import type { PunchAuditEntry, Shift } from '../types';
 import { getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
 import { HorizontalScrollArea } from './HorizontalScrollArea';
-import DatePickerField, { isDatePickerPortalClick } from './DatePickerField';
+import DatePickerField from './DatePickerField';
+import { isDatePickerPortalClick } from '../utils/datePickerPortal';
 import TimesheetManagementKpiBlock from './TimesheetManagementKpiBlock';
 import { CenteredModalPortal } from './ui/CenteredModalPortal';
 import { getPayrollPaymentDateForCalendarMonth } from '../utils/payrollSchedule';
@@ -180,7 +186,8 @@ export default function Timesheets() {
     [t]
   );
 
-  const isManagement = currentUser ? isManagementRole(currentUser.role) : false;
+  const canTeamTimesheetOps = currentUser ? canOperateTeamSchedule(currentUser) : false;
+  const canTimesheetApprove = currentUser ? canApproveShiftActions(currentUser) : false;
   const uiW = (key: string) => (currentUser ? isUiWidgetVisible(currentUser, key) : false);
 
   const now = new Date();
@@ -425,7 +432,7 @@ export default function Timesheets() {
 
   const visibleUsers = useMemo(() => {
     const onSchedule = users.filter(isUserVisibleOnTeamSchedule);
-    if (!isManagement && currentUser) {
+    if (!canTeamTimesheetOps && currentUser) {
       const self = users.find((u) => u.id === currentUser.id);
       if (!self || self.status !== 'active' || isPurelyManagementRole(self.role)) return [];
       return [self].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
@@ -440,7 +447,7 @@ export default function Timesheets() {
       !onSchedule.some((u) => u.id === self.id);
     const merged = needsSelf ? [...onSchedule, self] : [...onSchedule];
     return merged.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-  }, [users, isManagement, currentUser]);
+  }, [users, canTeamTimesheetOps, currentUser]);
 
   const weekShifts = useMemo(() =>
     shifts.filter((s) => s.date >= weekStr && s.date < weekEnd && !s.notes?.startsWith('__OPEN__')),
@@ -1253,7 +1260,7 @@ export default function Timesheets() {
           )}
 
           {/* ── Stats Cards (solo oggi, solo management) ────────────────── */}
-          {uiW('timesheet.stats_today') && isManagement && todayStr >= weekStr && todayStr < weekEnd && (
+          {uiW('timesheet.stats_today') && canTeamTimesheetOps && todayStr >= weekStr && todayStr < weekEnd && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
               {([
                 {
@@ -1313,7 +1320,7 @@ export default function Timesheets() {
             </div>
           )}
 
-          {isManagement &&
+          {canTeamTimesheetOps &&
             currentUser &&
             isFeatureEnabled(currentUser, 'view_stats') &&
             uiW('stats.mgmt_kpi_cards') && (
@@ -1324,7 +1331,7 @@ export default function Timesheets() {
             )}
 
           {/* ── Turni Sera da Chiudere ──────────────────────────────────── */}
-          {uiW('timesheet.dinner_close') && isManagement && dinnerShiftsNeedingClose.length > 0 && (
+          {uiW('timesheet.dinner_close') && canTeamTimesheetOps && dinnerShiftsNeedingClose.length > 0 && (
             <motion.div
               id="timesheet-section-dinner-close"
               initial={{ opacity: 0, y: -6 }}
@@ -1397,7 +1404,7 @@ export default function Timesheets() {
           )}
 
           {/* ── Turni pronti per l'approvazione ─────────────────────────── */}
-          {uiW('timesheet.ready_approval') && isManagement && readyForApproval.length > 0 && (
+          {uiW('timesheet.ready_approval') && canTeamTimesheetOps && readyForApproval.length > 0 && (
             <motion.div
               id="timesheet-section-ready-approval"
               initial={{ opacity: 0, y: -6 }}
@@ -1618,7 +1625,7 @@ export default function Timesheets() {
                       const d = timesheetData[u.id]?.[dStr];
                       return n + (d?.shifts.filter((s) => s.status !== 'approved').length ?? 0);
                     }, 0);
-                    const canReview = inP && isPast && isManagement && dayShiftCount > 0;
+                    const canReview = inP && isPast && canTeamTimesheetOps && dayShiftCount > 0;
                     const weekEndCol = viewMode === 'month' && (dayIdx + 1) % 7 === 0;
                     return (
                       <th key={dStr}
@@ -1836,7 +1843,7 @@ export default function Timesheets() {
               </tbody>
 
               {/* Footer totali */}
-              {isManagement && (
+              {canTeamTimesheetOps && (
                 <tfoot>
                   <tr className="bg-slate-50 border-t border-slate-200">
                     <td className="sticky left-0 bg-slate-50 pl-4 pr-3 py-3 text-slate-600 font-bold text-xs uppercase border-r border-slate-100 z-10">
@@ -1893,7 +1900,7 @@ export default function Timesheets() {
           )}
 
           {/* Box personale per staff */}
-          {!isManagement && currentUser && uiW('timesheet.staff_summary_box') && (
+          {!canTeamTimesheetOps && currentUser && uiW('timesheet.staff_summary_box') && (
             <div className="mt-4 bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
               <p className="text-xs uppercase tracking-wider text-slate-400 mb-3 font-semibold">
                 {t.timesheet_my_week}
@@ -1923,9 +1930,9 @@ export default function Timesheets() {
           const isFrozen = s.status === 'approved' && !!s.approved_at;
           const isSoftApproved = s.status === 'approved' && !s.approved_at;
           const isApproved = isFrozen; // alias: frozen = fully locked
-          const canClose = isManagement && s.punched && !s.actualEnd && !!s.punchInId && !isFrozen;
+          const canClose = canTeamTimesheetOps && s.punched && !s.actualEnd && !!s.punchInId && !isFrozen;
           // "Congela" appare per turni soft-approved (approvati dal drawer ma non ancora congelati)
-          const canApprove = isManagement && isSoftApproved && drawerData.dateStr <= todayStr;
+          const canApprove = canTimesheetApprove && isSoftApproved && drawerData.dateStr <= todayStr;
           const punchAuditEntries = drawerData.punchAuditEntries;
           const shiftEdits = drawerData.shiftEdits;
           const { dot, border, bg, ring, label, labelCls } = getShiftCardStyle(s, punchAuditEntries.length);
@@ -2132,7 +2139,7 @@ export default function Timesheets() {
                 </div>
 
                 {/* Drawer footer – azioni */}
-                {isManagement && !isApproved && (
+                {canTeamTimesheetOps && !isApproved && (
                   <div className="p-4 border-t border-slate-100 bg-slate-50 flex flex-col gap-3">
 
                     {/* ── Modifica orario turno ── */}
@@ -2281,7 +2288,7 @@ export default function Timesheets() {
                       <p className="text-[10px] text-accent/70 pl-6 mt-0.5">
                         {t.ts_no_edits_allowed}
                       </p>
-                      {isManagement && featureFlags['unlock_with_pin'] !== false && (
+                      {canTeamTimesheetOps && featureFlags['unlock_with_pin'] !== false && (
                         unlockModalShiftId === s.id ? (
                           <div className="mt-3">
                             <p className="text-[11px] text-slate-500 mb-1.5 text-center">{t.ts_enter_manager_pin}</p>

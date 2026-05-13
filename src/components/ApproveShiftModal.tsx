@@ -29,7 +29,7 @@ export default function ApproveShiftModal({ shift, punchRecords, userName, onClo
     const d = getDefaultApprovalClockHHMM(shift, punchRecords);
     setStartTime(d.start);
     setEndTime(d.end);
-  }, [shift.id, shift.start_time, shift.end_time, shift.approved_at, shift.approved_start_time, shift.approved_end_time, punchRecords]);
+  }, [shift, punchRecords]);
 
   const handleApprove = async () => {
     await onApprove(shift.id, startTime, endTime);

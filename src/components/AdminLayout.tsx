@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Users, Settings, LayoutList, RefreshCw, RotateCcw } from 'lucide-react';
+import DataSyncBanner from './DataSyncBanner';
 import { useApp } from '../context/AppContext';
 import { isAdminOnly, canEditRoleFeatureTemplates } from '../utils/permissions';
 import { getTranslations } from '../utils/translations';
@@ -23,6 +24,7 @@ export default function AdminLayout() {
     effectiveLanguage,
     showSuccess,
     isGlobalRefreshing,
+    dataSyncInProgress,
   } = useApp();
   const t = getTranslations(effectiveLanguage);
   const [activeTab, setActiveTab] = useState<AdminTab>('profili');
@@ -30,7 +32,7 @@ export default function AdminLayout() {
   const [hardReloading, setHardReloading] = useState(false);
   const fullAdminNav = currentUser && isAdminOnly(currentUser);
   const showAdminNav = fullAdminNav || (currentUser && canEditRoleFeatureTemplates(currentUser));
-  const syncBusy = cloudSyncing || hardReloading || isGlobalRefreshing;
+  const syncBusy = cloudSyncing || hardReloading || isGlobalRefreshing || dataSyncInProgress;
 
   const handleTabChange = useCallback((tab: AdminTab) => {
     setActiveTab(tab);
@@ -185,6 +187,13 @@ export default function AdminLayout() {
           </div>
         </div>
       </header>
+
+      {dataSyncInProgress && !isGlobalRefreshing && (
+        <div className="shrink-0 px-4 sm:px-6 pt-1">
+          <DataSyncBanner language={effectiveLanguage} />
+        </div>
+      )}
+
       <main className="flex-1 overflow-y-auto">
         {/* Montate tutte e tre: evita reset di stato non salvato cambiando tab o uscendo/entrando dalla stessa scheda */}
         <div className={activeTab === 'profili' ? 'block' : 'hidden'} aria-hidden={activeTab !== 'profili'}>

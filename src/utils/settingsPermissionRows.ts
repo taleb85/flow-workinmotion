@@ -1,3 +1,5 @@
+import { STAFF_PERMISSION_OPT_OUT_KEYS } from './staffPermissionDefaults';
+
 /** Chiavi permessi operativi salvate nel template ruoli e sincronizzate sugli utenti. */
 export const SETTINGS_OPERATIONAL_PERM_KEYS = [
   'can_request_holidays',
@@ -10,6 +12,14 @@ export const SETTINGS_OPERATIONAL_PERM_KEYS = [
 ] as const;
 
 export type SettingsOperationalPermKey = (typeof SETTINGS_OPERATIONAL_PERM_KEYS)[number];
+
+/** Base template operativo: opt-out (ferie, timbratura) attivi; flag gestionali spenti. */
+export function defaultOperationalTemplateBase(): Record<SettingsOperationalPermKey, boolean> {
+  const opt = new Set<string>(STAFF_PERMISSION_OPT_OUT_KEYS);
+  return Object.fromEntries(
+    SETTINGS_OPERATIONAL_PERM_KEYS.map((k) => [k, opt.has(k)])
+  ) as Record<SettingsOperationalPermKey, boolean>;
+}
 
 export function buildSettingsPermissionRows(t: Record<string, string>): {
   key: SettingsOperationalPermKey;

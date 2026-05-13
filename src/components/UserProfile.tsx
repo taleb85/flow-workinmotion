@@ -185,6 +185,7 @@ export function ProfileFormAdmin({
   onClose,
   isSaving,
   variant = 'edit',
+  activePinConflictMessage = null,
 }: {
   user: UserType;
   currentUser: UserType;
@@ -195,6 +196,8 @@ export function ProfileFormAdmin({
   isSaving: boolean;
   /** `create`: nessun blocco link invito (serve `id` dopo salvataggio). */
   variant?: 'edit' | 'create';
+  /** Se valorizzato: stesso PIN di un altro dipendente attivo (blocco salvataggio + hint sotto il campo). */
+  activePinConflictMessage?: string | null;
 }) {
   const { effectiveLanguage, showSuccess, showError } = useApp();
   const t = getTranslations(effectiveLanguage);
@@ -312,10 +315,16 @@ export function ProfileFormAdmin({
                 const value = e.target.value.replace(/\D/g, '').slice(0, 4);
                 setFormData((prev) => ({ ...prev, pin: value }));
               }}
-              className={inputClass}
+              className={`${inputClass} ${activePinConflictMessage ? 'border-red-400 ring-1 ring-red-200' : ''}`}
               placeholder="1234"
               maxLength={4}
+              aria-invalid={activePinConflictMessage ? true : undefined}
             />
+            {activePinConflictMessage ? (
+              <p className="mt-1.5 text-[11px] font-medium text-red-600 font-sans leading-snug">
+                {activePinConflictMessage}
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -434,7 +443,7 @@ export function ProfileFormAdmin({
           </button>
           <button
             type="submit"
-            disabled={isSaving}
+            disabled={isSaving || Boolean(activePinConflictMessage)}
             className="flex-1 px-4 py-2 rounded-xl text-sm bg-accent text-white font-semibold hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-sans"
           >
             {isSaving ? t.saving : variant === 'create' ? t.create_employee_submit : t.save_changes}

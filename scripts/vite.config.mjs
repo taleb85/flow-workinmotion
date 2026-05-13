@@ -114,7 +114,9 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
-    host: '127.0.0.1',
+    // `true` = ascolta su tutte le interfacce: anteprima Cursor / Simple Browser e tunnel porte funzionano meglio che con solo 127.0.0.1
+    host: true,
     port: 5173,
+    strictPort: false,
   },
 });

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useRef, ReactNode, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { persistStoredUiLanguage, readStoredUiLanguage } from '../utils/uiLanguagePreference';
 import {
   User,
@@ -22,7 +22,12 @@ import { formatTrans, getTranslations } from '../utils/translations';
 import { countUnreadNotifications } from '../utils/notifications';
 import { setAppLauncherBadgeUnreadCountAsync } from '../utils/appIconBadge';
 import { logHistory, logShiftEdit } from '../utils/scheduleHistory';
-import { isManagementRole } from '../utils/permissions';
+import {
+  canOperateTeamSchedule,
+  canApproveShiftActions,
+  canPublishScheduleDrafts,
+  isAdminOnly,
+} from '../utils/permissions';
 import {
   type FeatureFlags,
   getLocalFeatureFlags,
@@ -30,6 +35,7 @@ import {
   loadFeatureFlagsFromSupabase,
   updateFeatureFlagInSupabase,
   writeFeatureFlagsToStorage,
+  writeAllFeatureFlagsToSupabase,
 } from '../utils/featureFlags';
 import {
   type RoleFeatureTemplatesOnDisk,
@@ -51,8 +57,21 @@ import {
   loadAndMergeAdminModulesGlobal,
   saveAdminModulesGlobalToSupabase,
 } from '../utils/adminModulesGlobal';
-import { type WorkRules, getWorkRules, saveWorkRulesToSupabase } from '../utils/workRules';
-import { type BreakRule, getBreakRules, saveBreakRulesToSupabase, getBreakMinutesForShift, getActiveBreakRules } from '../utils/breakRules';
+import {
+  type WorkRules,
+  getWorkRules,
+  saveWorkRulesToSupabase,
+  DEFAULT_WORK_RULES,
+  loadWorkRulesFromSupabase,
+} from '../utils/workRules';
+import {
+  type BreakRule,
+  getBreakRules,
+  saveBreakRulesToSupabase,
+  loadBreakRulesFromSupabase,
+  getBreakMinutesForShift,
+  getActiveBreakRules,
+} from '../utils/breakRules';
 import { loadTimesheetPeriodFromSupabase, applyRemoteTimesheetPeriod } from '../utils/timesheetPeriodSupabase';
 import PwaGate from '../components/PwaGate';
 import i18n from '../utils/i18n';
@@ -70,11 +89,11 @@ import {
 } from '../utils/backgroundSync';
 import {
   readGeofenceEnvConfig,
-  haversineDistanceMeters,
   getCurrentPositionCoords,
   resolveEffectiveGeofenceConfig,
   type GeofenceConfig,
 } from '../utils/geofencePunch';
+import { isUserInRestaurantRange } from '../utils/geo';
 import {
   getLocalGeofenceConfig,
   writeLocalGeofenceConfig,
@@ -82,6 +101,23 @@ import {
   loadGeofenceConfigFromSupabase,
   saveGeofenceConfigToSupabase,
 } from '../utils/geofenceConfigStorage';
+import {
+  getLocalPresenceVerificationConfig,
+  writeLocalPresenceVerificationConfig,
+  mergePresenceVerificationLayers,
+  loadPresenceVerificationFromSupabase,
+  savePresenceVerificationToSupabase,
+  type PresenceVerificationConfig,
+} from '../utils/presenceVerificationConfigStorage';
+import { resolveEffectiveVerificationToken, normalizePresenceProof } from '../utils/presenceVerificationPayload';
+import {
+  fetchGlobalSettingsBundleFromSupabase,
+  pullGlobalSettingsBundleOnAppBoot,
+  uploadGlobalSettingsBundleToSupabase,
+  buildGlobalSettingsBundleFromParts,
+  bumpAppSettingsSyncSignal,
+  type AppGlobalSettingsBundle,
+} from '../utils/globalSettingsCloud';
 
 /** Una tantum: flag geofence senza VITE_RESTAURANT_LAT/LNG. */
 let geofenceMissingEnvWarned = false;
@@ -91,121 +127,14 @@ import {
   registerPinUnlockCredential,
 } from '../utils/pinUnlockWebAuthn';
 import { getDefaultApprovalClockHHMM } from '../utils/shiftResolvedClockTimes';
-import { pinMatchesStored } from '../utils/loginIdentifier';
-
-interface AppContextType {
-  showError: (message: string) => void;
-  showSuccess: (message: string) => void;
-  forceGlobalRefresh: () => Promise<void>;
-  hardResetTestData: () => Promise<{ shifts: number; holidays: number; punchRecords: number; notifications?: number }>;
-  /** Inserisce turni, timbrature, ferie e campi profilo di esempio per l’utente indicato (anteprima / test). */
-  seedDemoProfileForUser: (userId: string) => Promise<{
-    shifts: number;
-    holidays: number;
-    punchRecords: number;
-    userUpdated: boolean;
-    coworkerShifts: number;
-  }>;
-  silentRefreshData: (opts?: {
-    pullRemoteConfig?: boolean;
-    /** Non invocare `forceGlobalRefresh` se la revisione Storage è avanti (es. reload volontario dal server). */
-    skipRemoteRevisionCheck?: boolean;
-    /** Rilancia l’errore invece di limitarsi al log (es. `hardReloadFromDatabase`). */
-    throwOnError?: boolean;
-  }) => Promise<void>;
-  /** Svuota cache turni locale, ricarica DB + Storage cloud, aggiorna ack revisione — senza lock PIN. */
-  hardReloadFromDatabase: () => Promise<void>;
-  isGlobalRefreshing: boolean;
-  postRefreshLocked: boolean;
-  unlockAfterRefresh: (pin: string) => Promise<boolean>;
-  /** Sblocco con Face ID / Touch ID / impronta (se il dispositivo è stato collegato). */
-  unlockAfterRefreshWithDevice: () => Promise<boolean>;
-  /** Registra questo browser/dispositivo dopo verifica PIN a 4 cifre. */
-  registerPinUnlockDevice: (pin: string) => Promise<{ ok: boolean; wrongPin: boolean }>;
-  /** True se per l’utente corrente esiste già una credenziale WebAuthn su questo host. */
-  pinUnlockDeviceRegistered: boolean;
-  cancelRefreshLock: () => void;
-  /** Ordine in attesa di conferma PIN (mostra overlay e alla conferma salva su DB e aggiorna app). */
-  pendingOrderIds: string[] | null;
-  requestConfirmAndSaveOrder: (orderedIds: string[]) => void;
-  /** Settimana in attesa di pubblicazione (PIN richiesto per confermare). */
-  pendingPublishWeekStart: string | null;
-  requestConfirmAndPublishWeek: (weekStart: Date) => void;
-  forceLogoutRequested: boolean;
-  clearForceLogoutRequest: () => void;
-  currentUser: User | null;
-  setCurrentUser: (user: User | null) => void;
-  users: User[];
-  shifts: Shift[];
-  holidays: HolidayRequest[];
-  punchRecords: PunchRecord[];
-  availability: HolidayRequest[];
-  toggleAvailability: (userId: string, date: string) => Promise<void>;
-  addShift: (shift: Omit<Shift, 'id'>) => Promise<Shift | null>;
-  updateShift: (id: string, shift: Partial<Shift>) => void;
-  /**
-   * Approva definitivamente un turno (congelo):
-   * - approval_status = 'approved' + approved_at + approved_by + approved_start_time/end_time
-   * - se già soft-approved, aggiunge solo congelo (approved_at + orari congelati)
-   * - scrive punch_audit_log per tracciabilità
-   */
-  approveShift: (shiftId: string, opts?: { approvedStart: string; approvedEnd: string }) => Promise<void>;
-  /** Approva il turno senza congelarlo (nessun approved_at/approved_by). Il congelo avviene separatamente nelle Presenze. */
-  approveShiftSoft: (shiftId: string) => Promise<void>;
-  deleteShift: (id: string) => void;
-  deleteShifts: (ids: string[]) => void;
-  copyShift: (shift: Shift, newDate: string) => void;
-  publishWeekShifts: (weekStart: Date) => void;
-  publishDayShifts: (dateStr: string) => Promise<void>;
-  addHolidayRequest: (request: Omit<HolidayRequest, 'id' | 'created_at' | 'status'>) => Promise<{ ok: boolean; emailSent?: boolean; error?: string }>;
-  updateHolidayStatus: (id: string, status: HolidayStatus) => Promise<{ ok: boolean; emailSent?: boolean; error?: string }>;
-  addPunchRecord: (userId: string, type: 'in' | 'out', options?: { timestamp?: string; shift_id?: string }) => Promise<{ error?: string } | void>;
-  updatePunchRecord: (id: string, updates: { timestamp?: string; calculated_time?: string; clock_out_time?: string | null }) => Promise<void>;
-  deletePunchRecordsForShift: (shiftId: string) => Promise<void>;
-  updateUser: (id: string, updates: Partial<User>) => void;
-  /** Inserisce un nuovo dipendente in `users` (gestione: admin, manager, assistente, capo). */
-  createUser: (payload: {
-    first_name: string;
-    last_name?: string;
-    email: string;
-    role: UserRole;
-    pin: string;
-    status: UserStatus;
-    department?: Department;
-    hourly_rate_eur?: number | null;
-  }) => Promise<User | null>;
-  deleteUser: (id: string) => void;
-  reorderUsers: (userId: string, direction: 'up' | 'down') => void;
-  /** Applica l'ordine degli utenti solo nello stato (senza DB). Usato da Edit view Salva. */
-  setUsersSortOrder: (orderedIds: string[]) => void;
-  updateUserPreferences: (preferences: { language?: Language; theme?: 'light' | 'dark' }) => void;
-  effectiveLanguage: Language;
-  setLanguage: (lang: Language) => void;
-  featureFlags: FeatureFlags;
-  setFeatureFlag: (name: string, enabled: boolean) => Promise<void>;
-  /** Centro geofence effettivo (Storage/local + fallback .env); null se non configurato. */
-  geofenceEffectiveConfig: GeofenceConfig | null;
-  /** Salva `geofence.json` su Storage e aggiorna la cache locale (solo Admin da UI). */
-  saveGeofenceConfig: (config: GeofenceConfig) => Promise<void>;
-  workRules: WorkRules;
-  setWorkRules: (rules: WorkRules) => Promise<void>;
-  breakRules: BreakRule[];
-  setBreakRules: (rules: BreakRule[]) => Promise<void>;
-  /** Revisione incrementata al caricamento/salvataggio template permessi ruolo (solo Admin). */
-  roleTemplatesRevision: number;
-  /** Salva template permessi (locale + Storage). Solo per pannello Admin. */
-  saveRoleFeatureTemplates: (data: RoleFeatureTemplatesOnDisk) => Promise<void>;
-  adminModulesRevision: number;
-  /** Moduli scheda Impostazioni globali (locale + Storage). Solo Admin. */
-  saveAdminModulesGlobal: (data: AdminModulesGlobalOnDisk) => Promise<void>;
-}
-
-const AppContext = createContext<AppContextType | undefined>(undefined);
+import { pinMatchesStored, findActiveUserWithSamePin } from '../utils/loginIdentifier';
+import { isAppCloudSyncEnabled } from '../utils/appCloudSync';
+import { AppContext } from './appContextCore';
 
 const staffDefaults = { language: 'it' as const, theme: 'light' as const, can_edit_staff_pins: false, can_manage_drafts: false, can_view_total_hours: false, can_create_shifts: false, can_approve_shifts: false };
 const initialStaff: Omit<User, 'id'>[] = [
-  { first_name: 'Gustavo', last_name: 'Ghetta', email: 'gustavo.ghetta@basilico.it', role: 'manager', pin: '1111', status: 'active', sort_order: 1, ...staffDefaults, can_create_shifts: true, can_approve_shifts: true, can_manage_drafts: true, can_view_total_hours: true },
-  { first_name: 'Alexis', last_name: 'Man', email: 'alexis.man@basilico.it', role: 'assistant_manager', pin: '2222', status: 'active', sort_order: 2, ...staffDefaults, can_create_shifts: true, can_approve_shifts: true, can_manage_drafts: true, can_view_total_hours: true },
+  { first_name: 'Gustavo', last_name: 'Ghetta', email: 'gustavo.ghetta@basilico.it', role: 'manager', pin: '1111', status: 'active', sort_order: 1, ...staffDefaults },
+  { first_name: 'Alexis', last_name: 'Man', email: 'alexis.man@basilico.it', role: 'assistant_manager', pin: '2222', status: 'active', sort_order: 2, ...staffDefaults },
   { first_name: 'Taleb', last_name: 'Barikhan', email: 'taleb.barikhan@basilico.it', role: 'admin', pin: '8888', status: 'active', sort_order: 3, ...staffDefaults, can_create_shifts: true, can_approve_shifts: true, can_manage_drafts: true, can_view_total_hours: true, can_edit_staff_pins: true },
   { first_name: 'Mauricio', last_name: 'Man', email: 'mauricio.man@basilico.it', role: 'waiter', pin: '3333', status: 'active', sort_order: 4, ...staffDefaults },
   { first_name: 'Freddy', last_name: 'Junior', email: 'freddy.junior@basilico.it', role: 'waiter', pin: '4444', status: 'active', sort_order: 5, ...staffDefaults },
@@ -268,6 +197,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [availability, setAvailability] = useState<HolidayRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGlobalRefreshing, setIsGlobalRefreshing] = useState(false);
+  const [dataSyncInProgress, setDataSyncInProgress] = useState(false);
+  const silentSyncDepthRef = useRef(0);
+  /** Serializza `silentRefreshData`: evita richieste sovrapposte e banner “sincronizzazione” bloccato. */
+  const silentRefreshQueueRef = useRef(Promise.resolve());
+  /** In browser `setTimeout` restituisce `number` (non `NodeJS.Timeout`). */
+  const dataSyncBarDelayTimerRef = useRef<number | null>(null);
   const [postRefreshLocked, setPostRefreshLocked] = useState(false);
   const [pendingOrderIds, setPendingOrderIds] = useState<string[] | null>(null);
   const [pendingPublishWeekStart, setPendingPublishWeekStart] = useState<string | null>(null);
@@ -281,8 +216,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const punchRecordsRef = useRef<PunchRecord[]>([]);
   useEffect(() => { punchRecordsRef.current = punchRecords; }, [punchRecords]);
   const [featureFlags, setFeatureFlagsState] = useState<FeatureFlags>(() => getLocalFeatureFlags());
-  const [workRules, setWorkRulesState] = useState<WorkRules>(() => getWorkRules());
-  const [breakRules, setBreakRulesState] = useState<BreakRule[]>(() => getBreakRules());
+  const [workRules, setWorkRulesState] = useState<WorkRules>(() => ({ ...DEFAULT_WORK_RULES }));
+  const [breakRules, setBreakRulesState] = useState<BreakRule[]>(() => []);
+  const [settingsCloudLastSyncedAt, setSettingsCloudLastSyncedAt] = useState<string | null>(null);
+  const [settingsCloudPushBusy, setSettingsCloudPushBusy] = useState(false);
   const [roleTemplatesRevision, setRoleTemplatesRevision] = useState(0);
   const [adminModulesRevision, setAdminModulesRevision] = useState(0);
   const [geofenceEffectiveConfig, setGeofenceEffectiveConfig] = useState<GeofenceConfig | null>(null);
@@ -290,6 +227,49 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     geofenceEffectiveConfigRef.current = geofenceEffectiveConfig;
   }, [geofenceEffectiveConfig]);
+
+  const [presenceVerificationConfig, setPresenceVerificationConfig] = useState<PresenceVerificationConfig>(() =>
+    mergePresenceVerificationLayers(null, getLocalPresenceVerificationConfig())
+  );
+  const presenceVerificationRef = useRef(presenceVerificationConfig);
+  useEffect(() => {
+    presenceVerificationRef.current = presenceVerificationConfig;
+  }, [presenceVerificationConfig]);
+
+  /** Snapshot per creare `settings_bundle.json` su Storage al login Admin (upload di backup). */
+  const settingsBundleSeedDepsRef = useRef({
+    workRules,
+    breakRules,
+    featureFlags,
+    presenceVerificationConfig,
+    roleFeatureTemplates: null as RoleFeatureTemplatesOnDisk | null,
+    adminModulesGlobal: null as AdminModulesGlobalOnDisk | null,
+  });
+  settingsBundleSeedDepsRef.current = {
+    workRules,
+    breakRules,
+    featureFlags,
+    presenceVerificationConfig,
+    roleFeatureTemplates: getRoleFeatureTemplatesCache() ?? getLocalRoleFeatureTemplates(),
+    adminModulesGlobal: getAdminModulesGlobalCache() ?? getLocalAdminModulesGlobal(),
+  };
+
+  const refreshPresenceVerificationConfig = useCallback(async () => {
+    const remote = await loadPresenceVerificationFromSupabase().catch(() => null);
+    const local = getLocalPresenceVerificationConfig();
+    const merged = mergePresenceVerificationLayers(remote, local);
+    if (remote) writeLocalPresenceVerificationConfig(merged);
+    setPresenceVerificationConfig(merged);
+  }, []);
+
+  const savePresenceVerificationConfig = useCallback(
+    async (config: PresenceVerificationConfig) => {
+      writeLocalPresenceVerificationConfig(config);
+      await savePresenceVerificationToSupabase(config);
+      await refreshPresenceVerificationConfig();
+    },
+    [refreshPresenceVerificationConfig]
+  );
 
   const refreshGeofenceEffectiveConfig = useCallback(async () => {
     const remote = await loadGeofenceConfigFromSupabase().catch(() => null);
@@ -300,12 +280,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setGeofenceEffectiveConfig(resolveEffectiveGeofenceConfig(disk, env));
   }, []);
 
+  const applyAppSettingsBundle = useCallback((bundle: AppGlobalSettingsBundle) => {
+    if (bundle.workRules) {
+      setWorkRulesState({ ...DEFAULT_WORK_RULES, ...bundle.workRules });
+    }
+    if (bundle.breakRules) {
+      setBreakRulesState(bundle.breakRules);
+    }
+    if (bundle.geofence !== undefined && bundle.geofence !== null) {
+      writeLocalGeofenceConfig(bundle.geofence);
+    }
+    if (bundle.featureFlags && typeof bundle.featureFlags === 'object') {
+      const local = getLocalFeatureFlags();
+      const merged = { ...local, ...bundle.featureFlags };
+      setFeatureFlagsState(merged);
+      writeFeatureFlagsToStorage(merged);
+    }
+    if (bundle.roleFeatureTemplates && Object.keys(bundle.roleFeatureTemplates).length > 0) {
+      const merged = loadAndMergeRoleTemplates(bundle.roleFeatureTemplates, getLocalRoleFeatureTemplates());
+      setRoleFeatureTemplatesCache(merged);
+      if (merged) writeRoleFeatureTemplatesLocal(merged);
+      setRoleTemplatesRevision((n) => n + 1);
+    }
+    if (bundle.adminModulesGlobal && Object.keys(bundle.adminModulesGlobal).length > 0) {
+      const merged = loadAndMergeAdminModulesGlobal(bundle.adminModulesGlobal, getLocalAdminModulesGlobal());
+      setAdminModulesGlobalCache(merged);
+      if (merged) writeAdminModulesGlobalLocal(merged);
+      setAdminModulesRevision((n) => n + 1);
+    }
+    if (bundle.presenceVerification) {
+      const merged = mergePresenceVerificationLayers(bundle.presenceVerification, getLocalPresenceVerificationConfig());
+      writeLocalPresenceVerificationConfig(merged);
+      setPresenceVerificationConfig(merged);
+    }
+    setSettingsCloudLastSyncedAt(bundle.updatedAt);
+  }, []);
+
   /** Permette a updateUser (definito prima) di innescare il refresh dopo permessi. */
   const silentRefreshDataRef = useRef<
     (opts?: {
       pullRemoteConfig?: boolean;
       skipRemoteRevisionCheck?: boolean;
       throwOnError?: boolean;
+      /** Opzione legacy: il bundle non viene più scaricato da object Storage (solo JSON separati). */
+      forceSettingsBundle?: boolean;
     }) => Promise<void>
   >(async () => {});
   /** Revisione Storage da accettare con PIN dopo `forceGlobalRefresh` (altri dispositivi). */
@@ -403,11 +421,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCurrentUser((prev) => sessionUserFromLoadedUsersList(prev, freshUsers));
     });
     const unsubHolidaysAvail = database.realtime.subscribeToHolidaysAndAvailability(setHolidays, setAvailability);
+    const unsubSettingsSync = isAppCloudSyncEnabled()
+      ? database.realtime.subscribeToAppSettingsSyncSignal(() => {
+          void silentRefreshDataRef.current({
+            pullRemoteConfig: true,
+            skipRemoteRevisionCheck: true,
+            forceSettingsBundle: true,
+          });
+        })
+      : () => {};
     return () => {
       unsubPunches();
       unsubShifts();
       unsubUsers();
       unsubHolidaysAvail();
+      unsubSettingsSync();
     };
   }, []);
 
@@ -448,7 +476,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [currentUser, shifts, holidays, users, effectiveLanguage, launcherBadgeTick]);
 
   const loadInitialData = async () => {
-    try {
+    const BOOT_TIMEOUT_MS = 120_000;
+    let bootTid: number | null = null;
+
+    const bootWork = async () => {
       let loadedUsers = await database.users.getAll().catch(() => []);
       if (loadedUsers.length === 0) {
         for (const staffMember of initialStaff) {
@@ -488,45 +519,95 @@ export function AppProvider({ children }: { children: ReactNode }) {
         database.punchRecords.getAll().catch(() => []),
         database.availability.getAll().catch(() => []),
       ]);
-        setShifts(loadedShifts);
-        setHolidays(loadedHolidays);
-        setPunchRecords(loadedPunchRecords);
-        setAvailability(loadedAvailability);
+      setShifts(loadedShifts);
+      setHolidays(loadedHolidays);
+      setPunchRecords(loadedPunchRecords);
+      setAvailability(loadedAvailability);
 
-        // Rimuove flag legacy: versioni precedenti disattivavano per sempre i GET Storage dopo 404/rete, e il telefono non allineava mai al PC (localStorage non è condiviso tra dispositivi).
-        try {
-          localStorage.removeItem('osteria_features_storage_disabled');
-          localStorage.removeItem('osteria_role_templates_storage_skip');
-          localStorage.removeItem('osteria_admin_modules_storage_skip');
-        } catch {
-          /* ignore */
-        }
+      // Rimuove flag legacy: versioni precedenti disattivavano per sempre i GET Storage dopo 404/rete, e il telefono non allineava mai al PC (localStorage non è condiviso tra dispositivi).
+      try {
+        localStorage.removeItem('osteria_features_storage_disabled');
+        localStorage.removeItem('osteria_role_templates_storage_skip');
+        localStorage.removeItem('osteria_admin_modules_storage_skip');
+      } catch {
+        /* ignore */
+      }
 
-        // Feature flags: se Storage risponde, il remoto vince sul local (stesso criterio dei template ruoli — multi-dispositivo).
-        const sbFlags = await loadFeatureFlagsFromSupabase().catch(() => null);
-        if (sbFlags) {
-          const local = getLocalFeatureFlags();
-          const merged = { ...local, ...sbFlags };
-          setFeatureFlagsState(merged);
-          writeFeatureFlagsToStorage(merged);
+      const bundle = await pullGlobalSettingsBundleOnAppBoot().catch(() => null);
+      if (isAppCloudSyncEnabled()) {
+        if (bundle) {
+          if (!bundle.featureFlags) {
+            const sbFlagsOnly = await loadFeatureFlagsFromSupabase().catch(() => null);
+            if (sbFlagsOnly) {
+              const local = getLocalFeatureFlags();
+              const merged = { ...local, ...sbFlagsOnly };
+              setFeatureFlagsState(merged);
+              writeFeatureFlagsToStorage(merged);
+            }
+          }
+          applyAppSettingsBundle(bundle);
+          await refreshGeofenceEffectiveConfig();
+          if (!bundle.presenceVerification) {
+            await refreshPresenceVerificationConfig();
+          }
+        } else {
+          const sbFlags = await loadFeatureFlagsFromSupabase().catch(() => null);
+          if (sbFlags) {
+            const local = getLocalFeatureFlags();
+            const merged = { ...local, ...sbFlags };
+            setFeatureFlagsState(merged);
+            writeFeatureFlagsToStorage(merged);
+          }
+          const rtRemote = await loadRoleFeatureTemplatesFromSupabase().catch(() => null);
+          const rtLocal = getLocalRoleFeatureTemplates();
+          const rtMerged = loadAndMergeRoleTemplates(rtRemote, rtLocal);
+          setRoleFeatureTemplatesCache(rtMerged);
+          if (rtMerged) writeRoleFeatureTemplatesLocal(rtMerged);
+          setRoleTemplatesRevision((n) => n + 1);
+          const amRemote = await loadAdminModulesGlobalFromSupabase().catch(() => null);
+          const amLocal = getLocalAdminModulesGlobal();
+          const amMerged = loadAndMergeAdminModulesGlobal(amRemote, amLocal);
+          setAdminModulesGlobalCache(amMerged);
+          if (amMerged) writeAdminModulesGlobalLocal(amMerged);
+          setAdminModulesRevision((n) => n + 1);
+          await refreshGeofenceEffectiveConfig();
+          await refreshPresenceVerificationConfig();
+          const [wrSb, brSb] = await Promise.all([
+            loadWorkRulesFromSupabase().catch(() => null),
+            loadBreakRulesFromSupabase().catch(() => null),
+          ]);
+          if (wrSb) setWorkRulesState(wrSb);
+          else setWorkRulesState(getWorkRules());
+          if (brSb) setBreakRulesState(brSb);
+          else setBreakRulesState(getBreakRules());
+          setSettingsCloudLastSyncedAt(new Date().toISOString());
         }
-        const rtRemote = await loadRoleFeatureTemplatesFromSupabase().catch(() => null);
-        const rtLocal = getLocalRoleFeatureTemplates();
-        const rtMerged = loadAndMergeRoleTemplates(rtRemote, rtLocal);
-        setRoleFeatureTemplatesCache(rtMerged);
-        if (rtMerged) writeRoleFeatureTemplatesLocal(rtMerged);
-        setRoleTemplatesRevision((n) => n + 1);
-        const amRemote = await loadAdminModulesGlobalFromSupabase().catch(() => null);
-        const amLocal = getLocalAdminModulesGlobal();
-        const amMerged = loadAndMergeAdminModulesGlobal(amRemote, amLocal);
-        setAdminModulesGlobalCache(amMerged);
-        if (amMerged) writeAdminModulesGlobalLocal(amMerged);
-        setAdminModulesRevision((n) => n + 1);
+      } else {
         await refreshGeofenceEffectiveConfig();
-        // Work/break rules: solo localStorage (no load da Supabase per evitare 400 e crash)
+        await refreshPresenceVerificationConfig();
+        setWorkRulesState(getWorkRules());
+        setBreakRulesState(getBreakRules());
+      }
+    };
+
+    try {
+      await Promise.race([
+        bootWork(),
+        new Promise<never>((_, rej) => {
+          bootTid = window.setTimeout(() => rej(new Error('BOOT_TIMEOUT')), BOOT_TIMEOUT_MS);
+        }),
+      ]);
     } catch (error) {
-      console.error('Errore durante il caricamento iniziale:', error);
+      const isBootTimeout = error instanceof Error && error.message === 'BOOT_TIMEOUT';
+      if (isBootTimeout) {
+        console.warn(
+          '[loadInitialData] Timeout avvio (120s): splash chiuso; controlla rete o disattiva cloud sync se serve.'
+        );
+      } else {
+        console.error('Errore durante il caricamento iniziale:', error);
+      }
     } finally {
+      if (bootTid !== null) clearTimeout(bootTid);
       setIsLoading(false);
     }
   };
@@ -556,6 +637,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const addShift = useCallback(async (shift: Omit<Shift, 'id'>) => {
+    const op = currentUserRef.current;
+    if (!op || !canOperateTeamSchedule(op)) {
+      showError(getTranslations(effectiveLanguage).app_access_denied);
+      return null;
+    }
     const existingOnDate = shifts.filter((s) => s.user_id === shift.user_id && s.date === shift.date);
     if (existingOnDate.length >= MAX_SHIFTS_PER_DAY) {
       showError('Un dipendente non può avere più di 2 turni nello stesso giorno.');
@@ -666,12 +752,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
    * il punch_record di entrata collegato (tracciabilità completa).
    */
   const approveShiftSoft = useCallback(async (shiftId: string) => {
+    const op = currentUserRef.current;
+    if (!op || !canApproveShiftActions(op)) return;
     const existing = shifts.find((s) => s.id === shiftId);
     if (!existing || existing.approval_status === 'approved') return;
     await updateShift(shiftId, { approval_status: 'approved' });
   }, [shifts, updateShift]);
 
   const approveShift = useCallback(async (shiftId: string, opts?: { approvedStart: string; approvedEnd: string }) => {
+    const op = currentUserRef.current;
+    if (!op || !canApproveShiftActions(op)) return;
     const existing = shifts.find((s) => s.id === shiftId);
     if (!existing || existing.approved_at) return;
     if (existing.approval_status !== 'confirmed' && existing.approval_status !== 'approved') return;
@@ -716,6 +806,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [shifts, updateShift, punchRecordsRef]);
 
   const deleteShift = useCallback(async (id: string) => {
+    const op = currentUserRef.current;
+    if (!op || !canOperateTeamSchedule(op)) {
+      showError(getTranslations(effectiveLanguage).app_access_denied);
+      return;
+    }
     const existing = shifts.find(s => s.id === id);
     await database.shifts.delete(id);
     setShifts(prev => prev.filter(s => s.id !== id));
@@ -723,10 +818,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const actor = currentUserRef.current?.first_name ?? 'Sistema';
       logHistory('delete', actor, `Turno eliminato: ${existing.date} ${existing.start_time}–${existing.end_time}`);
     }
-  }, [shifts]);
+  }, [shifts, showError, effectiveLanguage]);
 
   const deleteShifts = useCallback(async (ids: string[]) => {
     if (ids.length === 0) return;
+    const op = currentUserRef.current;
+    if (!op || !canOperateTeamSchedule(op)) {
+      showError(getTranslations(effectiveLanguage).app_access_denied);
+      return;
+    }
     const actor = currentUserRef.current?.first_name ?? 'Sistema';
     logHistory('bulk_delete', actor, `${ids.length} turni eliminati`);
     // Salva snapshot per rollback in caso di errore
@@ -747,13 +847,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [shifts, punchRecords, showError, effectiveLanguage]);
 
-  const copyShift = useCallback((shift: Shift, newDate: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- id excluded for new shift
-    const { id, ...rest } = shift;
-    addShift({ ...rest, date: newDate, approval_status: 'draft' });
-  }, [addShift]);
+  const copyShift = useCallback(
+    (shift: Shift, newDate: string) => {
+      const op = currentUserRef.current;
+      if (!op || !canOperateTeamSchedule(op)) {
+        showError(getTranslations(effectiveLanguage).app_access_denied);
+        return;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- id excluded for new shift
+      const { id, ...rest } = shift;
+      void addShift({ ...rest, date: newDate, approval_status: 'draft' });
+    },
+    [addShift, showError, effectiveLanguage]
+  );
 
   const publishWeekShifts = useCallback(async (weekStart: Date) => {
+    const op = currentUserRef.current;
+    if (!op || !canPublishScheduleDrafts(op)) {
+      showError(getTranslations(effectiveLanguage).app_access_denied);
+      return;
+    }
     try {
       const weekEnd = addDays(weekStart, 7);
       const weekStartStr = format(weekStart, 'yyyy-MM-dd');
@@ -772,9 +885,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Errore durante la pubblicazione dei turni della settimana:', error);
     }
-  }, [shifts]);
+  }, [shifts, showError, effectiveLanguage]);
 
   const publishDayShifts = useCallback(async (dateStr: string) => {
+    const op = currentUserRef.current;
+    if (!op || !canPublishScheduleDrafts(op)) {
+      showError(getTranslations(effectiveLanguage).app_access_denied);
+      return;
+    }
     try {
       const draftShifts = shifts.filter((s) => s.approval_status === 'draft' && s.date === dateStr);
       for (const shift of draftShifts) {
@@ -784,7 +902,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Errore durante la pubblicazione dei turni del giorno:', error);
     }
-  }, [shifts]);
+  }, [shifts, showError, effectiveLanguage]);
 
   const addHolidayRequest = useCallback(async (req: Omit<HolidayRequest, 'id' | 'created_at' | 'status'>): Promise<{ ok: boolean; emailSent?: boolean; error?: string }> => {
     const payload = { ...req, status: 'pending' as const };
@@ -794,10 +912,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const requester = users.find(u => u.id === req.user_id);
     if (!requester || !supabase) return { ok: true, emailSent: false };
 
-    const managers = users.filter(u =>
-      isManagementRole(u.role) &&
-      u.status === 'active' &&
-      u.email
+    const managers = users.filter(
+      (u) => u.role === 'admin' && u.status === 'active' && u.email
     );
 
     let emailSent = false;
@@ -823,6 +939,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [users, effectiveLanguage]);
 
   const updateHolidayStatus = useCallback(async (id: string, status: HolidayStatus): Promise<{ ok: boolean; emailSent?: boolean; error?: string }> => {
+    if (status === 'approved' || status === 'rejected') {
+      const op = currentUserRef.current;
+      if (!op || !canApproveShiftActions(op)) {
+        return { ok: false, emailSent: false, error: getTranslations(effectiveLanguage).app_access_denied };
+      }
+    }
     const holiday = holidays.find((h) => h.id === id);
     const user = holiday ? users.find((u) => u.id === holiday.user_id) : null;
 
@@ -860,7 +982,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [holidays, users, effectiveLanguage]);
 
-  const addPunchRecord = useCallback(async (userId: string, type: 'in' | 'out', options?: { timestamp?: string; shift_id?: string }) => {
+  const addPunchRecord = useCallback(
+    async (
+      userId: string,
+      type: 'in' | 'out',
+      options?: { timestamp?: string; shift_id?: string; presenceProof?: string }
+    ) => {
     const t = getTranslations(effectiveLanguage);
     if (punchInFlightRef.current || isPunching) return { error: t.punch_in_progress };
     if (!userId || typeof userId !== 'string') return;
@@ -874,6 +1001,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsPunching(true);
 
     try {
+      const actor = currentUserRef.current;
+      const managerPunchingForSomeoneElse =
+        !!(actor && actor.id !== userId && canOperateTeamSchedule(actor));
+
       const geoCfg = geofenceEffectiveConfigRef.current ?? readGeofenceEnvConfig();
       if (featureFlags['geofence_punch'] === true) {
         if (!geoCfg) {
@@ -883,24 +1014,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
               '[geofence_punch] Attivo ma nessun centro configurato: salva lat/lng in Impostazioni (geofence.json) o imposta VITE_RESTAURANT_LAT/LNG nel build.'
             );
           }
-        } else {
-          const actor = currentUserRef.current;
-          const managerPunchingForSomeoneElse = !!(actor && actor.id !== userId);
-          if (!managerPunchingForSomeoneElse) {
-            try {
-              const pos = await getCurrentPositionCoords();
-              const d = haversineDistanceMeters(pos.lat, pos.lng, geoCfg.lat, geoCfg.lng);
-              if (d > geoCfg.radiusM) {
-                return { error: t.punch_geofence_outside };
-              }
-            } catch (e: unknown) {
-              const err = e as { code?: number };
-              const code = typeof err?.code === 'number' ? err.code : -1;
-              if (code === 1) return { error: t.punch_geofence_denied };
-              if (code === 3) return { error: t.punch_geofence_timeout };
-              return { error: t.punch_geofence_unavailable };
+        } else if (!managerPunchingForSomeoneElse) {
+          try {
+            const pos = await getCurrentPositionCoords();
+            const { inRange, distanceM } = isUserInRestaurantRange(pos.lat, pos.lng, geoCfg);
+            if (!inRange) {
+              return {
+                error: formatTrans(t.punch_geofence_outside_distance, {
+                  meters: String(Math.round(distanceM)),
+                }),
+              };
             }
+          } catch (e: unknown) {
+            const err = e as { code?: number };
+            const code = typeof err?.code === 'number' ? err.code : -1;
+            if (code === 1) return { error: t.punch_geofence_denied };
+            if (code === 3) return { error: t.punch_geofence_timeout };
+            return { error: t.punch_geofence_unavailable };
           }
+        }
+      }
+
+      const pv = presenceVerificationRef.current;
+      const effectivePresenceToken = resolveEffectiveVerificationToken(pv);
+      if (pv.requireVerification === true && !managerPunchingForSomeoneElse) {
+        if (!effectivePresenceToken) {
+          return { error: t.punch_presence_not_configured };
+        }
+        const proof = options?.presenceProof?.trim() ?? '';
+        if (!proof) {
+          return { error: t.punch_presence_proof_required };
+        }
+        if (normalizePresenceProof(proof) !== normalizePresenceProof(effectivePresenceToken)) {
+          return { error: t.punch_presence_proof_mismatch };
         }
       }
 
@@ -975,6 +1121,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const updateUser = useCallback(async (id: string, updates: Partial<User>) => {
     const prevUser = users.find((u) => u.id === id);
     if (!prevUser) return;
+
+    const mergedStatus = updates.status !== undefined ? updates.status : prevUser.status;
+    const mergedPinRaw = updates.pin !== undefined ? String(updates.pin) : String(prevUser.pin ?? '');
+    if (mergedStatus === 'active' && mergedPinRaw.replace(/\D/g, '').length === 4) {
+      const other = findActiveUserWithSamePin(users, mergedPinRaw, id);
+      if (other) {
+        const tr = getTranslations(effectiveLanguage);
+        const name = `${other.first_name ?? ''} ${other.last_name ?? ''}`.trim() || other.email;
+        showError(formatTrans(tr.employee_pin_taken_by_active, { name }));
+        return;
+      }
+    }
 
     // Aggiornamento ottimistico: l'UI si aggiorna subito
     const optimisticallyUpdated = { ...prevUser, ...updates };
@@ -1068,6 +1226,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const tr = getTranslations(effectiveLanguage);
       if (!supabase) {
         showError(tr.create_employee_error_no_supabase);
+        return null;
+      }
+      const pinConflict = findActiveUserWithSamePin(users, payload.pin);
+      if (pinConflict) {
+        const name = `${pinConflict.first_name ?? ''} ${pinConflict.last_name ?? ''}`.trim() || pinConflict.email;
+        showError(formatTrans(tr.employee_pin_taken_by_active, { name }));
         return null;
       }
       const maxOrder = users.reduce((m, u) => Math.max(m, u.sort_order ?? 0), 0);
@@ -1204,6 +1368,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
     i18n.changeLanguage(lang);
   }, [currentUser, updateUser]);
 
+  const DATA_SYNC_UI_DELAY_MS = 220;
+
+  const enterSilentDataSync = useCallback(() => {
+    silentSyncDepthRef.current += 1;
+    if (silentSyncDepthRef.current === 1 && dataSyncBarDelayTimerRef.current === null) {
+      const tid = window.setTimeout(() => {
+        dataSyncBarDelayTimerRef.current = null;
+        if (silentSyncDepthRef.current > 0) setDataSyncInProgress(true);
+      }, DATA_SYNC_UI_DELAY_MS);
+      dataSyncBarDelayTimerRef.current = tid;
+    }
+  }, []);
+
+  const leaveSilentDataSync = useCallback(() => {
+    silentSyncDepthRef.current = Math.max(0, silentSyncDepthRef.current - 1);
+    if (silentSyncDepthRef.current === 0) {
+      if (dataSyncBarDelayTimerRef.current !== null) {
+        clearTimeout(dataSyncBarDelayTimerRef.current);
+        dataSyncBarDelayTimerRef.current = null;
+      }
+      setDataSyncInProgress(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (dataSyncBarDelayTimerRef.current !== null) clearTimeout(dataSyncBarDelayTimerRef.current);
+    };
+  }, []);
+
   /**
    * Refresh silenzioso: sempre DB + allineamento utente loggato.
    * Con `pullRemoteConfig: true` (dopo toggle permessi/flag/regole) ricarica anche Storage.
@@ -1213,8 +1407,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     pullRemoteConfig?: boolean;
     skipRemoteRevisionCheck?: boolean;
     throwOnError?: boolean;
+    forceSettingsBundle?: boolean;
   }) => {
-    try {
+    const SYNC_TIMEOUT_MS = 75_000;
+
+    const inner = async () => {
       const safeLoad = async <T,>(label: string, fn: () => Promise<T[]>): Promise<T[] | null> => {
         try {
           return await fn();
@@ -1242,37 +1439,63 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setCurrentUser((prev) => sessionUserFromLoadedUsersList(prev, loadedUsers));
       }
 
-      if (opts?.pullRemoteConfig) {
-        /** Feature flags + periodo presenze da Storage (PWA ↔ browser); work/break restano su localStorage. */
+      const pullRemoteConfig = Boolean(opts?.pullRemoteConfig && isAppCloudSyncEnabled());
+      if (pullRemoteConfig) {
         const [sbFlags, periodRemote] = await Promise.all([
           loadFeatureFlagsFromSupabase().catch(() => null),
           loadTimesheetPeriodFromSupabase().catch(() => null),
         ]);
-        const localFlags = getLocalFeatureFlags();
-        const mergedFlags = sbFlags ? { ...localFlags, ...sbFlags } : localFlags;
-        setFeatureFlagsState(mergedFlags);
-        writeFeatureFlagsToStorage(mergedFlags);
         if (periodRemote) {
           applyRemoteTimesheetPeriod(periodRemote);
         }
-        const rtRemote = await loadRoleFeatureTemplatesFromSupabase().catch(() => null);
-        const rtLocal = getLocalRoleFeatureTemplates();
-        const rtMerged = loadAndMergeRoleTemplates(rtRemote, rtLocal);
-        setRoleFeatureTemplatesCache(rtMerged);
-        if (rtMerged) writeRoleFeatureTemplatesLocal(rtMerged);
-        setRoleTemplatesRevision((n) => n + 1);
-        const amRemote = await loadAdminModulesGlobalFromSupabase().catch(() => null);
-        const amLocal = getLocalAdminModulesGlobal();
-        const amMerged = loadAndMergeAdminModulesGlobal(amRemote, amLocal);
-        setAdminModulesGlobalCache(amMerged);
-        if (amMerged) writeAdminModulesGlobalLocal(amMerged);
-        setAdminModulesRevision((n) => n + 1);
-        await refreshGeofenceEffectiveConfig();
+
+        const bundle = await fetchGlobalSettingsBundleFromSupabase({
+          force: opts?.forceSettingsBundle === true,
+        }).catch(() => null);
+        if (bundle) {
+          if (!bundle.featureFlags) {
+            const localFlags = getLocalFeatureFlags();
+            const mergedFlags = sbFlags ? { ...localFlags, ...sbFlags } : localFlags;
+            setFeatureFlagsState(mergedFlags);
+            writeFeatureFlagsToStorage(mergedFlags);
+          }
+          applyAppSettingsBundle(bundle);
+          await refreshGeofenceEffectiveConfig();
+          if (!bundle.presenceVerification) {
+            await refreshPresenceVerificationConfig();
+          }
+        } else {
+          const localFlags = getLocalFeatureFlags();
+          const mergedFlags = sbFlags ? { ...localFlags, ...sbFlags } : localFlags;
+          setFeatureFlagsState(mergedFlags);
+          writeFeatureFlagsToStorage(mergedFlags);
+          const rtRemote = await loadRoleFeatureTemplatesFromSupabase().catch(() => null);
+          const rtLocal = getLocalRoleFeatureTemplates();
+          const rtMerged = loadAndMergeRoleTemplates(rtRemote, rtLocal);
+          setRoleFeatureTemplatesCache(rtMerged);
+          if (rtMerged) writeRoleFeatureTemplatesLocal(rtMerged);
+          setRoleTemplatesRevision((n) => n + 1);
+          const amRemote = await loadAdminModulesGlobalFromSupabase().catch(() => null);
+          const amLocal = getLocalAdminModulesGlobal();
+          const amMerged = loadAndMergeAdminModulesGlobal(amRemote, amLocal);
+          setAdminModulesGlobalCache(amMerged);
+          if (amMerged) writeAdminModulesGlobalLocal(amMerged);
+          setAdminModulesRevision((n) => n + 1);
+          await refreshGeofenceEffectiveConfig();
+          await refreshPresenceVerificationConfig();
+          const [wrSb, brSb] = await Promise.all([
+            loadWorkRulesFromSupabase().catch(() => null),
+            loadBreakRulesFromSupabase().catch(() => null),
+          ]);
+          if (wrSb) setWorkRulesState(wrSb);
+          if (brSb) setBreakRulesState(brSb);
+          setSettingsCloudLastSyncedAt(new Date().toISOString());
+        }
       }
 
       /* Cross-device: la revisione va controllata a ogni sync DB, non solo con pullRemoteConfig
          (altrimenti pull-to-refresh, mount, cambio tab non leggono mai Storage). */
-      if (!opts?.skipRemoteRevisionCheck) {
+      if (!opts?.skipRemoteRevisionCheck && isAppCloudSyncEnabled()) {
         const remoteRev = await fetchClientSyncRevisionFromSupabase().catch(() => null);
         if (remoteRev != null && remoteRev > getAckClientSyncRevision()) {
           if (currentUserRef.current) {
@@ -1283,11 +1506,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         }
       }
-    } catch (err) {
-      console.error('Errore durante il refresh silenzioso:', err);
-      if (opts?.throwOnError) throw err;
-    }
-  }, [refreshGeofenceEffectiveConfig]);
+    };
+
+    const queued = silentRefreshQueueRef.current.then(async () => {
+      enterSilentDataSync();
+      let timeoutId: number | null = null;
+      try {
+        await Promise.race([
+          inner(),
+          new Promise<never>((_, reject) => {
+            timeoutId = window.setTimeout(() => reject(new Error('SILENT_SYNC_TIMEOUT')), SYNC_TIMEOUT_MS);
+          }),
+        ]);
+      } catch (err) {
+        const isTimeout = err instanceof Error && err.message === 'SILENT_SYNC_TIMEOUT';
+        if (isTimeout) {
+          console.warn(
+            '[silentRefreshData] Timeout (rete o Supabase lento): sync interrotta, UI sbloccata.'
+          );
+          if (opts?.throwOnError) throw err;
+        } else {
+          console.error('Errore durante il refresh silenzioso:', err);
+          if (opts?.throwOnError) throw err;
+        }
+      } finally {
+        if (timeoutId !== null) {
+          clearTimeout(timeoutId);
+        }
+        leaveSilentDataSync();
+      }
+    });
+    silentRefreshQueueRef.current = queued.catch(() => {});
+    return queued;
+  }, [
+    enterSilentDataSync,
+    leaveSilentDataSync,
+    refreshGeofenceEffectiveConfig,
+    refreshPresenceVerificationConfig,
+    applyAppSettingsBundle,
+  ]);
 
   silentRefreshDataRef.current = silentRefreshData;
 
@@ -1299,12 +1556,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       );
       shiftCacheKeys.forEach((k) => localStorage.removeItem(k));
       await silentRefreshData({
-        pullRemoteConfig: true,
+        pullRemoteConfig: isAppCloudSyncEnabled(),
         skipRemoteRevisionCheck: true,
         throwOnError: true,
+        forceSettingsBundle: true,
       });
       pendingClientSyncRevRef.current = null;
-      const rev = await fetchClientSyncRevisionFromSupabase().catch(() => null);
+      const rev = isAppCloudSyncEnabled()
+        ? await fetchClientSyncRevisionFromSupabase().catch(() => null)
+        : null;
       if (rev != null) writeAckClientSyncRevision(rev);
       showSuccess(getTranslations(effectiveLanguage).hard_reload_success);
     } catch (err) {
@@ -1338,7 +1598,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       debounceTimer = setTimeout(() => {
         debounceTimer = null;
         const now = Date.now();
-        const pullRemote = now - lastConfigPull >= CONFIG_PULL_THROTTLE_MS;
+        const pullRemote = isAppCloudSyncEnabled() && now - lastConfigPull >= CONFIG_PULL_THROTTLE_MS;
         if (pullRemote) lastConfigPull = now;
         void silentRefreshDataRef.current(pullRemote ? { pullRemoteConfig: true } : undefined);
       }, 200);
@@ -1382,7 +1642,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const now = Date.now();
       if (now - lastBackgroundSyncRefreshRef.current < throttleMs) return;
       lastBackgroundSyncRefreshRef.current = now;
-      void silentRefreshDataRef.current({ pullRemoteConfig: true });
+      if (isAppCloudSyncEnabled()) {
+        void silentRefreshDataRef.current({ pullRemoteConfig: true });
+      }
     };
     navigator.serviceWorker?.addEventListener('message', onSwMessage);
 
@@ -1455,6 +1717,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await silentRefreshData({ pullRemoteConfig: true });
   }, [silentRefreshData]);
 
+  const pushSettingsToCloud = useCallback(async () => {
+    if (!isAppCloudSyncEnabled()) {
+      showError(getTranslations(effectiveLanguage).settings_cloud_sync_paused);
+      return;
+    }
+    setSettingsCloudPushBusy(true);
+    try {
+      const disk = getLocalGeofenceConfig();
+      const rt = getRoleFeatureTemplatesCache() ?? getLocalRoleFeatureTemplates();
+      const am = getAdminModulesGlobalCache() ?? getLocalAdminModulesGlobal();
+      const bundle = buildGlobalSettingsBundleFromParts({
+        workRules,
+        breakRules,
+        geofenceDisk: disk,
+        featureFlags,
+        roleFeatureTemplates: rt,
+        adminModulesGlobal: am,
+        presenceVerification: presenceVerificationConfig,
+      });
+      await uploadGlobalSettingsBundleToSupabase(bundle);
+      await Promise.all([
+        saveWorkRulesToSupabase(workRules),
+        saveBreakRulesToSupabase(breakRules),
+        writeAllFeatureFlagsToSupabase(featureFlags).catch(() => {}),
+        savePresenceVerificationToSupabase(presenceVerificationConfig).catch(() => {}),
+        disk ? saveGeofenceConfigToSupabase(disk).catch(() => {}) : Promise.resolve(),
+        rt && Object.keys(rt).length > 0 ? saveRoleFeatureTemplatesToSupabase(rt).catch(() => {}) : Promise.resolve(),
+        am && Object.keys(am).length > 0 ? saveAdminModulesGlobalToSupabase(am).catch(() => {}) : Promise.resolve(),
+      ]);
+      await bumpAppSettingsSyncSignal();
+      const rev = await bumpClientSyncRevisionOnSupabase();
+      if (rev != null) writeAckClientSyncRevision(rev);
+      setSettingsCloudLastSyncedAt(new Date().toISOString());
+      showSuccess(getTranslations(effectiveLanguage).settings_cloud_save_all_success);
+    } catch (e) {
+      showError(
+        e instanceof Error ? e.message : getTranslations(effectiveLanguage).settings_cloud_save_all_error
+      );
+    } finally {
+      setSettingsCloudPushBusy(false);
+    }
+  }, [
+    workRules,
+    breakRules,
+    featureFlags,
+    presenceVerificationConfig,
+    effectiveLanguage,
+    showSuccess,
+    showError,
+  ]);
+
   const toggleAvailability = useCallback(async (userId: string, date: string) => {
     const existing = availability.find(
       (a) => a.user_id === userId && a.start_date <= date && a.end_date >= date
@@ -1468,24 +1781,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [availability]);
 
   const forceGlobalRefresh = useCallback(async () => {
+    const GLOBAL_REFRESH_TIMEOUT_MS = 75_000;
     setIsGlobalRefreshing(true);
+    let loadTimeoutId: number | null = null;
     try {
-      const shiftCacheKeys = Object.keys(localStorage).filter(
-        (k) => k.toLowerCase().includes('shift') || k.toLowerCase().includes('turni')
-      );
-      shiftCacheKeys.forEach((k) => localStorage.removeItem(k));
-
-      setShifts([]);
-      setUsers([]);
-      setPunchRecords([]);
-
-      const [loadedUsers, loadedShifts, loadedPunchRecords, loadedHolidays, loadedAvailability] = await Promise.all([
+      const loadAll = Promise.all([
         database.users.getAll().catch(() => []),
         database.shifts.getAll().catch(() => []),
         database.punchRecords.getAll().catch(() => []),
         database.holidays.getAll().catch(() => []),
         database.availability.getAll().catch(() => []),
-      ]);
+      ]) as Promise<[User[], Shift[], PunchRecord[], HolidayRequest[], HolidayRequest[]]>;
+
+      const [loadedUsers, loadedShifts, loadedPunchRecords, loadedHolidays, loadedAvailability] =
+        await Promise.race([
+          loadAll,
+          new Promise<never>((_, reject) => {
+            loadTimeoutId = window.setTimeout(
+              () => reject(new Error('FORCE_GLOBAL_REFRESH_TIMEOUT')),
+              GLOBAL_REFRESH_TIMEOUT_MS
+            );
+          }),
+        ]);
+
+      if (loadTimeoutId !== null) {
+        clearTimeout(loadTimeoutId);
+        loadTimeoutId = null;
+      }
+
+      const shiftCacheKeys = Object.keys(localStorage).filter(
+        (k) => k.toLowerCase().includes('shift') || k.toLowerCase().includes('turni')
+      );
+      shiftCacheKeys.forEach((k) => localStorage.removeItem(k));
 
       setUsers(loadedUsers);
       setShifts(loadedShifts);
@@ -1496,7 +1823,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setIsGlobalRefreshing(false);
       setPostRefreshLocked(true);
     } catch (err) {
-      console.error('Errore durante il refresh globale:', err);
+      if (loadTimeoutId !== null) {
+        clearTimeout(loadTimeoutId);
+        loadTimeoutId = null;
+      }
+      const isTimeout = err instanceof Error && err.message === 'FORCE_GLOBAL_REFRESH_TIMEOUT';
+      if (isTimeout) {
+        console.warn(
+          '[forceGlobalRefresh] Timeout caricamento DB: overlay blur disattivato; riprova o controlla la rete.'
+        );
+      } else {
+        console.error('Errore durante il refresh globale:', err);
+      }
       pendingClientSyncRevRef.current = null;
       showError(getTranslations(effectiveLanguage).app_sync_failed_retry);
       setIsGlobalRefreshing(false);
@@ -1520,12 +1858,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
    * Il solo `users.getAll` non bastava: le matrici permesso vivono anche su `role_feature_templates.json`, ecc.
    */
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser?.id) return;
     const POLL_MS = 60_000;
     const check = () => {
       if (document.visibilityState !== 'visible') return;
       if (isGlobalRefreshingRef.current || postRefreshLockedRef.current) return;
-      void silentRefreshDataRef.current({ pullRemoteConfig: true });
+      void silentRefreshDataRef.current(
+        isAppCloudSyncEnabled() ? { pullRemoteConfig: true } : undefined
+      );
     };
     const id = window.setInterval(check, POLL_MS);
     const t0 = window.setTimeout(check, 8_000);
@@ -1534,6 +1874,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
       window.clearTimeout(t0);
     };
   }, [currentUser?.id]);
+
+  /**
+   * Dopo login Admin: un upload `settings_bundle.json` mantiene il file su Storage (backup).
+   * Il client non legge più quell'object (niente GET verso quel path); il pull usa i JSON separati.
+   */
+  const settingsBundleAutoSeedTriedRef = useRef(false);
+  useEffect(() => {
+    if (!currentUser?.id || !isAdminOnly(currentUser)) return;
+    if (settingsBundleAutoSeedTriedRef.current) return;
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        if (settingsBundleAutoSeedTriedRef.current) return;
+        if (!isAppCloudSyncEnabled()) {
+          settingsBundleAutoSeedTriedRef.current = true;
+          return;
+        }
+        if (!supabase || import.meta.env.VITE_APP_CONFIG_STORAGE_ENABLED === 'false') return;
+        settingsBundleAutoSeedTriedRef.current = true;
+        const d = settingsBundleSeedDepsRef.current;
+        const bundle = buildGlobalSettingsBundleFromParts({
+          workRules: d.workRules,
+          breakRules: d.breakRules,
+          geofenceDisk: getLocalGeofenceConfig(),
+          featureFlags: d.featureFlags,
+          roleFeatureTemplates: d.roleFeatureTemplates,
+          adminModulesGlobal: d.adminModulesGlobal,
+          presenceVerification: d.presenceVerificationConfig,
+        });
+        try {
+          await uploadGlobalSettingsBundleToSupabase(bundle);
+          await bumpAppSettingsSyncSignal().catch(() => {});
+          setSettingsCloudLastSyncedAt(new Date().toISOString());
+        } catch {
+          settingsBundleAutoSeedTriedRef.current = false;
+        }
+      })();
+    }, 2000);
+    return () => window.clearTimeout(timer);
+  }, [currentUser]);
 
   const runPostUnlockRefreshActions = useCallback(async (): Promise<boolean> => {
     try {
@@ -1578,9 +1957,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       pendingClientSyncRevRef.current = null;
     }
     /** Allinea Storage prima di togliere l’overlay: altrimenti sembra che «dopo il PIN non succeda nulla» mentre il pull è ancora in corso. */
-    if (revToAck != null) {
+    if (revToAck != null && isAppCloudSyncEnabled()) {
       try {
-        await silentRefreshData({ pullRemoteConfig: true, skipRemoteRevisionCheck: true });
+        await silentRefreshData({
+          pullRemoteConfig: true,
+          skipRemoteRevisionCheck: true,
+          forceSettingsBundle: true,
+        });
       } catch (e) {
         console.error('[runPostUnlockRefreshActions] silentRefreshData', e);
         showError(getTranslations(effectiveLanguage).app_sync_failed_retry);
@@ -1595,7 +1978,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!currentUser) return false;
       const freshUser = users.find((u) => u.id === currentUser.id);
       /** Stesso criterio del login: `pin` da PostgREST può arrivare come numero → `!==` falliva sempre. */
-      if (!freshUser || !pinMatchesStored(freshUser, pin)) return false;
+      if (!freshUser || freshUser.status !== 'active' || !pinMatchesStored(freshUser, pin)) return false;
       return runPostUnlockRefreshActions();
     },
     [currentUser, users, runPostUnlockRefreshActions]
@@ -1623,6 +2006,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       if (!freshUser || !pinMatchesStored(freshUser, pin)) {
         return { ok: false, wrongPin: true };
+      }
+      if (freshUser.status !== 'active') {
+        return { ok: false, wrongPin: false };
       }
       try {
         const displayName = `${freshUser.first_name} ${freshUser.last_name ?? ''}`.trim() || freshUser.email;
@@ -1679,12 +2065,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentUser, setCurrentUser, users, shifts, holidays, punchRecords, availability, toggleAvailability,
       addShift, updateShift, approveShift, approveShiftSoft, deleteShift, deleteShifts, copyShift,
       publishWeekShifts, publishDayShifts, addHolidayRequest, updateHolidayStatus, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
-      updateUser, createUser, deleteUser, reorderUsers, setUsersSortOrder, updateUserPreferences, effectiveLanguage, setLanguage, showError, showSuccess, forceGlobalRefresh, hardResetTestData, seedDemoProfileForUser, silentRefreshData, hardReloadFromDatabase, isGlobalRefreshing,
+      updateUser, createUser, deleteUser, reorderUsers, setUsersSortOrder, updateUserPreferences, effectiveLanguage, setLanguage, showError, showSuccess, forceGlobalRefresh, hardResetTestData, seedDemoProfileForUser, silentRefreshData, hardReloadFromDatabase, isGlobalRefreshing, dataSyncInProgress,
       postRefreshLocked, unlockAfterRefresh, unlockAfterRefreshWithDevice, registerPinUnlockDevice, pinUnlockDeviceRegistered, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest,
       featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,
+      presenceVerificationConfig, savePresenceVerificationConfig,
       workRules, setWorkRules, breakRules, setBreakRules,
       roleTemplatesRevision, saveRoleFeatureTemplates,
       adminModulesRevision, saveAdminModulesGlobal,
+      pushSettingsToCloud, settingsCloudLastSyncedAt, settingsCloudPushBusy,
     }}>
       <PwaGate>{children}</PwaGate>
       <AnimatePresence mode="sync">
@@ -1701,9 +2089,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components -- useApp hook must live alongside AppProvider
-export const useApp = () => {
-  const context = useContext(AppContext);
-  if (!context) throw new Error('useApp must be used within AppProvider');
-  return context;
-};
+/* Re-export da moduli stabili (Context non ricreato a ogni HMR di questo file). */
+/* eslint-disable react-refresh/only-export-components */
+export { useApp } from './appContextCore';
+export type { AppContextType } from './appContextTypes';
+/* eslint-enable react-refresh/only-export-components */

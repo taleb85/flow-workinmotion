@@ -10,7 +10,13 @@ import { format, isToday, isTomorrow, parseISO, addDays, startOfWeek } from 'dat
 import { it } from 'date-fns/locale';
 import { formatMinutesToHoursAndMinutes } from '../utils/timeCalculations';
 import { getNetShiftMinutes } from '../utils/breakRules';
-import { isManagementRole, isPurelyManagementRole, isUserVisibleOnTeamSchedule } from '../utils/permissions';
+import {
+  isManagementRole,
+  isPurelyManagementRole,
+  isUserVisibleOnTeamSchedule,
+  canOperateTeamSchedule,
+  canApproveShiftActions,
+} from '../utils/permissions';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getTranslations, getDateLocale } from '../utils/translations';
 import { isFeatureEnabled } from '../utils/enabledFeatures';
@@ -131,8 +137,12 @@ export default function HomePage({ onNavigateToHolidays, onNavigateToShifts, onN
   const uiW = (key: string) => isUiWidgetVisible(currentUser, key);
   /** Tabellone team su Home: rispetta matrice `team_view` (non solo il ruolo). */
   const showTeamHome = isMgmtUser && isFeatureEnabled(currentUser, 'team_view');
-  const canEditShiftsHome = isFeatureEnabled(currentUser, 'edit_shifts');
-  const canApproveShiftsHome = isFeatureEnabled(currentUser, 'approve_shifts');
+  const canEditShiftsHome =
+    currentUser.role === 'admin' ||
+    (isFeatureEnabled(currentUser, 'edit_shifts') && canOperateTeamSchedule(currentUser));
+  const canApproveShiftsHome =
+    currentUser.role === 'admin' ||
+    (isFeatureEnabled(currentUser, 'approve_shifts') && canApproveShiftActions(currentUser));
   /** Stesso gate su web, mobile e PWA (Master Control `staff_requests`). */
   const staffRequestsEnabled = featureFlags['staff_requests'] !== false;
   const todayStr = format(now, 'yyyy-MM-dd');
