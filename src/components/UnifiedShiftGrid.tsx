@@ -806,7 +806,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         console.warn('[handleCreateShift] addShift returned null — turno NON salvato');
         showError(t.error_generic ?? 'Errore durante la creazione del turno.');
       }
-    } catch { showError(t.error_generic ?? 'Errore.'); }
+    } catch (err) {
+      console.error('[handleCreateShift] insert error:', err);
+      showError(t.error_generic ?? 'Errore.');
+    }
     finally { setSaving(false); }
   }, [createModal, createStart, createEnd, addShift, showSuccess, showError, t, users]);
 
