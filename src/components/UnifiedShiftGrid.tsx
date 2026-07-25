@@ -1167,7 +1167,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
           className={`relative w-full min-w-0 text-left rounded-lg border ${borderColor} ${bgColor} ${glow} hover:brightness-125 transition-all ${isDraft ? 'border-dashed' : ''} px-0.5 py-0.5`}>
           <input type="checkbox" checked={selectedShiftIds.has(g.shift.id)} onChange={() => setSelectedShiftIds(prev => { const n = new Set(prev); if (n.has(g.shift.id)) n.delete(g.shift.id); else n.add(g.shift.id); return n; })}
-            className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-opacity ${selectedShiftIds.has(g.shift.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} onClick={e => e.stopPropagation()} />
+            className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-all ${selectedShiftIds.has(g.shift.id) ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} onClick={e => e.stopPropagation()} />
           <div
             className="flex items-end justify-center w-full gap-1 px-2 whitespace-nowrap overflow-hidden"
             style={{ minHeight: mainRowHeight, height: mainRowHeight }}
