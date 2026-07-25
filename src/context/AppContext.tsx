@@ -754,7 +754,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         database.availability.getAll().catch(() => []),
       ]);
         setShifts(mergeShiftsDeductExclusionsFromLocal(loadedShifts));
-        console.log('[loadInitialData] loadedShifts count:', loadedShifts.length, 'con tenant_id:', loadedShifts.filter(s => (s as any).tenant_id).length);
+        console.log('[loadInitialData] loadedShifts count:', loadedShifts.length, 'con tenant_id:', loadedShifts.filter(s => (s as any).tenant_id).length, 'date range:', loadedShifts.length > 0 ? `${loadedShifts[0].date}…${loadedShifts[loadedShifts.length-1].date}` : 'empty');
         setHolidays(loadedHolidays);
         setPunchRecords(loadedPunchRecords);
         setAvailability(loadedAvailability);
@@ -925,7 +925,13 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     const normalized = { ...shift, end_time: endTime, approval_status: 'draft' as const, ...autoBreak };
     console.log('[addShift] normalized payload:', JSON.stringify(normalized, null, 2));
     const res = await database.shifts.insert(normalized);
-    console.log('[addShift] insert result:', res ? `OK id=${res.id} tenant_id=${(res as any).tenant_id ?? 'MISSING'}` : 'NULL');
+    console.log('[addShift] insert result:', res ? `OK id=${res.id} tenant_id=${(res as any).tenant_id ?? 'MISSING'} date=${res.date} start=${res.start_time}` : 'NULL');
+    // Dopo insert, verifica se lo shift è recuperabile via getAll
+    if (res) {
+      const allAfter = await database.shifts.getAll().catch(() => []);
+      const found = allAfter.find(s => s.id === res.id);
+      console.log('[addShift] getAll post-insert:', allAfter.length, 'turni, shift appena creato trovato:', !!found);
+    }
     if (res) {
       setShifts(prev => [...prev, res]);
       recentlyAddedShiftIdsRef.current.add(res.id);

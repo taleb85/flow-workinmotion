@@ -154,6 +154,8 @@ const SHIFT_INSERT_ALLOW: (keyof Omit<Shift, 'id'>)[] = [
   'is_auto_break',
   'admin_note',
   'skills',
+  'tenant_id',
+  'department',
 ];
 
 function pickShiftInsertPayload(shift: Omit<Shift, 'id'>): Record<string, unknown> {
