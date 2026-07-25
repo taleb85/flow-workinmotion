@@ -381,11 +381,21 @@ export const database = {
   shifts: {
     async getAll() {
       if (!supabase) return [];
+      const PAGE_SIZE = 1000;
+      let allData: import('../types').Shift[] = [];
+      let from = 0;
       const base = supabase.from('shifts').select('*');
-      const scoped = withTenant(base);
-      const { data, error } = await scoped.order('date', { ascending: true }).limit(10000);
-      if (error) throw error;
-      return data || [];
+      const ordered = withTenant(base).order('date', { ascending: false });
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { data, error } = await ordered.range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        allData = allData.concat(data);
+        if (data.length < PAGE_SIZE) break;
+        from += PAGE_SIZE;
+      }
+      return allData;
     },
 
     async getByUserId(userId: string) {
