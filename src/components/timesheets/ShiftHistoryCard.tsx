@@ -78,7 +78,7 @@ export function ShiftHistoryCard({
           aria-expanded={isUnlocked && isExpanded}
           aria-controls="timesheet-drawer-combined-history"
           onClick={handleClick}
-          className="flex w-full min-h-[2.75rem] items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-amber-500/15 active:bg-amber-500/80"
+          className="flex w-full min-h-[2.75rem] items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-amber-500/15 active:bg-amber-500/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
         >
           {shiftEdits.length === 0 && punchAuditEntries.length > 0 ? (
             <ShieldAlert className="h-4 w-4 shrink-0 text-orange-400" aria-hidden />

@@ -523,7 +523,7 @@ export default function PunchInKiosk({ onGoToLogin }: PunchInKioskProps) {
         <button
           type="button"
           onClick={onGoToLogin}
-          className="group flex items-center gap-2 rounded-xl border-2 border-brand-deep/30 bg-brand-deep/8 px-4 py-2.5 text-xs font-semibold text-brand-deep shadow-[0_2px_8px_-2px_rgba(0,26,128,0.12)] transition-[color,background-color,border-color,box-shadow,transform] hover:border-brand-deep/60 hover:bg-brand-deep/15 hover:shadow-[0_4px_12px_-3px_rgba(0,26,128,0.2)] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2"
+className="group flex items-center gap-2 rounded-xl border-2 border-brand-deep/30 bg-brand-deep/8 px-4 py-2.5 text-xs font-semibold text-brand-deep shadow-[0_2px_8px_-2px_rgba(0,26,128,0.12)] transition-[color,background-color,border-color,box-shadow,transform] hover:border-brand-deep/60 hover:bg-brand-deep/15 hover:shadow-[0_4px_12px_-3px_rgba(0,26,128,0.2)] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
         >
           <User className="h-4 w-4 shrink-0 text-brand-deep" strokeWidth={2} />
           {t.area_personale}
@@ -768,7 +768,7 @@ export default function PunchInKiosk({ onGoToLogin }: PunchInKioskProps) {
                 <button
                   onClick={closeOverlay}
                   disabled={isLoading}
-                  className="p-2 rounded-xl text-neutral-400 hover:bg-white/10 transition-colors active:bg-white/80"
+                  className="p-2 rounded-xl text-neutral-400 hover:bg-white/10 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                   aria-label={t.cancel}
                 >
                   <X className="w-5 h-5" />

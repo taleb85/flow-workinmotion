@@ -220,7 +220,7 @@ export function CalendarDatePicker({ value, onChange, minDate, maxDate }: Calend
         <button
           type="button"
           onClick={handleToday}
-          className="rounded-xl bg-accent px-4 py-1.5 text-[13px] font-bold text-white shadow-sm hover:bg-accent/90 active:scale-95 transition-all"
+          className="rounded-xl bg-accent px-4 py-1.5 text-[13px] font-bold text-white shadow-sm hover:bg-accent/90 active:scale-95 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
         >
           Oggi
         </button>

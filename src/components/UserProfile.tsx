@@ -330,7 +330,7 @@ export function ProfileFormSelf({
         <button
           type="submit"
           disabled={isSaving}
-          className="w-full py-3 rounded-xl bg-accent text-white font-bold text-sm shadow-md shadow-accent/25 hover:bg-accent-hover active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full py-3 rounded-xl bg-accent text-white font-bold text-sm shadow-md shadow-accent/25 hover:bg-accent-hover active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
         >
           {isSaving ? t.saving : t.save}
         </button>
@@ -776,7 +776,7 @@ export function ProfileFormAdmin({
             <button
               type="button"
               onClick={handleCopyAccessLink}
-              className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white font-sans transition-all hover:opacity-95 active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white font-sans transition-all hover:opacity-95 active:scale-[0.98] hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               style={{ background: '#6366f1' }}
             >
               <Copy className="w-5 h-5" aria-hidden />
@@ -812,7 +812,7 @@ export function ProfileFormAdmin({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-xl border border-neutral-500 px-4 py-2 text-sm font-semibold text-white/80 surface-ghost-interactive font-sans"
+className="flex-1 rounded-xl border border-neutral-500 px-4 py-2 text-sm font-semibold text-white/80 surface-ghost-interactive font-sans transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           >
             {readOnly ? t.close ?? t.cancel : t.cancel}
           </button>
@@ -820,7 +820,7 @@ export function ProfileFormAdmin({
             <button
               type="submit"
               disabled={isSaving || Boolean(activePinConflictMessage)}
-              className="flex-1 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 font-sans active:bg-accent-hover/80"
+              className="flex-1 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 font-sans active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               {isSaving ? t.saving : variant === 'create' ? t.create_employee_submit : t.save_changes}
             </button>

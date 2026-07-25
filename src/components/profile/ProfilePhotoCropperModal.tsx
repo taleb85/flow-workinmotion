@@ -167,7 +167,7 @@ export default function ProfilePhotoCropperModal({ imageSrc, labels, onClose, on
         <button
           type="button"
           onClick={onClose}
-          className="rounded-full border border-white/20 bg-white/5 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10 touch-manipulation active:bg-white/80"
+          className="rounded-full border border-white/20 bg-white/5 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10 touch-manipulation active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
         >
           {labels.close}
         </button>
@@ -177,7 +177,7 @@ export default function ProfilePhotoCropperModal({ imageSrc, labels, onClose, on
         <button
           type="button"
           onClick={applyCrop}
-          className="rounded-full border border-white/20 bg-white/5 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10 touch-manipulation active:bg-white/80"
+          className="rounded-full border border-white/20 bg-white/5 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10 touch-manipulation active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
         >
           {labels.crop}
         </button>
@@ -227,7 +227,7 @@ export default function ProfilePhotoCropperModal({ imageSrc, labels, onClose, on
       <div className="flex shrink-0 items-center justify-center gap-6 border-t border-white/10 py-3">
         <button
           type="button"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white transition-colors hover:bg-white/15 touch-manipulation active:bg-white/80"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white transition-colors hover:bg-white/15 touch-manipulation active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           aria-label="Zoom out"
           onClick={() => setUserScale((s) => Math.max(1, s - 0.15))}
         >
@@ -235,7 +235,7 @@ export default function ProfilePhotoCropperModal({ imageSrc, labels, onClose, on
         </button>
         <button
           type="button"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white transition-colors hover:bg-white/15 touch-manipulation active:bg-white/80"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white transition-colors hover:bg-white/15 touch-manipulation active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           aria-label="Zoom in"
           onClick={() => setUserScale((s) => Math.min(4, s + 0.15))}
         >

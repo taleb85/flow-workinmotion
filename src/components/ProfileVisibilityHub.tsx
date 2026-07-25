@@ -545,7 +545,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
             <button
               type="button"
               onClick={closePreview}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-white/80 transition-colors hover:bg-slate-100 active:bg-slate-100/80"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-white/80 transition-colors hover:bg-slate-100 active:bg-slate-100/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               aria-label={tv.profile_visibility_close_preview ?? 'Chiudi anteprima'}
             >
               <X className="h-5 w-5 text-white/90" strokeWidth={2} />
@@ -574,7 +574,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
               <button
                 type="button"
                 onClick={handleSaveAndApply}
-                className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase shadow-sm transition-all hover:bg-accent-hover active:scale-95"
+                className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase shadow-sm transition-all hover:bg-accent-hover active:scale-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               >
                 {tv.profile_visibility_save_apply ?? 'Salva e applica'}
               </button>
@@ -625,7 +625,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                   <button
                     type="button"
                     onClick={handleSmartRestore}
-                    className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 px-3 py-2 text-xs font-semibold text-white/70 surface-ghost-interactive hover:text-white active:text-white"
+className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 px-3 py-2 text-xs font-semibold text-white/70 surface-ghost-interactive hover:text-white active:text-white transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     {hasUnsavedChanges
@@ -638,7 +638,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                       type="button"
                       onClick={handleDeleteUser}
                       disabled={isDeleting}
-                      className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 px-3 py-2 text-xs font-semibold text-red-600 surface-ghost-interactive hover:bg-red-50 active:bg-red-50/80"
+className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 px-3 py-2 text-xs font-semibold text-red-600 surface-ghost-interactive hover:bg-red-50 active:bg-red-50/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                     >
                       {isDeleting ? (
                         <RotateCcw className="w-3.5 h-3.5 animate-spin" />

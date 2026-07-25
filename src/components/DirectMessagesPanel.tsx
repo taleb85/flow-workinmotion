@@ -100,7 +100,7 @@ function NewChatPicker({
         <button
           type="button"
           onClick={onClose}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 hover:bg-white/10 transition-colors active:bg-white/80"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 hover:bg-white/10 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           aria-label={t.cancel ?? 'Chiudi'}
         >
           <X className="w-4 h-4" aria-hidden />
@@ -283,7 +283,7 @@ function ChatView({
         <button
           type="button"
           onClick={onBack}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-white/80 hover:bg-white/15 transition-colors active:bg-white/80"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-white/80 hover:bg-white/15 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           aria-label={t.notif_aria_back ?? 'Indietro'}
         >
           <ArrowLeft className="w-5 h-5" aria-hidden />
@@ -412,7 +412,7 @@ function ConversationList({
         <div className="flex items-center gap-1">
           <button
             onClick={onNewChat}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 transition-colors active:bg-white/80"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
             title={t.messages_new_chat}
           >
             <Plus className="w-4 h-4 text-white" />
@@ -420,7 +420,7 @@ function ConversationList({
           {onClose && (
             <button
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 transition-colors active:bg-white/80"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               title={t.close}
             >
               <X className="w-4 h-4 text-white" />

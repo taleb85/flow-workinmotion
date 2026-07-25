@@ -51,7 +51,7 @@ export default function Toast({ message, type = 'error', onClose }: ToastProps) 
         <button
           type="button"
           onClick={onClose}
-          className="shrink-0 rounded p-0.5 text-white/40 hover:bg-white/10 hover:text-white/80 transition-colors"
+          className="shrink-0 rounded p-0.5 text-white/40 hover:bg-white/10 hover:text-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           aria-label="Chiudi notifica"
         >
           <X className="h-3 w-3" />

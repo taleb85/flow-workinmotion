@@ -347,7 +347,7 @@ export default memo(function HomeManagerView({
                 <Calendar className="w-4 h-4 text-white/55" />
                 <h2 className="text-sm font-bold text-white">{t.home_todays_shifts}</h2>
                 <span className="text-[11px] text-slate-200 ml-1">({todayShiftsEnriched.length})</span>
-                <button type="button" onClick={() => onNavigateToShifts?.()} className="ml-auto text-xs font-semibold text-accent flex items-center gap-0.5 hover:underline active:brightness-95">
+<button type="button" onClick={() => onNavigateToShifts?.()} className="ml-auto text-xs font-semibold text-accent flex items-center gap-0.5 hover:underline active:brightness-95 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                   {t.home_see_all_shifts} <ArrowRight className="w-3 h-3" />
                 </button>
               </div>
@@ -470,7 +470,7 @@ export default memo(function HomeManagerView({
                     </h3>
                     <p className="text-sm text-white/55 mt-0.5">{closeModal.employeeName} · {safeFormatDate(closeModal.dateStr, 'd MMM', { locale })}</p>
                   </div>
-                  <button type="button" onClick={handleDismissCloseModal} className="p-1.5 rounded-xl hover:bg-white/10 transition-colors active:bg-white/80">
+                  <button type="button" onClick={handleDismissCloseModal} className="p-1.5 rounded-xl hover:bg-white/10 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                     <X className="w-4 h-4 text-white/55" />
                   </button>
                 </div>
@@ -515,11 +515,11 @@ export default memo(function HomeManagerView({
 
                 <div className="flex gap-2">
                   <button type="button" onClick={handleDismissCloseModal}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-neutral-500 text-white/70 text-sm font-semibold hover:bg-white/12 transition-colors active:bg-white/80">
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-neutral-500 text-white/70 text-sm font-semibold hover:bg-white/12 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                     {t.cancel}
                   </button>
                   <button type="button" disabled={!clockOutInput || closingLoading} onClick={onConfirmClose}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2 transition-colors active:bg-accent-hover/80">
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2 transition-colors active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                     {closingLoading ? t.saving : <><LogOutIcon className="w-4 h-4" />{t.home_btn_register}</>}
                   </button>
                 </div>

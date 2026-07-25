@@ -878,7 +878,7 @@ export default function StaffPersonalDashboard({
           <button
             type="button"
             onClick={onLogout}
-            className="w-full flex items-center justify-between border-t border-slate-100 px-5 py-4 text-left hover:bg-red-50 transition-colors min-h-[52px] text-red-600 font-medium active:bg-red-50/80"
+            className="w-full flex items-center justify-between border-t border-slate-100 px-5 py-4 text-left hover:bg-red-50 transition-colors min-h-[52px] text-red-600 font-medium active:bg-red-50/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             <span className="text-sm">{(t as { header_logout?: string }).header_logout ?? 'Esci'}</span>
             <LogOut className="w-5 h-5" strokeWidth={2} />
@@ -919,7 +919,7 @@ export default function StaffPersonalDashboard({
           <button
             type="button"
             onClick={onLogout}
-            className="mt-6 w-full py-3 rounded-xl bg-slate-100 text-white/80 font-semibold text-sm hover:bg-slate-200 transition-colors active:bg-slate-200/80"
+            className="mt-6 w-full py-3 rounded-xl bg-slate-100 text-white/80 font-semibold text-sm hover:bg-slate-200 transition-colors active:bg-slate-200/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             {(t as { header_logout?: string }).header_logout ?? 'Esci'}
           </button>
@@ -1094,12 +1094,12 @@ export default function StaffPersonalDashboard({
               </div>
               {!isIos && (
                 <button type="button" onClick={handleInstall}
-                  className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent-hover transition-colors active:bg-accent-hover/80">
+                  className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent-hover transition-colors active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                   Installa
                 </button>
               )}
               <button type="button" onClick={dismissInstallBanner}
-                className="flex-shrink-0 p-1 rounded-xl text-white/50 hover:text-white/70 hover:bg-slate-100 transition-colors active:text-white/70" aria-label={t.close}>
+                className="flex-shrink-0 p-1 rounded-xl text-white/50 hover:text-white/70 hover:bg-slate-100 transition-colors active:text-white/70 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]" aria-label={t.close}>
                 <X className="w-4 h-4" />
               </button>
             </div>

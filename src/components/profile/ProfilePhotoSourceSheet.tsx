@@ -46,7 +46,7 @@ export default function ProfilePhotoSourceSheet({
         <button
           type="button"
           role="menuitem"
-          className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-[11px] font-medium leading-tight text-white/90 transition-colors hover:bg-slate-50 active:bg-slate-100 touch-manipulation"
+          className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-[11px] font-medium leading-tight text-white/90 transition-colors hover:bg-slate-50 active:bg-slate-100 touch-manipulation hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           onClick={() => {
             onPickGallery();
             onClose();
@@ -60,7 +60,7 @@ export default function ProfilePhotoSourceSheet({
         <button
           type="button"
           role="menuitem"
-          className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-[11px] font-medium leading-tight text-white/90 transition-colors hover:bg-slate-50 active:bg-slate-100 touch-manipulation"
+          className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-[11px] font-medium leading-tight text-white/90 transition-colors hover:bg-slate-50 active:bg-slate-100 touch-manipulation hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           onClick={() => {
             onPickCamera();
             onClose();
@@ -74,7 +74,7 @@ export default function ProfilePhotoSourceSheet({
         <button
           type="button"
           role="menuitem"
-          className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-[11px] font-medium leading-tight text-white/90 transition-colors hover:bg-slate-50 active:bg-slate-100 touch-manipulation"
+          className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-[11px] font-medium leading-tight text-white/90 transition-colors hover:bg-slate-50 active:bg-slate-100 touch-manipulation hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           onClick={() => {
             onPickFiles();
             onClose();
@@ -89,7 +89,7 @@ export default function ProfilePhotoSourceSheet({
           <button
             type="button"
             role="menuitem"
-            className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-[11px] font-medium leading-tight text-red-600 transition-colors hover:bg-red-50 active:bg-red-100 touch-manipulation"
+            className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-[11px] font-medium leading-tight text-red-600 transition-colors hover:bg-red-50 active:bg-red-100 touch-manipulation hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             onClick={() => {
               onRemovePhoto();
               onClose();

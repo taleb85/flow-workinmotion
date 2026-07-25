@@ -270,7 +270,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
             pattern="[a-z0-9\-]+"
             className="flex-1 rounded-xl border border-neutral-500 bg-white/8 px-3 py-2.5 text-base font-mono text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40 transition"
           />
-          <button type="button" onClick={() => { setSlugManual(false); setSlug(slugify(name)); }} className="text-xs text-accent hover:underline shrink-0 active:brightness-95">Auto</button>
+<button type="button" onClick={() => { setSlugManual(false); setSlug(slugify(name)); }} className="text-xs text-accent hover:underline shrink-0 active:brightness-95 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">Auto</button>
         </div>
         <p className="text-[11px] text-white/40">Sarà il sottodominio: <span className="font-mono">{slug || '…'}.tuodominio.com</span></p>
       </div>
@@ -305,12 +305,12 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
         <button
           type="submit"
           disabled={saving || !name.trim() || !slug.trim()}
-          className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-accent-hover/80"
+className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-accent-hover/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
         >
           <Check className="w-4 h-4" />
           {saving ? 'Salvataggio…' : 'Salva'}
         </button>
-        <button type="button" onClick={onCancel} className="rounded-xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white/80 hover:bg-white/14 transition active:bg-white/80">
+<button type="button" onClick={onCancel} className="rounded-xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white/80 hover:bg-white/14 transition active:bg-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -408,14 +408,14 @@ function NewAdminCredentialsModal({ creds, onClose }: { creds: NewAdminCredentia
         <div className="flex gap-2">
           <button
             onClick={handleCopy}
-            className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-neutral-500 py-2.5 text-sm font-semibold text-white/80 hover:bg-white/5 active:bg-white/10 transition"
+className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-neutral-500 py-2.5 text-sm font-semibold text-white/80 hover:bg-white/5 active:bg-white/10 transition transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           >
             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
             {copied ? 'Copiato!' : 'Copia'}
           </button>
           <button
             onClick={onClose}
-            className="flex-1 rounded-xl bg-accent py-2.5 text-sm font-bold text-white hover:bg-accent-hover active:brightness-95 transition"
+className="flex-1 rounded-xl bg-accent py-2.5 text-sm font-bold text-white hover:bg-accent-hover active:brightness-95 transition transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             Ho salvato
           </button>
@@ -647,7 +647,7 @@ function SuperAdminPanelInner() {
               onClick={handleLogout}
               title="Esci da Super Admin"
               aria-label="Esci da Super Admin"
-              className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-red-50 hover:text-red-500 text-white/40 transition active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-red-50 hover:text-red-500 text-white/40 transition active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               <LogOut className="w-4 h-4" aria-hidden />
             </button>
@@ -749,7 +749,7 @@ function SuperAdminPanelInner() {
                             <div className="flex items-center gap-1 mt-1">
                               <Globe className="w-3 h-3 text-white/40 shrink-0" />
                               <span className="text-xs font-mono text-white/40 truncate" title={t.slug}>{t.slug}</span>
-                              <button onClick={() => copySlug(t.slug)} className="text-slate-300 hover:text-[#2255BB] transition p-0.5 shrink-0 active:text-[#2255BB]" title="Copia slug">
+<button onClick={() => copySlug(t.slug)} className="text-slate-300 hover:text-[#2255BB] transition p-0.5 shrink-0 active:text-[#2255BB] transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" title="Copia slug">
                                 <Copy className="w-3 h-3" />
                               </button>
                             </div>

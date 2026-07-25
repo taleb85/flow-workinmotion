@@ -114,7 +114,7 @@ export default function StaffKioskView({ user, onClose }: StaffKioskViewProps) {
               </p>
               <button
                 onClick={onClose}
-                className="bg-gray-900 text-white rounded-2xl px-8 py-4 font-bold uppercase tracking-wider hover:bg-black transition-all active:bg-black/80"
+                className="bg-gray-900 text-white rounded-2xl px-8 py-4 font-bold uppercase tracking-wider hover:bg-black transition-all active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               >
                 {t.logout}
               </button>
@@ -160,7 +160,7 @@ export default function StaffKioskView({ user, onClose }: StaffKioskViewProps) {
 
           <button
             onClick={onClose}
-            className="mt-6 w-full bg-gray-900 text-white rounded-2xl py-4 font-bold uppercase tracking-wider hover:bg-black transition-all flex items-center justify-center space-x-2 active:bg-black/80"
+            className="mt-6 w-full bg-gray-900 text-white rounded-2xl py-4 font-bold uppercase tracking-wider hover:bg-black transition-all flex items-center justify-center space-x-2 active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             <X className="w-5 h-5" />
             <span>{t.close}</span>

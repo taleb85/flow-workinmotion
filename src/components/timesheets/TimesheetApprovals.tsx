@@ -206,7 +206,7 @@ export default function TimesheetApprovals(props: TimesheetApprovalsProps) {
                 type="button"
                 disabled={approveWeekSummaryBusy}
                 onClick={onUndoApproveWeek}
-                className="flex-1 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-200 shadow-sm transition-colors hover:bg-red-500/20 disabled:opacity-50"
+                className="flex-1 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-200 shadow-sm transition-colors hover:bg-red-500/20 disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               >
                 {approveWeekSummaryBusy ? '...' : (t.ts_btn_undo_approve ?? 'Ripristina')}
               </button>
@@ -214,7 +214,7 @@ export default function TimesheetApprovals(props: TimesheetApprovalsProps) {
                 type="button"
                 disabled={approveWeekSummaryBusy}
                 onClick={onOpenBatchWeekApprove}
-                className="flex-1 rounded-xl bg-accent hover:bg-accent-hover px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-accent/20 transition-colors flex items-center justify-center gap-1.5"
+                className="flex-1 rounded-xl bg-accent hover:bg-accent-hover px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-accent/20 transition-colors flex items-center justify-center gap-1.5 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               >
                 <Lock className="w-3.5 h-3.5" />
                 Approva
@@ -223,7 +223,7 @@ export default function TimesheetApprovals(props: TimesheetApprovalsProps) {
                 type="button"
                 disabled={approveWeekSummaryBusy}
                 onClick={onCloseApproveWeekSummary}
-                className="flex-1 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-bold text-white/95 shadow-sm transition-colors hover:bg-white/15 disabled:opacity-50"
+                className="flex-1 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-bold text-white/95 shadow-sm transition-colors hover:bg-white/15 disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               >
                 {t.close}
               </button>
@@ -260,7 +260,7 @@ export default function TimesheetApprovals(props: TimesheetApprovalsProps) {
                 </p>
               </div>
               <button type="button" onClick={onCancelClose}
-                className="p-1.5 rounded-xl hover:bg-white/10 transition-colors active:bg-white/80">
+                className="p-1.5 rounded-xl hover:bg-white/10 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                 <X className="w-4 h-4 text-white/60" />
               </button>
             </div>
@@ -308,12 +308,12 @@ export default function TimesheetApprovals(props: TimesheetApprovalsProps) {
 
             <div className="flex gap-2">
               <button type="button" onClick={onCancelClose}
-                className="flex-1 px-4 py-2.5 rounded-xl text-white/70 text-sm font-medium transition-colors hover:bg-white/10 active:bg-white/80"
+                className="flex-1 px-4 py-2.5 rounded-xl text-white/70 text-sm font-medium transition-colors hover:bg-white/10 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                 style={{ border: '1px solid rgba(255,255,255,0.22)' }}>
                 {t.cancel}
               </button>
               <button type="button" disabled={!clockOutTime || closingLoading} onClick={onConfirmClose}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent-hover disabled:opacity-50 flex items-center justify-center gap-1.5 transition-colors active:bg-accent-hover/80">
+                className="flex-1 px-4 py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent-hover disabled:opacity-50 flex items-center justify-center gap-1.5 transition-colors active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                 {closingLoading ? t.ts_saving : <><LogOut className="w-3.5 h-3.5" />{t.ts_btn_register_exit}</>}
               </button>
             </div>

@@ -279,7 +279,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       onClick={onToggle}
       className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-40 ${
         enabled ? 'bg-accent' : 'bg-white/20'
-      }`}
+      } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
     >
       <span
         className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform ${
@@ -340,7 +340,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
           ref={btnRef}
           type="button"
           onClick={handleClick}
-          className={`shrink-0 rounded-full p-0.5 transition-colors ml-1 ${open ? 'text-accent' : 'text-slate-300 hover:text-white/60'} active:text-white/60'}`}
+          className={`shrink-0 rounded-full p-0.5 transition-colors ml-1 ${open ? 'text-accent' : 'text-slate-300 hover:text-white/60'} active:text-white/60'} hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]`}
           aria-label="Mostra anteprima"
         >
           <Info className="w-3 h-3" />
@@ -592,7 +592,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
               ref={btnRef}
               type="button"
               onClick={handleOpen}
-              className={`shrink-0 rounded-full p-0.5 transition-colors ${open ? 'text-accent' : 'text-white/50 hover:text-white/70'} active:text-white/70'}`}
+              className={`shrink-0 rounded-full p-0.5 transition-colors ${open ? 'text-accent' : 'text-white/50 hover:text-white/70'} active:text-white/70'} hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]`}
               aria-label="Mostra anteprima"
             >
               <Info className="w-3.5 h-3.5" />
@@ -683,7 +683,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
         aria-checked={enabled}
         disabled={locked}
         onClick={onToggle}
-        className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed ${enabled ? 'bg-accent' : 'bg-white/20'}`}
+        className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed ${enabled ? 'bg-accent' : 'bg-white/20'} hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
       >
         <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
       </button>
@@ -1046,7 +1046,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             type="button"
             onClick={resetMods}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/60 hover:bg-white/8 transition-colors disabled:opacity-50 active:bg-white/8/80"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/60 hover:bg-white/8 transition-colors disabled:opacity-50 active:bg-white/8/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           >
             <RotateCcw className="w-3 h-3" />
             Reset moduli

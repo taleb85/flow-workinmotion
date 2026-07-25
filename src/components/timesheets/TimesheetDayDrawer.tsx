@@ -281,7 +281,7 @@ export default function TimesheetDayDrawer({ ctx, updateShift }: TimesheetDayDra
                 Salva e chiudi
               </button>
               <button type="button" onClick={closeTimesheetShiftDrawer}
-                className="flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white/80 transition-colors hover:bg-white/15 active:bg-white/80">
+                className="flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white/80 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                 <X className="h-3 w-3 shrink-0" /> Chiudi senza salvare
               </button>
               <button type="button" onClick={() => setShowCloseConfirm(false)}

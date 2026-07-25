@@ -97,7 +97,7 @@ export default function PunchPresenceVerificationModal({
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-white/70 hover:bg-slate-200 active:bg-slate-200/80"
+className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-white/70 hover:bg-slate-200 active:bg-slate-200/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               aria-label={tv.close ?? 'Chiudi'}
             >
               <X className="h-4 w-4" />
@@ -136,7 +136,7 @@ export default function PunchPresenceVerificationModal({
                 <button
                   type="button"
                   onClick={handleRetry}
-                  className="mt-4 w-full rounded-xl bg-slate-100 py-3 text-sm font-semibold text-white/90 hover:bg-slate-200 active:bg-slate-200/80"
+className="mt-4 w-full rounded-xl bg-slate-100 py-3 text-sm font-semibold text-white/90 hover:bg-slate-200 active:bg-slate-200/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                 >
                   {t.punch_presence_try_again}
                 </button>

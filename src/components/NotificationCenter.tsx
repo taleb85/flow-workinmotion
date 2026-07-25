@@ -63,7 +63,7 @@ export default function NotificationCenter({ denseTrigger = false }: { denseTrig
       <button
         type="button"
         onClick={handleOpen}
-        className={`relative flex items-center justify-center transition-all h-full w-full text-white/60 hover:text-white active:text-white`}
+        className={`relative flex items-center justify-center transition-all h-full w-full text-white/60 hover:text-white active:text-white hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]`}
         title={t.profile_notifications}
       >
         <Bell className={`${denseTrigger ? 'h-4 w-4' : 'h-5 w-5'} ${unreadCount > 0 ? 'animate-ring text-red-500' : ''}`} />

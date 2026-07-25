@@ -138,7 +138,7 @@ export function HorizontalScrollArea({
             type="button"
             disabled={prevDisabled}
             onClick={onPrevClick}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-neutral-500 text-white/70 transition-colors surface-ghost-interactive disabled:pointer-events-none disabled:opacity-35"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-neutral-500 text-white/70 transition-colors surface-ghost-interactive disabled:pointer-events-none disabled:opacity-35 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
             aria-label={ariaLabelPrev}
           >
             <ChevronLeft className="h-4 w-4" aria-hidden />
@@ -147,7 +147,7 @@ export function HorizontalScrollArea({
             type="button"
             disabled={nextDisabled}
             onClick={onNextClick}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-neutral-500 text-white/70 transition-colors surface-ghost-interactive disabled:pointer-events-none disabled:opacity-35"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-neutral-500 text-white/70 transition-colors surface-ghost-interactive disabled:pointer-events-none disabled:opacity-35 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
             aria-label={ariaLabelNext}
           >
             <ChevronRight className="h-4 w-4" aria-hidden />
@@ -163,7 +163,7 @@ export function HorizontalScrollArea({
             type="button"
             disabled={prevDisabled}
             onClick={onPrevClick}
-            className={`left-0 rounded-l-[inherit] bg-gradient-to-r from-white/70 to-transparent hover:from-brand-deep/40 ${overlayBtnClass} active:brightness-95`}
+className={`left-0 rounded-l-[inherit] bg-gradient-to-r from-white/70 to-transparent hover:from-brand-deep/40 ${overlayBtnClass} active:brightness-95 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]`}
             aria-label={ariaLabelPrev}
           >
             <ChevronLeft className="h-5 w-5 shrink-0 drop-shadow-sm" strokeWidth={2} aria-hidden />
@@ -172,7 +172,7 @@ export function HorizontalScrollArea({
             type="button"
             disabled={nextDisabled}
             onClick={onNextClick}
-            className={`right-0 rounded-r-[inherit] bg-gradient-to-l from-white/70 to-transparent hover:from-brand-deep/40 ${overlayBtnClass} active:brightness-95`}
+className={`right-0 rounded-r-[inherit] bg-gradient-to-l from-white/70 to-transparent hover:from-brand-deep/40 ${overlayBtnClass} active:brightness-95 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]`}
             aria-label={ariaLabelNext}
           >
             <ChevronRight className="h-5 w-5 shrink-0 drop-shadow-sm" strokeWidth={2} aria-hidden />

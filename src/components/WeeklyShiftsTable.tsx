@@ -766,9 +766,11 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
       let created = 0;
       let skipped = 0;
       for (const entry of entries) {
-        const targetDay = allWeekDays.find((d) => getDay(d) === entry.day_of_week);
-        if (!targetDay) { skipped++; continue; }
-        const dateStr = format(targetDay, 'yyyy-MM-dd');
+        // day_of_week: 0=Sun, 1=Mon, ..., 6=Sat
+        // allWeekDays (week view): [0]=Mon, ..., [6]=Sun
+        const dayIndex = entry.day_of_week === 0 ? 6 : entry.day_of_week - 1;
+        if (dayIndex < 0 || dayIndex >= allWeekDays.length) { skipped++; continue; }
+        const dateStr = format(allWeekDays[dayIndex], 'yyyy-MM-dd');
         try {
           const res = await addShift({ user_id: entry.user_id, date: dateStr, start_time: entry.start_time, end_time: entry.end_time, type: entry.type as 'lunch' | 'dinner', approval_status: 'draft' });
           if (res) created++; else skipped++;
@@ -2195,14 +2197,20 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
             <div
               className="ui-toolbar-chip shrink-0 max-w-full min-w-0 cursor-default select-none font-bold !px-3 !h-9 lg:!h-10 !text-xs lg:!text-sm"
               role="status"
-              title={`${format(weekStart, 'dd/MM/yy', { locale: getDateLocale(effectiveLanguage) ?? it })} → ${format(addDays(weekStart, (viewMode === '2weeks' ? 13 : viewMode === 'day' ? 0 : 6)), 'dd/MM/yy', { locale: getDateLocale(effectiveLanguage) ?? it })}`}
+              title={`${(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()} → ${(() => { const d = addDays(weekStart, (viewMode === '2weeks' ? 13 : viewMode === 'day' ? 0 : 6)); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()}`}
             >
               <Calendar className="hidden sm:block h-3.5 w-3.5 lg:h-4 lg:w-4 shrink-0 text-white/50" aria-hidden />
               <span className="min-w-0 truncate tabular-nums">
                 <span className="text-white font-extrabold">S.{weekIndex + 1}&nbsp;</span>
-                {format(weekStart, 'dd/MM', { locale: getDateLocale(effectiveLanguage) ?? it })}
+                {(() => {
+                  const d = weekStart;
+                  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+                })()}
                 <span className="text-white/40 hidden sm:inline">
-                  {' → '}{format(addDays(weekStart, (viewMode === '2weeks' ? 13 : viewMode === 'day' ? 0 : 6)), 'dd/MM/yy', { locale: getDateLocale(effectiveLanguage) ?? it })}
+                  {' → '}{(() => {
+                    const d = addDays(weekStart, (viewMode === '2weeks' ? 13 : viewMode === 'day' ? 0 : 6));
+                    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+                  })()}
                 </span>
               </span>
             </div>
@@ -3149,7 +3157,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                 <History className="h-4 w-4 text-white/70" />
                 <h3 className="text-sm font-bold text-white">{t.wst_schedule_history_title}</h3>
               </div>
-              <button type="button" onClick={() => setShowHistoryModal(false)} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80" aria-label={t.close ?? 'Chiudi'}>
+<button type="button" onClick={() => setShowHistoryModal(false)} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" aria-label={t.close ?? 'Chiudi'}>
                 <X className="h-4 w-4" aria-hidden />
               </button>
             </div>
@@ -3201,7 +3209,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                 <EyeOff className="h-4 w-4 text-white/70" />
                 <h3 className="text-sm font-bold text-white">{t.wst_hidden_periods_modal_title}</h3>
               </div>
-              <button type="button" onClick={() => setShowHiddenPeriodsModal(false)} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80" aria-label={t.close ?? 'Chiudi'}>
+<button type="button" onClick={() => setShowHiddenPeriodsModal(false)} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" aria-label={t.close ?? 'Chiudi'}>
                 <X className="h-4 w-4" aria-hidden />
               </button>
             </div>
@@ -3242,7 +3250,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
           <div className="modal-glass-panel flex max-h-[80vh] min-h-0 w-full max-w-sm flex-col overflow-hidden rounded-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex flex-shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
               <h3 className="text-sm font-bold text-white">{t.names_list_title}</h3>
-              <button type="button" onClick={() => { setShowEditViewModal(false); setEditingNameUserId(null); setDraggingEditViewUserId(null); setDropTargetEditViewIdx(null); }} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80">
+<button type="button" onClick={() => { setShowEditViewModal(false); setEditingNameUserId(null); setDraggingEditViewUserId(null); setDropTargetEditViewIdx(null); }} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -3397,7 +3405,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                       type="button"
                       onClick={handleSaveOrder}
                       disabled={savingOrder}
-                      className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-accent text-white text-xs font-semibold uppercase hover:bg-accent-hover active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none transition-all shadow-sm"
+                      className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-accent text-white text-xs font-semibold uppercase hover:bg-accent-hover active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none transition-all shadow-sm hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                     >
                       {savingOrder ? <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" /> : null}
                       <span>{t.save}</span>
@@ -4780,7 +4788,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                   <button
                     type="button"
                     onClick={toggleOpenShiftsBarCollapsed}
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-amber-400/40 bg-amber-500/10 text-amber-300 transition-colors hover:bg-amber-500/20 active:bg-amber-500/80"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-amber-400/40 bg-amber-500/10 text-amber-300 transition-colors hover:bg-amber-500/20 active:bg-amber-500/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                     aria-expanded={!openShiftsBarCollapsed}
                     aria-label={
                       openShiftsBarCollapsed
@@ -5049,7 +5057,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
             <button
               type="button"
               onClick={closeShiftDetailPanel}
-              className="rounded-xl p-2 transition-colors hover:bg-white/10 active:bg-white/80"
+              className="rounded-xl p-2 transition-colors hover:bg-white/10 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               aria-label={t.close}
             >
               <X className="h-5 w-5 text-white/50" aria-hidden />
@@ -5686,7 +5694,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                           <button
                             type="button"
                             onClick={closeShiftDetailPanel}
-                            className="rounded-xl border border-neutral-500 bg-white/10 px-4 py-3 text-sm font-semibold text-white/70 transition-colors hover:bg-white/15 active:bg-white/80"
+                            className="rounded-xl border border-neutral-500 bg-white/10 px-4 py-3 text-sm font-semibold text-white/70 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                           >
                             {t.cancel}
                           </button>
@@ -5986,7 +5994,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                 <button
                   type="button"
                   onClick={handleContextCopy}
-                  className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-white/85 hover:bg-white/10 transition-colors active:bg-white/80"
+                  className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-white/85 hover:bg-white/10 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                 >
                   <ClipboardCopy className="h-3.5 w-3.5 shrink-0 text-white/40" />
                   Copia turno
@@ -5994,7 +6002,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                 <button
                   type="button"
                   onClick={handleContextEdit}
-                  className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-white/85 hover:bg-white/10 transition-colors active:bg-white/80"
+                  className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-white/85 hover:bg-white/10 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                 >
                   <Pencil className="h-3.5 w-3.5 shrink-0 text-white/40" />
                   Modifica
@@ -6109,7 +6117,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
             <button
               type="button"
               onClick={handleCopySelection}
-              className="flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold text-white/90 transition-colors hover:bg-white/15 active:bg-white/25"
+              className="flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold text-white/90 transition-colors hover:bg-white/15 active:bg-white/25 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               title={tv.selection_copy_title ?? t.selection_copy_title ?? 'Copia turni selezionati'}
             >
               <ClipboardCopy className="h-3.5 w-3.5 shrink-0" />
@@ -6422,7 +6430,7 @@ function CreateShiftModal({ userId, date, defaultTime, existingShifts, showError
               <button
                 type="button"
                 onClick={onClose}
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 transition-colors hover:bg-white/15 active:bg-white/20"
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 transition-colors hover:bg-white/15 active:bg-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               >
                 <X className="h-4 w-4 text-white/80" />
               </button>
@@ -6600,7 +6608,7 @@ function CreateShiftModal({ userId, date, defaultTime, existingShifts, showError
                   isOpenShift
                     ? 'bg-amber-500 text-white hover:bg-amber-600 active:bg-amber-700'
                     : 'bg-accent text-white hover:bg-accent-hover active:bg-accent-hover/80'
-                }`}
+                } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 {t.create_shift}
@@ -6608,7 +6616,7 @@ function CreateShiftModal({ userId, date, defaultTime, existingShifts, showError
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl bg-white/10 px-4 py-3 font-sans text-sm font-bold text-white transition-colors hover:bg-white/15 active:bg-white/20"
+                className="rounded-xl bg-white/10 px-4 py-3 font-sans text-sm font-bold text-white transition-colors hover:bg-white/15 active:bg-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               >
                 {t.cancel}
               </button>

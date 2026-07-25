@@ -668,7 +668,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             <button
               type="button"
               onClick={toggleTeamSectionExpanded}
-              className="-ml-1 flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-white/30 py-1.5 pl-1 pr-2 text-left transition-colors hover:bg-white/8 active:bg-white/8/80"
+              className="-ml-1 flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-white/30 py-1.5 pl-1 pr-2 text-left transition-colors hover:bg-white/8 active:bg-white/8/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               aria-expanded={teamSectionExpanded}
             >
               <ChevronDown
@@ -1556,14 +1556,14 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           aria-checked={isEnabled}
                           onClick={toggle}
                           title={isEnabled ? t.settings_break_toggle_disable : t.settings_break_toggle_enable}
-                          className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${isEnabled ? 'bg-accent' : 'bg-white/20'}`}
+                          className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${isEnabled ? 'bg-accent' : 'bg-white/20'} hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
                         >
                           <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${isEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
-                        <button type="button" onClick={() => setEditingBreakRule(rule)} className="p-1.5 rounded-xl hover:bg-white/10 text-white/40 hover:text-white/80 transition-colors active:text-white/80">
+                        <button type="button" onClick={() => setEditingBreakRule(rule)} className="p-1.5 rounded-xl hover:bg-white/10 text-white/40 hover:text-white/80 transition-colors active:text-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
-                        <button type="button" onClick={() => handleDeleteBreakRule(rule.id)} className="p-1.5 rounded-xl hover:bg-red-500/15 text-white/40 hover:text-red-500 transition-colors active:text-red-500">
+                        <button type="button" onClick={() => handleDeleteBreakRule(rule.id)} className="p-1.5 rounded-xl hover:bg-red-500/15 text-white/40 hover:text-red-500 transition-colors active:text-red-500 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -2298,7 +2298,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       <button
                         type="button"
                         onClick={handleImportClick}
-                        className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs font-medium uppercase text-white/70 surface-ghost-interactive"
+className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs font-medium uppercase text-white/70 surface-ghost-interactive transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                       >
                         {t.restore}
                       </button>
@@ -2561,7 +2561,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               <button
                 type="button"
                 onClick={handleConfirmImport}
-                className="flex-1 rounded-xl bg-accent py-2.5 text-xs font-semibold uppercase text-white hover:bg-accent-hover active:bg-accent-hover/80"
+className="flex-1 rounded-xl bg-accent py-2.5 text-xs font-semibold uppercase text-white hover:bg-accent-hover active:bg-accent-hover/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               >
                 {t.confirm}
               </button>
@@ -2686,7 +2686,7 @@ function BreakRuleModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 transition-colors hover:bg-white/15 active:bg-white/80"
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
             aria-label={t.close}
           >
             <X className="h-4 w-4 text-white/55" aria-hidden />
@@ -2879,7 +2879,7 @@ function BreakRuleModal({
           <div className="flex gap-2 pt-1">
             <button
               type="submit"
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-accent hover:bg-accent-hover text-white font-bold text-sm transition-colors active:bg-accent-hover/80"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-accent hover:bg-accent-hover text-white font-bold text-sm transition-colors active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               <Check className="w-4 h-4" />
               {isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
@@ -2887,7 +2887,7 @@ function BreakRuleModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-white/80 transition-colors hover:bg-white/15 active:bg-white/80"
+              className="rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-white/80 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
             >
               {t.cancel}
             </button>

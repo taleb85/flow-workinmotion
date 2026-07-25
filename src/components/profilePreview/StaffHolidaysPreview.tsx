@@ -35,7 +35,7 @@ export default function StaffHolidaysPreview({
           <button
             type="button"
             tabIndex={-1}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-accent/40 bg-accent/10 px-3 py-2 text-xs font-bold text-accent"
+className="inline-flex items-center gap-1.5 rounded-xl border border-accent/40 bg-accent/10 px-3 py-2 text-xs font-bold text-accent transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             <Plus className="h-4 w-4" />
             {t.new_request}

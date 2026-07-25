@@ -122,7 +122,7 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
                 : locDenied
                 ? 'bg-white/5 border-white/10 opacity-50 cursor-not-allowed'
                 : 'bg-white/8 border-neutral-500 hover:bg-white/12 hover:border-white/25 cursor-pointer'
-              }`}
+              } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
           >
             <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
               ${locGranted ? 'bg-emerald-500/25' : 'bg-emerald-500/20'}`}>
@@ -147,7 +147,7 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
           <button
             type="button"
             onClick={handleContinua}
-            className="w-full rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.98] py-3 text-sm font-bold text-white transition-all"
+            className="w-full rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.98] py-3 text-sm font-bold text-white transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             Continua
           </button>

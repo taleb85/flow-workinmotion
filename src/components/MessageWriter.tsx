@@ -194,7 +194,7 @@ export function MessageWriter({
             type="button"
             onClick={handleSend}
             disabled={isSending}
-            className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-2 py-1.5 text-xs font-bold text-white transition-colors hover:bg-amber-700 disabled:opacity-60 active:bg-amber-700/80"
+            className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-2 py-1.5 text-xs font-bold text-white transition-colors hover:bg-amber-700 disabled:opacity-60 active:bg-amber-700/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             {isSending ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -207,7 +207,7 @@ export function MessageWriter({
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-lg border border-amber-300 px-2 py-1.5 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-50 active:bg-amber-50/80"
+              className="rounded-lg border border-amber-300 px-2 py-1.5 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-50 active:bg-amber-50/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               {t.cancel ?? 'Annulla'}
             </button>
@@ -333,7 +333,7 @@ export function MessageWriter({
           type="button"
           onClick={handleSend}
           disabled={isSending}
-          className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-accent-hover disabled:opacity-60 active:bg-accent-hover/80"
+          className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-accent-hover disabled:opacity-60 active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
         >
           {isSending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -346,7 +346,7 @@ export function MessageWriter({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-accent/30 px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent/10 active:bg-accent/80"
+            className="rounded-lg border border-accent/30 px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent/10 active:bg-accent/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             {t.cancel ?? 'Annulla'}
           </button>

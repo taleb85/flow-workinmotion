@@ -23,7 +23,6 @@ import App from './App.tsx';
 import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { TenantProvider } from './context/TenantContext';
 import './index.css';
-import './styles/subtle-theme.css';
 
 // ── Rilevamento aggiornamento Service Worker ─────────────────────────────────
 // Quando un nuovo SW prende il controllo (dopo un deploy):

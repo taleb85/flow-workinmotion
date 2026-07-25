@@ -446,7 +446,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
             CSV con turni passati. I nomi non riconosciuti vengono ignorati. Stesso slot (sede, data, orari, tipo) non viene duplicato se è già in tabella.
           </p>
         </div>
-        <button type="button" onClick={onClose} className="text-white/40 hover:text-white/80 transition p-1 active:text-white/80" aria-label="Chiudi">
+<button type="button" onClick={onClose} className="text-white/40 hover:text-white/80 transition p-1 active:text-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" aria-label="Chiudi">
           <X className="w-4 h-4" aria-hidden />
         </button>
       </div>
@@ -461,7 +461,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
 
       <div className="grid grid-cols-2 gap-2">
         <button onClick={downloadTemplate}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-500 bg-white/8 py-2.5 text-xs font-semibold text-white/55 hover:bg-white/10 hover:text-white/90 transition active:text-white/90">
+className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-500 bg-white/8 py-2.5 text-xs font-semibold text-white/55 hover:bg-white/10 hover:text-white/90 transition active:text-white/90 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
           <ChevronRight className="w-3.5 h-3.5 -rotate-90" />
           Scarica template CSV
         </button>
@@ -563,7 +563,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
           type="button"
           onClick={handleImport}
           disabled={importing || matched.length === 0}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 py-3.5 text-sm font-bold text-white transition disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:bg-amber-500 active:scale-[0.99]"
+className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 py-3.5 text-sm font-bold text-white transition disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:bg-amber-500 active:scale-[0.99] transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
         >
           <Check className="w-4 h-4 shrink-0" />
           {importing

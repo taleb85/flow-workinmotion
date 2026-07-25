@@ -292,7 +292,7 @@ export default function HolidayRequests() {
                   />
                 </div>
 
-                <button type="submit" className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent to-amber-500 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-accent/20 transition-all hover:shadow-xl hover:shadow-accent/30 hover:scale-[1.02] active:scale-95">
+                <button type="submit" className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent to-amber-500 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-accent/20 transition-all hover:shadow-xl hover:shadow-accent/30 hover:scale-[1.02] active:scale-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                   <Check className="w-3.5 h-3.5" strokeWidth={3} />
                   {t.request_holiday}
                 </button>

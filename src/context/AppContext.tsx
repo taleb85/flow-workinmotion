@@ -458,6 +458,24 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   /** Revisione Storage da accettare con PIN dopo `forceGlobalRefresh` (altri dispositivi). */
   const pendingClientSyncRevRef = useRef<number | null>(null);
   const forceGlobalRefreshRef = useRef<() => Promise<void>>(async () => {});
+  /** Set di ID turno aggiunti localmente da pochi ms — evita che refresh asincroni li cancellino per race condition. */
+  const recentlyAddedShiftIdsRef = useRef<Set<string>>(new Set());
+  /** Sostituisce gli shifts con dati server, preservando i turni appena creati non ancora presenti nel DB remoto.
+   *  Quando il server conferma l'esistenza di un turno, lo rimuove dalla protezione.
+   *  Il turno resta protetto finché il server non lo conferma (nessun timeout arbitrario). */
+  const setShiftsFromServer = useCallback((fromServer: Shift[]) => {
+    const recentlyAdded = recentlyAddedShiftIdsRef.current;
+    // Rimuovi dalla protezione i turni che il server ha già confermato
+    for (const s of fromServer) {
+      recentlyAdded.delete(s.id);
+    }
+    if (recentlyAdded.size === 0) { setShifts(fromServer); return; }
+    setShifts(prev => {
+      const freshIds = new Set(fromServer.map(s => s.id));
+      const toMerge = prev.filter(s => recentlyAdded.has(s.id) && !freshIds.has(s.id));
+      return toMerge.length === 0 ? fromServer : [...toMerge, ...fromServer];
+    });
+  }, []);
 
   /** Lingua profilo in sessione, altrimenti preferenza persistita (login/kiosk senza sessione allineati). */
   const effectiveLanguage: Language = useMemo(() => {
@@ -605,7 +623,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubPunches = database.realtime.subscribeToPunchRecords(null, setPunchRecords);
-    const unsubShifts = database.realtime.subscribeToShifts(null, setShifts);
+    const unsubShifts = database.realtime.subscribeToShifts(null, setShiftsFromServer);
     const unsubUsers = database.realtime.subscribeToUsers((freshUsers) => {
       setUsers(freshUsers);
       setCurrentUser((prev) => sessionUserFromLoadedUsersList(prev, freshUsers));
@@ -907,6 +925,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     const res = await database.shifts.insert(normalized);
     if (res) {
       setShifts(prev => [...prev, res]);
+      recentlyAddedShiftIdsRef.current.add(res.id);
       const actor = currentUserRef.current?.first_name ?? 'Sistema';
       logHistory('create', actor, `Turno creato: ${shift.date} ${shift.start_time}–${endTime || '?'}`);
       markManagementDataTouched();
@@ -1988,7 +2007,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         ]);
 
         if (loadedUsers !== null) setUsers(loadedUsers);
-        if (loadedShifts !== null) setShifts(mergeShiftsDeductExclusionsFromLocal(loadedShifts));
+        if (loadedShifts !== null) setShiftsFromServer(mergeShiftsDeductExclusionsFromLocal(loadedShifts));
         if (loadedHolidays !== null) setHolidays(loadedHolidays);
         if (loadedPunchRecords !== null) setPunchRecords(loadedPunchRecords);
         if (loadedAvailability !== null) setAvailability(loadedAvailability);
@@ -2371,7 +2390,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       );
       shiftCacheKeys.forEach((k) => localStorage.removeItem(k));
 
-      setShifts([]);
+      setShiftsFromServer([]);
       setUsers([]);
       setPunchRecords([]);
 
@@ -2402,7 +2421,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 
       setSyncStage('Applicazione aggiornamenti…');
       setUsers(loadedUsers);
-      setShifts(mergeShiftsDeductExclusionsFromLocal(loadedShifts));
+      setShiftsFromServer(mergeShiftsDeductExclusionsFromLocal(loadedShifts));
       setPunchRecords(loadedPunchRecords);
       setHolidays(loadedHolidays);
       setAvailability(loadedAvailability);
@@ -2493,7 +2512,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         database.availability.getAll().catch(() => []),
       ]);
       setUsers(loadedUsers);
-      setShifts(mergeShiftsDeductExclusionsFromLocal(loadedShifts));
+      setShiftsFromServer(mergeShiftsDeductExclusionsFromLocal(loadedShifts));
       setHolidays(loadedHolidays);
       setPunchRecords(loadedPunchRecords);
       setAvailability(loadedAvailability);

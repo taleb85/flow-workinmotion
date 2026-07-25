@@ -1639,7 +1639,7 @@ export default function TimesheetsGrid({ ctx }: TimesheetsGridProps) {
                         <div className="flex flex-col gap-1 justify-center">
                           <button
                             type="button"
-                            className="w-full max-w-full rounded-lg py-0.5 text-right transition-colors hover:bg-white/[0.04]"
+                            className="w-full max-w-full rounded-lg py-0.5 text-right transition-colors hover:bg-white/[0.04] hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                             aria-label={formatTrans(t.ts_employee_week_review_open_aria, { name: user.first_name })}
                             onClick={(e) => {
                               e.stopPropagation();

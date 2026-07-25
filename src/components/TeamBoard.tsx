@@ -57,14 +57,14 @@ export default memo(function TeamBoard({
                   <button
                     type="button"
                     onClick={onSave}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 active:bg-amber-600/80"
+className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 active:bg-amber-600/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                   >
                     <Check size={12} /> {t.save}
                   </button>
                   <button
                     type="button"
                     onClick={onCancel}
-                    className="px-3 py-1.5 rounded-xl bg-white/10 text-white/70 text-xs font-semibold hover:bg-white/15 active:bg-white/80"
+className="px-3 py-1.5 rounded-xl bg-white/10 text-white/70 text-xs font-semibold hover:bg-white/15 active:bg-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                   >
                     {t.cancel}
                   </button>
@@ -109,7 +109,7 @@ export default memo(function TeamBoard({
                 <button
                   type="button"
                   onClick={onClear}
-                  className="p-1.5 rounded-xl hover:bg-red-50 text-red-400 active:bg-red-50/80"
+className="p-1.5 rounded-xl hover:bg-red-50 text-red-400 active:bg-red-50/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                 >
                   <X size={13} />
                 </button>

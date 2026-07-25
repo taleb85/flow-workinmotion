@@ -254,7 +254,7 @@ const baseIt = {
   // Ore / export PDF riepiloghi
   download_pdf: 'PDF',
   employee: 'Dipendente',
-  total_hours: 'Ore totali',
+  total_hours: 'TOTALE',
 
   // WeeklyShiftsTable
   department_sala: 'Sala',

@@ -691,7 +691,7 @@ export default function Statistics() {
                             >
                               <div className="flex items-center justify-between px-2 py-1.5 border-b border-white/10 mb-1">
                                 <span className="text-xs font-bold uppercase tracking-wider text-white/45">{t.department_filter_label}</span>
-                                <button type="button" onClick={() => setShowDeptMenu(false)} className="rounded-lg p-1 text-white/45 transition-colors hover:bg-white/10 hover:text-white/70 active:text-white/70" aria-label={t.close}>
+                                <button type="button" onClick={() => setShowDeptMenu(false)} className="rounded-lg p-1 text-white/45 transition-colors hover:bg-white/10 hover:text-white/70 active:text-white/70 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" aria-label={t.close}>
                                   <X className="h-3.5 w-3.5" />
                                 </button>
                               </div>
@@ -737,7 +737,7 @@ export default function Statistics() {
               <button
                 type="button"
                 onClick={handleExportStatsCsv}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-white/15"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-white/15 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               >
                 <FileDown className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 {tv.stats_export_csv ?? 'Export CSV'}

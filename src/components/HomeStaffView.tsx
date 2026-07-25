@@ -192,7 +192,7 @@ export default memo(function HomeStaffView({
         <div ref={shiftsListRef} className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xs font-bold text-white/55 uppercase tracking-wider">{t.home_my_shifts}</h3>
-            <button type="button" onClick={() => onNavigateToShifts?.()} className="text-xs font-semibold text-white/70 flex items-center gap-1 hover:underline active:brightness-95">
+<button type="button" onClick={() => onNavigateToShifts?.()} className="text-xs font-semibold text-white/70 flex items-center gap-1 hover:underline active:brightness-95 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
               {t.home_see_all} <ChevronRight className="w-3 h-3" />
             </button>
           </div>

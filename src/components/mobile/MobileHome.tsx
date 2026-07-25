@@ -209,7 +209,7 @@ export default function MobileHome({
               type="button"
               disabled={punchBusy}
               onClick={onEnd}
-              className="w-full h-11 bg-red-600 hover:bg-red-700 text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 transition-all active:scale-95 disabled:opacity-60"
+              className="w-full h-11 bg-red-600 hover:bg-red-700 text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 transition-all active:scale-95 disabled:opacity-60 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               <LogOut className="w-4 h-4" />
               <span className="text-sm font-bold uppercase tracking-wider">
@@ -223,7 +223,7 @@ export default function MobileHome({
               type="button"
               disabled={punchBusy}
               onClick={onStart}
-              className="w-full h-11 bg-brand-electric hover:bg-blue-500 text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-900/30 transition-all active:scale-95 disabled:opacity-60"
+              className="w-full h-11 bg-brand-electric hover:bg-blue-500 text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-900/30 transition-all active:scale-95 disabled:opacity-60 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               <Play className="w-4 h-4 fill-current" />
               <span className="text-sm font-bold uppercase tracking-wider">
@@ -289,7 +289,7 @@ export default function MobileHome({
           {onNavigateToTimesheet && (
             <button
               onClick={onNavigateToTimesheet}
-              className="text-[11px] font-bold text-white/70 flex items-center gap-0.5 hover:opacity-80 transition-opacity active:opacity-70"
+className="text-[11px] font-bold text-white/70 flex items-center gap-0.5 hover:opacity-80 transition-opacity active:opacity-70 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
             >
               {detailLabel} <ChevronRight className="w-3 h-3" />
             </button>

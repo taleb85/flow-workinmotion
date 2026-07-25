@@ -99,7 +99,7 @@ const FeatureCard = memo(function FeatureCard({
               aria-checked={enabled}
               aria-label={label}
               onClick={onToggle}
-              className={`relative mt-0.5 h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${enabled ? 'bg-accent' : 'bg-white/20'}`}
+              className={`relative mt-0.5 h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${enabled ? 'bg-accent' : 'bg-white/20'} hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
             >
               <span
                 className={`pointer-events-none absolute top-0 left-0 h-5 w-5 rounded-full bg-white toggle-knob shadow transition-transform duration-200 ${enabled ? 'translate-x-5' : 'translate-x-0'}`}
@@ -112,7 +112,7 @@ const FeatureCard = memo(function FeatureCard({
                 type="button"
                 aria-expanded={detailsExpanded}
                 onClick={onToggleDetail}
-                className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-accent hover:text-accent/80 active:text-accent/80"
+className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-accent hover:text-accent/80 active:text-accent/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               >
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${detailsExpanded ? 'rotate-180' : ''}`} />
                 {toggleDetailLabel}
@@ -258,7 +258,7 @@ export default function ImpostazioniPage({ onOpenProfilesTab }: ImpostazioniPage
             <span className="text-xs bg-white/15 rounded px-2 py-0.5 ml-2 text-white/70">{translateRole(currentUser.role, effectiveLanguage as 'it' | 'en' | 'es' | 'fr')}</span>
           </div>
           <button
-            className="mt-3 px-3 py-1.5 rounded-lg border border-red-500/50 bg-red-500/20 text-[#fca5a5] font-semibold hover:bg-red-500/30 transition-colors active:bg-red-500/80"
+            className="mt-3 px-3 py-1.5 rounded-lg border border-red-500/50 bg-red-500/20 text-[#fca5a5] font-semibold hover:bg-red-500/30 transition-colors active:bg-red-500/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             onClick={logout}
           >
             {t.logout || 'Logout'}
@@ -287,7 +287,7 @@ export default function ImpostazioniPage({ onOpenProfilesTab }: ImpostazioniPage
             </div>
           </div>
           <button
-            className="px-3 py-1.5 rounded-lg border border-red-500/50 bg-red-500/20 text-[#fca5a5] font-semibold hover:bg-red-500/30 transition-colors active:bg-red-500/80"
+            className="px-3 py-1.5 rounded-lg border border-red-500/50 bg-red-500/20 text-[#fca5a5] font-semibold hover:bg-red-500/30 transition-colors active:bg-red-500/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             onClick={logout}
           >
             {t.logout || 'Logout'}
@@ -304,7 +304,7 @@ export default function ImpostazioniPage({ onOpenProfilesTab }: ImpostazioniPage
             <button
               type="button"
               onClick={onOpenProfilesTab}
-              className="inline-flex items-center gap-1.5 self-start rounded-lg border border-accent/25 bg-accent/[0.07] px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/12 transition-colors active:bg-accent/80"
+              className="inline-flex items-center gap-1.5 self-start rounded-lg border border-accent/25 bg-accent/[0.07] px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/12 transition-colors active:bg-accent/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               <Users className="w-3.5 h-3.5 opacity-80" />
               {t.impostazioni_open_profiles}

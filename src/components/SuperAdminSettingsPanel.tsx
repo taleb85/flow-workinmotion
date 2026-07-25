@@ -447,7 +447,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             type="button"
             onClick={handleSave}
             disabled={saving || tab === 'staff'}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-accent-hover/80"
+className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-accent-hover/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             <Check className="w-4 h-4" />
             {saving ? 'Salvataggio…' : tab === 'staff' ? 'Salvataggio inline per dipendente' : 'Salva impostazioni sede'}

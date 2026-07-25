@@ -743,10 +743,9 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         id="main-content"
         role="main"
         aria-label="Contenuto principale"
-        className={`w-full flex flex-col shrink-0 ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''}`}
-        style={{ paddingTop: 'var(--app-sticky-header-offset, 80px)' }}
-      >
-        <div className="w-full app-horizontal-pad pt-3">
+        className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''}`}
+        style={{ paddingTop: 'var(--app-sticky-header-offset, 80px)' }}>
+        <div className="w-full app-horizontal-pad pt-3 flex-1 min-h-0 flex flex-col">
           {/* PIN portals */}
           {createPortal(
             <AnimatePresence>
@@ -831,7 +830,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                 animate="animate"
                 exit="exit"
                 transition={{ duration: 0.3, ease: [0.32, 0, 0.12, 1] }}
-                className="w-full"
+                className="w-full flex-1 min-h-0 flex flex-col"
                 style={{ willChange: 'transform, opacity' }}
               >
                 <Suspense fallback={null}>

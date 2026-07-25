@@ -189,7 +189,7 @@ function LoginMock({ dark }: { dark: boolean }) {
         <div className="w-full flex flex-col gap-3">
           <input readOnly placeholder="Nome utente" className={`w-full rounded-xl px-4 py-3 text-base outline-none pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/70' : 'border border-slate-200 bg-white text-slate-700 shadow-sm'}`} />
           <input readOnly type="password" placeholder="Password" className={`w-full rounded-xl px-4 py-3 text-base outline-none pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/70' : 'border border-slate-200 bg-white text-slate-700 shadow-sm'}`} />
-          <button className="w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white flex items-center justify-center gap-2 pointer-events-none">
+<button className="w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white flex items-center justify-center gap-2 pointer-events-none transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
             <LogIn size={16} /> Accedi
           </button>
         </div>
@@ -198,7 +198,7 @@ function LoginMock({ dark }: { dark: boolean }) {
           <span className="text-xs">oppure</span>
           <div className={`flex-1 h-px ${dark ? 'bg-white/10' : 'bg-slate-200'}`} />
         </div>
-        <button className={`w-full rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/70' : 'border-2 border-blue-100 bg-blue-50 text-blue-700'}`}>
+<button className={`w-full rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/70' : 'border-2 border-blue-100 bg-blue-50 text-blue-700'} transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
           <Fingerprint size={16} /> Accesso biometrico
         </button>
       </div>
@@ -267,7 +267,7 @@ function PwaAndroidMock({ dark }: { dark: boolean }) {
           </div>
         ))}
       </div>
-      <button className={`w-full rounded-2xl py-4 font-bold flex items-center justify-center gap-2 pointer-events-none text-base ${dark ? 'bg-white text-slate-900' : 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'}`}>
+<button className={`w-full rounded-2xl py-4 font-bold flex items-center justify-center gap-2 pointer-events-none text-base ${dark ? 'bg-white text-slate-900' : 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'} transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
         <Download size={18} /> Installa ora
       </button>
     </div>
@@ -434,10 +434,10 @@ function KioskMock({ dark }: { dark: boolean }) {
           </div>
         </div>
         <div className="flex flex-col gap-3 w-full max-w-xs pb-10">
-          <button className="w-full rounded-2xl bg-blue-600 py-4 text-white font-bold text-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 pointer-events-none">
+<button className="w-full rounded-2xl bg-blue-600 py-4 text-white font-bold text-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 pointer-events-none transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
             Entra <ChevronRight size={20} />
           </button>
-          <button className={`w-full rounded-2xl py-3 font-semibold text-base pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/50' : 'border border-slate-200 bg-white text-slate-500'}`}>
+<button className={`w-full rounded-2xl py-3 font-semibold text-base pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/50' : 'border border-slate-200 bg-white text-slate-500'} transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
             Esci
           </button>
         </div>
@@ -735,7 +735,7 @@ function FerieMock({ dark }: { dark: boolean }) {
             </Card>
           ))}
         </div>
-        <button className={`w-full rounded-2xl py-3 text-[11px] font-bold flex items-center justify-center gap-1.5 pointer-events-none ${dark ? 'bg-[#4361EE]/30 border border-[#4361EE]/40 text-white/70' : 'bg-blue-600 text-white'}`}>
+<button className={`w-full rounded-2xl py-3 text-[11px] font-bold flex items-center justify-center gap-1.5 pointer-events-none ${dark ? 'bg-[#4361EE]/30 border border-[#4361EE]/40 text-white/70' : 'bg-blue-600 text-white'} transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
           + Richiedi ferie
         </button>
       </div>
@@ -1061,7 +1061,7 @@ function DFerieMock({ dark }: { dark: boolean }) {
                   <span className={`text-xs font-bold ${dark ? 'text-white/60' : 'text-slate-500'}`}>Seleziona…</span>
                 </div>
               ))}
-              <button className={`w-full rounded-xl py-2.5 text-xs font-bold mt-1 pointer-events-none ${dark ? 'bg-[#4361EE]/30 border border-[#4361EE]/40 text-white/70' : 'bg-blue-600 text-white'}`}>
+<button className={`w-full rounded-xl py-2.5 text-xs font-bold mt-1 pointer-events-none ${dark ? 'bg-[#4361EE]/30 border border-[#4361EE]/40 text-white/70' : 'bg-blue-600 text-white'} transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
                 Invia richiesta
               </button>
             </div>

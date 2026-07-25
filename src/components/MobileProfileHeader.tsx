@@ -116,16 +116,16 @@ export default function MobileProfileHeader({
           }}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click(); }}
         >
-          <FlowWaveIcon size={30} />
+          <FlowWaveIcon size={36} />
         </div>
         <div className="flex flex-col leading-none select-none">
           <span
-            style={{ color: '#ffffff', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 15, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}
+            style={{ color: '#ffffff', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}
           >
             FLOW
           </span>
           <span
-            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 8, fontWeight: 500, letterSpacing: '0.20em', textTransform: 'uppercase', marginTop: 3, lineHeight: 1 }}
+            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 10, fontWeight: 500, letterSpacing: '0.20em', textTransform: 'uppercase', marginTop: 3, lineHeight: 1 }}
           >
             Work in Motion <span style={{ color: 'rgba(255,255,255,0.25)', marginLeft: 2 }}>v{__APP_VERSION__}</span>
           </span>
@@ -142,7 +142,7 @@ export default function MobileProfileHeader({
       <div className="flex shrink-0 items-center gap-2.5">
         {/* Status: live dot + data */}
         <span
-          className="hidden sm:inline text-[11px] font-medium whitespace-nowrap capitalize tabular-nums"
+          className="hidden sm:inline text-[13px] font-medium whitespace-nowrap capitalize tabular-nums"
           style={{ color: 'rgba(255,255,255,0.60)', letterSpacing: '0.01em' }}
         >
           {dateLabel}

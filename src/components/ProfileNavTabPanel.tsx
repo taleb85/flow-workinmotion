@@ -489,7 +489,7 @@ export default function ProfileNavTabPanel({
 
           {/* Impostazioni profilo */}
           <div className="rounded-xl overflow-hidden border border-neutral-500">
-            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-all active:scale-[0.98] hover:bg-white/10" onClick={() => toggleSection('settings')}>
+            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-all active:scale-[0.98] hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('settings')}>
               <span className={rowLabelCls}>{tv.profile_tab_group_settings ?? 'Impostazioni profilo'}</span>
               <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'settings' ? 'rotate-90' : ''}`} />
             </button>
@@ -516,7 +516,7 @@ export default function ProfileNavTabPanel({
 
           {/* Notifiche */}
           <div className="rounded-xl overflow-hidden border border-neutral-500">
-            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-all active:scale-[0.98] hover:bg-white/10" onClick={() => toggleSection('notif')}>
+            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-all active:scale-[0.98] hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('notif')}>
               <span className={rowLabelCls}>{tv.profile_notifications ?? 'Notifiche'}</span>
               <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'notif' ? 'rotate-90' : ''}`} />
             </button>
@@ -533,7 +533,7 @@ export default function ProfileNavTabPanel({
 
           {/* Lingua */}
           <div className="rounded-xl overflow-hidden border border-neutral-500">
-            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-all active:scale-[0.98] hover:bg-white/10" onClick={() => toggleSection('lang')}>
+            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-all active:scale-[0.98] hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('lang')}>
               <span className={rowLabelCls}>{t.language ?? 'Lingua'}</span>
               <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'lang' ? 'rotate-90' : ''}`} />
             </button>

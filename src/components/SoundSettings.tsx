@@ -45,7 +45,7 @@ export function SoundSettings({ compact = false }: SoundSettingsProps) {
           isSoundEnabled 
             ? 'bg-accent/10 text-accent' 
             : 'bg-slate-100 text-white/50'
-        }`}
+        } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
         title={isSoundEnabled ? 'Muta suoni' : 'Attiva suoni'}
       >
         {isSoundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
@@ -82,7 +82,7 @@ export function SoundSettings({ compact = false }: SoundSettingsProps) {
             onClick={handleToggleSound}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
               isSoundEnabled ? 'bg-accent' : 'bg-white/20'
-            }`}
+            } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -135,7 +135,7 @@ export function SoundSettings({ compact = false }: SoundSettingsProps) {
         {/* Tasto Test */}
         <button
           onClick={handleTestSound}
-          className="w-full py-3 rounded-2xl bg-brand-deep/8 text-[11px] font-black text-brand-deep uppercase tracking-[0.2em] hover:bg-brand-deep/15 transition-colors border border-brand-deep/20 active:bg-brand-deep/80"
+          className="w-full py-3 rounded-2xl bg-brand-deep/8 text-[11px] font-black text-brand-deep uppercase tracking-[0.2em] hover:bg-brand-deep/15 transition-colors border border-brand-deep/20 active:bg-brand-deep/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
         >
           Prova Feedback
         </button>
