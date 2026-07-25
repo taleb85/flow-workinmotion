@@ -207,6 +207,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const effectiveWorkRules = DEFAULT_WORK_RULES;
   const violationChromeEnabled = featureFlags?.violation_rules !== false;
 
+  /** DEBUG — conta turni totali caricati */
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log(`[🔄 Grid] totali allShifts: ${allShifts.length}`);
+    }
+  });
+
   const gridRootRef = useRef<HTMLDivElement>(null);
   const contentAboveRef = useRef<HTMLDivElement>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
@@ -783,14 +790,21 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     try {
       const start = overrideStart ?? createStart;
       const end = overrideEnd ?? createEnd;
-      await addShift({
+      const result = await addShift({
         user_id: createModal.userId, date: createModal.date,
         start_time: start + ':00', end_time: end + ':00',
         type: getShiftTypeFromStartTime(start),
         approval_status: 'draft' as const,
         department: users.find(u => u.id === createModal.userId)?.department ?? undefined,
       });
-      showSuccess(t.shift_created ?? 'Turno creato.'); setCreateModal(null);
+      if (result) {
+        showSuccess(t.shift_created ?? 'Turno creato.');
+        setCreateModal(null);
+      } else {
+        // addShift ha fallito silenziosamente (es. insert non ha salvato nulla)
+        console.warn('[handleCreateShift] addShift returned null — turno NON salvato');
+        showError(t.error_generic ?? 'Errore durante la creazione del turno.');
+      }
     } catch { showError(t.error_generic ?? 'Errore.'); }
     finally { setSaving(false); }
   }, [createModal, createStart, createEnd, addShift, showSuccess, showError, t, users]);

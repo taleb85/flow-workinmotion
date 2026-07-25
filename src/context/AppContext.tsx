@@ -929,6 +929,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       const actor = currentUserRef.current?.first_name ?? 'Sistema';
       logHistory('create', actor, `Turno creato: ${shift.date} ${shift.start_time}–${endTime || '?'}`);
       markManagementDataTouched();
+    } else {
+      console.warn('[addShift] insert returned null (supabase non disponibile o inserimento fallito)', shift);
     }
     return res;
   }, [shifts, showError, computePersistedAutoBreak, effectiveLanguage, markManagementDataTouched]);
