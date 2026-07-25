@@ -922,7 +922,9 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       shift.user_id
     );
     const normalized = { ...shift, end_time: endTime, approval_status: 'draft' as const, ...autoBreak };
+    console.log('[addShift] normalized payload:', JSON.stringify(normalized, null, 2));
     const res = await database.shifts.insert(normalized);
+    console.log('[addShift] insert result:', res ? `OK id=${res.id}` : 'NULL');
     if (res) {
       setShifts(prev => [...prev, res]);
       recentlyAddedShiftIdsRef.current.add(res.id);
