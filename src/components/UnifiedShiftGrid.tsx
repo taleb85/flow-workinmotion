@@ -1031,21 +1031,29 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       const label = formatShiftTimeRangeFull(ex.shift.start_time, ex.shift.end_time);
       const title = `${t.extra_shift ?? 'Turno aggiuntivo'}: ${label}`;
       const compactLabel = formatShiftTimeRangeCompact(ex.shift.start_time, ex.shift.end_time);
+      const isChecked = selectedShiftIds.has(ex.shift.id);
+      const handleClick = (e: React.MouseEvent) => {
+        if (e.shiftKey) {
+          setSelectedShiftIds(prev => { const n = new Set(prev); if (n.has(ex.shift.id)) n.delete(ex.shift.id); else n.add(ex.shift.id); return n; });
+        } else {
+          handleOpenDrawer(ex.shift, { isExtra: true });
+        }
+      };
       return (
         <button
           key={ex.shift.id}
           type="button"
           title={title}
           aria-label={title}
-          onClick={() => handleOpenDrawer(ex.shift, { isExtra: true })}
+          onClick={handleClick}
           onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
           draggable={canEdit}
           onDragStart={(e) => handleDragStart(e, ex.shift.id)}
           onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
           className={
             stacked
-              ? 'w-full flex shrink-0 items-center justify-center gap-0.5 rounded-md border-2 border-dashed border-accent bg-accent px-1 text-[10px] font-extrabold tabular-nums leading-none text-white shadow-[0_1px_4px_rgba(0,0,0,0.35)] hover:brightness-110 transition-all'
-              : 'w-full rounded-lg border-2 border-dashed border-accent bg-accent/80 px-2 py-1.5 text-[11px] font-extrabold tabular-nums text-white hover:bg-accent transition-all'
+              ? `w-full flex shrink-0 items-center justify-center gap-0.5 rounded-md border-2 border-dashed px-1 text-[10px] font-extrabold tabular-nums leading-none text-white shadow-[0_1px_4px_rgba(0,0,0,0.35)] hover:brightness-110 transition-all ${isChecked ? 'border-white/80 bg-white/20' : 'border-accent bg-accent'}`
+              : `w-full rounded-lg border-2 border-dashed px-2 py-1.5 text-[11px] font-extrabold tabular-nums text-white transition-all ${isChecked ? 'border-white/80 bg-white/20' : 'border-accent bg-accent/80 hover:bg-accent'}`
           }
           style={stacked ? { height: extraRowHeight, minHeight: extraRowHeight } : undefined}
         >
