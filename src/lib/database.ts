@@ -383,7 +383,7 @@ export const database = {
       if (!supabase) return [];
       const base = supabase.from('shifts').select('*');
       const scoped = withTenant(base);
-      const { data, error } = await scoped.order('date', { ascending: true });
+      const { data, error } = await scoped.order('date', { ascending: true }).limit(10000);
       if (error) throw error;
       return data || [];
     },
