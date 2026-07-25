@@ -106,6 +106,13 @@ export function PinPadModal({
     if (credRegistered && !bioLoading) void handleBiometric();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-conferma quando il PIN raggiunge 4 cifre
+  useEffect(() => {
+    if (pin.length === 4 && !isLoading) {
+      onConfirm();
+    }
+  }, [pin.length, isLoading, onConfirm]);
   // ────────────────────────────────────────────────────────────────────────────
 
   const handleKey = (n: number | 'del') => {

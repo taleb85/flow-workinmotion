@@ -777,14 +777,16 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     finally { setSaving(false); }
   }, [selectedShift, editIn, editOut, allPunchRecords, addPunchRecord, updatePunchRecord, updateShift, setSelectedShift, showSuccess, showError, t]);
 
-  const handleCreateShift = useCallback(async () => {
+  const handleCreateShift = useCallback(async (overrideStart?: string, overrideEnd?: string) => {
     if (!createModal) return;
     setSaving(true);
     try {
+      const start = overrideStart ?? createStart;
+      const end = overrideEnd ?? createEnd;
       await addShift({
         user_id: createModal.userId, date: createModal.date,
-        start_time: createStart + ':00', end_time: createEnd + ':00',
-        type: getShiftTypeFromStartTime(createStart),
+        start_time: start + ':00', end_time: end + ':00',
+        type: getShiftTypeFromStartTime(start),
         approval_status: 'draft' as const,
         department: users.find(u => u.id === createModal.userId)?.department ?? undefined,
       });
@@ -2023,7 +2025,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       setCreateEnd(end);
                     }}
                     slotOverride={getShiftSlotFromStartTime(createStart)}
-                    onAutoCreate={handleCreateShift}
+                    onAutoCreate={(s, e) => handleCreateShift(s, e)}
                   />
                 ) : (
                   <>
@@ -2035,7 +2037,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                         setCreateEnd(end);
                       }}
                       slotOverride="lunch"
-                      onAutoCreate={handleCreateShift}
+                      onAutoCreate={(s, e) => handleCreateShift(s, e)}
                     />
                     <ShiftSlotPresetsSection
                       startTime={createStart}
@@ -2045,7 +2047,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                         setCreateEnd(end);
                       }}
                       slotOverride="evening"
-                      onAutoCreate={handleCreateShift}
+                      onAutoCreate={(s, e) => handleCreateShift(s, e)}
                     />
                   </>
                 )}

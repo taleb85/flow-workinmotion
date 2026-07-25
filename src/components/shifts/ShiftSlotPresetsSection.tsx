@@ -15,8 +15,8 @@ type Props = {
   onApply: (start: string, end: string) => void;
   /** Se specificato, forza la fascia oraria ignorando l'auto‑rilevamento da startTime */
   slotOverride?: ShiftSlot;
-  /** Se fornita, il click su un preset applica l'orario E crea automaticamente il turno. */
-  onAutoCreate?: () => void;
+  /** Se fornita, il click su un preset applica l'orario E crea automaticamente il turno con i valori appena selezionati. */
+  onAutoCreate?: (start: string, end: string) => void;
 };
 
 export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply, slotOverride, onAutoCreate }: Props) {
@@ -189,7 +189,7 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
                 onClick={() => {
                   setSelectedIdx(i);
                   onApply(start, end);
-                  onAutoCreate?.();
+                  onAutoCreate?.(start, end);
                 }}
                 className={`rounded-lg px-4 py-2 text-[12px] font-bold tabular-nums transition-all duration-200 border ${
                   isActive
