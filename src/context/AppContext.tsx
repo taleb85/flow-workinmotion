@@ -754,6 +754,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         database.availability.getAll().catch(() => []),
       ]);
         setShifts(mergeShiftsDeductExclusionsFromLocal(loadedShifts));
+        console.log('[loadInitialData] loadedShifts count:', loadedShifts.length, 'con tenant_id:', loadedShifts.filter(s => (s as any).tenant_id).length);
         setHolidays(loadedHolidays);
         setPunchRecords(loadedPunchRecords);
         setAvailability(loadedAvailability);
@@ -924,7 +925,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     const normalized = { ...shift, end_time: endTime, approval_status: 'draft' as const, ...autoBreak };
     console.log('[addShift] normalized payload:', JSON.stringify(normalized, null, 2));
     const res = await database.shifts.insert(normalized);
-    console.log('[addShift] insert result:', res ? `OK id=${res.id}` : 'NULL');
+    console.log('[addShift] insert result:', res ? `OK id=${res.id} tenant_id=${(res as any).tenant_id ?? 'MISSING'}` : 'NULL');
     if (res) {
       setShifts(prev => [...prev, res]);
       recentlyAddedShiftIdsRef.current.add(res.id);

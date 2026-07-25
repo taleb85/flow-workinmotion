@@ -210,7 +210,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   /** DEBUG — conta turni totali caricati */
   useEffect(() => {
     if (import.meta.env.DEV) {
-      console.log(`[🔄 Grid] totali allShifts: ${allShifts.length}`);
+      console.log(`[🔄 Grid] totali allShifts: ${allShifts.length} | con tenant_id: ${allShifts.filter(s => (s as any).tenant_id).length}`);
     }
   });
 
