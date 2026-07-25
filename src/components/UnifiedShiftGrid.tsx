@@ -788,8 +788,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     if (!createModal) return;
     setSaving(true);
     try {
-      const start = overrideStart ?? createStart;
-      const end = overrideEnd ?? createEnd;
+      // Se chiamato da onClick del pulsante "Crea", React passa l'evento come primo arg — ignoralo
+      const start = (typeof overrideStart === 'string' ? overrideStart : undefined) ?? createStart;
+      const end = (typeof overrideEnd === 'string' ? overrideEnd : undefined) ?? createEnd;
       const result = await addShift({
         user_id: createModal.userId, date: createModal.date,
         start_time: start + ':00', end_time: end + ':00',
