@@ -406,8 +406,24 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
   // ── Selection / Bulk edit ──
   const [selectedShiftIds, setSelectedShiftIds] = useState<Set<string>>(new Set());
-  const [bulkEditOpen, setBulkEditOpen] = useState(false);
-  const [bulkEditStatus, setBulkEditStatus] = useState<string>('');
+
+  // ── ESC annulla azione corrente ──
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      // Chiudi modale creazione turno
+      setCreateModal(null);
+      // Chiudi drawer dettaglio
+      if (drawerOpen) {
+        setDrawerOpen(false);
+        setSelectedShift(null);
+      }
+      // Deseleziona turni
+      if (selectedShiftIds.size > 0) setSelectedShiftIds(new Set());
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [drawerOpen, selectedShiftIds]);
 
   // ── Drag & Drop ──
   // Usiamo una ref per draggedShiftId per evitare stale closure nei drag handler
@@ -417,7 +433,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const [_dragCopyMode, setDragCopyMode] = useState(false);
   // Conferma dopo il drop: chiede se spostare o copiare
   const [dropConfirm, setDropConfirm] = useState<{
-    shiftId: string;
+    shiftIds: string[];
     targetUserId: string;
     targetDate: string;
     targetLabel: string;
@@ -497,7 +513,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const isPeriodView = viewMode === 'period';
   const employeeColWidth = 96;
   const totalColWidth = 72;
-  const dayColMinWidth = isPeriodView ? 80 : 112;
+  const dayColMinWidth = isPeriodView ? 88 : 120;
   const tableMinWidth = employeeColWidth + totalColWidth + dayCount * dayColMinWidth;
   const dayColCalc = `calc((100% - ${employeeColWidth + totalColWidth}px) / ${dayCount})`;
   const slotRowHeight = isPeriodView ? 28 : dayCount > 7 ? 28 : 36;
@@ -859,27 +875,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     } catch { showError(t.error_generic ?? 'Errore.'); }
   }, [selectedShift, isAutoBreak, updateShift, showError, t]);
 
-  const handleBulkEdit = useCallback(async () => {
-    if (selectedShiftIds.size === 0) return;
-    setSaving(true);
-    try {
-      let skipped = 0;
-      for (const id of selectedShiftIds) {
-        const updates: any = {};
-        if (bulkEditStatus) updates.approval_status = bulkEditStatus;
-        if (Object.keys(updates).length > 0) {
-          const s = allShifts.find(x => x.id === id);
-          if (s && isFrozen(s)) { skipped++; continue; }
-          await updateShift(id, updates);
-        }
-      }
-      if (skipped > 0) showError((t.n_shifts_skipped_frozen ?? '{n} turni congelati saltati.').replace('{n}', String(skipped)));
-      else showSuccess(t.bulk_edit_done ?? 'Modifiche applicate.');
-      setBulkEditOpen(false); setSelectedShiftIds(new Set());
-    } catch { showError(t.error_generic ?? 'Errore.'); }
-    finally { setSaving(false); }
-  }, [selectedShiftIds, bulkEditStatus, updateShift, allShifts, showSuccess, showError, t]);
-
   const handleSaveTemplate = useCallback(async () => {
     if (!saveTemplateName.trim() || !database.shiftTemplates?.save) return;
     setSavingTemplate(true);
@@ -1002,27 +997,29 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setDraggedShiftId(null);
     setDropTargetKey(null);
     setDragCopyMode(false);
-    // Evita drop sulla stessa cella
-    const origShift = allShifts.find(s => s.id === shiftId);
-    if (origShift && origShift.user_id === targetUserId && origShift.date === targetDate) {
-      // Se stesso giorno/utente, controlla se è su slot diverso
-      const currentSlot = getShiftSlotFromStartTime(origShift.start_time ?? '10:00');
-      if (!targetSlot || currentSlot === targetSlot) return;
-    }
+    // Se il turno trascinato è parte della selezione, usa TUTTI gli ID selezionati
+    const ids = selectedShiftIds.has(shiftId) ? [...selectedShiftIds] : [shiftId];
+    // Filtra eventuali turni già sulla stessa cella
+    const filtered = ids.filter(id => {
+      const s = allShifts.find(x => x.id === id);
+      return !(s && s.user_id === targetUserId && s.date === targetDate);
+    });
+    if (filtered.length === 0) return;
     // Mostra conferma per spostare o copiare
     const targetUser = users.find(u => u.id === targetUserId);
-    const slot = targetSlot ?? getShiftSlotFromStartTime(origShift?.start_time ?? '10:00');
+    const firstShift = allShifts.find(s => s.id === filtered[0]);
+    const slot = targetSlot ?? getShiftSlotFromStartTime(firstShift?.start_time ?? '10:00');
     const slotLabel = slot === 'lunch' ? 'pranzo' : 'sera';
     const presets = loadShiftSlotPresets(slot);
-    const origStart = origShift?.start_time?.slice(0, 5);
-    const origEnd = origShift?.end_time?.slice(0, 5);
+    const origStart = firstShift?.start_time?.slice(0, 5);
+    const origEnd = firstShift?.end_time?.slice(0, 5);
     const selectedPresetIdx = presets.findIndex(p => p.start === origStart && p.end === origEnd);
     const effectiveIdx = selectedPresetIdx >= 0 ? selectedPresetIdx : 0;
     const pick = presets[effectiveIdx] ?? (slot === 'lunch' ? { start: '10:00', end: '16:00' } : { start: '18:00', end: '23:00' });
     const targetTimeRange = `${pick.start}–${pick.end}`;
     const targetLabel = targetUser ? `${targetUser.first_name} — ${targetDate} (${slotLabel})` : `${targetDate} (${slotLabel})`;
-    setDropConfirm({ shiftId, targetUserId, targetDate, targetLabel, targetSlot: slot, targetTimeRange, presets, selectedPresetIdx: effectiveIdx });
-  }, [handleDropOnCell, handleDropCopyOnCell, allShifts, users]);
+    setDropConfirm({ shiftIds: filtered, targetUserId, targetDate, targetLabel, targetSlot: slot, targetTimeRange, presets, selectedPresetIdx: effectiveIdx });
+  }, [handleDropOnCell, handleDropCopyOnCell, allShifts, users, selectedShiftIds]);
 
   const renderExtraShiftRows = (extraGroups: DayShiftGroup[], layout: 'desktop' | 'mobile') => {
     if (extraGroups.length === 0) return null;
@@ -1052,12 +1049,20 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
           className={
             stacked
-              ? `w-full flex shrink-0 items-center justify-center gap-0.5 rounded-md border-2 border-dashed px-1 text-[10px] font-extrabold tabular-nums leading-none text-white shadow-[0_1px_4px_rgba(0,0,0,0.35)] hover:brightness-110 transition-all ${isChecked ? 'border-white/80 bg-white/20' : 'border-accent bg-accent'}`
-              : `w-full rounded-lg border-2 border-dashed px-2 py-1.5 text-[11px] font-extrabold tabular-nums text-white transition-all ${isChecked ? 'border-white/80 bg-white/20' : 'border-accent bg-accent/80 hover:bg-accent'}`
+              ? `w-full relative flex shrink-0 items-center justify-center gap-0.5 rounded-md border-2 border-dashed px-1 text-[10px] font-extrabold tabular-nums leading-none text-white shadow-[0_1px_4px_rgba(0,0,0,0.35)] ${isChecked ? 'border-white/80 bg-white/20' : 'border-accent bg-accent'}`
+              : `w-full rounded-lg border-2 border-dashed px-2 py-1.5 text-[11px] font-extrabold tabular-nums text-white ${isChecked ? 'border-white/80 bg-white/20' : 'border-accent bg-accent/80'}`
           }
           style={stacked ? { height: extraRowHeight, minHeight: extraRowHeight } : undefined}
         >
-          <Plus className={stacked ? 'h-2.5 w-2.5 shrink-0 stroke-[3]' : 'hidden'} aria-hidden />
+          {stacked ? (
+            <>
+              <input type="checkbox" checked={isChecked} readOnly
+                className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-all ${isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} />
+              <Plus className="h-2.5 w-2.5 shrink-0 stroke-[3]" aria-hidden />
+            </>
+          ) : (
+            <Plus className="h-3 w-3 shrink-0" aria-hidden />
+          )}
           <span className="truncate">{stacked ? compactLabel : label}</span>
         </button>
       );
@@ -1094,7 +1099,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     const timeLabel = breakBesideIcons ? timeOnly : (
       <span className="inline-flex items-center gap-0.5 max-w-full">
         {timeOnly}
-        {breakBadge}
+        {!isPeriodView && breakBadge}
       </span>
     );
 
@@ -1114,7 +1119,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
             onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
-              className={`w-full text-left rounded-lg border-l-4 ${borderColor} ${bgColor} ${glow} px-2.5 py-2 hover:brightness-125 transition-all active:scale-[0.98]`}>
+              className={`w-full text-left rounded-lg border-l-4 ${borderColor} ${bgColor} ${glow} px-2.5 py-2 transition-all active:scale-[0.98]`}>
               <div className="flex items-center justify-between gap-1">
               {timeLabel}
               <div className="flex items-center gap-1 shrink-0">
@@ -1149,7 +1154,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
             onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
-            className={`w-full flex items-center justify-center rounded-md border-l-[3px] ${accent} bg-white/[0.07] hover:bg-white/[0.12] transition-colors ${g.isAbsent ? 'opacity-70' : ''} ${isDraft ? 'border-dashed' : ''}`}
+            className={`w-full flex items-center justify-center rounded-md border-l-[3px] ${accent} bg-white/[0.07] transition-colors ${g.isAbsent ? 'opacity-70' : ''} ${isDraft ? 'border-dashed' : ''}`}
             style={{ height: mainRowHeight, minHeight: mainRowHeight }}
           >
             {timeLabel}
@@ -1165,7 +1170,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           draggable={canEdit}
           onDragStart={(e) => handleDragStart(e, g.shift.id)}
           onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
-          className={`relative w-full min-w-0 text-left rounded-lg border ${borderColor} ${bgColor} ${glow} hover:brightness-125 transition-all ${isDraft ? 'border-dashed' : ''} px-0.5 py-0.5`}>
+          className={`relative w-full min-w-0 text-left rounded-lg border ${borderColor} ${bgColor} ${glow} transition-all ${isDraft ? 'border-dashed' : ''} px-0.5 py-0.5`}>
           <input type="checkbox" checked={selectedShiftIds.has(g.shift.id)} onChange={() => setSelectedShiftIds(prev => { const n = new Set(prev); if (n.has(g.shift.id)) n.delete(g.shift.id); else n.add(g.shift.id); return n; })}
             className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-all ${selectedShiftIds.has(g.shift.id) ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} onClick={e => e.stopPropagation()} />
           <div
@@ -1228,6 +1233,27 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             {(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
             <span className="hidden min-[420px]:inline"> — {(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}</span>
           </span>
+          {selectedShiftIds.size > 0 && (
+            <div className="flex items-center gap-1.5 ml-auto">
+              <span className="text-xs font-bold text-white/60 whitespace-nowrap">{selectedShiftIds.size} selezionati</span>
+              <button type="button" onClick={async () => {
+                if (!sessionActive) {
+                  showError(t.require_pin_session ?? 'Attiva la sessione PIN per eliminare in massa.');
+                  return;
+                }
+                for (const id of selectedShiftIds) {
+                  const s = allShifts.find(x => x.id === id);
+                  if (!s || !canDeleteShift(s)) continue;
+                  if (isFrozen(s)) authorizeFrozenDelete(id);
+                  try { await deleteShift(id); } catch { /* toast già mostrato */ }
+                }
+                setSelectedShiftIds(new Set());
+              }}
+                className="rounded-lg bg-rose-600/20 px-2.5 py-1.5 text-rose-300 hover:bg-rose-600/30 transition-colors">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="ui-toolbar-row-tight flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2 lg:ml-auto lg:justify-end">
@@ -1469,52 +1495,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         document.body
       )}
 
-      {selectedShiftIds.size > 0 && (
-        <div className="mb-2 flex items-center gap-2 text-[10px] text-white/40">
-          <span className="text-[10px] text-white/50 font-semibold">{selectedShiftIds.size} selezionati</span>
-          {!bulkEditOpen ? (
-            <button type="button" onClick={() => setBulkEditOpen(true)}
-              className="rounded-lg bg-accent/20 px-2.5 py-1 text-[10px] font-bold text-accent hover:bg-accent/30 transition-colors uppercase tracking-wider">
-              {t.bulk_edit ?? 'Modifica'}
-            </button>
-          ) : (
-            <>
-              <select value={bulkEditStatus} onChange={e => setBulkEditStatus(e.target.value)}
-                className="bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-bold text-white/70 uppercase outline-none">
-                <option value="">{t.status ?? 'Stato'}</option>
-                <option value="draft">Draft</option>
-                <option value="confirmed">Pubblicato</option>
-                <option value="approved">Approvato</option>
-              </select>
-              <button type="button" onClick={handleBulkEdit}
-                className="rounded-lg bg-emerald-600/20 px-2.5 py-1 text-[10px] font-bold text-emerald-300 hover:bg-emerald-600/30 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
-                <Check className="h-3 w-3 inline-block mr-0.5" />{t.apply ?? 'Applica'}
-              </button>
-              <button type="button" onClick={() => { setBulkEditOpen(false); setBulkEditStatus(''); }}
-                className="rounded-lg bg-white/10 px-2.5 py-1 text-[10px] font-bold text-white/50 hover:text-white transition-colors uppercase tracking-wider">
-                <X className="h-3 w-3" />
-              </button>
-            </>
-          )}
-          <button type="button" onClick={async () => {
-            if (!sessionActive) {
-              showError(t.require_pin_session ?? 'Attiva la sessione PIN per eliminare in massa.');
-              return;
-            }
-            for (const id of selectedShiftIds) {
-              const s = allShifts.find(x => x.id === id);
-              if (!s || !canDeleteShift(s)) continue;
-              if (isFrozen(s)) authorizeFrozenDelete(id);
-              try { await deleteShift(id); } catch { /* toast già mostrato */ }
-            }
-            setSelectedShiftIds(new Set());
-          }}
-            className="rounded-lg bg-rose-600/20 px-2.5 py-1 text-[10px] font-bold text-rose-300 hover:bg-rose-600/30 transition-colors uppercase tracking-wider">
-            <Trash2 className="h-3 w-3 inline-block mr-0.5" />{t.delete ?? 'Elimina'}
-          </button>
-        </div>
-      )}
-
       {/* ── Mobile Card View ── */}
       <div className="md:hidden space-y-4 px-1 pb-4">
         {visibleUsers.map((user) => {
@@ -1649,17 +1629,17 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   <th
                     key={i}
                     title={format(day, 'EEEE d MMMM', { locale })}
-                    className={`px-0.5 py-1.5 text-center border-b border-white/10 ${weekEnd ? 'border-r-2 border-r-white/20' : ''}`}
+                    className={`px-1.5 py-1.5 text-center border-b border-white/10 ${weekEnd ? 'border-r-2 border-r-white/20' : ''} ${isToday(day) ? 'border-b-2 !border-b-accent' : ''}`}
                   >
                     {isPeriodView ? (
                       <>
-                        <div className="text-[9px] font-bold uppercase text-white/35 leading-none">{format(day, 'EEEEE', { locale })}</div>
-                        <div className={`text-sm font-black leading-tight ${isToday(day) ? 'text-accent' : 'text-white/85'}`}>{format(day, 'd')}</div>
+                        <div className={`text-[9px] font-bold uppercase leading-none ${isToday(day) ? 'text-white/60' : 'text-white/20'}`}>{format(day, 'EEEEE', { locale })}</div>
+                        <div className={`text-sm font-black leading-tight ${isToday(day) ? 'text-accent' : 'text-white/45'}`}>{format(day, 'd')}</div>
                       </>
                     ) : (
                       <>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-white/40">{format(day, 'EEE', { locale })}</div>
-                        <div className={`text-sm font-black ${isToday(day) ? 'text-accent' : 'text-white/80'}`}>{format(day, 'd')}</div>
+                        <div className={`text-[10px] font-bold uppercase tracking-wider ${isToday(day) ? 'text-white/80' : 'text-white/25'}`}>{format(day, 'EEE', { locale })}</div>
+                        <div className={`text-sm font-black ${isToday(day) ? 'text-accent' : 'text-white/50'}`}>{format(day, 'd')}</div>
                       </>
                     )}
                   </th>
@@ -1676,7 +1656,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               const totalActual = getTotalActual(user.id);
               return (
                 <tr key={user.id} className="wst-employee-row">
-                  <td className={`sticky left-0 z-10 backdrop-blur-sm px-2 py-1.5 border-b border-r border-white/[0.06] cursor-pointer transition-colors hover:bg-white/[0.06]`}
+                  <td className={`sticky left-0 z-10 px-2 py-1.5 border-b border-r border-white/[0.06] cursor-pointer hover:bg-white/[0.08]`}
                     onClick={() => {
                       const shifts = weekShifts
                         .filter(s => s.user_id === user.id && s.approval_status !== 'approved' && !isShiftPayrollFrozen(s))
@@ -1700,7 +1680,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     const weekEnd = isPeriodView && day.getDay() === 0;
                     return (
                       <td key={dIdx}
-                        className={`px-0.5 py-0.5 align-top group min-w-0 border-b border-r border-white/[0.06] ${isToday(day) ? 'bg-accent/[0.04]' : weekStripe ? 'bg-white/[0.02]' : ''} ${weekEnd ? 'border-r-2 border-r-white/15' : ''}`}
+                        className={`px-1 py-0.5 align-top group min-w-0 border-b border-r border-white/[0.06] ${weekEnd ? 'border-r-2 border-r-white/15' : ''} ${isToday(day) ? '!border-b-accent !border-b-2' : ''}`}
                       >
                         {groups.length === 0 ? (
                           <div
@@ -2131,7 +2111,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 type="button"
                 onClick={() => {
                   const p = dropConfirm.presets[dropConfirm.selectedPresetIdx];
-                  void handleDropOnCell(dropConfirm.shiftId, dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot, p.start + ':00', p.end + ':00');
+                  if (dropConfirm.shiftIds.length > 1) {
+                    // Batch: ogni turno mantiene i propri orari
+                    for (const id of dropConfirm.shiftIds) {
+                      void handleDropOnCell(id, dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot);
+                    }
+                  } else {
+                    void handleDropOnCell(dropConfirm.shiftIds[0], dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot, p.start + ':00', p.end + ':00');
+                  }
+                  setSelectedShiftIds(new Set());
                   setDropConfirm(null);
                 }}
                 className="flex-1 rounded-lg bg-amber-600/20 px-4 py-2.5 text-[11px] font-bold text-amber-300 hover:bg-amber-600/30 transition-colors uppercase tracking-wider"
@@ -2142,7 +2130,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 type="button"
                 onClick={() => {
                   const p = dropConfirm.presets[dropConfirm.selectedPresetIdx];
-                  void handleDropCopyOnCell(dropConfirm.shiftId, dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot, p.start + ':00', p.end + ':00');
+                  if (dropConfirm.shiftIds.length > 1) {
+                    // Batch: ogni turno mantiene i propri orari
+                    for (const id of dropConfirm.shiftIds) {
+                      void handleDropCopyOnCell(id, dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot);
+                    }
+                  } else {
+                    void handleDropCopyOnCell(dropConfirm.shiftIds[0], dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot, p.start + ':00', p.end + ':00');
+                  }
+                  setSelectedShiftIds(new Set());
                   setDropConfirm(null);
                 }}
                 className="flex-1 rounded-lg bg-blue-600/20 px-4 py-2.5 text-[11px] font-bold text-blue-300 hover:bg-blue-600/30 transition-colors uppercase tracking-wider"

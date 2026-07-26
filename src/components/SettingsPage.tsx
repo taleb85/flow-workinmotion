@@ -797,7 +797,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                                       type="button"
                                       onClick={async () => {
                                         const _accessLink = buildShortInviteLink(user, users);
-                                        const configUrl = `${window.location.origin}/Installa_FLOW.mobileconfig`;
+                                        const installPath = `/install?userId=${encodeURIComponent(user.id)}&firstName=${encodeURIComponent(user.first_name ?? '')}`;
+                                        const configUrl = `${window.location.origin}${installPath}`;
                                         const nome = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim();
                                         const pin = (user.pin ?? '').replace(/\D/g, '');
                                         const pinLine = pin.length === 4 ? `PIN: ${pin}` : '';
@@ -807,10 +808,12 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                                           '',
                                           `Nome: ${nome}`,
                                           ...(pinLine ? [pinLine] : []),
-                                          `📱 Installa l'app sul tuo iPhone in 3 passi:`,
-                                          `1. Apri il link qui sotto da Safari`,
-                                          `2. Scarica il file e vai su Impostazioni → "Profilo scaricato" → Installa`,
-                                          `3. Accedi con le credenziali sopra`,
+                                          `📱 Installa FLOW sul tuo iPhone:`,
+                                          `1. Apri questo link da Safari`,
+                                          `2. Tocca l'icona Condividi (□↑) in basso`,
+                                          `3. Scorri e tocca "Aggiungi a schermata Home"`,
+                                          `4. Tocca "Aggiungi" in alto a destra`,
+                                          `5. Apri FLOW dalla Home`,
                                           '',
                                           `🔗 ${configUrl}`,
                                         ].join('\n');

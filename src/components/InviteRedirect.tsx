@@ -1,6 +1,6 @@
 /**
  * Risolve /i/:slug → dipendente, salva il nome per il login,
- * poi reindirizza direttamente al download del profilo .mobileconfig.
+ * poi reindirizza alla pagina di installazione PWA (/install).
  */
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -30,8 +30,10 @@ export default function InviteRedirect() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const installPathBase = '/install';
+
     if (!slug) {
-      window.location.href = '/Installa_FLOW.mobileconfig';
+      window.location.href = installPathBase;
       return;
     }
 
@@ -41,7 +43,7 @@ export default function InviteRedirect() {
     async function resolve() {
       try {
         if (!supabase) {
-          if (!cancelled) window.location.href = '/Installa_FLOW.mobileconfig';
+          if (!cancelled) window.location.href = installPathBase;
           return;
         }
 
@@ -80,14 +82,21 @@ export default function InviteRedirect() {
               localStorage.setItem(FLOW_INVITE_NAME_STORAGE_KEY, loginName);
             } catch { /* ignore */ }
           }
+          // Redirect to install page with user info
+          const params = new URLSearchParams({ userId: matched.id, firstName: matched.first_name ?? '' });
+          if (!cancelled && !redirected) {
+            redirected = true;
+            window.location.href = `${installPathBase}?${params.toString()}`;
+          }
+          return;
         }
 
         if (!cancelled && !redirected) {
           redirected = true;
-          window.location.href = '/Installa_FLOW.mobileconfig';
+          window.location.href = installPathBase;
         }
       } catch {
-        if (!cancelled) window.location.href = '/Installa_FLOW.mobileconfig';
+        if (!cancelled) window.location.href = installPathBase;
       }
     }
 

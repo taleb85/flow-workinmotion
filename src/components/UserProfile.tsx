@@ -6,7 +6,7 @@
  * Persistenza: updateUser -> database.users.update (tabella `users`), campo `department` incluso.
  */
 import { useMemo, useCallback, useState, useRef } from 'react';
-import { User, Mail, Lock, Shield, CheckCircle, AlertTriangle, Euro, Link2, Copy, Phone, Calendar } from 'lucide-react';
+import { User, Mail, Lock, Shield, CheckCircle, AlertTriangle, Euro, Link2, Copy, Share2, Phone, Calendar } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppConfig } from '../context/appSliceContexts';
 import { useAppOverlay } from '../context/appSliceContexts';
@@ -495,6 +495,45 @@ export function ProfileFormAdmin({
     }
   }, [accessLink, showSuccess, showError, tv.admin_employee_access_link_copied, tv.copy_failed]);
 
+  const handleShareInstall = useCallback(async () => {
+    const installPath = `/install?userId=${encodeURIComponent(user.id)}&firstName=${encodeURIComponent(formData.first_name)}`;
+    const installUrl = `${window.location.origin}${installPath}`;
+    const shareTitle = tv.share_install_title ?? 'FLOW';
+    const shareText = [
+      tv.share_install_greeting?.replace('{name}', `${formData.first_name} ${formData.last_name ?? ''}`.trim()) ?? '',
+      '',
+      tv.share_install_intro ?? '',
+      `${tv.share_install_name?.replace('{name}', formData.first_name) ?? ''}`,
+      formData.pin ? `${tv.share_install_pin?.replace('{pin}', formData.pin) ?? ''}` : '',
+      '',
+      tv.share_install_steps_header ?? '',
+      tv.share_install_step1 ?? '',
+      tv.share_install_step2 ?? '',
+      tv.share_install_step3 ?? '',
+      '',
+      installUrl,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: shareTitle, text: shareText, url: installUrl });
+      } catch (err) {
+        if ((err as DOMException).name !== 'AbortError') {
+          showError?.(tv.copy_failed ?? 'Condivisione non riuscita.');
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareText + '\n\n' + installUrl);
+        showSuccess?.(tv.admin_employee_install_link_copied ?? 'Testo copiato. Incollalo in un messaggio.');
+      } catch {
+        showError?.(tv.copy_failed ?? 'Copia non riuscita.');
+      }
+    }
+  }, [formData.first_name, formData.last_name, formData.pin, showSuccess, showError, tv]);
+
   const roleSelectDisabled =
     readOnly || (isPurelyManagementRole(user.role) && !isAdminOnly(currentUser));
   const showEmploymentEndField =
@@ -781,6 +820,17 @@ export function ProfileFormAdmin({
             >
               <Copy className="w-5 h-5" aria-hidden />
               <span>{tv.admin_employee_invite_send ?? 'Copia link invito'}</span>
+            </button>
+
+            {/* Pulsante: condividi file installazione iPhone */}
+            <button
+              type="button"
+              onClick={handleShareInstall}
+              className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white font-sans transition-all hover:opacity-95 active:scale-[0.98] hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              style={{ background: '#22c55e' }}
+            >
+              <Share2 className="w-5 h-5" aria-hidden />
+              <span>{tv.share_install_btn ?? 'Condividi installazione iPhone'}</span>
             </button>
             <p className="pl-5 text-[11px] font-medium text-white font-sans">
               {formatTrans(tv.admin_employee_access_link_preview ?? 'Nome al login: {name}', {

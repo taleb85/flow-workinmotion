@@ -617,7 +617,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     </AnimatePresence>
     <div
       role="region" aria-label="Applicazione"
-      className="relative min-h-screen min-h-[100dvh] w-full text-white font-sans antialiased overflow-x-clip safe-area-pad pt-0 flex flex-col"
+      className="relative h-screen h-[100dvh] w-full text-white font-sans antialiased overflow-hidden safe-area-pad pt-0 flex flex-col"
       style={{ background: bgTheme.appBg }}
     >
       <DeepAuroraShell theme={bgTheme} />
@@ -745,7 +745,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         aria-label="Contenuto principale"
         className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''}`}
         style={{ paddingTop: 'var(--app-sticky-header-offset, 80px)' }}>
-        <div className="w-full app-horizontal-pad pt-3 flex-1 min-h-0 flex flex-col">
+        <div className="w-full app-horizontal-pad pt-0 flex-1 min-h-0 flex flex-col">
           {/* PIN portals */}
           {createPortal(
             <AnimatePresence>
