@@ -2,7 +2,7 @@ import { type BackgroundTheme } from '../utils/backgroundThemes';
 
 export default function DeepAuroraShell({ theme }: { theme: BackgroundTheme }) {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       {/* Base gradient */}
       <div
         className="pointer-events-none absolute inset-0"
