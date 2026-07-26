@@ -64,7 +64,6 @@ button:active,
 
 /* Brand + top-tabbar: fill sul <header> in App (un blocco unico, niente fessura 1px) */
 body .flow-brand-header {
-  background: transparent !important;
   box-shadow: none !important;
   border-radius: 0 !important;
 }
@@ -102,9 +101,9 @@ body {
 #root {
   min-height: 100dvh;
   min-height: 100%;
+  max-height: 100dvh;
   background: transparent;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 
@@ -2076,7 +2075,6 @@ html[data-theme="dark"] body {
 
 /* ── Topbar / header ── */
 .flow-brand-header {
-  background: rgba(10, 10, 10, 0.88) !important;
   box-shadow: none !important;
   border-radius: 0 !important;
 }

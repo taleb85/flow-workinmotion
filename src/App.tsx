@@ -204,11 +204,14 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
   }, []);
 
   const [headerScrolled, setHeaderScrolled] = useState(false);
+  const appScrollRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const onScroll = () => setHeaderScrolled(window.scrollY > 10);
+    const el = appScrollRef.current;
+    if (!el) return;
+    const onScroll = () => setHeaderScrolled(el.scrollTop > 10);
     onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
   }, []);
 
   // ── Clear PWA badge on app open + visibility change ──────────────────────
@@ -616,8 +619,9 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       )}
     </AnimatePresence>
     <div
+      ref={appScrollRef}
       role="region" aria-label="Applicazione"
-      className="relative h-screen h-[100dvh] w-full text-white font-sans antialiased overflow-y-auto safe-area-pad pt-0 flex flex-col"
+      className="relative h-screen h-[100dvh] w-full text-white font-sans antialiased overflow-y-auto [-webkit-overflow-scrolling:touch] safe-area-pad pt-0 flex flex-col"
       style={{ background: bgTheme.appBg }}
     >
       <DeepAuroraShell theme={bgTheme} />
@@ -666,13 +670,12 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       <header
         ref={appStickyHeaderRef}
         aria-label="Navigazione principale"
-        className={`fixed left-0 right-0 z-[10040] shrink-0 transition-[visibility,opacity,background,top] duration-150 ${
+        className={`sticky top-0 left-0 right-0 z-[10040] shrink-0 transition-[visibility,opacity,background] duration-150 ${
           overlayOpen ? 'invisible opacity-0 pointer-events-none' : ''
         } ${
           isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''
         } ${headerScrolled ? 'bg-app-bg/92 backdrop-blur-[20px]' : ''}`}
         style={{
-          top: impersonatingAs ? 40 : 0,
           background: headerScrolled ? undefined : 'transparent',
           borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
         }}
@@ -743,8 +746,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         id="main-content"
         role="main"
         aria-label="Contenuto principale"
-        className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''}`}
-        style={{ paddingTop: 'var(--app-sticky-header-offset, 80px)' }}>
+        className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''}`}>
         <div className="w-full app-horizontal-pad pt-0 flex-1 min-h-0 flex flex-col">
           {/* PIN portals */}
           {createPortal(

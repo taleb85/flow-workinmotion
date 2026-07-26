@@ -622,7 +622,7 @@ export default function StaffPersonalDashboard({
     const todayStr = format(now, 'yyyy-MM-dd');
 
     return (
-      <div className="space-y-0">
+      <div className="space-y-0 max-md:pt-[92px]">
         <StaffPushNotificationPromptBanner userId={displayUser.id} effectiveLanguage={effectiveLanguage} />
         <MobileStaffDashboard
           user={displayUser}
@@ -890,7 +890,7 @@ export default function StaffPersonalDashboard({
   );
 
   const renderHolidays = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 max-md:pt-[92px]">
       {isMobile ? (
         <MobileRequests 
           requests={holidays.filter(h => h.user_id === user.id)} 
@@ -937,7 +937,7 @@ export default function StaffPersonalDashboard({
   );
 
   return (
-    <div className="w-full scroll-smooth text-white/90 font-sans antialiased pb-content overflow-x-hidden">
+    <div className="w-full scroll-smooth text-white/90 font-sans antialiased overflow-y-auto [-webkit-overflow-scrolling:touch] pb-content pt-0">
       <div className="mx-auto w-full max-w-7xl">
       {holidaysFocus && (
         <div className="mb-3 flex items-center gap-2">
@@ -961,6 +961,7 @@ export default function StaffPersonalDashboard({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            style={{ touchAction: 'pan-y' }}
           >
             {holidaysFocus ? (
               renderHolidays()
