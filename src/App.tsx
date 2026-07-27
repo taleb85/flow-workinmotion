@@ -119,7 +119,7 @@ function LoginRoute() {
 
   return (
     <>
-      <div role="region" aria-label="Accesso" className="relative min-h-screen min-h-[100dvh] w-full" style={{ background: bgTheme.appBg }}>
+      <div role="region" aria-label="Accesso" className="relative min-h-screen min-h-[100dvh] w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
         <DeepAuroraShell theme={bgTheme} />
         <AnimatePresence mode="wait">
           <LoginPage key="login" onLogin={handleLogin} onBack={handleBack} />
@@ -204,9 +204,8 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
   }, []);
 
   const [headerScrolled, setHeaderScrolled] = useState(false);
-  const appScrollRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const el = appScrollRef.current;
+    const el = document.getElementById('root');
     if (!el) return;
     const onScroll = () => setHeaderScrolled(el.scrollTop > 10);
     onScroll();
@@ -619,9 +618,8 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       )}
     </AnimatePresence>
     <div
-      ref={appScrollRef}
       role="region" aria-label="Applicazione"
-      className="relative h-screen h-[100dvh] w-full text-white font-sans antialiased overflow-y-auto [-webkit-overflow-scrolling:touch] safe-area-pad pt-0 flex flex-col"
+      className="relative w-full flex-1 min-h-0 text-white font-sans antialiased safe-area-pad pt-0 flex flex-col"
       style={{ background: bgTheme.appBg }}
     >
       <DeepAuroraShell theme={bgTheme} />

@@ -9,8 +9,7 @@ const RESISTANCE = 0.4;
 const PULL_PREVENT_DEFAULT_PX = 10;
 
 /**
- * L’app scrolla su `#root` (html/body con overflow hidden). `window.scrollY` resta 0
- * e altrimenti il pull-to-refresh crede di essere sempre in cima e blocca lo scroll.
+ * L'app scrolla su `#root`.
  */
 function getAppScrollY(): number {
   const r = document.getElementById('root');

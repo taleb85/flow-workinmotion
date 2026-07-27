@@ -46,3 +46,4 @@ Users/
 
 # Temp / timestamp files
 *.timestamp-*
+.env*

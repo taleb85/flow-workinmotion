@@ -172,7 +172,7 @@ export default memo(function HomeManagerView({
           className="flex flex-col gap-5">
 
           {/* ── Saluto ────────────────────────────────────────────────── */}
-          <div className="px-1">
+          <div className="px-1 pt-3">
             <h1 className="text-xl font-extrabold tracking-tight leading-tight text-white">
               {t.home_greeting.replace('{name}', currentUser.first_name)}
             </h1>

@@ -43,14 +43,16 @@ export function clearMainViewState(userId: string): void {
   }
 }
 
-/** Scroll verticale effettivo: l’app usa `#root` come unico container (body/html fissi). */
+/**
+ * Scroll verticale effettivo: l'app usa `#root` come contenitore scrollabile.
+ */
 export function getAppRootScrollY(): number {
   const r = document.getElementById('root');
   if (r) return r.scrollTop;
   return window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
 }
 
-/** Applica lo scroll: prima `#root` (PWA), poi finestra (fallback). */
+/** Applica lo scroll su `#root`. */
 export function applyWindowScrollY(y: number): void {
   const top = Math.max(0, y);
   const r = document.getElementById('root');

@@ -214,7 +214,7 @@ export default function HolidayRequests() {
       >
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       {uiW('ferie.header') && (
-      <div className="mb-5 flex items-center justify-between gap-3">
+      <div className="mb-5 mt-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           {isAdmin && pendingAll.length > 0 && (
             <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full text-[11px] font-bold"

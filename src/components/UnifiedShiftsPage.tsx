@@ -15,7 +15,7 @@ export default function UnifiedShiftsPage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="w-full h-full min-h-0 flex flex-col mx-auto px-2 pb-2 pt-3 font-sans overflow-hidden"
+      className="w-full h-full min-h-0 flex flex-col mx-auto px-2 pb-2 pt-3 font-sans"
     >
       {/* Admin badge */}
       {isSessionElevated && (

@@ -1197,7 +1197,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       <style>{`.wst-employee-row td { border-bottom: 1px solid rgba(255,255,255,0.20) !important; }
 .wst-employee-row td { border-top: 1px solid rgba(255,255,255,0.10) !important; }
 /* Header tabella opaco su scroll: copre il contenuto sottostante con vetro satinato */
-.wst-header-scrolled { background: rgba(18,18,22,0.85) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; }
+.wst-header-scrolled { background: rgba(10,10,12,0.92) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
 .wst-header-scrolled th { color: rgba(255,255,255,0.75) !important; border-bottom-color: rgba(255,255,255,0.12) !important; }
 .wst-header-scrolled th div { color: rgba(255,255,255,0.75) !important; }
 .wst-header-scrolled .text-accent { color: rgba(255,255,255,0.75) !important; }`}</style>
@@ -1214,8 +1214,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
       {/* ── Sezione superiore fissa (toolbar + selezioni + mobile view) ── */}
       <div ref={contentAboveRef}>
-      {/* ── Toolbar ── */}
-      <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mb-3 w-full min-w-0"
+      {/* Toolbar sticky in tutte le viewport */}
+       <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mb-3 w-full min-w-0 md:sticky md:top-0 md:z-50 py-2"
         data-toolbar-mode={mode}>
         <div className="ui-toolbar-row-tight flex min-w-0 flex-1 flex-wrap items-center gap-1.5 sm:gap-2">
           <div className="flex shrink-0 items-center gap-1">
@@ -2062,7 +2062,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             <div className="flex gap-2">
               <button type="button" onClick={() => setCreateModal(null)}
                 className="flex-1 rounded-lg border border-white/20 px-4 py-2.5 text-[11px] font-bold text-white/70 hover:bg-white/[0.07] hover:text-white hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.3)] transition-all uppercase tracking-wider">{t.cancel ?? 'Annulla'}</button>
-              <button type="button" onClick={handleCreateShift} disabled={saving}
+              <button type="button" onClick={() => handleCreateShift()} disabled={saving}
                 className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-[11px] font-bold text-white hover:bg-accent/80 hover:shadow-[inset_0_0_36px_rgba(255,255,255,0.35)] disabled:opacity-40 transition-all uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                 <Plus className="h-3.5 w-3.5 inline-block mr-1.5" />{t.create ?? 'Crea'}
               </button>

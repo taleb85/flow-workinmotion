@@ -937,7 +937,7 @@ export default function StaffPersonalDashboard({
   );
 
   return (
-    <div className="w-full scroll-smooth text-white/90 font-sans antialiased overflow-y-auto [-webkit-overflow-scrolling:touch] pb-content pt-0">
+    <div className="w-full flex-1 min-h-0 scroll-smooth text-white/90 font-sans antialiased pb-content pt-0">
       <div className="mx-auto w-full max-w-7xl">
       {holidaysFocus && (
         <div className="mb-3 flex items-center gap-2">

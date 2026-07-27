@@ -2112,7 +2112,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
       {wTurniToolbar && (
       <>
       {/* Toolbar: navigazione + pubblica + ☰ */}
-      <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 flex flex-row flex-wrap lg:flex-nowrap items-center justify-start gap-x-2 gap-y-2 overflow-x-auto relative z-40 mb-2">
+      <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 flex flex-row flex-wrap lg:flex-nowrap items-center justify-start gap-x-2 gap-y-2 overflow-x-auto md:sticky md:top-0 md:z-50 mb-2 py-2">
         {/* ── Sinistra: navigazione periodo / vista ── */}
         <div className="ui-toolbar-row-tight min-w-0 shrink-0 !gap-2">
           {/* Wrapper compatto: nav + chip data sempre vicini */}
@@ -3745,7 +3745,7 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
             <div
               ref={flatMirrorHeaderRef}
               className="sticky z-[200] rounded-b-xl overflow-hidden border-x border-b border-neutral-500 mb-1"
-              style={{ top: 'var(--app-sticky-header-offset)', background: 'rgba(42, 74, 138, 0.55)' }}
+              style={{ top: 'var(--app-sticky-header-offset)', background: 'rgba(10,10,12,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
             >
               <div ref={flatHeaderScrollRef} className="overflow-x-hidden">
                 <table className="w-full border-collapse table-fixed">
@@ -3754,17 +3754,16 @@ export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollP
                     {allWeekDays.map((_, ci) => <col key={ci} />)}
                   </colgroup>
                   <thead>
-                    <tr style={{ background: 'rgba(255, 255, 255, 0.08)' }}>
-                      <th className="text-left px-4 py-3 text-[11px] font-black uppercase tracking-widest text-white/70 border-r border-white/20"
-                        style={{ background: 'rgba(255, 255, 255, 0.08)' }}>
+                    <tr>
+                      <th className="text-left px-4 py-3 text-[11px] font-black uppercase tracking-widest text-white/70 border-r border-white/20 bg-white/[0.06]"
+                      >
                         Staff
                       </th>
                       {allWeekDays.map((day, di) => {
                         const isTodayDH = isToday(day);
                         return (
-                          <th key={di} className="text-center px-2 py-2"
+                          <th key={di} className={`text-center px-2 py-2 ${isTodayDH ? 'bg-white/[0.10]' : 'bg-white/[0.04]'}`}
                             style={{
-                              background: isTodayDH ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.08)',
                               borderRight: di < allWeekDays.length - 1 ? '1px solid rgba(255, 255, 255, 0.15)' : undefined,
                             }}>
                             <div className={`text-[11px] font-bold uppercase tracking-widest mb-0.5 ${isTodayDH ? 'text-white' : 'text-white/50'}`}>
