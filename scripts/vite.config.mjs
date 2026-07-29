@@ -219,6 +219,8 @@ export default defineConfig(({ command }) => {
           'vendor-pdf': ['jspdf'],
           'vendor-date': ['date-fns'],
           'vendor-icons': ['lucide-react'],
+          'vendor-tesseract': ['tesseract.js'],
+          'vendor-ai': ['@google/generative-ai'],
         },
       },
     },

@@ -1055,6 +1055,16 @@ button[role="switch"][class~="bg-accent"] {
 .depth-card {
   /* Dark theme: backgrounds managed by surface-glass class */
 }
+
+/* ── Animazione cambio tab (CSS transitions: evita Framer Motion per i tab) ── */
+.tab-content-fade-in {
+  animation: tabFadeIn 0.25s ease-out;
+}
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /** Modalità no-motion: azzera tutte le transizioni e animazioni CSS */
 html.no-motion *,
 html.no-motion *::before,

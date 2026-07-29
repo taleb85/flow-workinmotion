@@ -8,6 +8,8 @@ import type { BackgroundTheme } from '../utils/backgroundThemes';
 import DesignAuditPreview from '../components/DesignAuditPreview';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+// AnimatePresence/motion mantenuti solo per overlay modali e PIN;
+// le animazioni cambio tab sono state sostituite con CSS transitions (performance mobile).
 import { useAppUser, useAppData, useAppConfig, useAppOverlay } from '../context/AppContext';
 import { ProfileLeaveGuardRefContext, type ProfileLeaveGuard } from '../context/ProfileLeaveGuardContext';
 import { applyUnauthenticatedDocumentTheme } from '../utils/theme';
@@ -807,33 +809,11 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
               {(t as Record<string, string>).app_all_nav_tabs_disabled}
             </div>
           ) : isManagement ? (
-            <AnimatePresence mode="wait" custom={tabNavDirection.current}>
-              <motion.div
-                key={activeTab}
-                custom={tabNavDirection.current}
-                variants={{
-                  initial: (dir: number) => {
-                    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return { opacity: 0 };
-                    return { opacity: 0, x: dir * 36 };
-                  },
-                  animate: { opacity: 1, x: 0 },
-                  exit: (dir: number) => {
-                    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return { opacity: 0 };
-                    return { opacity: 0, x: dir * -24 };
-                  },
-                }}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 0.3, ease: [0.32, 0, 0.12, 1] }}
-                className="w-full flex-1 min-h-0 flex flex-col"
-                style={{ willChange: 'transform, opacity' }}
-              >
-                <Suspense fallback={null}>
-                  {renderManagementContent()}
-                </Suspense>
-              </motion.div>
-            </AnimatePresence>
+            <div className="w-full flex-1 min-h-0 flex flex-col tab-content-fade-in" key={activeTab}>
+              <Suspense fallback={null}>
+                {renderManagementContent()}
+              </Suspense>
+            </div>
           ) : currentUser ? (
             <RouteErrorBoundary sectionName="Dashboard staff">
               <Suspense fallback={null}>

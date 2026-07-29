@@ -165,6 +165,48 @@ function pickShiftInsertPayload(shift: Omit<Shift, 'id'>): Record<string, unknow
   return out;
 }
 
+// ── Helper Realtime: debounce + throttling + dedup ──────────────────────────
+/** Crea una funzione `pull` con debounce progressivo (raggruppa cambi ravvicinati)
+ *  e throttle (salta pull se uno è già in corso). Il timeout cresce quanto più
+ *  a lungo la raffica di eventi persiste, per evitare sovraccarico su Realtime. */
+function createRealtimePuller<T>(
+  fetchFn: () => Promise<T[]>,
+  callback: (data: T[]) => void,
+  label: string,
+  initialDelay = 400,
+): (() => void) & { forceNow: () => Promise<void> } {
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let pullInFlight = false;
+  let pendingSince = 0;
+  const maxDelay = 1200;
+  const pull = async () => {
+    if (pullInFlight) return;
+    pullInFlight = true;
+    try {
+      const data = await fetchFn();
+      callback(data);
+    } catch (e) {
+      if (import.meta.env.DEV) console.warn(`[realtime ${label}] refetch failed`, e);
+    } finally {
+      pullInFlight = false;
+    }
+  };
+  const schedulePull = () => {
+    const now = Date.now();
+    if (!pendingSince) pendingSince = now;
+    const elapsed = now - pendingSince;
+    // Più a lungo dura la raffica, più aspettiamo prima di fare fetch
+    const delay = Math.min(initialDelay + elapsed * 0.5, maxDelay);
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      pendingSince = 0;
+      void pull();
+    }, delay);
+  };
+  return Object.assign(schedulePull, { forceNow: pull });
+}
+
 export const database = {
   users: {
     async getAll() {
@@ -381,19 +423,23 @@ export const database = {
   shifts: {
     async getAll() {
       if (!supabase) return [];
-      const PAGE_SIZE = 1000;
+      const PAGE_SIZE = 500;
+      const MAX_PAGES = 20; // max 10.000 turni
       let allData: import('../types').Shift[] = [];
       let from = 0;
       const base = supabase.from('shifts').select('*');
       const ordered = withTenant(base).order('date', { ascending: false });
+      let pages = 0;
       // eslint-disable-next-line no-constant-condition
       while (true) {
+        if (pages >= MAX_PAGES) break;
         const { data, error } = await ordered.range(from, from + PAGE_SIZE - 1);
         if (error) throw error;
         if (!data || data.length === 0) break;
         allData = allData.concat(data);
         if (data.length < PAGE_SIZE) break;
         from += PAGE_SIZE;
+        pages++;
       }
       return allData;
     },
@@ -1176,130 +1222,86 @@ export const database = {
   realtime: {
     subscribeToShifts(userId: string | null, callback: (shifts: Shift[]) => void) {
       if (!supabase) return () => {};
-      let debounceTimer: ReturnType<typeof setTimeout> | null = null;
       const topic = `shifts:${userId ?? 'all'}:${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`}`;
-      const pull = async () => {
-        try {
-          const data = userId ? await database.shifts.getByUserId(userId) : await database.shifts.getAll();
-          callback(data);
-        } catch (e) {
-          if (import.meta.env.DEV) console.warn('[realtime shifts] refetch failed', e);
-        }
-      };
+      const handler = createRealtimePuller<Shift>(
+        () => userId ? database.shifts.getByUserId(userId) : database.shifts.getAll(),
+        callback,
+        'shifts',
+      );
       const channel = supabase!
         .channel(topic)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'shifts' }, () => {
-          if (debounceTimer) clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-            debounceTimer = null;
-            void pull();
-          }, 200);
-        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'shifts' }, handler)
         .subscribe((status) => {
-          if (status === 'SUBSCRIBED') void pull();
+          if (status === 'SUBSCRIBED') void handler.forceNow();
           else if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && import.meta.env.DEV) {
             console.warn('[realtime shifts]', status, topic);
           }
         });
       return () => {
-        if (debounceTimer) clearTimeout(debounceTimer);
         supabase!.removeChannel(channel);
       };
     },
     subscribeToHolidays(userId: string | null, callback: (holidays: HolidayRequest[]) => void) {
       if (!supabase) return () => {};
-      let debounceTimer: ReturnType<typeof setTimeout> | null = null;
       const topic = `holidays:${userId ?? 'all'}:${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`}`;
-      const pull = async () => {
-        try {
-          const data = userId ? await database.holidays.getByUserId(userId) : await database.holidays.getAll();
-          callback(data);
-        } catch (e) {
-          if (import.meta.env.DEV) console.warn('[realtime holidays] refetch failed', e);
-        }
-      };
+      const handler = createRealtimePuller<HolidayRequest>(
+        () => userId ? database.holidays.getByUserId(userId) : database.holidays.getAll(),
+        callback,
+        'holidays',
+      );
       const channel = supabase!
         .channel(topic)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'holiday_requests' }, () => {
-          if (debounceTimer) clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-            debounceTimer = null;
-            void pull();
-          }, 200);
-        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'holiday_requests' }, handler)
         .subscribe((status) => {
-          if (status === 'SUBSCRIBED') void pull();
+          if (status === 'SUBSCRIBED') void handler.forceNow();
           else if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && import.meta.env.DEV) {
             console.warn('[realtime holidays]', status, topic);
           }
         });
       return () => {
-        if (debounceTimer) clearTimeout(debounceTimer);
         supabase!.removeChannel(channel);
       };
     },
     subscribeToPunchRecords(userId: string | null, callback: (records: PunchRecord[]) => void) {
       if (!supabase) return () => {};
-      let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-      /** Nome univoco: due iscrizioni (AppProvider + StaffPersonalDashboard) non devono condividere lo stesso channel. */
       const topic = `punch-records:${userId ?? 'all'}:${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`}`;
-      const pull = async () => {
-        try {
-          const data = userId ? await database.punchRecords.getByUserId(userId) : await database.punchRecords.getAll();
-          callback(data);
-        } catch (e) {
-          if (import.meta.env.DEV) console.warn('[realtime punch_records] refetch failed', e);
-        }
-      };
+      const handler = createRealtimePuller<PunchRecord>(
+        () => userId ? database.punchRecords.getByUserId(userId) : database.punchRecords.getAll(),
+        callback,
+        'punch_records',
+      );
       const channel = supabase!
         .channel(topic)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'punch_records' }, () => {
-          if (debounceTimer) clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-            debounceTimer = null;
-            void pull();
-          }, 200);
-        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'punch_records' }, handler)
         .subscribe((status) => {
-          if (status === 'SUBSCRIBED') void pull();
+          if (status === 'SUBSCRIBED') void handler.forceNow();
           else if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && import.meta.env.DEV) {
             console.warn('[realtime punch_records]', status, topic);
           }
         });
       return () => {
-        if (debounceTimer) clearTimeout(debounceTimer);
         supabase!.removeChannel(channel);
       };
     },
     subscribeToUsers(callback: (users: User[]) => void) {
       if (!supabase) return () => {};
-      let debounceTimer: ReturnType<typeof setTimeout> | null = null;
       const topic = `users:${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`}`;
-      const pull = async () => {
-        try {
-          const data = await database.users.getAll();
-          callback(data);
-        } catch (e) {
-          if (import.meta.env.DEV) console.warn('[realtime users] refetch failed', e);
-        }
-      };
+      const handler = createRealtimePuller<User>(
+        () => database.users.getAll(),
+        callback,
+        'users',
+        500, // users cambia raramente → debounce più lungo
+      );
       const channel = supabase!
         .channel(topic)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
-          if (debounceTimer) clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-            debounceTimer = null;
-            void pull();
-          }, 300);
-        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, handler)
         .subscribe((status) => {
-          if (status === 'SUBSCRIBED') void pull();
+          if (status === 'SUBSCRIBED') void handler.forceNow();
           else if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && import.meta.env.DEV) {
             console.warn('[realtime users]', status, topic);
           }
         });
       return () => {
-        if (debounceTimer) clearTimeout(debounceTimer);
         supabase!.removeChannel(channel);
       };
     },
@@ -1309,37 +1311,25 @@ export const database = {
       onAvailability: (availability: HolidayRequest[]) => void
     ) {
       if (!supabase) return () => {};
-      let debounceTimer: ReturnType<typeof setTimeout> | null = null;
       const topic = `holidays-avail:${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`}`;
-      const pull = async () => {
-        try {
-          const [holidays, avail] = await Promise.all([
-            database.holidays.getAll(),
-            database.availability.getAll(),
-          ]);
-          onHolidays(holidays);
-          onAvailability(avail);
-        } catch (e) {
-          if (import.meta.env.DEV) console.warn('[realtime holidays+availability] refetch failed', e);
-        }
-      };
+      const handler = createRealtimePuller<HolidayRequest>(
+        () => Promise.all([
+          database.holidays.getAll(),
+          database.availability.getAll(),
+        ]).then(([h, a]) => { onHolidays(h); onAvailability(a); return h; }),
+        () => {}, // callback interna già gestita sopra
+        'holidays+availability',
+      );
       const channel = supabase!
         .channel(topic)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'holiday_requests' }, () => {
-          if (debounceTimer) clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-            debounceTimer = null;
-            void pull();
-          }, 200);
-        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'holiday_requests' }, handler)
         .subscribe((status) => {
-          if (status === 'SUBSCRIBED') void pull();
+          if (status === 'SUBSCRIBED') void handler.forceNow();
           else if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && import.meta.env.DEV) {
             console.warn('[realtime holidays+availability]', status, topic);
           }
         });
       return () => {
-        if (debounceTimer) clearTimeout(debounceTimer);
         supabase!.removeChannel(channel);
       };
     },

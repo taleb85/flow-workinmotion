@@ -2734,27 +2734,43 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     requestConfirmAndSaveOrder, requestConfirmAndPublishWeek,
   ]);
 
+  const appContextValue = useMemo(() => ({
+    isLoading,
+    currentUser, setCurrentUser, users, shifts, holidays, punchRecords, availability, toggleAvailability,
+    addShift, updateShift, approveShift, deleteShift, deleteShifts, copyShift, bulkCopyPreviousWeek,
+    publishWeekShifts, publishDayShifts, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
+    updateUser, createUser, deleteUser, reorderUsers, setUsersSortOrder, updateUserPreferences, effectiveLanguage, setLanguage, clearLanguage, showError, showSuccess, forceGlobalRefresh, hardResetTestData, seedDemoProfileForUser, silentRefreshData, hardReloadFromDatabase, isGlobalRefreshing, syncStage, dataSyncInProgress,
+    postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, unlockAfterRefreshWithDevice, registerPinUnlockDevice, pinUnlockDeviceRegistered, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
+    featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,
+    presenceVerificationConfig, savePresenceVerificationConfig,
+    workRules, setWorkRules, breakRules, setBreakRules,
+    roleTemplatesRevision, saveRoleFeatureTemplates,
+    adminModulesRevision, saveAdminModulesGlobal,
+    departmentsRevision, notifyDepartmentsChanged,
+    pushSettingsToCloud, settingsCloudLastSyncedAt, settingsCloudPushBusy,
+    managementDataTouchedSinceLastSync,
+    isSessionElevated, setIsSessionElevated,
+    impersonatingAs, originalAdminUser, setImpersonating,
+  } satisfies AppContextType), [
+    isLoading, currentUser, setCurrentUser, users, shifts, holidays, punchRecords, availability, toggleAvailability,
+    addShift, updateShift, approveShift, deleteShift, deleteShifts, copyShift, bulkCopyPreviousWeek,
+    publishWeekShifts, publishDayShifts, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
+    updateUser, createUser, deleteUser, reorderUsers, setUsersSortOrder, updateUserPreferences, effectiveLanguage, setLanguage, clearLanguage, showError, showSuccess, forceGlobalRefresh, hardResetTestData, seedDemoProfileForUser, silentRefreshData, hardReloadFromDatabase, isGlobalRefreshing, syncStage, dataSyncInProgress,
+    postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, unlockAfterRefreshWithDevice, registerPinUnlockDevice, pinUnlockDeviceRegistered, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
+    featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,
+    presenceVerificationConfig, savePresenceVerificationConfig,
+    workRules, setWorkRules, breakRules, setBreakRules,
+    roleTemplatesRevision, saveRoleFeatureTemplates,
+    adminModulesRevision, saveAdminModulesGlobal,
+    departmentsRevision, notifyDepartmentsChanged,
+    pushSettingsToCloud, settingsCloudLastSyncedAt, settingsCloudPushBusy,
+    managementDataTouchedSinceLastSync,
+    isSessionElevated, setIsSessionElevated,
+    impersonatingAs, originalAdminUser, setImpersonating,
+  ]);
+
   return (
-    <AppContext.Provider
-      value={{
-        isLoading,
-        currentUser, setCurrentUser, users, shifts, holidays, punchRecords, availability, toggleAvailability,
-        addShift, updateShift, approveShift, deleteShift, deleteShifts, copyShift, bulkCopyPreviousWeek,
-        publishWeekShifts, publishDayShifts, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
-        updateUser, createUser, deleteUser, reorderUsers, setUsersSortOrder, updateUserPreferences, effectiveLanguage, setLanguage, clearLanguage, showError, showSuccess, forceGlobalRefresh, hardResetTestData, seedDemoProfileForUser, silentRefreshData, hardReloadFromDatabase, isGlobalRefreshing, syncStage, dataSyncInProgress,
-        postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, unlockAfterRefreshWithDevice, registerPinUnlockDevice, pinUnlockDeviceRegistered, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
-        featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,
-        presenceVerificationConfig, savePresenceVerificationConfig,
-        workRules, setWorkRules, breakRules, setBreakRules,
-        roleTemplatesRevision, saveRoleFeatureTemplates,
-        adminModulesRevision, saveAdminModulesGlobal,
-        departmentsRevision, notifyDepartmentsChanged,
-        pushSettingsToCloud, settingsCloudLastSyncedAt, settingsCloudPushBusy,
-        managementDataTouchedSinceLastSync,
-        isSessionElevated, setIsSessionElevated,
-        impersonatingAs, originalAdminUser, setImpersonating,
-      } satisfies AppContextType}
-    >
+    <AppContext.Provider value={appContextValue}>
       <UserSliceContext.Provider value={userSlice}>
         <DataSliceContext.Provider value={dataSlice}>
           <ConfigSliceContext.Provider value={configSlice}>

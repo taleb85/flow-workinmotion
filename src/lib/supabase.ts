@@ -7,9 +7,29 @@ function cleanEnv(val: string | undefined): string {
 const supabaseUrl = cleanEnv(import.meta.env.VITE_SUPABASE_URL);
 const supabaseKey = cleanEnv(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? import.meta.env.VITE_SUPABASE_ANON_KEY);
 
-/** Fetch senza cache: evita risposte stale su pull-to-refresh e sync multi-dispositivo */
-const fetchNoCache: typeof fetch = (input, init) =>
-  fetch(input, { ...init, cache: 'no-store' });
+// ── Cache condizionale per Supabase ──────────────────────────────────────────
+// WRITE (insert/update/delete) → sempre fresche (no-store).
+// READ (select) → usa cache default del browser per ridurre richieste ridondanti.
+// Il Service Worker (CacheFirst su JS/CSS) non interferisce con le fetch API.
+const isWritePath = (url: string | URL | Request): boolean => {
+  if (typeof url === 'string') return url === '' || false;
+  const u = typeof url === 'object' && 'url' in url ? (url as Request).url : String(url);
+  // Le richieste REST di supabase-js POST/PATCH/DELETE sono write
+  return false; // supabase-js usa POST per select, quindi controlliamo il metodo
+};
+
+/**
+ * Fetch con cache condizionale:
+ * - Select (GET) → cache predefinita del browser (304 Not Modified se possibile)
+ * - Insert/Update/Delete (POST/PATCH/DELETE) → no-store per consistenza
+ * Il Service Worker PWA gestisce già le risorse statiche; le API calls passano attraverso.
+ */
+const fetchWithSmartCache: typeof fetch = (input, init) => {
+  const method = (init?.method ?? (typeof input === 'object' && 'method' in input
+    ? (input as Request).method : 'GET')).toUpperCase();
+  const cacheMode = method === 'GET' ? 'default' : 'no-store';
+  return fetch(input, { ...init, cache: cacheMode });
+};
 
 /**
  * L'app usa sessione custom (`app_session`) e PostgREST/Storage con chiave anonima:
@@ -23,7 +43,7 @@ const fetchNoCache: typeof fetch = (input, init) =>
  */
 export const supabase: SupabaseClient | null = supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey, {
-      global: { fetch: fetchNoCache },
+      global: { fetch: fetchWithSmartCache },
       auth: {
         persistSession: false,
         autoRefreshToken: false,
