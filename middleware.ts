@@ -4,7 +4,7 @@ export const config = {
 
 export default async function middleware(request: Request) {
   const userAgent = request.headers.get('user-agent') || '';
-  if (!/iPhone|iPad|iPod/.test(userAgent)) return;
+  if (!/iPhone|iPad|iPod/.test(userAgent)) return undefined;
 
   const mobileconfigUrl = new URL('/Installa_FLOW.mobileconfig', request.url).href;
   const resp = await fetch(mobileconfigUrl);
