@@ -223,8 +223,17 @@ export function TimeInputField({
           }
         }}
         onBlur={() => flush(h, m)}
-        onFocus={(e) => e.currentTarget.select()}
-        onClick={(e) => e.currentTarget.select()}
+        onFocus={(e) => {
+          requestAnimationFrame(() => e.currentTarget.select());
+        }}
+        onClick={(e) => {
+          e.currentTarget.select();
+        }}
+        onMouseUp={(e) => {
+          // Dopo il rilascio del mouse, forza la selezione (alcuni browser deselezionano dopo onClick)
+          e.currentTarget.select();
+          e.preventDefault();
+        }}
         onKeyDown={handleHourKeyDown}
         className={`${inner} pl-2 pr-0.5`}
         style={{ background: 'transparent' }}
@@ -252,8 +261,16 @@ export function TimeInputField({
           }
         }}
         onBlur={() => flush(h, m)}
-        onFocus={(e) => e.currentTarget.select()}
-        onClick={(e) => e.currentTarget.select()}
+        onFocus={(e) => {
+          requestAnimationFrame(() => e.currentTarget.select());
+        }}
+        onClick={(e) => {
+          e.currentTarget.select();
+        }}
+        onMouseUp={(e) => {
+          e.currentTarget.select();
+          e.preventDefault();
+        }}
         onKeyDown={handleMinuteKeyDown}
         className={`${inner} pl-0.5 pr-2`}
         style={{ background: 'transparent' }}

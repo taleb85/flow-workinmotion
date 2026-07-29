@@ -400,9 +400,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   }, [drawerOpen, editStartTime, editEndTime, editIn, editOut, deductBreak, isAutoBreak]);
 
   const handleCloseDrawer = useCallback(() => {
-    if (hasUnsavedChanges && !confirm(t.unsaved_changes_confirm ?? 'Sono presenti modifiche non salvate. Chiudere ugualmente?')) return;
+    if (hasUnsavedChanges) return; // Impedisce la chiusura se ci sono modifiche non salvate
     setDrawerOpen(false);
-  }, [hasUnsavedChanges, t]);
+  }, [hasUnsavedChanges]);
 
   // ── Selection / Bulk edit ──
   const [selectedShiftIds, setSelectedShiftIds] = useState<Set<string>>(new Set());
@@ -413,8 +413,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       if (e.key !== 'Escape') return;
       // Chiudi modale creazione turno
       setCreateModal(null);
-      // Chiudi drawer dettaglio
-      if (drawerOpen) {
+      // Chiudi drawer dettaglio (solo se nessuna modifica non salvata)
+      if (drawerOpen && !hasUnsavedChanges) {
         setDrawerOpen(false);
         setSelectedShift(null);
       }
@@ -423,7 +423,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [drawerOpen, selectedShiftIds]);
+  }, [drawerOpen, selectedShiftIds, hasUnsavedChanges]);
 
   // ── Drag & Drop ──
   // Usiamo una ref per draggedShiftId per evitare stale closure nei drag handler
@@ -649,7 +649,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setSaving(true);
     try {
       await updateShift(selectedShift.id, { start_time: editStartTime + ':00', end_time: editEndTime + ':00' });
+      // Aggiorna i valori iniziali così hasUnsavedChanges torna false
+      initialValuesRef.current = {
+        ...initialValuesRef.current,
+        editStartTime,
+        editEndTime,
+      };
       showSuccess(t.shift_updated ?? 'Turno aggiornato.');
+      // Chiudi automaticamente il drawer dopo salvataggio riuscito
+      setDrawerOpen(false);
     } catch { showError(t.error_generic ?? 'Errore.'); }
     finally { setSaving(false); }
   }, [selectedShift, editStartTime, editEndTime, updateShift, showSuccess, showError, t]);
@@ -1008,7 +1016,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     // Mostra conferma per spostare o copiare
     const targetUser = users.find(u => u.id === targetUserId);
     const firstShift = allShifts.find(s => s.id === filtered[0]);
-    const slot = targetSlot ?? getShiftSlotFromStartTime(firstShift?.start_time ?? '10:00');
+    // I preset mostrati devono corrispondere al tipo di turno trascinato (dal suo orario),
+    // non alla zona di drop (targetSlot indica solo in quale metà della cella posizionarlo).
+    const slot = getShiftSlotFromStartTime(firstShift?.start_time ?? '10:00');
     const slotLabel = slot === 'lunch' ? 'pranzo' : 'sera';
     const presets = loadShiftSlotPresets(slot);
     const origStart = firstShift?.start_time?.slice(0, 5);
@@ -1816,6 +1826,18 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     <Trash2 className="h-4 w-4" />
                   </button>
                 )}
+                {canDeleteShift(selectedShift) && drawerDeleteConfirm && (
+                  <div className="flex items-center gap-1.5">
+                    <button type="button" onClick={() => setDrawerDeleteConfirm(false)}
+                      className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] font-bold text-white/70 hover:bg-white/20 transition-all whitespace-nowrap">
+                      {t.cancel ?? 'Annulla'}
+                    </button>
+                    <button type="button" onClick={() => void handleDeleteShift(selectedShift, { skipConfirm: true })}
+                      className="rounded-lg bg-rose-600 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-rose-700 transition-all whitespace-nowrap">
+                      {t.wst_confirm_delete_btn ?? 'Conferma elimina'}
+                    </button>
+                  </div>
+                )}
                 {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
                   <button type="button" onClick={() => handleFreezeShift(selectedShift)}
                     className="rounded-lg bg-emerald-600/20 p-2 text-emerald-300 hover:bg-emerald-600/30 transition-all" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
@@ -1979,20 +2001,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               </div>
               {/* Bottom row: Action buttons */}
               <div className="col-span-2 flex flex-wrap gap-2">
-                {canDeleteShift(selectedShift) && (
-                  drawerDeleteConfirm ? (
-                    <div className="flex w-full gap-2">
-                      <button type="button" onClick={() => setDrawerDeleteConfirm(false)}
-                        className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-[11px] font-bold text-white/70 hover:bg-white/20 transition-all hover:scale-[1.02] active:scale-95">
-                        {t.cancel ?? 'Annulla'}
-                      </button>
-                      <button type="button" onClick={() => void handleDeleteShift(selectedShift, { skipConfirm: true })}
-                        className="flex-1 rounded-lg bg-rose-600 px-3 py-2 text-[11px] font-bold text-white hover:bg-rose-700 transition-all hover:scale-[1.02] active:scale-95">
-                        {t.wst_confirm_delete_btn ?? 'Conferma elimina'}
-                      </button>
-                    </div>
-                  ) : null
-                )}
                 {canEdit && isFrozen(selectedShift) && (
                   <button type="button" onClick={() => handleUnfreezeShift(selectedShift)}
                     className="ml-auto flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-2 text-[11px] font-bold text-accent hover:bg-accent/30 transition-all border border-transparent hover:border-accent/30 hover:scale-[1.02] active:scale-95">

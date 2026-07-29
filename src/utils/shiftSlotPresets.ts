@@ -20,13 +20,23 @@ export const DEFAULT_EVENING_PRESETS: ShiftTimePreset[] = [
 const STORAGE_PREFIX = 'flow_slot_presets_';
 
 export function loadShiftSlotPresets(slot: ShiftSlot): ShiftTimePreset[] {
+  const defaults = slot === 'lunch' ? DEFAULT_LUNCH_PRESETS : DEFAULT_EVENING_PRESETS;
   try {
     const raw = localStorage.getItem(`${STORAGE_PREFIX}${slot}`);
-    if (raw) return JSON.parse(raw) as ShiftTimePreset[];
+    if (raw) {
+      const custom = JSON.parse(raw) as ShiftTimePreset[];
+      if (Array.isArray(custom) && custom.length > 0) {
+        // Unisce custom + default, eliminando duplicati (stesso start+end).
+        // I custom vengono prima, i default vengono dopo se non già presenti.
+        const seen = new Set(custom.map((p) => `${p.start}|${p.end}`));
+        const extras = defaults.filter((p) => !seen.has(`${p.start}|${p.end}`));
+        return [...custom, ...extras];
+      }
+    }
   } catch {
     /* ignore */
   }
-  return slot === 'lunch' ? DEFAULT_LUNCH_PRESETS : DEFAULT_EVENING_PRESETS;
+  return defaults;
 }
 
 export function saveShiftSlotPresets(slot: ShiftSlot, presets: ShiftTimePreset[]): void {
