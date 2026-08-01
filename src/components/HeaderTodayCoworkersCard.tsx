@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { format, isValid } from 'date-fns';
+import { format } from 'date-fns';
 import { Users } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppData } from '../context/appSliceContexts';
@@ -35,35 +35,6 @@ function effectiveShiftType(s: Shift): 'lunch' | 'dinner' {
   return !Number.isNaN(h) && h >= 17 ? 'dinner' : 'lunch';
 }
 
-function lunchDinnerRingClass(shifts: Shift[]): string {
-  const types = new Set(shifts.map(effectiveShiftType));
-  const hasL = types.has('lunch');
-  const hasD = types.has('dinner');
-  if (hasL && hasD) {
-    return 'bg-brand-500';
-  }
-  if (hasD) {
-    return 'bg-violet-500';
-  }
-  return 'bg-amber-500';
-}
-
-/** Anello: pranzo/cena (turni ≤16:00) + viola per cambio guardia (>16:00). */
-function shiftRingOuterClass(shifts: Shift[]): string {
-  if (shifts.length > 1) {
-    return 'bg-brand-500';
-  }
-  const early = shifts.filter((s) => !isCambioGuardiaShift(s));
-  const late = shifts.filter((s) => isCambioGuardiaShift(s));
-  if (late.length === 0) {
-    return lunchDinnerRingClass(early.length ? early : shifts);
-  }
-  if (early.length === 0) {
-    return 'bg-violet-500';
-  }
-  return 'bg-brand-500';
-}
-
 function shiftRingTitle(
   shifts: Shift[],
   lunchLabel: string,
@@ -89,17 +60,19 @@ function shiftRingTitle(
   return parts.join(' · ');
 }
 
-type Row = { userId: string; name: string; shifts: Shift[] };
+type Row = { userId: string; name: string; shifts: Shift[]; sortOrder: number };
 
-function shiftTimeCaption(shifts: Shift[], multiLabel: string): string {
+/** Intervalli orari come nella tabella turni: "16:00 – 23:00"; più turni separati da " · ". */
+function shiftTimeIntervals(shifts: Shift[]): string {
   if (shifts.length === 0) return '';
-  if (shifts.length === 1) {
-    const s = shifts[0];
-    const a = (s.start_time || '').slice(0, 5);
-    const b = (s.end_time || '').slice(0, 5);
-    return a && b ? `${a}–${b}` : a || b || '—';
-  }
-  return multiLabel.replace('{n}', String(shifts.length));
+  const intervals = shifts
+    .map((s) => {
+      const a = (s.start_time || '').slice(0, 5);
+      const b = (s.end_time || '').slice(0, 5);
+      return a && b ? `${a} – ${b}` : a || b || '';
+    })
+    .filter(Boolean);
+  return [...new Set(intervals)].join(' · ');
 }
 
 /**
@@ -107,7 +80,7 @@ function shiftTimeCaption(shifts: Shift[], multiLabel: string): string {
  */
 export default function HeaderTodayCoworkersCard() {
   const { currentUser, users } = useAppUser();
-  const { shifts, punchRecords } = useAppData();
+  const { shifts } = useAppData();
   const { featureFlags } = useAppConfig();
   const t = useT();
   const tv = t as Record<string, string>;
@@ -136,35 +109,12 @@ export default function HeaderTodayCoworkersCard() {
       if (!u) continue;
       const sorted = [...list].sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
       const name = (u.first_name ?? '').trim() || u.email?.split('@')[0] || '—';
-      out.push({ userId, name, shifts: sorted });
+      out.push({ userId, name, shifts: sorted, sortOrder: u.sort_order ?? 0 });
     }
-    out.sort((a, b) => {
-      const aStart = a.shifts[0]?.start_time || '99:99';
-      const bStart = b.shifts[0]?.start_time || '99:99';
-      return aStart.localeCompare(bStart);
-    });
+    // Ordina come la tabella ruota: per sort_order (poi per nome).
+    out.sort((a, b) => (a.sortOrder - b.sortOrder) || a.name.localeCompare(b.name));
     return out;
   }, [currentUser, shifts, users, isVisibleByAdmin]);
-
-  const getPunchForShift = (shiftId: string, userId: string, dateStr: string, isLunchShift: boolean) => {
-    const punchIn = punchRecords.find((p) => {
-      if (p.type !== 'in') return false;
-      if (shiftId && p.shift_id) return p.shift_id === shiftId;
-      if (p.user_id !== userId) return false;
-      const d = new Date(p.timestamp);
-      if (!isValid(d)) return false;
-      return format(d, 'yyyy-MM-dd') === dateStr && (isLunchShift ? d.getHours() < 16 : d.getHours() >= 16);
-    });
-    const punchOut = punchRecords.find((p) => {
-      if (p.type !== 'out') return false;
-      if (shiftId && p.shift_id) return p.shift_id === shiftId;
-      if (p.user_id !== userId) return false;
-      const d = new Date(p.timestamp);
-      if (!isValid(d)) return false;
-      return format(d, 'yyyy-MM-dd') === dateStr && (isLunchShift ? d.getHours() < 16 : d.getHours() >= 16);
-    });
-    return { punchIn, punchOut };
-  };
 
   if (!currentUser || !isVisibleByAdmin) return null;
 
@@ -174,7 +124,6 @@ export default function HeaderTodayCoworkersCard() {
   const lunchL = t.lunch ?? 'Pranzo';
   const dinnerL = t.dinner ?? 'Cena';
   const cambioL = tv.header_coworkers_cambio_guardia ?? 'Cambio guardia';
-  const multiShiftsTpl = tv.header_coworkers_multi_shifts ?? '{n} turni';
 
   return (
     <section className="w-full px-3 py-2 sm:px-4 sm:py-3" aria-label={title}>
@@ -197,7 +146,7 @@ export default function HeaderTodayCoworkersCard() {
           <ul
             id="header-coworkers-today-list"
             aria-label={title}
-            className="smooth-scroll flex min-w-0 flex-1 flex-nowrap gap-4 overflow-x-auto overscroll-contain pb-2 no-scrollbar"
+            className="smooth-scroll flex min-w-0 flex-1 flex-nowrap gap-2 overflow-x-auto overscroll-contain pb-2 no-scrollbar"
           >
             {rows.map((r) => {
               const u = users.find((x) => x.id === r.userId);
@@ -206,49 +155,35 @@ export default function HeaderTodayCoworkersCard() {
               const focus = readAvatarFocus(r.userId);
               const initial = (r.name.charAt(0) || '?').toUpperCase();
               const ringTitle = shiftRingTitle(r.shifts, lunchL, dinnerL, cambioL);
-              const timeCaption = shiftTimeCaption(r.shifts, multiShiftsTpl);
-              const isPunchedIn = r.shifts.some(s => {
-                const isDinner = effectiveShiftType(s) === 'dinner';
-                const { punchIn, punchOut } = getPunchForShift(s.id, s.user_id, format(new Date(), 'yyyy-MM-dd'), !isDinner);
-                return !!punchIn && !punchOut;
-              });
+              const intervals = shiftTimeIntervals(r.shifts);
 
               return (
                 <li
                   key={r.userId}
-                  className="flex w-[4.5rem] shrink-0 flex-col items-center gap-1.5 text-center"
+                  className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] py-1 pl-1 pr-3"
+                  title={`${ringTitle}${intervals ? ` · ${intervals}` : ''}`}
                 >
-                  <div
-                    className="relative shrink-0 rounded-xl rounded-xl border border-neutral-500"
-                    title={`${ringTitle}${timeCaption ? ` · ${timeCaption}` : ''}`}
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-slate-50">
-                      {avatarSrc ? (
-                        <img
-                          src={avatarSrc}
-                          alt=""
-                          role="presentation"
-                          className="h-full w-full object-cover"
-                          style={{ objectPosition: avatarFocusToObjectPosition(focus) }}
-                          draggable={false}
-                        />
-                      ) : (
-                        <span className="text-lg font-bold text-white/60" aria-hidden>
-                          {initial}
-                        </span>
-                      )}
-                    </div>
-                    {/* Shift Type Indicator */}
-                    <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full shadow-sm z-10 ${shiftRingOuterClass(r.shifts)}`}></div>
-                    {isPunchedIn && (
-                      <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-brand-500 border-2 border-white rounded-full shadow-sm z-10"></div>
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-50">
+                    {avatarSrc ? (
+                      <img
+                        src={avatarSrc}
+                        alt=""
+                        role="presentation"
+                        className="h-full w-full object-cover"
+                        style={{ objectPosition: avatarFocusToObjectPosition(focus) }}
+                        draggable={false}
+                      />
+                    ) : (
+                      <span className="text-base font-bold text-white/60" aria-hidden>
+                        {initial}
+                      </span>
                     )}
                   </div>
-                  <div className="min-w-0 w-full px-0.5">
-                    <span className="block truncate text-[11px] font-black uppercase tracking-tight text-white/60" title={r.name}>{r.name}
+                  <div className="min-w-0 flex flex-col">
+                    <span className="block max-w-[88px] truncate text-[11px] font-black uppercase tracking-tight leading-tight text-white/80" title={r.name}>{r.name}
                     </span>
-                    {timeCaption ? (
-                      <span className="block truncate text-[11px] font-bold tabular-nums text-white/60 mt-0.5" title={timeCaption}>{timeCaption}
+                    {intervals ? (
+                      <span className="block max-w-[88px] truncate text-[10px] font-bold tabular-nums leading-tight text-white/50" title={intervals}>{intervals}
                       </span>
                     ) : null}
                   </div>

@@ -55,6 +55,21 @@ function buildMessage(p: Payload): { recipientId: string; body: string } | null 
   }
 
   if (type === 'UPDATE' && record && old_record) {
+    // Pubblicazione turno: draft → confirmed (invio notifica "turno pubblicato").
+    if (old_record.approval_status === 'draft' && record.approval_status === 'confirmed') {
+      const uid = record.user_id;
+      if (typeof uid !== 'string') return null;
+      const st = fmtTime(record.start_time);
+      const range =
+        record.end_time != null && String(record.end_time).length > 0
+          ? `${st}-${fmtTime(record.end_time)}`
+          : st;
+      return {
+        recipientId: uid,
+        body: `Il tuo turno del ${fmtDate(record.date)} è stato pubblicato: ${range}`,
+      };
+    }
+
     if (
       old_record.date === record.date &&
       old_record.start_time === record.start_time &&

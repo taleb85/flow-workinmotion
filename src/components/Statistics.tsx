@@ -597,7 +597,8 @@ export default function Statistics() {
 
               </div>
 
-              {/* PDF + Filtro reparto — lato destro */}
+              {/* PDF + Filtro reparto — lato destro (renderizzato solo se c'è almeno un'azione disponibile) */}
+              {((showManagementStatsChrome && isFeatureEnabled(currentUser, 'export_pdf')) || (isAdmin && departments.length > 0)) && (
               <div className="flex w-full min-w-0 shrink-0 flex-wrap items-center justify-end sm:w-auto sm:flex-nowrap md:contents">
                 <div className="relative flex min-h-9 w-full min-w-0 items-center justify-end gap-1 sm:w-auto md:ml-auto lg:min-h-10">
                   {showManagementStatsChrome && isFeatureEnabled(currentUser, 'export_pdf') && (
@@ -724,6 +725,7 @@ export default function Statistics() {
                   )}
                 </div>
               </div>
+              )}
              </div>
           </>
         )}

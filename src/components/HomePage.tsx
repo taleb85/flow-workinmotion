@@ -414,7 +414,7 @@ export default function HomePage({
   // ── MANAGER VIEW (team home) ────────────────────────────────────────────────
   if (isMobile) {
     return (
-      <div className="pb-content pt-6 w-full app-horizontal-pad font-sans">
+      <div className="pb-content pt-6 w-full font-sans">
         <MobileStaffDashboard
           user={currentUser}
           language={effectiveLanguage}

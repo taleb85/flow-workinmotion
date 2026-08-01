@@ -250,6 +250,17 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const [periodNavOffset, setPeriodNavOffset] = useState(0);
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [weekStart, setWeekStart] = useState(() => startOfWeek(today, { weekStartsOn: 1 }));
+
+  /** Schede dipendenti a cassetto nella vista mobile (default: tutte chiuse, si aprono al tap). */
+  const [expandedUserIds, setExpandedUserIds] = useState<Set<string>>(() => new Set());
+  const toggleUserExpanded = useCallback((userId: string) => {
+    setExpandedUserIds(prev => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  }, []);
   const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
 
   const effectivePeriod = periodNavOffset === 0 ? periodConfig
@@ -1516,14 +1527,32 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           });
           return (
             <div key={user.id} className="rounded-xl border border-neutral-500 overflow-hidden p-4 shadow-sm">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h4 className="font-bold text-lg text-white">{user.first_name} {user.last_name?.[0] ?? ''}</h4>
-                  {user.department && (
-                    <p className="text-[11px] text-white/50 font-medium uppercase tracking-wider">{user.department}</p>
-                  )}
+              <div
+                role="button"
+                tabIndex={0}
+                aria-expanded={expandedUserIds.has(user.id)}
+                onClick={() => toggleUserExpanded(user.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleUserExpanded(user.id);
+                  }
+                }}
+                className="flex justify-between items-start mb-4 cursor-pointer select-none"
+              >
+                <div className="flex items-start gap-2 min-w-0">
+                  <ChevronDown
+                    className={`mt-1 h-4 w-4 shrink-0 text-white/40 transition-transform ${expandedUserIds.has(user.id) ? '' : '-rotate-90'}`}
+                    aria-hidden
+                  />
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-lg text-white truncate">{user.first_name} {user.last_name?.[0] ?? ''}</h4>
+                    {user.department && (
+                      <p className="text-[11px] text-white/50 font-medium uppercase tracking-wider">{user.department}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <div className="text-[10px] font-bold text-white/40 uppercase tracking-tight">{t.total_hours ?? 'Ore'}</div>
                   <div className="text-sm font-bold text-accent tabular-nums">
                     {formatMinutesToHoursAndMinutes(totalActual)}
@@ -1534,6 +1563,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 </div>
               </div>
 
+              {expandedUserIds.has(user.id) && (
               <div className="space-y-2">
                 {!userHasShifts ? (
                   <div
@@ -1598,6 +1628,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   })
                 )}
               </div>
+              )}
             </div>
           );
         })}

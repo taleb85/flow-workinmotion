@@ -1,15 +1,14 @@
 -- Push turni via payload allineato ai Database Webhook Supabase (docs: Database Webhooks).
 -- pg_net accoda la POST in modo asincrono: non blocca il commit e non richiede l’app aperta.
 --
--- URL destinazione: {app.supabase_url}/functions/v1/shift-change-webhook
--- Headers: Authorization Bearer {app.service_role_key}
+-- URL destinazione: https://xzfcxjcwsyigdlsfmwwv.supabase.co/functions/v1/shift-change-webhook
+-- La edge function è deployata con --no-verify-jwt e usa la propria service role key in
+-- ambiente, quindi il trigger non ha bisogno di header Authorization né di GUC custom.
 --
--- Stessi secret della migration 20260403140000_push_subscriptions.sql:
---   ALTER DATABASE postgres SET app.supabase_url = 'https://<ref>.supabase.co';
---   ALTER DATABASE postgres SET app.service_role_key = '<service_role_jwt>';
---
--- Opzionale: puoi creare un Webhook da Dashboard (tabella shifts, stessi eventi) puntando
--- allo stesso URL e disattivare i trigger qui sotto, per gestire tutto dall’UI.
+-- NOTA: in passato questa funzione leggeva i GUC custom `app.supabase_url` e
+-- `app.service_role_key` (via current_setting). Non erano mai stati impostati sul DB,
+-- quindi il trigger usciva subito e NON inviava MAI alcuna notifica. Ora l'URL è
+-- hardcodato: se il progetto cambia, aggiornare qui e nella edge function.
 
 CREATE EXTENSION IF NOT EXISTS pg_net;
 
@@ -25,17 +24,10 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  _base text;
   _url  text;
   _payload jsonb;
 BEGIN
-  _base := rtrim(coalesce(nullif(current_setting('app.supabase_url', true), ''), ''), '/');
-  IF _base = '' THEN
-    IF TG_OP = 'DELETE' THEN
-      RETURN OLD;
-    END IF;
-    RETURN NEW;
-  END IF;
+  _url := 'https://xzfcxjcwsyigdlsfmwwv.supabase.co/functions/v1/shift-change-webhook';
 
   IF TG_OP = 'INSERT' THEN
     IF NEW.approval_status IS NOT DISTINCT FROM 'draft'::text THEN
@@ -45,12 +37,11 @@ BEGIN
     IF OLD.date IS NOT DISTINCT FROM NEW.date
        AND OLD.start_time IS NOT DISTINCT FROM NEW.start_time
        AND OLD.end_time IS NOT DISTINCT FROM NEW.end_time
+       AND NOT (OLD.approval_status = 'draft'::text AND NEW.approval_status = 'confirmed'::text)
     THEN
       RETURN NEW;
     END IF;
   END IF;
-
-  _url := _base || '/functions/v1/shift-change-webhook';
 
   IF TG_OP = 'INSERT' THEN
     _payload := jsonb_build_object(
@@ -82,8 +73,7 @@ BEGIN
     PERFORM net.http_post(
       url := _url,
       headers := jsonb_build_object(
-        'Content-Type', 'application/json',
-        'Authorization', 'Bearer ' || coalesce(nullif(current_setting('app.service_role_key', true), ''), '')
+        'Content-Type', 'application/json'
       ),
       body := _payload
     );

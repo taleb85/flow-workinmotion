@@ -622,7 +622,7 @@ export default function StaffPersonalDashboard({
     const todayStr = format(now, 'yyyy-MM-dd');
 
     return (
-      <div className="space-y-0 max-md:pt-[92px]">
+      <div className="space-y-0">
         <StaffPushNotificationPromptBanner userId={displayUser.id} effectiveLanguage={effectiveLanguage} />
         <MobileStaffDashboard
           user={displayUser}
@@ -890,7 +890,7 @@ export default function StaffPersonalDashboard({
   );
 
   const renderHolidays = () => (
-    <div className="space-y-4 max-md:pt-[92px]">
+    <div className="space-y-4">
       {isMobile ? (
         <MobileRequests 
           requests={holidays.filter(h => h.user_id === user.id)} 
@@ -973,7 +973,7 @@ export default function StaffPersonalDashboard({
                 {activeTab === 'timesheet' && (
                   <>
                     {/* ── Sub-tab: Presenze | Statistiche — sempre visibile per tutti i profili ── */}
-                    <div className="flex items-center gap-1.5 mb-4 px-4">
+                    <div className="flex items-center gap-1.5 mt-8 mb-4 px-4">
                       {(['presence', 'stats'] as const).map((v) => {
                         const label = v === 'presence' ? (t.tab_attendance ?? 'Presenze') : (t.tab_statistics ?? 'Statistiche');
                         const active = tsStaffView === v;

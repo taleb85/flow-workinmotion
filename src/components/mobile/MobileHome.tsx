@@ -132,7 +132,7 @@ export default function MobileHome({
       )}
 
       {/* ── Saluto compatto ─────────────────────────────────────────── */}
-      <div className="px-1">
+      <div className="px-1 mt-5">
         <h1 className="text-xl font-extrabold tracking-tight leading-tight text-white">
           {greetingText}
         </h1>
@@ -223,7 +223,7 @@ export default function MobileHome({
               type="button"
               disabled={punchBusy}
               onClick={onStart}
-              className="w-full h-11 bg-brand-electric hover:bg-blue-500 text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-900/30 transition-all active:scale-95 disabled:opacity-60 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              className="w-full h-11 bg-brand-electric hover:bg-blue-500 text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-black/20 transition-all active:scale-95 disabled:opacity-60 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               <Play className="w-4 h-4 fill-current" />
               <span className="text-sm font-bold uppercase tracking-wider">
