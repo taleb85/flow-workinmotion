@@ -44,7 +44,7 @@
     }
 
     // Valori di default se non presenti nel payload
-    const title = notificationData.title || 'FLOW';
+    const title = notificationData.title || 'Osteria Basilico';
     // Usa la foto del mittente come icona se disponibile, altrimenti icona app
     const iconUrl = notificationData.icon || '/icon-192.png';
     const options = {

@@ -128,9 +128,9 @@ export default defineConfig(({ command }) => {
         'icons/icon-1024.png',
       ],
       manifest: {
-        name: 'FLOW',
-        short_name: 'FLOW',
-        description: 'FLOW — Work in Motion. Gestione turni e presenze.',
+        name: 'Osteria Basilico',
+        short_name: 'Osteria Basilico',
+        description: 'Osteria Basilico — Gestione turni e presenze.',
         start_url: '/profilo',
         lang: 'it',
         display: 'standalone',

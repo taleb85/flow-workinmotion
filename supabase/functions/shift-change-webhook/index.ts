@@ -17,7 +17,7 @@ function fmtDate(d: unknown): string {
   if (typeof d !== 'string') return '';
   const m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (!m) return d;
-  return `${m[3]}/${m[2]}/${m[1]}`;
+  return `${m[3]}/${m[2]}`;
 }
 
 function fmtTime(t: unknown): string {
@@ -26,7 +26,13 @@ function fmtTime(t: unknown): string {
   return s.length >= 5 ? s.slice(0, 5) : s;
 }
 
-function buildMessage(p: Payload): { recipientId: string; body: string } | null {
+function fmtRange(record: Record<string, unknown>): string {
+  const st = fmtTime(record.start_time);
+  const en = fmtTime(record.end_time);
+  return st && en ? `${st} – ${en}` : st || en || '';
+}
+
+function buildMessage(p: Payload): { recipientId: string; title: string; body: string } | null {
   const { type, record, old_record } = p;
   if (!type) return null;
 
@@ -35,6 +41,7 @@ function buildMessage(p: Payload): { recipientId: string; body: string } | null 
     if (typeof uid !== 'string') return null;
     return {
       recipientId: uid,
+      title: 'Turno annullato',
       body: `Il tuo turno del ${fmtDate(old_record.date)} è stato annullato`,
     };
   }
@@ -43,14 +50,10 @@ function buildMessage(p: Payload): { recipientId: string; body: string } | null 
     if (record.approval_status === 'draft') return null;
     const uid = record.user_id;
     if (typeof uid !== 'string') return null;
-    const st = fmtTime(record.start_time);
-    const range =
-      record.end_time != null && String(record.end_time).length > 0
-        ? `${st}-${fmtTime(record.end_time)}`
-        : st;
     return {
       recipientId: uid,
-      body: `Nuovo turno il ${fmtDate(record.date)}: ${range}`,
+      title: 'Nuovo turno',
+      body: `Il tuo turno del ${fmtDate(record.date)}: ${fmtRange(record)}`,
     };
   }
 
@@ -59,14 +62,10 @@ function buildMessage(p: Payload): { recipientId: string; body: string } | null 
     if (old_record.approval_status === 'draft' && record.approval_status === 'confirmed') {
       const uid = record.user_id;
       if (typeof uid !== 'string') return null;
-      const st = fmtTime(record.start_time);
-      const range =
-        record.end_time != null && String(record.end_time).length > 0
-          ? `${st}-${fmtTime(record.end_time)}`
-          : st;
       return {
         recipientId: uid,
-        body: `Il tuo turno del ${fmtDate(record.date)} è stato pubblicato: ${range}`,
+        title: 'Turno pubblicato',
+        body: `Il tuo turno del ${fmtDate(record.date)} è stato pubblicato: ${fmtRange(record)}`,
       };
     }
 
@@ -79,14 +78,10 @@ function buildMessage(p: Payload): { recipientId: string; body: string } | null 
     }
     const uid = record.user_id;
     if (typeof uid !== 'string') return null;
-    const st = fmtTime(record.start_time);
-    const range =
-      record.end_time != null && String(record.end_time).length > 0
-        ? `${st}-${fmtTime(record.end_time)}`
-        : st;
     return {
       recipientId: uid,
-      body: `Il tuo turno del ${fmtDate(record.date)} è stato modificato: ${range}`,
+      title: 'Turno modificato',
+      body: `Il tuo turno del ${fmtDate(record.date)} è stato modificato: ${fmtRange(record)}`,
     };
   }
 
@@ -143,7 +138,7 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       message_type: 'private',
       recipient_id: built.recipientId,
-      push_title: 'FLOW',
+      push_title: built.title,
       body: built.body.slice(0, 120),
       type: 'shift_change',
       url: '/app?open=turni',
