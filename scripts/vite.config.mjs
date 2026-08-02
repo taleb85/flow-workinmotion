@@ -128,8 +128,8 @@ export default defineConfig(({ command }) => {
         'icons/icon-1024.png',
       ],
       manifest: {
-        name: 'FLOW — Work in Motion',
-        short_name: 'FLOW',
+        name: 'Work in Motion',
+        short_name: 'Work in Motion',
         description: 'FLOW — Work in Motion. Gestione turni e presenze.',
         start_url: '/profilo',
         lang: 'it',

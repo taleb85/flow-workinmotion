@@ -25,7 +25,7 @@
     } catch (e) {
       // Se non è JSON, usa il testo direttamente
       notificationData = {
-        title: 'FLOW',
+        title: 'Nuova notifica',
         body: event.data.text(),
       };
     }
@@ -44,7 +44,7 @@
     }
 
     // Valori di default se non presenti nel payload
-    const title = notificationData.title || 'FLOW';
+    const title = notificationData.title || 'Nuova notifica';
     // Usa la foto del mittente come icona se disponibile, altrimenti icona app
     const iconUrl = notificationData.icon || '/icon-192.png';
     const options = {
