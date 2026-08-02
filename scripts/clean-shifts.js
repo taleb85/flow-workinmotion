@@ -1,5 +1,5 @@
 /**
- * Pulizia turni - Osteria Basilico
+ * Pulizia turni - FLOW — Work in Motion
  * CANCELLA tutti i record nella tabella shifts (nessuna cache, operazione diretta su Supabase).
  *
  * Uso: node scripts/clean-shifts.js

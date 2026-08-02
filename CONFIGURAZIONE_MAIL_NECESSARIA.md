@@ -1,13 +1,13 @@
 # CONFIGURAZIONE MAIL NECESSARIA
 
-Per abilitare l'invio delle email di notifica ferie (da **Osteria Basilico <info@osteriabasilico.co.uk>**), è necessario configurare Resend e Supabase.
+Per abilitare l'invio delle email di notifica ferie (da **FLOW <notifications@flow-workinmotion.vercel.app>**), è necessario configurare Resend e Supabase.
 
 ---
 
 ## 1. Account Resend
 
 1. Crea un account su [resend.com](https://resend.com)
-2. Verifica il dominio **osteriabasilico.co.uk** nelle impostazioni Resend (DNS: record TXT e MX)
+2. Verifica il dominio **flow-workinmotion.vercel.app** nelle impostazioni Resend (DNS: record TXT e MX)
 3. Genera una **API Key** da Resend Dashboard → API Keys → Create API Key
 
 ---

@@ -1,4 +1,4 @@
-# Osteria Basilico — App
+# FLOW — Work in Motion
 
 Applicazione web (React, Vite, Supabase) per turni, ferie, presenze e gestione staff.
 

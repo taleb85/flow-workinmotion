@@ -1,5 +1,5 @@
 /**
- * Logica di Push Notifications per Osteria Basilico.
+ * Logica di Push Notifications per FLOW — Work in Motion.
  * Caricato dal service worker (Workbox importScripts).
  * Gestisce gli eventi `push` per mostrare notifiche nel centro notifiche del sistema.
  * 
@@ -25,7 +25,7 @@
     } catch (e) {
       // Se non è JSON, usa il testo direttamente
       notificationData = {
-        title: 'Osteria Basilico',
+        title: 'FLOW',
         body: event.data.text(),
       };
     }
@@ -44,7 +44,7 @@
     }
 
     // Valori di default se non presenti nel payload
-    const title = notificationData.title || 'Osteria Basilico';
+    const title = notificationData.title || 'FLOW';
     // Usa la foto del mittente come icona se disponibile, altrimenti icona app
     const iconUrl = notificationData.icon || '/icon-192.png';
     const options = {

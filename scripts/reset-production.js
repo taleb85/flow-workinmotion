@@ -1,5 +1,5 @@
 /**
- * Reset Produzione - Osteria Basilico
+ * Reset Produzione - FLOW — Work in Motion
  * Cancella tutti i turni, timbrature e richieste ferie. Disattiva utenti Test/Guest.
  *
  * Uso: node scripts/reset-production.js

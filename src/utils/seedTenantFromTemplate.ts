@@ -2,7 +2,7 @@
  * seedTenantFromTemplate
  *
  * Copia utenti (anonimizzati) e turni della settimana corrente dal tenant
- * template (default: 'osteria-basilico') verso un tenant appena creato.
+ * template (default: slug del tenant sorgente) verso un tenant appena creato.
  * Aggiorna anche le impostazioni operative del nuovo tenant preservando
  * accent_color, header_font e azzerando geofence (coordinata fisica locale).
  */

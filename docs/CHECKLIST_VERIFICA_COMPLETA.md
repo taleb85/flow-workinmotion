@@ -3,14 +3,14 @@
 Usala **in ordine**. Non incollare mai in chat **chiavi, token o `.env`**: se serve aiuto, manda solo **esito** (ok / errore), **nomi** delle variabili presenti, o screenshot con valori oscurati.
 
 **URL di riferimento produzione:** `https://flow-workinmotion.vercel.app` (o `VITE_PUBLIC_APP_ORIGIN` al build)  
-**Repo:** [taleb85/osteria-basilico-app](https://github.com/taleb85/osteria-basilico-app)
+**Repo:** [taleb85/osteria-basilico-app](https://github.com/taleb85/osteria-basilico-app) (nome storico, non legato al brand)  
 
 ---
 
 ## A — Cloudflare Pages (progetto collegato a Git)
 
 1. **Progetto Pages →** collega il repository  
-   - [ ] Repository corretto (`osteria-basilico-app` o come lo hai chiamato).  
+   - [ ] Repository corretto (`osteria-basilico-app` o come lo hai chiamato).
    - [ ] Branch di build: `main` (o il branch usato in produzione).
 
 2. **Build settings**  

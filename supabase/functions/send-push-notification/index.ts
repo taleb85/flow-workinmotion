@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Recupera nome e avatar del mittente
-    let senderName = 'Osteria Basilico';
+    let senderName = 'FLOW';
     let senderAvatar: string | null = null;
 
     if (sender_id) {
@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
         .single();
 
       if (sender) {
-        senderName = [sender.first_name, sender.last_name].filter(Boolean).join(' ').trim() || 'Osteria Basilico';
+        senderName = [sender.first_name, sender.last_name].filter(Boolean).join(' ').trim() || 'FLOW';
         senderAvatar = sender.avatar_url ?? null;
       }
     }

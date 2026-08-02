@@ -7,7 +7,7 @@ Passi da fare **una volta** sul tuo computer o dopo aver creato il repository re
 Se Git avvisa che nome/email non sono configurati:
 
 ```bash
-cd /percorso/Osteria_Basilico_Final
+cd /percorso/del/progetto
 
 # Solo questo repo (consigliato)
 git config user.name "Il Tuo Nome"

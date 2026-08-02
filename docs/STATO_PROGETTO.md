@@ -1,6 +1,6 @@
 # Stato progetto (riferimento rapido)
 
-Repository pubblico: **[github.com/taleb85/osteria-basilico-app](https://github.com/taleb85/osteria-basilico-app)** · Produzione (default): **https://flow-workinmotion.vercel.app** (Vercel; override con `VITE_PUBLIC_APP_ORIGIN` al build)
+Repository pubblico: **[github.com/taleb85/osteria-basilico-app](https://github.com/taleb85/osteria-basilico-app)** (nome storico, non legato al brand) · Produzione (default): **https://flow-workinmotion.vercel.app** (Vercel; override con `VITE_PUBLIC_APP_ORIGIN` al build)
 
 | Voce | Stato |
 |------|--------|

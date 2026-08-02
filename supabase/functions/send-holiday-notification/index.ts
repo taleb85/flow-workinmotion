@@ -1,8 +1,8 @@
 // Supabase Edge Function: invio email notifica ferie via Resend API
-// Mittente: Osteria Basilico <info@osteriabasilico.co.uk>
+// Mittente: FLOW <notifications@flow-workinmotion.vercel.app>
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-const FROM = 'Osteria Basilico <info@osteriabasilico.co.uk>';
+const FROM = 'FLOW <notifications@flow-workinmotion.vercel.app>';
 
 interface Payload {
   email: string;
@@ -21,14 +21,14 @@ const TEXTS = {
       body: 'La tua richiesta di ferie/permesso è stata approvata.',
       dates: 'Date',
       regards: 'Cordiali saluti,',
-      team: 'Il team Osteria Basilico',
+      team: 'Il team FLOW',
     },
     rejected: {
       title: 'Richiesta Non Approvata',
       body: 'La tua richiesta di ferie/permesso non è stata approvata.',
       dates: 'Date richieste',
       regards: 'Cordiali saluti,',
-      team: 'Il team Osteria Basilico',
+      team: 'Il team FLOW',
     },
   },
   en: {
@@ -38,14 +38,14 @@ const TEXTS = {
       body: 'Your holiday/leave request has been approved.',
       dates: 'Dates',
       regards: 'Kind regards,',
-      team: 'The Osteria Basilico Team',
+      team: 'The FLOW Team',
     },
     rejected: {
       title: 'Request Not Approved',
       body: 'Your holiday/leave request has not been approved.',
       dates: 'Requested dates',
       regards: 'Kind regards,',
-      team: 'The Osteria Basilico Team',
+      team: 'The FLOW Team',
     },
   },
   es: {
@@ -55,14 +55,14 @@ const TEXTS = {
       body: 'Tu solicitud de vacaciones/permiso ha sido aprobada.',
       dates: 'Fechas',
       regards: 'Atentamente,',
-      team: 'El equipo Osteria Basilico',
+      team: 'El equipo FLOW',
     },
     rejected: {
       title: 'Solicitud No Aprobada',
       body: 'Tu solicitud de vacaciones/permiso no ha sido aprobada.',
       dates: 'Fechas solicitadas',
       regards: 'Atentamente,',
-      team: 'El equipo Osteria Basilico',
+      team: 'El equipo FLOW',
     },
   },
 };
@@ -101,7 +101,7 @@ function buildHtml(payload: Payload): string {
   <div style="max-width:560px;margin:0 auto;padding:32px 24px;">
     <div style="background:#fff;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.05);overflow:hidden;border:1px solid #e2e8f0;">
       <div style="background:#0f172a;padding:24px;text-align:center;">
-        <h1 style="margin:0;color:#fff;font-size:22px;font-weight:600;letter-spacing:0.5px;">Osteria Basilico</h1>
+        <h1 style="margin:0;color:#fff;font-size:22px;font-weight:600;letter-spacing:0.5px;">FLOW — Work in Motion</h1>
         <p style="margin:8px 0 0;color:#94a3b8;font-size:13px;">Ferie & Permessi</p>
       </div>
       <div style="padding:28px 24px;">
@@ -115,7 +115,7 @@ function buildHtml(payload: Payload): string {
         <p style="margin:4px 0 0;font-size:14px;font-weight:600;color:#0f172a;">${content.team}</p>
       </div>
     </div>
-    <p style="margin:20px 0 0;text-align:center;font-size:11px;color:#94a3b8;">Osteria Basilico · info@osteriabasilico.co.uk</p>
+    <p style="margin:20px 0 0;text-align:center;font-size:11px;color:#94a3b8;">FLOW — Work in Motion · notifications@flow-workinmotion.vercel.app</p>
   </div>
 </body>
 </html>

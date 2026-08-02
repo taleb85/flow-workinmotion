@@ -1,7 +1,7 @@
 import { startOfMonth, endOfMonth, addDays, startOfWeek, endOfWeek } from 'date-fns';
 
 /**
- * Pagamento stipendi (regola Osteria Basilico):
+ * Pagamento stipendi (regola FLOW):
  * **lunedì immediatamente successivo** alla domenica che chiude l'**ultima settimana
  * completa** (lunedì–domenica) **interamente contenuta** nel mese civile.
  *
