@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode, type Dispatch, type SetStateAction } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode, type Dispatch, type SetStateAction } from 'react';
 import type { User } from '../types';
 
 interface SessionContextValue {
@@ -53,17 +53,22 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setGlobalPinSessionId(null);
   }, []);
 
+  const value = useMemo(() => ({
+    currentUser, setCurrentUser,
+    users, setUsers,
+    isSessionElevated, setIsSessionElevated,
+    impersonatingAs, originalAdminUser, setImpersonating,
+    forceLogoutRequested, setForceLogoutRequested, clearForceLogoutRequest, logout,
+    globalPinSessionId, setGlobalPinSessionId,
+  }), [
+    currentUser, users, isSessionElevated,
+    impersonatingAs, originalAdminUser, setImpersonating,
+    forceLogoutRequested, clearForceLogoutRequest, logout,
+    globalPinSessionId,
+  ]);
+
   return (
-    <SessionContext.Provider
-      value={{
-        currentUser, setCurrentUser,
-        users, setUsers,
-        isSessionElevated, setIsSessionElevated,
-        impersonatingAs, originalAdminUser, setImpersonating,
-        forceLogoutRequested, setForceLogoutRequested, clearForceLogoutRequest, logout,
-        globalPinSessionId, setGlobalPinSessionId,
-      }}
-    >
+    <SessionContext.Provider value={value}>
       {children}
     </SessionContext.Provider>
   );

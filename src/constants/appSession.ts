@@ -6,5 +6,8 @@
  */
 export const APP_SESSION_STORAGE_KEY = 'app_session';
 
-/** Login: nome precompilato dopo link invito `/i/:slug` → «Apri senza installare». */
+/** Login: nome precompilato dopo link invito `/i/:slug`. */
 export const FLOW_INVITE_NAME_STORAGE_KEY = 'flow-invite-name';
+
+/** Login: PIN precompilato dopo link invito `/i/:slug`. */
+export const FLOW_INVITE_PIN_STORAGE_KEY = 'flow-invite-pin';

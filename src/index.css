@@ -2342,3 +2342,28 @@ main > div,
   overflow-y: visible;
   height: auto;
 }
+
+/* ── Animazioni login page (CSS nativo invece di Framer Motion repeat:Infinity) ── */
+@keyframes pulse-glow-lg {
+  0%, 100% { box-shadow: 0 0 18px rgba(255,149,0,0.55), 0 0 6px rgba(255,200,150,0.35); }
+  50%      { box-shadow: 0 0 36px rgba(255,149,0,0.90), 0 0 14px rgba(255,200,150,0.60); }
+}
+@keyframes pulse-glow-sm {
+  0%, 100% { box-shadow: 0 0 14px rgba(255,149,0,0.50), 0 0 5px rgba(255,200,150,0.30); }
+  50%      { box-shadow: 0 0 28px rgba(255,149,0,0.80), 0 0 12px rgba(255,200,150,0.50); }
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.65; }
+  50%      { opacity: 1; }
+}
+.animate-pulse-glow {
+  animation: pulse-glow-lg 2.4s ease-in-out infinite;
+  will-change: box-shadow;
+}
+.animate-pulse-glow-sm {
+  animation: pulse-glow-sm 2.2s ease-in-out infinite;
+  will-change: box-shadow;
+}
+.animate-breathe {
+  animation: breathe 2.2s ease-in-out infinite;
+}

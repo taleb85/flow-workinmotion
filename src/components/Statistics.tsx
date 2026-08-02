@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, memo } from 'react';
 import {
   startOfMonth,
   endOfMonth,
@@ -77,7 +77,7 @@ function getInitialDatesFromOffset(): { start: string; end: string } {
   return { start: r.startDate, end: r.endDate };
 }
 
-export default function Statistics() {
+export default memo(function Statistics() {
   const { users, currentUser, effectiveLanguage } = useAppUser();
   const { shifts, punchRecords } = useAppData();
   const { breakRules, featureFlags, departmentsRevision } = useAppConfig();
@@ -1400,4 +1400,4 @@ export default function Statistics() {
       </motion.div>
     </div>
   );
-}
+})

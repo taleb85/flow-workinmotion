@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useMemo, useRef, type CSSProperties } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, memo, type CSSProperties } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { User as UserIcon, Lock, Loader2, Eye, EyeOff, Fingerprint } from 'lucide-react';
+import { User as UserIcon, Lock, Loader2, Eye, EyeOff, Fingerprint, X } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppConfig } from '../context/appSliceContexts';
 import type { User as UserType, Language as LangType, Theme } from '../types';
@@ -9,7 +9,7 @@ import { userRowToSessionUser } from '../utils/staffPermissionDefaults';
 import { getTranslations } from '../utils/translations';
 import { applyUnauthenticatedDocumentTheme } from '../utils/theme';
 import { decodeProfiloAccessToken } from '../config/appPaths';
-import { APP_SESSION_STORAGE_KEY, FLOW_INVITE_NAME_STORAGE_KEY } from '../constants/appSession';
+import { APP_SESSION_STORAGE_KEY, FLOW_INVITE_NAME_STORAGE_KEY, FLOW_INVITE_PIN_STORAGE_KEY } from '../constants/appSession';
 import { getDeviceUiLanguage } from '../utils/uiLanguagePreference';
 import {
   findUserByNameAndPinAnyStatus,
@@ -35,7 +35,7 @@ interface LoginPageProps {
   onBack: () => void;
 }
 
-export default function LoginPage({ onLogin }: LoginPageProps) {
+export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const { users, setCurrentUser, setLanguage, setIsSessionElevated } = useAppUser();
   const { featureFlags } = useAppConfig();
   const _kioskEnabled = featureFlags['kiosk_active'] !== false;
@@ -92,6 +92,16 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [deviceSuccess, setDeviceSuccess] = useState('');
+  /** Banner installazione iOS — mostrato solo su Safari iPhone non-standalone */
+  const [showIosInstallHint, setShowIosInstallHint] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent;
+    const isIOS = /iPhone|iPad|iPod/.test(ua);
+    const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
+    const isStandalone = (navigator as Navigator & { standalone?: boolean }).standalone
+      || window.matchMedia('(display-mode: standalone)').matches;
+    return isIOS && isSafari && !isStandalone;
+  });
   const shakeControls = useAnimation();
   useEffect(() => {
     if (!error) return;
@@ -146,10 +156,15 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   useEffect(() => {
     if (inviteUserId || inviteNameFromUrl || invitePinFromUrl) return;
     try {
-      const stored = localStorage.getItem(FLOW_INVITE_NAME_STORAGE_KEY);
-      if (stored) {
-        setStaffName(stored.toUpperCase());
+      const storedName = localStorage.getItem(FLOW_INVITE_NAME_STORAGE_KEY);
+      const storedPin = localStorage.getItem(FLOW_INVITE_PIN_STORAGE_KEY);
+      if (storedName) {
+        setStaffName(storedName.toUpperCase());
         localStorage.removeItem(FLOW_INVITE_NAME_STORAGE_KEY);
+      }
+      if (storedPin) {
+        setPassword(storedPin);
+        localStorage.removeItem(FLOW_INVITE_PIN_STORAGE_KEY);
       }
     } catch {
       /* ignore */
@@ -503,6 +518,18 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         </div>
       ) : null}
 
+      {/* iOS install hint — sottile, auto-chiudibile */}
+      {showIosInstallHint && (
+        <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-white/10 bg-black/60 backdrop-blur-md px-3 py-2.5 flex items-start gap-2">
+          <p className="text-[12px] leading-snug text-white/70 flex-1">
+            Per installare l'app sulla Home: tocca <span className="text-white font-semibold">Condividi</span> (□↑) in Safari, poi <span className="text-white font-semibold">Aggiungi a Schermata Home</span>
+          </p>
+          <button type="button" onClick={() => setShowIosInstallHint(false)} className="shrink-0 text-white/40 hover:text-white/70 mt-0.5">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* F watermark di sfondo */}
       <div
         aria-hidden
@@ -535,27 +562,17 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               pointer-events-none sui figli: iOS a volte non sintetizza il click se il target è div/SVG/motion sotto al button
             */}
             <span className="pointer-events-none inline-flex" aria-hidden>
-            <motion.div
-              animate={{ boxShadow: [
-                '0 0 18px rgba(255,149,0,0.55), 0 0 6px rgba(255,200,150,0.35)',
-                '0 0 36px rgba(255,149,0,0.90), 0 0 14px rgba(255,200,150,0.60)',
-                '0 0 18px rgba(255,149,0,0.55), 0 0 6px rgba(255,200,150,0.35)',
-              ]}}
-              transition={{ duration: 2.4, ease: 'easeInOut', repeat: Infinity }}
-              style={{ borderRadius: 28 }}
-            >
+            <div className="animate-pulse-glow" style={{ borderRadius: 28 }}>
               <FlowWaveIcon size={112} radius={28} />
-            </motion.div>
+            </div>
             </span>
           </button>
-          <motion.p
-            className="mt-8 text-[11px] font-semibold tracking-[0.25em] uppercase select-none pointer-events-none"
+          <p
+             className="mt-8 text-[11px] font-semibold tracking-[0.25em] uppercase select-none pointer-events-none animate-breathe"
             style={{ color: 'rgba(255,255,255,0.75)' }}
-            animate={{ opacity: [0.65, 1, 0.65] }}
-            transition={{ duration: 2.2, ease: 'easeInOut', repeat: Infinity }}
           >
             Tap to start
-          </motion.p>
+          </p>
         </div>
         )}
 
@@ -573,17 +590,9 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         >
           {/* Logo + brand */}
           <div className="flex flex-col items-center mb-8">
-            <motion.div
-              animate={{ boxShadow: [
-                '0 0 14px rgba(255,149,0,0.50), 0 0 5px rgba(255,200,150,0.30)',
-                '0 0 28px rgba(255,149,0,0.80), 0 0 12px rgba(255,200,150,0.50)',
-                '0 0 14px rgba(255,149,0,0.50), 0 0 5px rgba(255,200,150,0.30)',
-              ]}}
-              transition={{ duration: 2.2, ease: 'easeInOut', repeat: Infinity }}
-              style={{ borderRadius: 26 }}
-            >
+            <div className="animate-pulse-glow-sm" style={{ borderRadius: 26 }}>
               <FlowWaveIcon size={96} radius={26} />
-            </motion.div>
+            </div>
           </div>
 
           {/* Form fields */}
@@ -756,4 +765,4 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       </div>
     </motion.div>
   );
-}
+})

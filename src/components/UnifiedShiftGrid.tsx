@@ -503,6 +503,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const prevWeek = () => setWeekStart(d => addDays(d, -7));
   const nextWeek = () => setWeekStart(d => addDays(d, 7));
   const goToday = () => {
+    // Ripristina il periodo predefinito salvato, non quello personalizzato
+    const defaultCfg = loadPeriodConfig();
+    setPeriodConfigState(defaultCfg);
     setPeriodNavOffset(0);
     setWeekStart(startOfWeek(today, { weekStartsOn: 1 }));
   };

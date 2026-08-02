@@ -424,10 +424,15 @@ export const database = {
     async getAll() {
       if (!supabase) return [];
       const PAGE_SIZE = 500;
-      const MAX_PAGES = 20; // max 10.000 turni
+      const MAX_PAGES = 4; // max 2000 turni (ridotto da 20 pagine / 10000)
+      // Filtra solo gli ultimi 12 mesi di turni
+      const twelveMonthsAgo = new Date();
+      twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
       let allData: import('../types').Shift[] = [];
       let from = 0;
-      const base = supabase.from('shifts').select('*');
+      const base = supabase.from('shifts')
+        .select('*')
+        .gte('date', twelveMonthsAgo.toISOString().split('T')[0]);
       const ordered = withTenant(base).order('date', { ascending: false });
       let pages = 0;
       // eslint-disable-next-line no-constant-condition
@@ -658,7 +663,13 @@ export const database = {
   punchRecords: {
     async getAll() {
       if (!supabase) return [];
-      const base = supabase.from('punch_records').select('*');
+      // Solo ultimi 6 mesi + LIMIT 5000 per performance
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      const base = supabase.from('punch_records')
+        .select('*')
+        .gte('timestamp', sixMonthsAgo.toISOString())
+        .limit(5000);
       const scoped = withTenant(base);
       const { data, error } = await scoped.order('timestamp', { ascending: false });
       if (error) throw error;

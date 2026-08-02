@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback, useId } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback, useId, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { format, startOfWeek, endOfWeek, addDays, differenceInCalendarDays, parseISO, isToday, eachDayOfInterval, getDay } from 'date-fns';
 import { database } from '../lib/database';
@@ -318,7 +318,7 @@ interface WeeklyShiftsTableProps {
   stickyDateBarInScrollPane?: boolean;
 }
 
-export default function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: WeeklyShiftsTableProps = {}) {
+function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: WeeklyShiftsTableProps = {}) {
   const initialPeriod = loadPeriodConfig();
   const [periodConfig, setPeriodConfig] = useState(initialPeriod);
   const [periodDraftStart, setPeriodDraftStart] = useState<string>(initialPeriod.startDate);
@@ -6626,3 +6626,5 @@ function CreateShiftModal({ userId, date, defaultTime, existingShifts, showError
     </AnimatePresence>
   );
 }
+
+export default memo(WeeklyShiftsTable);

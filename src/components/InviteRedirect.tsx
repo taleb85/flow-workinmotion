@@ -1,12 +1,14 @@
 /**
- * Risolve /i/:slug → dipendente, salva il nome per il login,
- * poi reindirizza alla pagina di installazione PWA (/install).
+ * Risolve /i/:slug → dipendente, salva nome + PIN,
+ * poi reindirizza direttamente al login (l'app si usa subito in Safari, 
+ * l'utente la installerà sulla Home quando Safari lo propone).
  */
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { buildUserInviteSlug } from '../config/appPaths';
-import { FLOW_INVITE_NAME_STORAGE_KEY } from '../constants/appSession';
+import { FLOW_INVITE_NAME_STORAGE_KEY, FLOW_INVITE_PIN_STORAGE_KEY } from '../constants/appSession';
+import { PATH_PROFILO } from '../config/appPaths';
 
 function cleanSlug(s: string | null | undefined): string {
   return (s ?? '')
@@ -27,13 +29,10 @@ type SlimUser = {
 
 export default function InviteRedirect() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    const installPathBase = '/install';
-
     if (!slug) {
-      window.location.href = installPathBase;
+      window.location.href = PATH_PROFILO;
       return;
     }
 
@@ -43,7 +42,7 @@ export default function InviteRedirect() {
     async function resolve() {
       try {
         if (!supabase) {
-          if (!cancelled) window.location.href = installPathBase;
+          if (!cancelled) window.location.href = PATH_PROFILO;
           return;
         }
 
@@ -78,31 +77,31 @@ export default function InviteRedirect() {
         if (matched) {
           const loginName = `${matched.first_name ?? ''} ${matched.last_name ?? ''}`.trim();
           if (loginName) {
-            try {
-              localStorage.setItem(FLOW_INVITE_NAME_STORAGE_KEY, loginName);
-            } catch { /* ignore */ }
+            try { localStorage.setItem(FLOW_INVITE_NAME_STORAGE_KEY, loginName); } catch { /* ignore */ }
           }
-          // Redirect to install page with user info
-          const params = new URLSearchParams({ userId: matched.id, firstName: matched.first_name ?? '' });
+          // Salva anche il PIN se presente così il login è istantaneo
+          if (matched.pin && matched.pin.replace(/\D/g, '').length === 4) {
+            try { localStorage.setItem(FLOW_INVITE_PIN_STORAGE_KEY, matched.pin.replace(/\D/g, '')); } catch { /* ignore */ }
+          }
           if (!cancelled && !redirected) {
             redirected = true;
-            window.location.href = `${installPathBase}?${params.toString()}`;
+            window.location.href = PATH_PROFILO;
           }
           return;
         }
 
         if (!cancelled && !redirected) {
           redirected = true;
-          window.location.href = installPathBase;
+          window.location.href = PATH_PROFILO;
         }
       } catch {
-        if (!cancelled) window.location.href = installPathBase;
+        if (!cancelled) window.location.href = PATH_PROFILO;
       }
     }
 
     void resolve();
     return () => { cancelled = true; };
-  }, [slug, navigate]);
+  }, [slug]);
 
   return null;
 }

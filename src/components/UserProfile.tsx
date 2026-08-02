@@ -6,7 +6,7 @@
  * Persistenza: updateUser -> database.users.update (tabella `users`), campo `department` incluso.
  */
 import { useMemo, useCallback, useState, useRef } from 'react';
-import { User, Mail, Lock, Shield, CheckCircle, AlertTriangle, Euro, Link2, Copy, Share2, Phone, Calendar } from 'lucide-react';
+import { User, Mail, Lock, Shield, CheckCircle, AlertTriangle, Euro, Copy, Share2, Phone, Calendar } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppConfig } from '../context/appSliceContexts';
 import { useAppOverlay } from '../context/appSliceContexts';
@@ -495,30 +495,14 @@ export function ProfileFormAdmin({
     }
   }, [accessLink, showSuccess, showError, tv.admin_employee_access_link_copied, tv.copy_failed]);
 
-  const handleShareInstall = useCallback(async () => {
-    const installPath = `/install?userId=${encodeURIComponent(user.id)}&firstName=${encodeURIComponent(formData.first_name)}`;
-    const installUrl = `${window.location.origin}${installPath}`;
-    const shareTitle = tv.share_install_title ?? 'FLOW';
-    const shareText = [
-      tv.share_install_greeting?.replace('{name}', `${formData.first_name} ${formData.last_name ?? ''}`.trim()) ?? '',
-      '',
-      tv.share_install_intro ?? '',
-      `${tv.share_install_name?.replace('{name}', formData.first_name) ?? ''}`,
-      formData.pin ? `${tv.share_install_pin?.replace('{pin}', formData.pin) ?? ''}` : '',
-      '',
-      tv.share_install_steps_header ?? '',
-      tv.share_install_step1 ?? '',
-      tv.share_install_step2 ?? '',
-      tv.share_install_step3 ?? '',
-      '',
-      installUrl,
-    ]
-      .filter(Boolean)
-      .join('\n');
+  /** Condivisione semplificata: link diretto, l'utente atterra direttamente sul login. */
+  const handleShareInviteSimple = useCallback(async () => {
+    const name = `${formData.first_name} ${formData.last_name ?? ''}`.trim();
+    const shareText = `Ciao ${name}! 👋\n\nApri questo link per accedere subito all'app FLOW:\n${accessLink}`;
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: shareTitle, text: shareText, url: installUrl });
+        await navigator.share({ title: 'FLOW — La tua app', text: shareText });
       } catch (err) {
         if ((err as DOMException).name !== 'AbortError') {
           showError?.(tv.copy_failed ?? 'Condivisione non riuscita.');
@@ -526,13 +510,13 @@ export function ProfileFormAdmin({
       }
     } else {
       try {
-        await navigator.clipboard.writeText(shareText + '\n\n' + installUrl);
-        showSuccess?.(tv.admin_employee_install_link_copied ?? 'Testo copiato. Incollalo in un messaggio.');
+        await navigator.clipboard.writeText(shareText);
+        showSuccess?.(tv.admin_employee_access_link_copied ?? 'Link copiato. Incollalo in un messaggio per il dipendente.');
       } catch {
         showError?.(tv.copy_failed ?? 'Copia non riuscita.');
       }
     }
-  }, [formData.first_name, formData.last_name, formData.pin, showSuccess, showError, tv]);
+  }, [formData.first_name, formData.last_name, accessLink, showError, showSuccess, tv]);
 
   const roleSelectDisabled =
     readOnly || (isPurelyManagementRole(user.role) && !isAdminOnly(currentUser));
@@ -805,49 +789,41 @@ export function ProfileFormAdmin({
         )}
 
         {variant === 'edit' && (!readOnly || isManagementRole(currentUser.role)) && (
-          <div className="rounded-xl border border-neutral-500 space-y-2 bg-white/8 p-3">
-            <p className="flex gap-1.5 text-[11px] leading-snug text-white/70 font-sans">
-              <Link2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/45" aria-hidden />
-              <span>{tv.admin_employee_access_link_hint ?? ''}</span>
+          <div className="rounded-xl border border-neutral-500 bg-white/8 p-4 space-y-3">
+            <p className="text-[12px] leading-relaxed text-white/70 font-sans text-center">
+              {formatTrans(
+                tv.admin_employee_access_link_hint_simple ??
+                  'Invia il link a {name}. Aprendolo da telefono installerà l\'app in 30 secondi.',
+                { name: formData.first_name || 'il dipendente' }
+              )}
             </p>
 
-            {/* Pulsante: copia link invito standard */}
+            {/* Pulsante principale: invia via WhatsApp/SMS/Telegram */}
             <button
               type="button"
-              onClick={handleCopyAccessLink}
-              className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white font-sans transition-all hover:opacity-95 active:scale-[0.98] hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-              style={{ background: '#6366f1' }}
-            >
-              <Copy className="w-5 h-5" aria-hidden />
-              <span>{tv.admin_employee_invite_send ?? 'Copia link invito'}</span>
-            </button>
-
-            {/* Pulsante: condividi file installazione iPhone */}
-            <button
-              type="button"
-              onClick={handleShareInstall}
-              className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white font-sans transition-all hover:opacity-95 active:scale-[0.98] hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              onClick={handleShareInviteSimple}
+              className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white font-sans transition-all hover:opacity-95 active:scale-[0.98] hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               style={{ background: '#22c55e' }}
             >
               <Share2 className="w-5 h-5" aria-hidden />
-              <span>{tv.share_install_btn ?? 'Condividi installazione iPhone'}</span>
+              <span>Invia accesso</span>
             </button>
-            <p className="pl-5 text-[11px] font-medium text-white font-sans">
-              {formatTrans(tv.admin_employee_access_link_preview ?? 'Nome al login: {name}', {
-                name: `${formData.first_name} ${formData.last_name ?? ''}`.trim() || '—',
-              })}
-            </p>
-            {formData.status !== 'active' && (
-              <p className="pl-5 text-[11px] font-medium text-amber-800 font-sans">
-                {tv.admin_employee_access_link_inactive ?? ''}
-              </p>
-            )}
+
+            {/* Pulsante secondario: solo copia link */}
+            <button
+              type="button"
+              onClick={handleCopyAccessLink}
+              className="flex w-full items-center justify-center gap-1.5 text-[11px] text-white/40 hover:text-white/60 transition-colors font-sans"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              <span>Copia solo il link</span>
+            </button>
+
             {!invitePinComplete && (
-              <p className="pl-5 text-[11px] font-medium text-amber-800 font-sans">
-                {tv.admin_employee_access_link_pin_incomplete ?? ''}
+              <p className="text-[11px] text-amber-300/80 font-sans text-center">
+                {tv.admin_employee_access_link_pin_incomplete ?? 'Aggiungi 4 cifre nel campo PIN per includerle nel link.'}
               </p>
             )}
-            <p className="text-[11px] text-white/45 font-mono break-all pl-5">{accessLink}</p>
           </div>
         )}
 
