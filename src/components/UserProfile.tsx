@@ -12,7 +12,7 @@ import { useAppConfig } from '../context/appSliceContexts';
 import { useAppOverlay } from '../context/appSliceContexts';
 import { useT } from '../hooks/useT';
 import { getTranslations, formatTrans } from '../utils/translations';
-import { buildShortInviteLink } from '../config/appPaths';
+import { buildProfiloAccessLink } from '../config/appPaths';
 import { PUBLIC_APP_ORIGIN } from '../config/publicAppUrl';
 import type { User as UserType, Language, Department } from '../types';
 import { isPurelyManagementRole, isAdminOnly, isManagementRole, canUserEdit } from '../utils/permissions';
@@ -478,12 +478,12 @@ export function ProfileFormAdmin({
   // Non serve includere il tenantSlug nel link breve: è InviteRedirect a gestirlo.
   const accessLink = useMemo(
     () =>
-      buildShortInviteLink(
-        { id: user.id, first_name: formData.first_name, last_name: formData.last_name },
-        users,
+      buildProfiloAccessLink(
+        user.id,
+        { pin: formData.pin, displayName: `${formData.first_name} ${formData.last_name ?? ''}`.trim() },
         PUBLIC_APP_ORIGIN
       ),
-    [user.id, formData.first_name, formData.last_name, users]
+    [user.id, formData.pin, formData.first_name, formData.last_name]
   );
 
   const handleCopyAccessLink = useCallback(async () => {

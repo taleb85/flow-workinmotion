@@ -6,9 +6,7 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { buildUserInviteSlug } from '../config/appPaths';
-import { FLOW_INVITE_NAME_STORAGE_KEY, FLOW_INVITE_PIN_STORAGE_KEY } from '../constants/appSession';
-import { PATH_PROFILO } from '../config/appPaths';
+import { buildUserInviteSlug, buildProfiloAccessLink, PATH_PROFILO } from '../config/appPaths';
 
 function cleanSlug(s: string | null | undefined): string {
   return (s ?? '')
@@ -75,17 +73,14 @@ export default function InviteRedirect() {
         }
 
         if (matched) {
-          const loginName = `${matched.first_name ?? ''} ${matched.last_name ?? ''}`.trim();
-          if (loginName) {
-            try { localStorage.setItem(FLOW_INVITE_NAME_STORAGE_KEY, loginName); } catch { /* ignore */ }
-          }
-          // Salva anche il PIN se presente così il login è istantaneo
-          if (matched.pin && matched.pin.replace(/\D/g, '').length === 4) {
-            try { localStorage.setItem(FLOW_INVITE_PIN_STORAGE_KEY, matched.pin.replace(/\D/g, '')); } catch { /* ignore */ }
-          }
+          const pin = matched.pin?.replace(/\D/g, '').slice(0, 4);
+          const tokenUrl = buildProfiloAccessLink(matched.id, {
+            pin: pin && pin.length === 4 ? pin : undefined,
+            displayName: `${matched.first_name ?? ''} ${matched.last_name ?? ''}`.trim(),
+          });
           if (!cancelled && !redirected) {
             redirected = true;
-            window.location.href = PATH_PROFILO;
+            window.location.href = tokenUrl;
           }
           return;
         }

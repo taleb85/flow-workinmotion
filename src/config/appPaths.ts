@@ -16,6 +16,28 @@ export type ProfiloInviteLinkOptions = {
 };
 
 /**
+ * Genera un link diretto a /profilo con token base64 che codifica userId, PIN e tenantSlug.
+ * Formato token: base64(JSON { u: userId, p: pin, s: tenantSlug })
+ * LoginPage decodifica `?t=` via decodeProfiloAccessToken() e pre-compila nome e PIN.
+ */
+export function buildProfiloAccessLink(
+  userId: string,
+  options?: ProfiloInviteLinkOptions,
+  origin?: string
+): string {
+  const base = origin ?? (typeof window !== 'undefined' ? window.location.origin : '');
+  const payload: { u: string; p?: string; s?: string } = { u: userId };
+  if (options?.pin && options.pin.replace(/\D/g, '').length === 4) {
+    payload.p = options.pin.replace(/\D/g, '');
+  }
+  if (options?.tenantSlug) {
+    payload.s = options.tenantSlug;
+  }
+  const token = btoa(JSON.stringify(payload));
+  return `${base}${PATH_PROFILO}?t=${encodeURIComponent(token)}`;
+}
+
+/**
  * Decodifica un token `t=` generato da buildProfiloAccessLink.
  * Supporta sia il formato nuovo JSON `{"u":...,"p":...,"s":...}`
  * sia il vecchio formato `userId|pin` per backward-compatibility.
