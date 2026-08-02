@@ -522,7 +522,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       {showIosInstallHint && (
         <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-white/10 bg-black/60 backdrop-blur-md px-3 py-2.5 flex items-start gap-2">
           <p className="text-[12px] leading-snug text-white/70 flex-1">
-            Per installare l'app sulla Home: tocca <span className="text-white font-semibold">Condividi</span> (□↑) in Safari, poi <span className="text-white font-semibold">Aggiungi a Schermata Home</span>
+            Per installare l'app sulla Home: in Safari tocca <span className="text-white font-semibold">☰</span> nella barra indirizzi, poi <span className="text-white font-semibold">Aggiungi a Schermata Home</span>
           </p>
           <button type="button" onClick={() => setShowIosInstallHint(false)} className="shrink-0 text-white/40 hover:text-white/70 mt-0.5">
             <X className="w-4 h-4" />
