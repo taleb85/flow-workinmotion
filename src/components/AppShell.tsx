@@ -612,7 +612,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     )}
     <AnimatePresence>
       {showPermissions && !showOnboarding && (
-        <Suspense fallback={null}><PermissionRequestModal key="perm-modal" onDone={() => setShowPermissions(false)} /></Suspense>
+        <Suspense fallback={null}><PermissionRequestModal key="perm-modal" userId={currentUser?.id} onDone={() => setShowPermissions(false)} /></Suspense>
       )}
     </AnimatePresence>
     <div

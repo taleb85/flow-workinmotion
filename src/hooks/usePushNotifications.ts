@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 
 /**
  * Chiave pubblica VAPID per Web Push.
@@ -11,6 +11,63 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
   const raw = atob(base64);
   return Uint8Array.from(raw, (c) => c.charCodeAt(0));
+}
+
+/** Salva una subscription push sul backend (edge function push-subscription). */
+async function saveSubscriptionToBackend(userId: string, sub: PushSubscription): Promise<boolean> {
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+    const keys = sub.toJSON().keys ?? {};
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/push-subscription`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseAnonKey,
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        endpoint: sub.endpoint,
+        p256dh: keys.p256dh ?? '',
+        auth_key: keys.auth ?? '',
+        user_agent: navigator.userAgent.slice(0, 200),
+      }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      console.warn('[Push] Errore salvataggio:', response.status, text);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('[Push] Errore salvataggio subscription:', err);
+    return false;
+  }
+}
+
+/**
+ * Crea (se manca) e salva la subscription push per l'utente.
+ * NON richiede il permesso: presuppone che sia già stato concesso.
+ * Usata dal gate permessi all'avvio e dall'auto-iscrizione.
+ */
+export async function ensurePushSubscription(userId?: string): Promise<boolean> {
+  if (typeof window === 'undefined' || !userId) return false;
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) return true;
+    const subscription = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
+    });
+    return await saveSubscriptionToBackend(userId, subscription);
+  } catch (err) {
+    console.error('[Push] ensurePushSubscription:', err);
+    return false;
+  }
 }
 
 export type UsePushNotificationsOptions = {
@@ -32,49 +89,82 @@ export function usePushNotifications(userId?: string, options?: UsePushNotificat
     'PushManager' in window &&
     'Notification' in window;
 
-  // Controlla lo stato reale (permesso + subscription nel browser)
+  // Controlla lo stato reale (permesso + subscription nel browser) e lo
+  // mantiene aggiornato quando la finestra torna al focus (es. dopo il prompt
+  // di sistema richiesto dal gate permessi all'avvio).
   useEffect(() => {
     if (!isPushNotificationSupported) return;
-    const perm = Notification.permission;
-    setNotificationPermission(perm);
-
-    if (perm === 'granted') {
-      // Verifica che ci sia anche una subscription attiva nel browser
-      navigator.serviceWorker.ready
-        .then((reg) => reg.pushManager.getSubscription())
-        .then((sub) => setIsSubscribed(!!sub))
-        .catch(() => setIsSubscribed(false));
-    }
+    const refresh = () => {
+      setNotificationPermission(Notification.permission);
+      if (Notification.permission === 'granted') {
+        navigator.serviceWorker.ready
+          .then((reg) => reg.pushManager.getSubscription())
+          .then((sub) => setIsSubscribed(!!sub))
+          .catch(() => setIsSubscribed(false));
+      }
+    };
+    refresh();
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
   }, [isPushNotificationSupported]);
 
-  // Iscrizione automatica: si attiva quando l'utente è loggato (userId disponibile)
-  // e il permesso non è ancora stato esplicitamente negato.
-  // Un piccolo delay lascia tempo al Service Worker di registrarsi.
+  // Auto-iscrizione: se il permesso è già stato concesso ma la subscription
+  // manca, la crea e la salva automaticamente (nessun nuovo prompt).
+  // Un solo tentativo per sessione per evitare loop se il subscribe fallisce.
+  const autoSubscribeAttemptedRef = useRef(false);
+  useEffect(() => {
+    autoSubscribeAttemptedRef.current = false;
+  }, [userId]);
+
   useEffect(() => {
     if (!enableAutoSubscribe) return;
     if (!isPushNotificationSupported) return;
     if (!userId) return;
-    if (Notification.permission === 'denied') return;
+    if (Notification.permission !== 'granted') return;
+    if (isSubscribed) return;
+    if (autoSubscribeAttemptedRef.current) return;
+    autoSubscribeAttemptedRef.current = true;
 
-    const timer = setTimeout(async () => {
-      // Se già iscritto, non fare nulla
+    let cancelled = false;
+    (async () => {
+      setIsLoading(true);
+      setError(null);
       try {
         const reg = await navigator.serviceWorker.ready;
         const existingSub = await reg.pushManager.getSubscription();
         if (existingSub) {
-          setIsSubscribed(true);
-          setNotificationPermission('granted');
+          if (!cancelled) {
+            setIsSubscribed(true);
+            setIsLoading(false);
+          }
           return;
         }
-      } catch { /* ignora */ }
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
+        });
+        const saved = await saveSubscriptionToBackend(userId, subscription);
+        if (cancelled) return;
+        setSavedOk(saved);
+        setIsSubscribed(true);
+        setIsLoading(false);
+      } catch (err) {
+        if (cancelled) return;
+        console.error('[Push] Auto-iscrizione fallita:', err);
+        setError('Attivazione automatica non riuscita — premi "Attiva Notifiche"');
+        setIsLoading(false);
+      }
+    })();
 
-      // Altrimenti richiedi permesso e iscriviti
-      await requestNotificationPermission();
-    }, 1500);
-
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, enableAutoSubscribe]);
+  }, [isPushNotificationSupported, enableAutoSubscribe, userId, isSubscribed]);
 
   /** Salva subscription nel backend */
   const saveSubscription = useCallback(async (sub: PushSubscription): Promise<boolean> => {
@@ -82,36 +172,7 @@ export function usePushNotifications(userId?: string, options?: UsePushNotificat
       console.warn('[Push] userId mancante, subscription non salvata');
       return false;
     }
-    try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-      const keys = sub.toJSON().keys ?? {};
-
-      const response = await fetch(`${supabaseUrl}/functions/v1/push-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': supabaseAnonKey,
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          endpoint: sub.endpoint,
-          p256dh: keys.p256dh ?? '',
-          auth_key: keys.auth ?? '',
-          user_agent: navigator.userAgent.slice(0, 200),
-        }),
-      });
-
-      if (!response.ok) {
-        const text = await response.text().catch(() => '');
-        console.warn('[Push] Errore salvataggio:', response.status, text);
-        return false;
-      }
-      return true;
-    } catch (err) {
-      console.warn('[Push] Errore salvataggio subscription:', err);
-      return false;
-    }
+    return saveSubscriptionToBackend(userId, sub);
   }, [userId]);
 
   /** Attiva push: richiede permesso, forza nuova subscription, salva nel DB */
@@ -167,8 +228,16 @@ export function usePushNotifications(userId?: string, options?: UsePushNotificat
       const msg = err instanceof Error ? err.message : String(err);
       setError(`Errore: ${msg}`);
       console.error('[Push]', err);
-      // Anche se pushManager.subscribe fallisce, il browser permission è ok per in-app
-      if (Notification.permission === 'granted') setIsSubscribed(true);
+      // Verifica lo stato reale della subscription: se il subscribe è fallito
+      // ma esiste comunque una subscription (es. ripristinata dal browser),
+      // riflette lo stato vero, altrimenti resta "Non iscritto".
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        setIsSubscribed(!!sub);
+      } catch {
+        setIsSubscribed(false);
+      }
       setIsLoading(false);
       return false;
     }

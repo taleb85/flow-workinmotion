@@ -7,16 +7,20 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, MapPin, CheckCircle, ChevronRight, Settings, ShieldAlert } from 'lucide-react';
 import { markPermissionModalAsked } from './permissionModalEligibility';
+import { ensurePushSubscription } from '../hooks/usePushNotifications';
 
 interface PermissionRequestModalProps {
   onDone: () => void;
+  userId?: string;
 }
 
-export default function PermissionRequestModal({ onDone }: PermissionRequestModalProps) {
+export default function PermissionRequestModal({ onDone, userId }: PermissionRequestModalProps) {
   const [notifStatus, setNotifStatus] = useState<NotificationPermission>('default');
   const [locationStatus, setLocationStatus] = useState<PermissionState | 'unsupported'>('prompt');
   const [notifLoading, setNotifLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushSubLoading, setPushSubLoading] = useState(false);
 
   // Supporto browser: permessi non supportati NON bloccano l'avvio
   const notifSupported = 'Notification' in window;
@@ -35,6 +39,14 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
     try {
       const result = await Notification.requestPermission();
       setNotifStatus(result);
+      // Appena concesso, crea e salva subito la subscription push:
+      // così "Permesso concesso" e "Iscritto" si attivano insieme.
+      if (result === 'granted' && userId) {
+        setPushSubLoading(true);
+        const ok = await ensurePushSubscription(userId);
+        setPushSubscribed(ok);
+        setPushSubLoading(false);
+      }
     } catch { /* ignore */ }
     setNotifLoading(false);
   };
@@ -61,8 +73,12 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
     typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
   const notifNeedsInstall = notifSupported && !notifGranted && isIOS && !isStandalone;
 
+  // La subscription push è necessaria solo se le notifiche sono supportate e c'è un utente
+  const pushRequired = notifSupported && !!userId;
+  const pushActive = !pushRequired || pushSubscribed;
+
   // Tutti i permessi necessari concessi → si può proseguire
-  const canProceed = notifGranted && locGranted;
+  const canProceed = notifGranted && locGranted && pushActive;
 
   const handleContinua = () => {
     if (!canProceed) return;
@@ -70,7 +86,7 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
     onDone();
   };
 
-  const missingCount = [notifGranted, locGranted].filter((ok) => !ok).length;
+  const missingCount = [notifGranted, locGranted, pushActive].filter((ok) => !ok).length;
 
   return (
     <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-md">
@@ -118,7 +134,19 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white/90">Notifiche</p>
               <p className="text-xs text-white/60 mt-0.5">
-                {notifGranted ? 'Attivate' : notifDenied ? 'Bloccate — abilita dalle impostazioni' : notifLoading ? 'In attesa…' : 'Turni, messaggi e avvisi in tempo reale'}
+                {notifGranted
+                  ? pushRequired
+                    ? pushSubLoading
+                      ? 'Attivazione in corso…'
+                      : pushSubscribed
+                      ? 'Attivate · Iscritto'
+                      : 'Attivate · iscrizione non riuscita'
+                    : 'Attivate'
+                  : notifDenied
+                  ? 'Bloccate — abilita dalle impostazioni'
+                  : notifLoading
+                  ? 'In attesa…'
+                  : 'Turni, messaggi e avvisi in tempo reale'}
               </p>
             </div>
             {!notifGranted && !notifDenied && (
