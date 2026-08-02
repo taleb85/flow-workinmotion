@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, MapPin, CheckCircle, ChevronRight, Settings, ShieldAlert } from 'lucide-react';
-import { markPermissionModalAsked } from './permissionModalEligibility';
+import { markPermissionModalAsked, isLocationGrantedFlag, markLocationGranted } from './permissionModalEligibility';
 import { ensurePushSubscription } from '../hooks/usePushNotifications';
 
 interface PermissionRequestModalProps {
@@ -30,8 +30,15 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
 
   useEffect(() => {
     if (notifSupported) setNotifStatus(Notification.permission);
-    if (navigator.permissions) {
-      navigator.permissions.query({ name: 'geolocation' }).then(r => setLocationStatus(r.state)).catch(() => {});
+    // Posizione: il flag locale è la fonte affidabile (iOS Safari può
+    // lasciare il Permissions API su "prompt" anche a permesso concesso).
+    if (isLocationGrantedFlag()) {
+      setLocationStatus('granted');
+    } else if (navigator.permissions) {
+      navigator.permissions.query({ name: 'geolocation' }).then(r => {
+        setLocationStatus(r.state);
+        if (r.state === 'granted') markLocationGranted();
+      }).catch(() => {});
     }
   }, [notifSupported]);
 
@@ -94,7 +101,11 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
     setLocationLoading(true);
     setLocationError(null);
     navigator.geolocation.getCurrentPosition(
-      () => { setLocationStatus('granted'); setLocationLoading(false); },
+      () => {
+        setLocationStatus('granted');
+        markLocationGranted(); // ricorda il consenso per le prossime sessioni
+        setLocationLoading(false);
+      },
       (err) => {
         // Codici errore geolocalizzazione:
         //  1 = PERMISSION_DENIED (consenso negato davvero)
