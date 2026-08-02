@@ -562,27 +562,31 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       {/* Banner installazione PWA */}
       {showIosInstallHint && (
         isIOS ? (
-          /* iOS Safari: guida visiva con animazione verso la barra indirizzi */
-          <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-orange-400/20 bg-orange-500/10 backdrop-blur-lg px-3 py-3 overflow-hidden">
-            {/* Freccia animata che punta in alto — verso la barra indirizzi */}
-            <div className="flex justify-center -mb-1">
-              <motion.div
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 1.2, ease: 'easeInOut', repeat: Infinity }}
-                className="text-orange-400 text-lg"
-              >
-                ↑
-              </motion.div>
-            </div>
-            <div className="flex items-start gap-2">
-              <p className="text-[12px] leading-snug text-white/80 flex-1 text-center">
-                Tocca <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-white/10 text-white font-bold text-[10px]">☰</span> nella barra in alto, poi<br />
-                <span className="text-white font-semibold">Aggiungi a Schermata Home</span>
+          /* iOS Safari: pulsante che apre Condividi → da lì "Aggiungi a Schermata Home" */
+          <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-orange-400/25 bg-orange-500/10 backdrop-blur-lg px-3 py-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                void (async () => {
+                  try {
+                    await navigator.share({
+                      title: 'FLOW',
+                      text: 'Installa FLOW sulla Home per accedere più velocemente',
+                      url: window.location.origin + '/profilo',
+                    });
+                  } catch { /* annullato */ }
+                })();
+                setShowIosInstallHint(false);
+              }}
+              className="w-full text-center"
+            >
+              <p className="text-[13px] leading-snug text-white font-semibold">
+                📲 Tocca qui per installare l'app sulla Home
               </p>
-              <button type="button" onClick={() => setShowIosInstallHint(false)} className="shrink-0 text-white/30 hover:text-white/60">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+              <p className="text-[11px] text-white/50 mt-0.5">
+                Si aprirà il menu Condividi → scorri e tocca <span className="text-white/70">Aggiungi a Schermata Home</span>
+              </p>
+            </button>
           </div>
         ) : deferredPrompt !== null ? (
           /* Chrome/Android/Edge: bottone che apre il dialog nativo di installazione */
