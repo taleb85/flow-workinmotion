@@ -1,15 +1,12 @@
 /**
- * Modal che chiede notifiche + posizione al primo accesso.
- * Mostrato una volta sola per dispositivo (flag in localStorage).
+ * Modal gate bloccante: richiede notifiche + posizione all'avvio.
+ * Non si può proseguire finché i permessi necessari non sono concessi:
+ * se manca un consenso, l'app non si avvia.
  */
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, MapPin, CheckCircle, ChevronRight } from 'lucide-react';
+import { Bell, MapPin, CheckCircle, ChevronRight, Settings, ShieldAlert } from 'lucide-react';
 import { markPermissionModalAsked } from './permissionModalEligibility';
-
-function _isPermissionNeeded(p: NotificationPermission | PermissionState | undefined) {
-  return p === 'default' || p === 'prompt' || p === undefined;
-}
 
 interface PermissionRequestModalProps {
   onDone: () => void;
@@ -21,16 +18,19 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
   const [notifLoading, setNotifLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
 
+  // Supporto browser: permessi non supportati NON bloccano l'avvio
+  const notifSupported = 'Notification' in window;
+  const locSupported = typeof navigator !== 'undefined' && 'geolocation' in navigator;
+
   useEffect(() => {
-    // Leggi stati correnti
-    if ('Notification' in window) setNotifStatus(Notification.permission);
+    if (notifSupported) setNotifStatus(Notification.permission);
     if (navigator.permissions) {
       navigator.permissions.query({ name: 'geolocation' }).then(r => setLocationStatus(r.state)).catch(() => {});
     }
-  }, []);
+  }, [notifSupported]);
 
   const handleNotif = async () => {
-    if (notifStatus === 'granted' || notifStatus === 'denied') return;
+    if (!notifSupported || notifStatus === 'granted' || notifStatus === 'denied') return;
     setNotifLoading(true);
     try {
       const result = await Notification.requestPermission();
@@ -40,7 +40,7 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
   };
 
   const handleLocation = () => {
-    if (locationStatus === 'granted' || locationStatus === 'denied') return;
+    if (!locSupported || locationStatus === 'granted' || locationStatus === 'denied') return;
     setLocationLoading(true);
     navigator.geolocation.getCurrentPosition(
       () => { setLocationStatus('granted'); setLocationLoading(false); },
@@ -49,18 +49,31 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
     );
   };
 
+  const notifGranted = !notifSupported || notifStatus === 'granted';
+  const notifDenied = notifSupported && notifStatus === 'denied';
+  const locGranted = !locSupported || locationStatus === 'granted';
+  const locDenied = locSupported && locationStatus === 'denied';
+
+  // Su iPhone le notifiche web richiedono l'app installata (PWA): senza,
+  // il prompt non appare mai → guidiamo all'installazione.
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+  const isStandalone =
+    typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
+  const notifNeedsInstall = notifSupported && !notifGranted && isIOS && !isStandalone;
+
+  // Tutti i permessi necessari concessi → si può proseguire
+  const canProceed = notifGranted && locGranted;
+
   const handleContinua = () => {
+    if (!canProceed) return;
     markPermissionModalAsked();
     onDone();
   };
 
-  const notifGranted = notifStatus === 'granted';
-  const notifDenied = notifStatus === 'denied';
-  const locGranted = locationStatus === 'granted';
-  const locDenied = locationStatus === 'denied';
+  const missingCount = [notifGranted, locGranted].filter((ok) => !ok).length;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-md">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -75,7 +88,7 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
             Abilita le funzionalità
           </h2>
           <p className="text-xs text-white/60 mt-1">
-            Per ricevere avvisi e usare il timbratore con posizione
+            Per continuare devi consentire notifiche e posizione
           </p>
         </div>
 
@@ -90,14 +103,16 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
               ${notifGranted
                 ? 'bg-emerald-500/20 border-emerald-500/40'
                 : notifDenied
-                ? 'bg-white/5 border-white/10 opacity-50 cursor-not-allowed'
+                ? 'bg-rose-500/10 border-rose-500/40'
                 : 'bg-white/8 border-neutral-500 hover:bg-white/12 hover:border-white/25 cursor-pointer'
               }`}
           >
             <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
-              ${notifGranted ? 'bg-emerald-500/25' : 'bg-blue-500/20'}`}>
+              ${notifGranted ? 'bg-emerald-500/25' : notifDenied ? 'bg-rose-500/25' : 'bg-blue-500/20'}`}>
               {notifGranted
                 ? <CheckCircle className="h-5 w-5 text-emerald-400" />
+                : notifDenied
+                ? <ShieldAlert className="h-5 w-5 text-rose-400" />
                 : <Bell className="h-5 w-5 text-blue-400" />}
             </div>
             <div className="flex-1 min-w-0">
@@ -120,14 +135,16 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
               ${locGranted
                 ? 'bg-emerald-500/20 border-emerald-500/40'
                 : locDenied
-                ? 'bg-white/5 border-white/10 opacity-50 cursor-not-allowed'
+                ? 'bg-rose-500/10 border-rose-500/40'
                 : 'bg-white/8 border-neutral-500 hover:bg-white/12 hover:border-white/25 cursor-pointer'
               } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
           >
             <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
-              ${locGranted ? 'bg-emerald-500/25' : 'bg-emerald-500/20'}`}>
+              ${locGranted ? 'bg-emerald-500/25' : locDenied ? 'bg-rose-500/25' : 'bg-emerald-500/20'}`}>
               {locGranted
                 ? <CheckCircle className="h-5 w-5 text-emerald-400" />
+                : locDenied
+                ? <ShieldAlert className="h-5 w-5 text-rose-400" />
                 : <MapPin className="h-5 w-5 text-emerald-400" />}
             </div>
             <div className="flex-1 min-w-0">
@@ -140,6 +157,29 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
               <ChevronRight className="h-4 w-4 text-white/50 shrink-0" />
             )}
           </button>
+
+          {/* Avviso permessi bloccati o installazione richiesta */}
+          {(notifDenied || locDenied || notifNeedsInstall) && (
+            <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
+              <Settings className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-[11px] leading-relaxed text-amber-200/90">
+                {notifNeedsInstall ? (
+                  <>
+                    Per ricevere le notifiche su iPhone devi installare l’app: Safari → <b>Condividi</b> → <b>Aggiungi alla schermata Home</b>. Poi riapri l’app da lì e dai il consenso alle notifiche.
+                  </>
+                ) : (
+                  <>
+                    {notifDenied && locDenied
+                      ? 'Notifiche e posizione sono bloccate. '
+                      : notifDenied
+                      ? 'Le notifiche sono bloccate. '
+                      : 'La posizione è bloccata. '}
+                    Vai nelle impostazioni del dispositivo (Safari/Chrome → Impostazioni sito web o Notifiche) e abilita {notifDenied && locDenied ? 'entrambi' : 'il permesso'}, poi torna qui.
+                  </>
+                )}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -147,12 +187,19 @@ export default function PermissionRequestModal({ onDone }: PermissionRequestModa
           <button
             type="button"
             onClick={handleContinua}
-            className="w-full rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.98] py-3 text-sm font-bold text-white transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+            disabled={!canProceed}
+            className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98]
+              ${canProceed
+                ? 'bg-blue-600 hover:bg-blue-500 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]'
+                : 'bg-white/10 text-white/40 cursor-not-allowed'
+              }`}
           >
-            Continua
+            {canProceed ? 'Continua' : missingCount > 1 ? 'Consenti i 2 permessi per continuare' : 'Consenti il permesso per continuare'}
           </button>
           <p className="text-center text-[11px] text-white/50 mt-2">
-            Puoi modificare questi permessi in qualsiasi momento dalle impostazioni del dispositivo
+            {canProceed
+              ? 'Ora puoi entrare nell’app'
+              : 'L’app non si avvia finché notifiche e posizione non sono consentite'}
           </p>
         </div>
       </motion.div>
