@@ -42,6 +42,33 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
     }
   }, [notifSupported]);
 
+  // Verifica silenziosa all'apertura: se il permesso posizione è GIÀ concesso
+  // (es. iOS dove il Permissions API resta su 'prompt' anche a permesso dato),
+  // lo scopriamo provando a leggere la posizione senza chiedere nulla.
+  // Se riesce → salviamo il flag → la modale non richiederà più la posizione.
+  // Se fallisce → NON cambiamo stato: su iOS senza gesto utente il prompt
+  // non appare, l'utente toccherà la card per richiederlo (con user activation).
+  useEffect(() => {
+    if (!locSupported) return;
+    if (isLocationGrantedFlag()) return;
+    if (locationStatus === 'granted' || locationStatus === 'denied') return;
+    let cancelled = false;
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        if (cancelled) return;
+        setLocationStatus('granted');
+        markLocationGranted();
+      },
+      () => {
+        // silenzioso: nessun cambio di stato
+      },
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [locSupported, locationStatus]);
+
   // All'apertura: se il permesso è GIÀ concesso ma la subscription manca,
   // avviala subito (senza dover cliccare nulla). Questo copre il caso
   // "Permesso concesso" + "Non iscritto" che lasciava l'utente bloccato.
