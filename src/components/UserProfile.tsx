@@ -495,22 +495,27 @@ export function ProfileFormAdmin({
     }
   }, [accessLink, showSuccess, showError, tv.admin_employee_access_link_copied, tv.copy_failed]);
 
-  /** Condivisione semplificata: link diretto, l'utente atterra direttamente sul login. */
+  /** Condivisione: link con URL separato per AirDrop + WhatsApp/SMS/Telegram. */
   const handleShareInviteSimple = useCallback(async () => {
     const name = `${formData.first_name} ${formData.last_name ?? ''}`.trim();
-    const shareText = `Ciao ${name}! 👋\n\nApri questo link per accedere subito all'app FLOW:\n${accessLink}`;
+    const shareText = `Ciao ${name}! 👋\n\nApri questo link per accedere subito all'app FLOW.`;
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'FLOW — La tua app', text: shareText });
+        await navigator.share({
+          title: 'FLOW — La tua app',
+          text: shareText,
+          url: accessLink, // URL separato → AirDrop, WhatsApp, Safari lo riconoscono come link
+        });
       } catch (err) {
         if ((err as DOMException).name !== 'AbortError') {
           showError?.(tv.copy_failed ?? 'Condivisione non riuscita.');
         }
       }
     } else {
+      const fullText = `${shareText}\n${accessLink}`;
       try {
-        await navigator.clipboard.writeText(shareText);
+        await navigator.clipboard.writeText(fullText);
         showSuccess?.(tv.admin_employee_access_link_copied ?? 'Link copiato. Incollalo in un messaggio per il dipendente.');
       } catch {
         showError?.(tv.copy_failed ?? 'Copia non riuscita.');
