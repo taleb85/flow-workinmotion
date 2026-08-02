@@ -22,6 +22,7 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
   const [pushSubscribed, setPushSubscribed] = useState(false);
   const [pushSubLoading, setPushSubLoading] = useState(false);
   const [pushSubError, setPushSubError] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   // Supporto browser: permessi non supportati NON bloccano l'avvio
   const notifSupported = 'Notification' in window;
@@ -91,10 +92,28 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
   const handleLocation = () => {
     if (!locSupported || locationStatus === 'granted' || locationStatus === 'denied') return;
     setLocationLoading(true);
+    setLocationError(null);
     navigator.geolocation.getCurrentPosition(
       () => { setLocationStatus('granted'); setLocationLoading(false); },
-      () => { setLocationStatus('denied'); setLocationLoading(false); },
-      { enableHighAccuracy: false, timeout: 15000 },
+      (err) => {
+        // Codici errore geolocalizzazione:
+        //  1 = PERMISSION_DENIED (consenso negato davvero)
+        //  2 = POSITION_UNAVAILABLE (GPS spento / interni / senza segnale)
+        //  3 = TIMEOUT
+        // Solo il codice 1 è un rifiuto del consenso: blocchiamo l'utente.
+        // I codici 2 e 3 NON sono un rifiuto → mostriamo un avviso e
+        // lasciamo il pulsante attivo per riprovare.
+        const code = (err as GeolocationPositionError | null)?.code;
+        if (code === 1) {
+          setLocationStatus('denied');
+        } else {
+          setLocationError(
+            'Posizione non rilevata (GPS spento o assenza di segnale). Riattiva il GPS e riprova.'
+          );
+        }
+        setLocationLoading(false);
+      },
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 },
     );
   };
 
@@ -233,6 +252,19 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
               <ChevronRight className="h-4 w-4 text-white/50 shrink-0" />
             )}
           </button>
+
+          {/* Errore posizione: non è un rifiuto del consenso, solo segnale assente */}
+          {locationError && !locDenied && (
+            <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
+              <MapPin className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-[11px] leading-relaxed text-amber-200/90">
+                {locationError}{' '}
+                <button type="button" onClick={handleLocation} className="underline font-semibold text-amber-100 hover:text-white">
+                  Riprova
+                </button>
+              </p>
+            </div>
+          )}
 
           {/* Avviso permessi bloccati o installazione richiesta */}
           {(notifDenied || locDenied || notifNeedsInstall) && (
