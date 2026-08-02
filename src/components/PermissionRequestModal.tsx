@@ -21,6 +21,7 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
   const [locationLoading, setLocationLoading] = useState(false);
   const [pushSubscribed, setPushSubscribed] = useState(false);
   const [pushSubLoading, setPushSubLoading] = useState(false);
+  const [pushSubError, setPushSubError] = useState<string | null>(null);
 
   // Supporto browser: permessi non supportati NON bloccano l'avvio
   const notifSupported = 'Notification' in window;
@@ -33,21 +34,57 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
     }
   }, [notifSupported]);
 
+  // All'apertura: se il permesso è GIÀ concesso ma la subscription manca,
+  // avviala subito (senza dover cliccare nulla). Questo copre il caso
+  // "Permesso concesso" + "Non iscritto" che lasciava l'utente bloccato.
+  useEffect(() => {
+    if (!notifSupported || !userId) return;
+    if (Notification.permission !== 'granted') return;
+    let cancelled = false;
+    setPushSubLoading(true);
+    setPushSubError(null);
+    ensurePushSubscription(userId)
+      .then((ok) => {
+        if (cancelled) return;
+        setPushSubscribed(ok);
+        if (!ok) setPushSubError('Iscrizione non riuscita — tocca la card per riprovare');
+      })
+      .catch(() => {
+        if (!cancelled) setPushSubError('Iscrizione non riuscita — tocca la card per riprovare');
+      })
+      .finally(() => {
+        if (!cancelled) setPushSubLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [notifSupported, userId]);
+
   const handleNotif = async () => {
-    if (!notifSupported || notifStatus === 'granted' || notifStatus === 'denied') return;
+    if (!notifSupported || notifStatus === 'denied') return;
     setNotifLoading(true);
+    setPushSubError(null);
     try {
-      const result = await Notification.requestPermission();
-      setNotifStatus(result);
-      // Appena concesso, crea e salva subito la subscription push:
-      // così "Permesso concesso" e "Iscritto" si attivano insieme.
-      if (result === 'granted' && userId) {
+      // 1. Permesso: se non è ancora concesso, richiedilo
+      if (notifStatus !== 'granted') {
+        const result = await Notification.requestPermission();
+        setNotifStatus(result);
+        if (result !== 'granted') {
+          setNotifLoading(false);
+          return;
+        }
+      }
+      // 2. Permesso ok (appena concesso o già dato) → crea la subscription
+      if (userId) {
         setPushSubLoading(true);
         const ok = await ensurePushSubscription(userId);
         setPushSubscribed(ok);
+        if (!ok) setPushSubError('Iscrizione non riuscita — riprova');
         setPushSubLoading(false);
       }
-    } catch { /* ignore */ }
+    } catch {
+      setPushSubError('Errore durante l’attivazione — riprova');
+    }
     setNotifLoading(false);
   };
 
@@ -114,9 +151,9 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
           <button
             type="button"
             onClick={() => void handleNotif()}
-            disabled={notifGranted || notifDenied || notifLoading}
+            disabled={notifDenied || notifLoading || pushSubLoading || (notifGranted && pushActive)}
             className={`w-full flex items-center gap-3 rounded-xl px-4 py-3.5 text-left transition-all active:scale-[0.98] border
-              ${notifGranted
+              ${notifGranted && pushActive
                 ? 'bg-emerald-500/20 border-emerald-500/40'
                 : notifDenied
                 ? 'bg-rose-500/10 border-rose-500/40'
@@ -124,8 +161,8 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
               }`}
           >
             <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
-              ${notifGranted ? 'bg-emerald-500/25' : notifDenied ? 'bg-rose-500/25' : 'bg-blue-500/20'}`}>
-              {notifGranted
+              ${notifGranted && pushActive ? 'bg-emerald-500/25' : notifDenied ? 'bg-rose-500/25' : 'bg-blue-500/20'}`}>
+              {notifGranted && pushActive
                 ? <CheckCircle className="h-5 w-5 text-emerald-400" />
                 : notifDenied
                 ? <ShieldAlert className="h-5 w-5 text-rose-400" />
@@ -134,25 +171,36 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white/90">Notifiche</p>
               <p className="text-xs text-white/60 mt-0.5">
-                {notifGranted
-                  ? pushRequired
-                    ? pushSubLoading
-                      ? 'Attivazione in corso…'
-                      : pushSubscribed
-                      ? 'Attivate · Iscritto'
-                      : 'Attivate · iscrizione non riuscita'
-                    : 'Attivate'
+                {notifGranted && pushActive
+                  ? 'Attivate · Iscritto'
                   : notifDenied
                   ? 'Bloccate — abilita dalle impostazioni'
                   : notifLoading
                   ? 'In attesa…'
+                  : pushSubLoading
+                  ? 'Attivazione in corso…'
+                  : notifGranted && pushRequired
+                  ? 'Permesso dato — tocca per completare l’iscrizione'
+                  : notifGranted
+                  ? 'Attivate'
                   : 'Turni, messaggi e avvisi in tempo reale'}
               </p>
             </div>
             {!notifGranted && !notifDenied && (
               <ChevronRight className="h-4 w-4 text-white/50 shrink-0" />
             )}
+            {notifGranted && pushRequired && !pushActive && !pushSubLoading && (
+              <ChevronRight className="h-4 w-4 text-white/50 shrink-0" />
+            )}
           </button>
+
+          {/* Errore iscrizione */}
+          {pushSubError && (
+            <div className="flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5">
+              <ShieldAlert className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
+              <p className="text-[11px] leading-relaxed text-rose-200/90">{pushSubError}</p>
+            </div>
+          )}
 
           {/* Posizione */}
           <button

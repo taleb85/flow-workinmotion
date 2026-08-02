@@ -48,6 +48,44 @@ async function saveSubscriptionToBackend(userId: string, sub: PushSubscription):
 }
 
 /**
+ * Risolve una Promise con un valore di fallback dopo `ms` millisecondi:
+ * evita che l'attesa del Service Worker resti appesa all'infinito.
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(fallback), ms);
+    promise.then(
+      (v) => { clearTimeout(timer); resolve(v); },
+      () => { clearTimeout(timer); resolve(fallback); },
+    );
+  });
+}
+
+/**
+ * Ottiene una ServiceWorkerRegistration attiva, con fallback:
+ * 1) registrazione esistente  2) `ready` (con timeout)  3) registrazione esplicita di /sw.js
+ */
+async function getActiveRegistration(): Promise<ServiceWorkerRegistration | null> {
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return null;
+  try {
+    const existing = await withTimeout(navigator.serviceWorker.getRegistration(), 3000, undefined as ServiceWorkerRegistration | undefined);
+    if (existing) return existing;
+  } catch { /* ignora */ }
+  try {
+    const ready = await withTimeout(navigator.serviceWorker.ready, 8000, null);
+    if (ready) return ready;
+  } catch { /* ignora */ }
+  try {
+    const reg = await navigator.serviceWorker.register('/sw.js');
+    await withTimeout(navigator.serviceWorker.ready, 8000, null);
+    return reg;
+  } catch (err) {
+    console.error('[Push] Impossibile registrare il service worker:', err);
+    return null;
+  }
+}
+
+/**
  * Crea (se manca) e salva la subscription push per l'utente.
  * NON richiede il permesso: presuppone che sia già stato concesso.
  * Usata dal gate permessi all'avvio e dall'auto-iscrizione.
@@ -56,7 +94,8 @@ export async function ensurePushSubscription(userId?: string): Promise<boolean> 
   if (typeof window === 'undefined' || !userId) return false;
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
   try {
-    const reg = await navigator.serviceWorker.ready;
+    const reg = await getActiveRegistration();
+    if (!reg) return false;
     const existing = await reg.pushManager.getSubscription();
     if (existing) return true;
     const subscription = await reg.pushManager.subscribe({
@@ -163,7 +202,6 @@ export function usePushNotifications(userId?: string, options?: UsePushNotificat
     return () => {
       cancelled = true;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPushNotificationSupported, enableAutoSubscribe, userId, isSubscribed]);
 
   /** Salva subscription nel backend */
