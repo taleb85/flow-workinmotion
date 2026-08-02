@@ -23,7 +23,6 @@ import BodyPullToRefresh from '../components/BodyPullToRefresh';
 import HomePage from '../components/HomePage';
 import LoginPage from '../components/LoginPage';
 import InviteRedirect from '../components/InviteRedirect';
-import InstallPage from '../components/InstallPage';
 import { RotateCw, Cloud, CloudOff, Lock, Unlock, ShieldCheck, ShieldOff, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { PinPadModal } from '../components/ui/PinPadModal';
@@ -988,7 +987,9 @@ function AppContent() {
       {/* Rotte pubbliche — accessibili senza PWA */}
       <Routes>
         <Route path="/i/:slug" element={<InviteRedirect />} />
-        <Route path="/install" element={<InstallPage />} />
+        <Route path="/install" element={<Navigate to={PATH_PROFILO} replace />} />
+        <Route path={PATH_PROFILO} element={<LoginRoute />} />
+        <Route path="/login" element={<Navigate to={PATH_PROFILO} replace />} />
       </Routes>
 
       {/* Rotte protette — richiedono PWA */}
@@ -997,8 +998,6 @@ function AppContent() {
         <Route path="/" element={<Navigate to={PATH_PROFILO} replace />} />
         <Route path="/kiosk" element={<Navigate to={PATH_PROFILO} replace />} />
         <Route path="/timbratura" element={<Navigate to={PATH_PROFILO} replace />} />
-        <Route path={PATH_PROFILO} element={<LoginRoute />} />
-        <Route path="/login" element={<Navigate to={PATH_PROFILO} replace />} />
         <Route path="/app" element={<ProtectedApp />} />
         <Route path="/app/*" element={<ProtectedApp />} />
         <Route path="/admin" element={<AdminGate><Suspense fallback={null}><AdminLayout /></Suspense></AdminGate>} />
