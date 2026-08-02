@@ -3,6 +3,12 @@ import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { User as UserIcon, Lock, Loader2, Eye, EyeOff, Fingerprint, X } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
+
+/** Evento beforeinstallprompt (PWA install su Chrome/Edge/Android) */
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
 import { useAppConfig } from '../context/appSliceContexts';
 import type { User as UserType, Language as LangType, Theme } from '../types';
 import { userRowToSessionUser } from '../utils/staffPermissionDefaults';
@@ -92,16 +98,51 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [deviceSuccess, setDeviceSuccess] = useState('');
-  /** Banner installazione iOS — mostrato solo su Safari iPhone non-standalone */
-  const [showIosInstallHint, setShowIosInstallHint] = useState(() => {
+  /** Evento install PWA nativo (Chrome/Android) — catturato e riesposto come bottone. */
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const isIOS = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return /iPhone|iPad|iPod/.test(navigator.userAgent);
+  }, []);
+  const isSafari = useMemo(() => {
     if (typeof window === 'undefined') return false;
     const ua = navigator.userAgent;
-    const isIOS = /iPhone|iPad|iPod/.test(ua);
-    const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
-    const isStandalone = (navigator as Navigator & { standalone?: boolean }).standalone
+    return /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
+  }, []);
+  const isStandalone = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return (navigator as Navigator & { standalone?: boolean }).standalone === true
       || window.matchMedia('(display-mode: standalone)').matches;
+  }, []);
+  /** Banner installazione — iOS Safari non-standalone (guida visiva) o Android Chrome (bottone install) */
+  const showInstallBanner = !isStandalone && ((isIOS && isSafari) || deferredPrompt !== null);
+  /** Banner installazione iOS — guida visiva con freccia verso la barra indirizzi */
+  const [showIosInstallHint, setShowIosInstallHint] = useState(() => {
+    if (typeof window === 'undefined') return false;
     return isIOS && isSafari && !isStandalone;
   });
+
+  // Cattura beforeinstallprompt (Chrome/Android, Edge, etc.)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  /** Su Chrome/Android: mostra il dialog nativo di installazione PWA. */
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    try {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') setDeferredPrompt(null);
+    } catch {
+      // user dismissed
+    }
+  };
   const shakeControls = useAnimation();
   useEffect(() => {
     if (!error) return;
@@ -518,16 +559,43 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
         </div>
       ) : null}
 
-      {/* iOS install hint — sottile, auto-chiudibile */}
+      {/* Banner installazione PWA */}
       {showIosInstallHint && (
-        <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-white/10 bg-black/60 backdrop-blur-md px-3 py-2.5 flex items-start gap-2">
-          <p className="text-[12px] leading-snug text-white/70 flex-1">
-            Per installare l'app sulla Home: in Safari tocca <span className="text-white font-semibold">☰</span> nella barra indirizzi, poi <span className="text-white font-semibold">Aggiungi a Schermata Home</span>
-          </p>
-          <button type="button" onClick={() => setShowIosInstallHint(false)} className="shrink-0 text-white/40 hover:text-white/70 mt-0.5">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        isIOS ? (
+          /* iOS Safari: guida visiva con animazione verso la barra indirizzi */
+          <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-orange-400/20 bg-orange-500/10 backdrop-blur-lg px-3 py-3 overflow-hidden">
+            {/* Freccia animata che punta in alto — verso la barra indirizzi */}
+            <div className="flex justify-center -mb-1">
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 1.2, ease: 'easeInOut', repeat: Infinity }}
+                className="text-orange-400 text-lg"
+              >
+                ↑
+              </motion.div>
+            </div>
+            <div className="flex items-start gap-2">
+              <p className="text-[12px] leading-snug text-white/80 flex-1 text-center">
+                Tocca <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-white/10 text-white font-bold text-[10px]">☰</span> nella barra in alto, poi<br />
+                <span className="text-white font-semibold">Aggiungi a Schermata Home</span>
+              </p>
+              <button type="button" onClick={() => setShowIosInstallHint(false)} className="shrink-0 text-white/30 hover:text-white/60">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ) : deferredPrompt !== null ? (
+          /* Chrome/Android/Edge: bottone che apre il dialog nativo di installazione */
+          <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-green-400/20 bg-green-500/10 backdrop-blur-lg px-3 py-2.5">
+            <button
+              type="button"
+              onClick={handleInstallClick}
+              className="w-full flex items-center justify-center gap-2 text-[13px] font-semibold text-white"
+            >
+              📲 Installa l'app sulla Home
+            </button>
+          </div>
+        ) : null
       )}
 
       {/* F watermark di sfondo */}
