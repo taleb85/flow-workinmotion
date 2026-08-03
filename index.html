@@ -27,6 +27,14 @@
         text-align: center;
         z-index: 99999;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #ios-install-banner:active {
+        background: rgba(255,149,0,0.15);
+        border-color: rgba(255,149,0,0.3);
       }
       #ios-install-banner p {
         margin: 0 0 6px 0;
@@ -55,6 +63,14 @@
             var banner = document.createElement('div');
             banner.id = 'ios-install-banner';
             banner.innerHTML = '<span class="arrow">↑</span><p>Tocca <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:rgba(255,255,255,0.1);color:#fff;font-weight:700;font-size:10px;vertical-align:middle;">☰</span> nella barra indirizzi<br>poi <strong style="color:#FF9500;">Aggiungi a Schermata Home</strong></p>';
+            banner.addEventListener('click', function() {
+              // Scrolla in cima per esporre la barra indirizzi + menu ☰
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              // Feedback visivo
+              banner.style.opacity = '0';
+              banner.style.transition = 'opacity 0.3s';
+              setTimeout(function() { banner.remove(); }, 300);
+            });
             document.body.appendChild(banner);
             banner.style.display = 'block';
             // Auto-nascondi dopo 15 secondi
