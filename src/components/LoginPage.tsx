@@ -100,27 +100,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const [deviceSuccess, setDeviceSuccess] = useState('');
   /** Evento install PWA nativo (Chrome/Android) — catturato e riesposto come bottone. */
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const isIOS = useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    return /iPhone|iPad|iPod/.test(navigator.userAgent);
-  }, []);
-  const isSafari = useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    const ua = navigator.userAgent;
-    return /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
-  }, []);
-  const isStandalone = useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    return (navigator as Navigator & { standalone?: boolean }).standalone === true
-      || window.matchMedia('(display-mode: standalone)').matches;
-  }, []);
-  /** Banner installazione — iOS Safari non-standalone (guida visiva) o Android Chrome (bottone install) */
-  const showInstallBanner = !isStandalone && ((isIOS && isSafari) || deferredPrompt !== null);
-  /** Banner installazione iOS — guida visiva con freccia verso la barra indirizzi */
-  const [showIosInstallHint, setShowIosInstallHint] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return isIOS && isSafari && !isStandalone;
-  });
 
   // Cattura beforeinstallprompt (Chrome/Android, Edge, etc.)
   useEffect(() => {
@@ -559,31 +538,17 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
         </div>
       ) : null}
 
-      {/* Banner installazione PWA */}
-      {showIosInstallHint && (
-        isIOS ? (
-          /* iOS Safari: guida visiva — "Aggiungi a Home" è nel menu pagina ☰ */
-          <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-orange-400/25 bg-orange-500/10 backdrop-blur-lg px-3 py-2.5">
-            <p className="text-[13px] leading-snug text-white font-semibold text-center mb-0.5">
-              📲 Installa l'app sulla Home
-            </p>
-            <p className="text-[11px] text-white/50 text-center leading-relaxed">
-              Tocca <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-white/15 text-white text-[10px] font-bold">☰</span> nella barra indirizzi di Safari (in alto o in basso)
-              <br />poi <span className="text-white/70 font-semibold">Aggiungi a Schermata Home</span>
-            </p>
-          </div>
-        ) : deferredPrompt !== null ? (
-          /* Chrome/Android/Edge: bottone che apre il dialog nativo di installazione */
-          <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-green-400/20 bg-green-500/10 backdrop-blur-lg px-3 py-2.5">
-            <button
-              type="button"
-              onClick={handleInstallClick}
-              className="w-full flex items-center justify-center gap-2 text-[13px] font-semibold text-white"
-            >
-              📲 Installa l'app sulla Home
-            </button>
-          </div>
-        ) : null
+      {/* Banner installazione PWA — solo Android/Chrome con beforeinstallprompt */}
+      {deferredPrompt !== null && (
+        <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-green-400/20 bg-green-500/10 backdrop-blur-lg px-3 py-2.5">
+          <button
+            type="button"
+            onClick={handleInstallClick}
+            className="w-full flex items-center justify-center gap-2 text-[13px] font-semibold text-white"
+          >
+            📲 Installa l'app sulla Home
+          </button>
+        </div>
       )}
 
       {/* F watermark di sfondo */}
