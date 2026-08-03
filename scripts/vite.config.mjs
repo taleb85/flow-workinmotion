@@ -163,9 +163,10 @@ export default defineConfig(({ command }) => {
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
+        // v1.8.0: cache-bust forzato — pulisce tutte le cache vecchie
         importScripts: ['pwa-background-sync.js', 'pwa-push-notifications.js'],
-        globPatterns: ['**/*.{ico,png,svg,webmanifest}', 'app.html'],
-        navigateFallback: 'app.html',
+        globPatterns: ['**/*.{ico,png,svg,webmanifest}', 'index.html'],
+        navigateFallback: 'index.html',
         navigateFallbackDenylist: [
           /^\/rest\//,
           /^\/auth\//,

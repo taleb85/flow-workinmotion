@@ -41,7 +41,6 @@ import {
 import { useIsMobileViewport } from '../hooks/useIsMobileViewport';
 import { isAdminOnly, isManagementRole, findFreezeVerifierById } from '../utils/permissions';
 import AdminGate from '../components/AdminGate';
-import { PwaGate } from '../components/PwaGate';
 import { MaintenancePage } from '../components/MaintenancePage';
 
 const StaffPersonalDashboard = lazy(() => import('../components/StaffPersonalDashboard'));
