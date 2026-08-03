@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef, memo, type CSSProperties } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { User as UserIcon, Lock, Loader2, Eye, EyeOff, Fingerprint, X } from 'lucide-react';
+import { User as UserIcon, Lock, Loader2, Eye, EyeOff, Fingerprint } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 
 /** Evento beforeinstallprompt (PWA install su Chrome/Edge/Android) */
