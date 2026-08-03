@@ -562,31 +562,25 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       {/* Banner installazione PWA */}
       {showIosInstallHint && (
         isIOS ? (
-          /* iOS Safari: pulsante che apre Condividi → da lì "Aggiungi a Schermata Home" */
+          /* iOS Safari: guida visiva — "Aggiungi a Home" è nel menu ☰, non in Condividi */
           <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-orange-400/25 bg-orange-500/10 backdrop-blur-lg px-3 py-2.5">
-            <button
-              type="button"
-              onClick={() => {
-                void (async () => {
-                  try {
-                    await navigator.share({
-                      title: 'FLOW',
-                      text: 'Installa FLOW sulla Home per accedere più velocemente',
-                      url: window.location.origin + '/profilo',
-                    });
-                  } catch { /* annullato */ }
-                })();
-                setShowIosInstallHint(false);
-              }}
-              className="w-full text-center"
-            >
-              <p className="text-[13px] leading-snug text-white font-semibold">
-                📲 Tocca qui per installare l'app sulla Home
-              </p>
-              <p className="text-[11px] text-white/50 mt-0.5">
-                Si aprirà il menu Condividi → scorri e tocca <span className="text-white/70">Aggiungi a Schermata Home</span>
-              </p>
-            </button>
+            {/* Freccia animata che punta in alto verso la barra indirizzi */}
+            <div className="flex justify-center -mb-0.5">
+              <motion.div
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 1.2, ease: 'easeInOut', repeat: Infinity }}
+                className="text-orange-400 text-base leading-none"
+              >
+                ↑
+              </motion.div>
+            </div>
+            <p className="text-[13px] leading-snug text-white font-semibold text-center mb-0.5">
+              📲 Installa l'app sulla Home
+            </p>
+            <p className="text-[11px] text-white/50 text-center leading-relaxed">
+              Tocca <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-white/15 text-white text-[10px] font-bold">☰</span> nella barra indirizzi di Safari
+              <br />poi <span className="text-white/70 font-semibold">Aggiungi a Schermata Home</span>
+            </p>
           </div>
         ) : deferredPrompt !== null ? (
           /* Chrome/Android/Edge: bottone che apre il dialog nativo di installazione */
