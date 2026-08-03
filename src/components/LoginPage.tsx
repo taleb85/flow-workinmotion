@@ -572,7 +572,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               <br />poi <span className="text-white/70 font-semibold">Aggiungi a Schermata Home</span>
             </p>
           </div>
-          </div>
         ) : deferredPrompt !== null ? (
           /* Chrome/Android/Edge: bottone che apre il dialog nativo di installazione */
           <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-green-400/20 bg-green-500/10 backdrop-blur-lg px-3 py-2.5">
