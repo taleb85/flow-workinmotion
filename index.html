@@ -108,7 +108,7 @@
         // Se è in modalità app → tutto normale, React carica
         if (isStandalone) return;
 
-        // Blocca React: mostra schermata di installazione
+        // Nascondi #root per evitare sovrapposizione React
         document.documentElement.style.overflow = 'hidden';
 
         function buildInstallScreen() {
@@ -170,6 +170,10 @@
             }, { once: true });
           }
         }
+
+        // Nascondi #root mentre la schermata install è visibile
+        var root = document.getElementById('root');
+        if (root) root.style.display = 'none';
 
         document.addEventListener('DOMContentLoaded', buildInstallScreen);
       })();
