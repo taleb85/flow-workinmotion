@@ -12,75 +12,166 @@
     </script>
     <!-- Banner installazione PWA iOS — visibile subito, prima che React carichi -->
     <style>
-      #ios-install-banner {
+      /* Schermata di installazione — visibile solo se NON in modalità app */
+      #pwa-install-screen {
         display: none;
         position: fixed;
-        top: max(1rem, env(safe-area-inset-top));
-        left: 10px;
-        right: 10px;
-        background: rgba(20, 20, 20, 0.92);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        padding: 12px 14px;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.08);
-        text-align: center;
-        z-index: 99999;
+        inset: 0;
+        background: radial-gradient(ellipse at 50% 30%, rgba(255,149,0,0.18) 0%, rgba(2,6,23,1) 60%);
+        z-index: 999999;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-        user-select: none;
-        -webkit-user-select: none;
+        text-align: center;
+        color: #fff;
       }
-      #ios-install-banner:active {
-        background: rgba(255,149,0,0.15);
-        border-color: rgba(255,149,0,0.3);
-      }
-      #ios-install-banner p {
-        margin: 0 0 6px 0;
-        font-size: 13px;
-        color: rgba(255,255,255,0.85);
-        line-height: 1.4;
-      }
-      #ios-install-banner .arrow {
-        font-size: 20px;
-        animation: ios-bounce 1.2s ease-in-out infinite;
-        display: block;
+      #pwa-install-screen.show { display: flex; }
+      #pwa-install-screen .logo {
+        width: 100px;
+        height: 100px;
+        border-radius: 26px;
+        background: linear-gradient(135deg, #253660, #1a2744);
+        box-shadow: 0 0 40px rgba(255,149,0,0.5);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        font-weight: 900;
+        letter-spacing: -2px;
         color: #FF9500;
       }
-      @keyframes ios-bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-6px); }
+      #pwa-install-screen h1 {
+        font-size: 22px;
+        font-weight: 800;
+        margin: 0 0 6px 0;
       }
+      #pwa-install-screen .subtitle {
+        font-size: 13px;
+        color: rgba(255,255,255,0.5);
+        margin: 0 0 28px 0;
+      }
+      #pwa-install-screen .step {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        max-width: 300px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        background: rgba(40,32,24,0.8);
+        border: 1px solid rgba(255,255,255,0.12);
+        margin-bottom: 10px;
+        font-size: 13px;
+        text-align: left;
+        color: rgba(255,255,255,0.85);
+      }
+      #pwa-install-screen .step-num {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: rgba(255,149,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 12px;
+        color: #FF9500;
+        flex-shrink: 0;
+      }
+      #pwa-install-screen .install-btn {
+        margin-top: 20px;
+        width: 100%;
+        max-width: 300px;
+        padding: 14px;
+        border-radius: 16px;
+        background: #FF9500;
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        border: none;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        display: none;
+      }
+      #pwa-install-screen .install-btn.show { display: block; }
     </style>
     <script>
       (function(){
         var ua = navigator.userAgent;
         var isIOS = /iPhone|iPad|iPod/.test(ua);
+        var isAndroid = /Android/.test(ua);
         var isStandalone = navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-        if (isIOS && !isStandalone) {
-          document.addEventListener('DOMContentLoaded', function() {
-            var banner = document.createElement('div');
-            banner.id = 'ios-install-banner';
-            banner.innerHTML = '<span class="arrow">↑</span><p>Tocca <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:rgba(255,255,255,0.1);color:#fff;font-weight:700;font-size:10px;vertical-align:middle;">☰</span> nella barra indirizzi<br>poi <strong style="color:#FF9500;">Aggiungi a Schermata Home</strong></p>';
-            banner.addEventListener('click', function() {
-              // Scrolla in cima per esporre la barra indirizzi + menu ☰
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              // Feedback visivo
-              banner.style.opacity = '0';
-              banner.style.transition = 'opacity 0.3s';
-              setTimeout(function() { banner.remove(); }, 300);
-            });
-            document.body.appendChild(banner);
-            banner.style.display = 'block';
-            // Auto-nascondi dopo 15 secondi
-            setTimeout(function() {
-              banner.style.opacity = '0';
-              banner.style.transition = 'opacity 0.5s';
-              setTimeout(function() { banner.remove(); }, 500);
-            }, 15000);
-          });
+
+        // Se è in modalità app → tutto normale, React carica
+        if (isStandalone) return;
+
+        // Blocca React: mostra schermata di installazione
+        document.documentElement.style.overflow = 'hidden';
+
+        function buildInstallScreen() {
+          var screen = document.createElement('div');
+          screen.id = 'pwa-install-screen';
+          screen.className = 'show';
+
+          var inner = '';
+          inner += '<div class="logo">F</div>';
+          inner += '<h1>Installa FLOW</h1>';
+          inner += '<p class="subtitle">Aggiungi l\'app alla schermata Home per iniziare</p>';
+
+          if (isIOS) {
+            inner += '<div class="step"><span class="step-num">1</span>Tocca ☰ nella barra indirizzi di Safari</div>';
+            inner += '<div class="step"><span class="step-num">2</span>Scorri e tocca <strong>Aggiungi a Schermata Home</strong></div>';
+            inner += '<div class="step"><span class="step-num">3</span>Tocca <strong>Aggiungi</strong> per confermare</div>';
+          } else if (isAndroid) {
+            inner += '<div class="step"><span class="step-num">1</span>Tocca ⋮ in alto a destra</div>';
+            inner += '<div class="step"><span class="step-num">2</span>Seleziona <strong>Installa app</strong> o <strong>Aggiungi a Home</strong></div>';
+            inner += '<div class="step"><span class="step-num">3</span>Conferma l\'installazione</div>';
+            inner += '<button class="install-btn" id="pwa-install-btn">📲 Installa l\'app</button>';
+          } else {
+            inner += '<div class="step"><span class="step-num">1</span>Clicca l\'icona ⊕ nella barra indirizzi</div>';
+            inner += '<div class="step"><span class="step-num">2</span>Seleziona <strong>Installa</strong></div>';
+            inner += '<div class="step"><span class="step-num">3</span>FLOW apparirà sul desktop</div>';
+            inner += '<button class="install-btn" id="pwa-install-btn">📲 Installa l\'app</button>';
+          }
+
+          screen.innerHTML = inner;
+          document.body.insertBefore(screen, document.body.firstChild);
+
+          // Bottone install (Android/Desktop)
+          var installBtn = document.getElementById('pwa-install-btn');
+          if (installBtn) {
+            var deferredPrompt = window.__deferredInstallPrompt;
+            if (deferredPrompt) {
+              installBtn.classList.add('show');
+              installBtn.addEventListener('click', function() {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function(result) {
+                  if (result.outcome === 'accepted') {
+                    // L'app è stata installata — ricarica
+                    window.location.reload();
+                  }
+                });
+              });
+            }
+            // Ascolta anche eventi futuri (se il listener non ha ancora catturato)
+            window.addEventListener('beforeinstallprompt', function(e) {
+              e.preventDefault();
+              window.__deferredInstallPrompt = e;
+              installBtn.classList.add('show');
+              installBtn.addEventListener('click', function() {
+                e.prompt();
+                e.userChoice.then(function(result) {
+                  if (result.outcome === 'accepted') window.location.reload();
+                });
+              });
+            }, { once: true });
+          }
         }
+
+        document.addEventListener('DOMContentLoaded', buildInstallScreen);
       })();
     </script>
     <script>
