@@ -10,6 +10,63 @@
         window.__deferredInstallPrompt = e;
       });
     </script>
+    <!-- Banner installazione PWA iOS — visibile subito, prima che React carichi -->
+    <style>
+      #ios-install-banner {
+        display: none;
+        position: fixed;
+        top: max(1rem, env(safe-area-inset-top));
+        left: 10px;
+        right: 10px;
+        background: rgba(20, 20, 20, 0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.08);
+        text-align: center;
+        z-index: 99999;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+      #ios-install-banner p {
+        margin: 0 0 6px 0;
+        font-size: 13px;
+        color: rgba(255,255,255,0.85);
+        line-height: 1.4;
+      }
+      #ios-install-banner .arrow {
+        font-size: 20px;
+        animation: ios-bounce 1.2s ease-in-out infinite;
+        display: block;
+        color: #FF9500;
+      }
+      @keyframes ios-bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+      }
+    </style>
+    <script>
+      (function(){
+        var ua = navigator.userAgent;
+        var isIOS = /iPhone|iPad|iPod/.test(ua);
+        var isStandalone = navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+        if (isIOS && !isStandalone) {
+          document.addEventListener('DOMContentLoaded', function() {
+            var banner = document.createElement('div');
+            banner.id = 'ios-install-banner';
+            banner.innerHTML = '<span class="arrow">↑</span><p>Tocca <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:rgba(255,255,255,0.1);color:#fff;font-weight:700;font-size:10px;vertical-align:middle;">☰</span> nella barra indirizzi<br>poi <strong style="color:#FF9500;">Aggiungi a Schermata Home</strong></p>';
+            document.body.appendChild(banner);
+            banner.style.display = 'block';
+            // Auto-nascondi dopo 15 secondi
+            setTimeout(function() {
+              banner.style.opacity = '0';
+              banner.style.transition = 'opacity 0.5s';
+              setTimeout(function() { banner.remove(); }, 500);
+            }, 15000);
+          });
+        }
+      })();
+    </script>
     <script>
       (function(){
         var th = 'dark';
