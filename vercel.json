@@ -5,7 +5,7 @@
   "rewrites": [
     { "source": "/", "destination": "/app.html" },
     { "source": "/profilo", "destination": "/app.html" },
-    { "source": "/((?!Installa_FLOW\\.mobileconfig$).*)", "destination": "/app.html" }
+    { "source": "/(.*)", "destination": "/app.html" }
   ],
   "headers": [
     {
@@ -41,14 +41,6 @@
       "source": "/sw.js",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
-      ]
-    },
-    {
-      "source": "/Installa_FLOW.mobileconfig",
-      "headers": [
-        { "key": "Content-Type", "value": "application/x-apple-aspen-config" },
-        { "key": "Content-Disposition", "value": "inline" },
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, s-maxage=0" }
       ]
     }
   ]
