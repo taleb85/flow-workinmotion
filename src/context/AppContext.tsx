@@ -104,7 +104,6 @@ import {
   clearLocalDeductExcludedRuleIds,
 } from '../utils/shiftDeductExclusionsLocal';
 import { loadTimesheetPeriodFromSupabase, applyRemoteTimesheetPeriod } from '../utils/timesheetPeriodSupabase';
-import { PwaGate } from '../components/PwaGate';
 import { userRowToSessionUser, defaultPermissionFieldsForNewUser } from '../utils/staffPermissionDefaults';
 import { APP_SESSION_STORAGE_KEY } from '../constants/appSession';
 import { PATH_PROFILO } from '../config/appPaths';
@@ -2789,7 +2788,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
                   <FlowWaveIcon size={120} radius={34} />
                 </div>
               ) : (
-                <PwaGate>{children}</PwaGate>
+                children
               )}
 
 
