@@ -359,6 +359,43 @@ export function useMessages(userId?: string, isAdmin = false) {
   );
 
   /**
+   * Elimina un'intera conversazione (tutti i messaggi privati tra due utenti).
+   * Accessibile sia ad admin che a utenti normali per la propria conversazione.
+   */
+  const deleteConversation = useCallback(
+    async (contactId: string) => {
+      if (!userId || !supabase) return false;
+
+      try {
+        const { error: supabaseError } = await supabase
+          .from('staff_messages')
+          .delete()
+          .or(
+            `and(sender_id.eq.${userId},recipient_id.eq.${contactId}),and(sender_id.eq.${contactId},recipient_id.eq.${userId})`
+          );
+
+        if (supabaseError) throw supabaseError;
+
+        setMessages((prev) =>
+          prev.filter(
+            (m) =>
+              !(
+                m.message_type === 'private' &&
+                ((m.sender_id === userId && m.recipient_id === contactId) ||
+                  (m.sender_id === contactId && m.recipient_id === userId))
+              )
+          )
+        );
+        return true;
+      } catch (err) {
+        console.error('[useMessages] Error deleting conversation:', err);
+        return false;
+      }
+    },
+    [userId]
+  );
+
+  /**
    * Filtra messaggi broadcast.
    */
   const broadcastMessages = messages.filter((m) => m.message_type === 'broadcast');
@@ -385,6 +422,7 @@ export function useMessages(userId?: string, isAdmin = false) {
     markAllAsRead,
     sendMessage,
     deleteMessage,
+    deleteConversation,
     loadMessages,
   };
 }

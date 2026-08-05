@@ -523,7 +523,7 @@ export default function PunchInKiosk({ onGoToLogin }: PunchInKioskProps) {
         <button
           type="button"
           onClick={onGoToLogin}
-className="group flex items-center gap-2 rounded-xl border-2 border-brand-deep/30 bg-brand-deep/8 px-4 py-2.5 text-xs font-semibold text-brand-deep shadow-[0_2px_8px_-2px_rgba(0,26,128,0.12)] transition-[color,background-color,border-color,box-shadow,transform] hover:border-brand-deep/60 hover:bg-brand-deep/15 hover:shadow-[0_4px_12px_-3px_rgba(0,26,128,0.2)] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="group flex items-center gap-2 rounded-xl border-2 border-brand-deep/30 bg-brand-deep/8 px-4 py-2.5 text-xs font-semibold text-brand-deep shadow-[0_2px_8px_-2px_rgba(0,26,128,0.12)] transition-[color,background-color,border-color,box-shadow,transform] hover:border-brand-deep/60 hover:bg-brand-deep/15 hover:shadow-[0_4px_12px_-3px_rgba(0,26,128,0.2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
         >
           <User className="h-4 w-4 shrink-0 text-brand-deep" strokeWidth={2} />
           {t.area_personale}
@@ -801,13 +801,13 @@ className="group flex items-center gap-2 rounded-xl border-2 border-brand-deep/3
                             setSelectedShift(shift);
                           }}
                           disabled={!isSelectable}
-                          className={`w-full px-4 py-3 rounded-xl flex items-center gap-3 text-left transition-all duration-300 border ${
-                            done
-                              ? 'bg-white/5 border-white/12 cursor-default'
-                              : awaitingOut
-                                  ? 'bg-amber-500/12 border-amber-500/30 cursor-pointer hover:bg-amber-500/22'
-                                  : 'bg-white/8 border-neutral-500 hover:bg-white/12 cursor-pointer'
-                          } ${isSuggested ? 'ring-2 ring-accent/40' : ''} active:bg-amber-500/22'/80`}
+                          className={`w-full px-4 py-3 rounded-xl flex items-center gap-3 text-left transition-colors duration-300 border ${
+ done
+ ? 'bg-white/5 border-white/12 cursor-default'
+ : awaitingOut
+ ? 'bg-amber-500/12 border-amber-500/30 cursor-pointer hover:bg-amber-500/22'
+ : 'bg-white/8 border-neutral-500 hover:bg-white/12 cursor-pointer'
+ } ${isSuggested ? 'ring-2 ring-accent/40' : ''} active:bg-amber-500/22'/80`}
                         >
                           <span
                             className={`flex-shrink-0 ${done ? 'text-accent' : awaitingOut ? 'text-amber-500' : isDayShift ? 'text-amber-500' : 'text-white/50'}`}
@@ -848,7 +848,7 @@ className="group flex items-center gap-2 rounded-xl border-2 border-brand-deep/3
                         type="button"
                         onClick={() => { setUserWantsShiftList(true); setSelectedShift(null); }}
                         disabled={isLoading}
-                        className="flex flex-col items-center justify-center gap-0.5 text-white/50 active:scale-95 transition-transform"
+                        className="flex flex-col items-center justify-center gap-0.5 text-white/50 transition-transform"
                       >
                         <Smartphone className="w-5 h-5 text-[#455a3f]" />
                         <span className="text-[11px] font-black uppercase tracking-tighter leading-none">

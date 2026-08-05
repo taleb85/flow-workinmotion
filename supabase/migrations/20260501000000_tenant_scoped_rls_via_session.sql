@@ -201,18 +201,27 @@ CREATE POLICY "holiday_requests_delete_tenant" ON public.holiday_requests
   );
 
 -- ── PUNCH AUDIT LOG ───────────────────────────────────────────────────────
-DROP POLICY IF EXISTS "anon_all_punch_audit_log" ON public.punch_audit_log;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'punch_audit_log') THEN
+    DROP POLICY IF EXISTS "anon_all_punch_audit_log" ON public.punch_audit_log;
 
-CREATE POLICY "punch_audit_log_select_tenant" ON public.punch_audit_log
-  FOR SELECT USING (
-    get_session_tenant_id() IS NULL
-    OR tenant_id = get_session_tenant_id()
-  );
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'punch_audit_log_select_tenant' AND tablename = 'punch_audit_log') THEN
+      CREATE POLICY "punch_audit_log_select_tenant" ON public.punch_audit_log
+        FOR SELECT USING (
+          get_session_tenant_id() IS NULL
+          OR tenant_id = get_session_tenant_id()
+        );
+    END IF;
 
-CREATE POLICY "punch_audit_log_insert_tenant" ON public.punch_audit_log
-  FOR INSERT WITH CHECK (
-    tenant_id = get_session_tenant_id()
-  );
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'punch_audit_log_insert_tenant' AND tablename = 'punch_audit_log') THEN
+      CREATE POLICY "punch_audit_log_insert_tenant" ON public.punch_audit_log
+        FOR INSERT WITH CHECK (
+          tenant_id = get_session_tenant_id()
+        );
+    END IF;
+  END IF;
+END $$;
 
 -- ── NOTIFICATIONS ─────────────────────────────────────────────────────────
 DROP POLICY IF EXISTS "Anon can select notifications" ON public.notifications;
@@ -220,40 +229,59 @@ DROP POLICY IF EXISTS "Anon can insert notifications" ON public.notifications;
 DROP POLICY IF EXISTS "Anon can update notifications" ON public.notifications;
 DROP POLICY IF EXISTS "Anon can delete notifications" ON public.notifications;
 
-CREATE POLICY "notifications_select_self" ON public.notifications
-  FOR SELECT USING (
-    get_session_user_id() IS NULL
-    OR recipient_user_id = get_session_user_id()
-  );
+DO $$
+BEGIN
+  -- Usa user_id (la colonna reale) invece di recipient_user_id
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'notifications_select_self' AND tablename = 'notifications') THEN
+    CREATE POLICY "notifications_select_self" ON public.notifications
+      FOR SELECT USING (
+        get_session_user_id() IS NULL
+        OR user_id = get_session_user_id()
+      );
+  END IF;
 
-CREATE POLICY "notifications_insert_tenant" ON public.notifications
-  FOR INSERT WITH CHECK (
-    get_session_tenant_id() IS NULL
-    OR tenant_id = get_session_tenant_id()
-  );
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'notifications_insert_tenant' AND tablename = 'notifications') THEN
+    CREATE POLICY "notifications_insert_tenant" ON public.notifications
+      FOR INSERT WITH CHECK (
+        get_session_tenant_id() IS NULL
+        OR tenant_id = get_session_tenant_id()
+      );
+  END IF;
+END $$;
 
 -- ── APP SETTINGS SYNC SIGNAL ─────────────────────────────────────────────
-DROP POLICY IF EXISTS "app_settings_sync_signal_anon_select" ON public.app_settings_sync_signal;
-DROP POLICY IF EXISTS "app_settings_sync_signal_anon_insert" ON public.app_settings_sync_signal;
-DROP POLICY IF EXISTS "app_settings_sync_signal_anon_update" ON public.app_settings_sync_signal;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'app_settings_sync_signal' AND column_name = 'tenant_id') THEN
+    DROP POLICY IF EXISTS "app_settings_sync_signal_anon_select" ON public.app_settings_sync_signal;
+    DROP POLICY IF EXISTS "app_settings_sync_signal_anon_insert" ON public.app_settings_sync_signal;
+    DROP POLICY IF EXISTS "app_settings_sync_signal_anon_update" ON public.app_settings_sync_signal;
 
-CREATE POLICY "app_settings_sync_signal_select_tenant" ON public.app_settings_sync_signal
-  FOR SELECT USING (
-    get_session_tenant_id() IS NULL
-    OR tenant_id = get_session_tenant_id()
-  );
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'app_settings_sync_signal_select_tenant' AND tablename = 'app_settings_sync_signal') THEN
+      CREATE POLICY "app_settings_sync_signal_select_tenant" ON public.app_settings_sync_signal
+        FOR SELECT USING (
+          get_session_tenant_id() IS NULL
+          OR tenant_id = get_session_tenant_id()
+        );
+    END IF;
 
-CREATE POLICY "app_settings_sync_signal_insert_tenant" ON public.app_settings_sync_signal
-  FOR INSERT WITH CHECK (
-    get_session_tenant_id() IS NULL
-    OR tenant_id = get_session_tenant_id()
-  );
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'app_settings_sync_signal_insert_tenant' AND tablename = 'app_settings_sync_signal') THEN
+      CREATE POLICY "app_settings_sync_signal_insert_tenant" ON public.app_settings_sync_signal
+        FOR INSERT WITH CHECK (
+          get_session_tenant_id() IS NULL
+          OR tenant_id = get_session_tenant_id()
+        );
+    END IF;
 
-CREATE POLICY "app_settings_sync_signal_update_tenant" ON public.app_settings_sync_signal
-  FOR UPDATE USING (
-    get_session_tenant_id() IS NULL
-    OR tenant_id = get_session_tenant_id()
-  );
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'app_settings_sync_signal_update_tenant' AND tablename = 'app_settings_sync_signal') THEN
+      CREATE POLICY "app_settings_sync_signal_update_tenant" ON public.app_settings_sync_signal
+        FOR UPDATE USING (
+          get_session_tenant_id() IS NULL
+          OR tenant_id = get_session_tenant_id()
+        );
+    END IF;
+  END IF;
+END $$;
 
 -- ── SHIFT TEMPLATES (global, no tenant_id) ───────────────────────────────
 DROP POLICY IF EXISTS "anon_select_shift_templates" ON public.shift_templates;
@@ -261,11 +289,21 @@ DROP POLICY IF EXISTS "anon_insert_shift_templates" ON public.shift_templates;
 DROP POLICY IF EXISTS "anon_update_shift_templates" ON public.shift_templates;
 DROP POLICY IF EXISTS "anon_delete_shift_templates" ON public.shift_templates;
 
-CREATE POLICY "shift_templates_all_anon" ON public.shift_templates
-  FOR ALL USING (true);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'shift_templates_all_anon' AND tablename = 'shift_templates') THEN
+    CREATE POLICY "shift_templates_all_anon" ON public.shift_templates
+      FOR ALL USING (true);
+  END IF;
+END $$;
 
 -- ── SUPER ADMINS ─────────────────────────────────────────────────────────
 DROP POLICY IF EXISTS "super_admins_service_only" ON public.super_admins;
 
-CREATE POLICY "super_admins_service_only" ON public.super_admins
-  FOR ALL USING (false);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'super_admins_service_only' AND tablename = 'super_admins') THEN
+    CREATE POLICY "super_admins_service_only" ON public.super_admins
+      FOR ALL USING (false);
+  END IF;
+END $$;

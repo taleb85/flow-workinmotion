@@ -92,16 +92,16 @@ export function Toggle({ value, onChange, danger }: { value: boolean; onChange: 
       aria-checked={value}
       onClick={() => onChange(!value)}
       className={`relative w-10 h-5.5 rounded-full transition-colors duration-200 shrink-0 ${
-        value
-          ? danger ? 'bg-red-500' : 'bg-accent'
-          : 'bg-white/20'
-      }`}
+ value
+ ? danger ? 'bg-red-500' : 'bg-accent'
+ : 'bg-white/20'
+ }`}
       style={{ minWidth: '2.5rem', height: '1.375rem' }}
     >
       <span
         className={`absolute top-0.5 left-0.5 w-4.5 h-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-          value ? 'translate-x-[1.125rem]' : 'translate-x-0'
-        }`}
+ value ? 'translate-x-[1.125rem]' : 'translate-x-0'
+ }`}
         style={{ width: '1.125rem', height: '1.125rem' }}
       />
     </button>
@@ -238,10 +238,10 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             type="button"
             onClick={() => setTab(t.id)}
             className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold whitespace-nowrap transition-colors ${
-              tab === t.id
-                ? 'text-accent border-b-2 border-accent bg-white/8'
-                : 'text-white/55 hover:text-white/80'
-            } active:text-white/80'`}
+ tab === t.id
+ ? 'text-accent border-b-2 border-accent bg-white/8'
+ : 'text-white/55 hover:text-white/80'
+ } active:text-white/80'`}
           >
             {t.icon}{t.label}
           </button>
@@ -447,7 +447,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             type="button"
             onClick={handleSave}
             disabled={saving || tab === 'staff'}
-className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-accent-hover/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-accent-hover/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             <Check className="w-4 h-4" />
             {saving ? 'Salvataggio…' : tab === 'staff' ? 'Salvataggio inline per dipendente' : 'Salva impostazioni sede'}

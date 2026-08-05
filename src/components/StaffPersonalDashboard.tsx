@@ -982,11 +982,11 @@ export default function StaffPersonalDashboard({
                             key={v}
                             type="button"
                             onClick={() => setTsStaffView(v)}
-                            className={`h-8 px-4 rounded-full text-[11px] font-extrabold uppercase tracking-wider transition-all ${
-                              active
-                                ? 'bg-accent text-white shadow-[0_0_12px_-2px_var(--color-accent)] scale-105'
-                                : 'bg-white/[0.04] border border-white/[0.07] text-white/40 hover:border-white/25 hover:text-white/80'
-                            } active:scale-95`}
+                            className={`h-8 px-4 rounded-full text-[11px] font-extrabold uppercase tracking-wider transition-colors ${
+ active
+ ? 'bg-accent text-white shadow-[0_0_12px_-2px_var(--color-accent)] scale-105'
+ : 'bg-white/[0.04] border border-white/[0.07] text-white/40 hover:border-white/25 hover:text-white/80'
+ }`}
                           >
                             {label}
                           </button>

@@ -104,7 +104,7 @@ export default function StaffHomePreview({
         <button
           type="button"
           tabIndex={-1}
-className="rounded-xl border border-neutral-500 surface-ghost-interactive flex min-h-[52px] w-full items-center justify-between gap-3 px-4 py-3 text-left transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="rounded-xl border border-neutral-500 surface-ghost-interactive flex min-h-[52px] w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
         >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10">

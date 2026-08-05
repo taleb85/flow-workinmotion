@@ -330,7 +330,7 @@ export function ProfileFormSelf({
         <button
           type="submit"
           disabled={isSaving}
-          className="w-full py-3 rounded-xl bg-accent text-white font-bold text-sm shadow-md shadow-accent/25 hover:bg-accent-hover active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+          className="w-full py-3 rounded-xl bg-accent text-white font-bold text-sm shadow-md shadow-accent/25 hover:bg-accent-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
         >
           {isSaving ? t.saving : t.save}
         </button>
@@ -391,13 +391,13 @@ export function AdminTimesheetGridPrivacyEditor({ user }: { user: UserType }) {
           disabled={busy}
           onClick={() => void handleToggle()}
           className={`relative flex h-7 w-12 shrink-0 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-50 ${
-            plannedOnly ? 'bg-accent' : 'bg-slate-300'
-          }`}
+ plannedOnly ? 'bg-accent' : 'bg-slate-300'
+ }`}
         >
           <span
             className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-              plannedOnly ? 'translate-x-5' : 'translate-x-0.5'
-            }`}
+ plannedOnly ? 'translate-x-5' : 'translate-x-0.5'
+ }`}
           />
         </button>
       </div>
@@ -807,7 +807,7 @@ export function ProfileFormAdmin({
             <button
               type="button"
               onClick={handleShareInviteSimple}
-              className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white font-sans transition-all hover:opacity-95 active:scale-[0.98] hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white font-sans transition-colors hover:opacity-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               style={{ background: '#22c55e' }}
             >
               <Share2 className="w-5 h-5" aria-hidden />
@@ -843,7 +843,7 @@ export function ProfileFormAdmin({
           <button
             type="button"
             onClick={onClose}
-className="flex-1 rounded-xl border border-neutral-500 px-4 py-2 text-sm font-semibold text-white/80 surface-ghost-interactive font-sans transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="flex-1 rounded-xl border border-neutral-500 px-4 py-2 text-sm font-semibold text-white/80 surface-ghost-interactive font-sans transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           >
             {readOnly ? t.close ?? t.cancel : t.cancel}
           </button>

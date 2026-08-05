@@ -555,6 +555,8 @@ const baseEn: Record<string, string> = {
   notif_push_not_supported: 'Notifications not supported on this device.',
   notif_push_saved: 'Notification preference saved.',
 
+  messages_tab: 'Messages',
+  notifications_tab: 'Notifications',
   messages_title: 'Messages',
   messages_new_chat: 'New conversation',
   messages_new_conversation: 'New conversation',

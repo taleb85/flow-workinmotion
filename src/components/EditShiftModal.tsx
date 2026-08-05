@@ -146,7 +146,7 @@ export default function EditShiftModal({ shift, onClose }: EditShiftModalProps) 
             <div className="flex space-x-3 pt-4">
               <button
                 onClick={handleSave}
-className="flex-1 bg-accent text-white rounded-2xl py-4 font-black uppercase tracking-wider flex items-center justify-center space-x-2 hover:bg-accent-hover hover:shadow-lg transition-shadow active:bg-accent-hover/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="flex-1 bg-accent text-white rounded-2xl py-4 font-black uppercase tracking-wider flex items-center justify-center space-x-2 hover:bg-accent-hover hover:shadow-lg transition-shadow active:bg-accent-hover/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               >
                 <Save className="w-5 h-5" />
                 <span>{t.save}</span>

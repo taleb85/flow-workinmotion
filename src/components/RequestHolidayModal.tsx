@@ -98,7 +98,7 @@ export default function RequestHolidayModal({ isOpen, onClose, userId }: Request
   };
 
   const inputCls =
-    'w-full px-3 py-2.5 text-base rounded-2xl border border-neutral-500 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-white placeholder:text-white/40 transition-all bg-white/10' as const;
+    'w-full px-3 py-2.5 text-base rounded-2xl border border-neutral-500 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-white placeholder:text-white/40 transition-colors bg-white/10' as const;
   const labelClsFull = 'block text-xs font-bold uppercase tracking-wider mb-1 text-accent/80';
 
   if (!isOpen) return null;
@@ -190,14 +190,14 @@ export default function RequestHolidayModal({ isOpen, onClose, userId }: Request
                     lightHaptic();
                     handleClose();
                   }}
-                  className="min-h-[56px] rounded-3xl border border-slate-200 text-base font-bold text-white/80 transition-colors active:scale-[0.99]"
+                  className="min-h-[56px] rounded-3xl border border-slate-200 text-base font-bold text-white/80 transition-colors"
                 >
                   {t.cancel}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || !startDate || !endDate}
-                  className="flex min-h-[56px] items-center justify-center gap-2 rounded-3xl bg-accent text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-accent/20 transition-all hover:shadow-xl hover:shadow-accent/30 hover:scale-[1.02] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+                  className="flex min-h-[56px] items-center justify-center gap-2 rounded-3xl bg-accent text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-accent/20 transition-colors hover:shadow-xl hover:shadow-accent/30 disabled:cursor-not-allowed disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                 >
                   {isSubmitting ? (
                     <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -254,7 +254,7 @@ export default function RequestHolidayModal({ isOpen, onClose, userId }: Request
           <button
             type="submit"
             disabled={isSubmitting || !startDate || !endDate}
-            className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-accent text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-accent/20 transition-all hover:shadow-xl hover:shadow-accent/30 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+            className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-accent text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-accent/20 transition-colors hover:shadow-xl hover:shadow-accent/30 disabled:cursor-not-allowed disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             {isSubmitting ? (
               <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

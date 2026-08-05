@@ -114,10 +114,10 @@ export default function AdminSyncOverlay({ onDone, onReload }: Props) {
                 className="flex items-center gap-3"
               >
                 <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-colors duration-300 ${
-                  done
-                    ? 'bg-brand-mid'
-                    : 'border-2 border-neutral-500'
-                }`}>
+ done
+ ? 'bg-brand-mid'
+ : 'border-2 border-neutral-500'
+ }`}>
                   {done && !isLast && (
                     <Check className="w-3 h-3 text-white" strokeWidth={3} />
                   )}
@@ -133,10 +133,10 @@ export default function AdminSyncOverlay({ onDone, onReload }: Props) {
                   )}
                 </div>
                 <span className={`text-sm font-medium transition-colors duration-300 ${
-                  done
-                    ? 'text-white/80'
-                    : 'text-white/50'
-                }`}>
+ done
+ ? 'text-white/80'
+ : 'text-white/50'
+ }`}>
                   {step.label}
                 </span>
               </motion.li>

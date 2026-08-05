@@ -64,10 +64,10 @@ export function NotificationPermissionButton({
         disabled={isLoading}
         title={isSubscribed ? t.notif_push_active_title : t.notif_push_activate_title}
         className={`inline-flex items-center justify-center h-10 w-10 rounded-lg transition-colors disabled:opacity-50 ${
-          isSubscribed
-            ? 'bg-brand-100 text-brand-700'
-            : 'bg-slate-100 text-white/80'
-        } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
+ isSubscribed
+ ? 'bg-brand-100 text-brand-700'
+ : 'bg-slate-100 text-white/80'
+ } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
       >
         {isLoading ? (
           <Loader2 className="h-5 w-5 animate-spin" />
@@ -87,10 +87,10 @@ export function NotificationPermissionButton({
         onClick={handleToggle}
         disabled={isLoading}
         className={`flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-semibold rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-          isSubscribed
-            ? 'bg-brand-50 text-brand-700 border-brand-200'
-            : 'bg-slate-100 text-white/80 border-slate-200 hover:bg-slate-200'
-        } active:bg-slate-200'/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
+ isSubscribed
+ ? 'bg-brand-50 text-brand-700 border-brand-200'
+ : 'bg-slate-100 text-white/80 border-slate-200 hover:bg-slate-200'
+ } active:bg-slate-200'/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -111,8 +111,8 @@ export function NotificationPermissionButton({
         <div className="flex items-center gap-1.5">
           <span
             className={`h-2 w-2 rounded-full flex-shrink-0 ${
-              notificationPermission === 'granted' ? 'bg-green-500' : 'bg-amber-400'
-            }`}
+ notificationPermission === 'granted' ? 'bg-green-500' : 'bg-amber-400'
+ }`}
           />
           <span className="text-[11px] font-semibold uppercase tracking-wider text-white/50">
             {notificationPermission === 'granted' ? 'Permesso concesso' : 'Permesso non richiesto'}

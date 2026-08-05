@@ -127,12 +127,12 @@ export default function PostUnlockRestartOverlay({ language }: { language: Langu
                 {/* Icona */}
                 <span
                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${
-                    isDone
-                      ? 'bg-accent text-white'
-                      : isLast
-                      ? 'bg-accent/15 text-accent'
-                      : 'bg-white/10 text-white/40'
-                  }`}
+ isDone
+ ? 'bg-accent text-white'
+ : isLast
+ ? 'bg-accent/15 text-accent'
+ : 'bg-white/10 text-white/40'
+ }`}
                 >
                   {isDone ? (
                     <Check className="h-3 w-3" strokeWidth={3} />
@@ -144,8 +144,8 @@ export default function PostUnlockRestartOverlay({ language }: { language: Langu
                 {/* Testo */}
                 <span
                   className={`text-xs font-medium transition-colors duration-300 ${
-                    isDone ? 'text-neutral-200' : 'text-neutral-400'
-                  }`}
+ isDone ? 'text-neutral-200' : 'text-neutral-400'
+ }`}
                 >
                   {step.label}
                 </span>

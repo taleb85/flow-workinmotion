@@ -31,6 +31,19 @@ export default function AdminLayout() {
   const [activeTab, setActiveTab] = useState<AdminTab>('profili');
   const [bgTheme, setBgTheme] = useState<BackgroundTheme>(() => getStoredTheme(currentUser?.id));
 
+  // Applica appBg a html e body così il colore del tema copre tutto lo schermo
+  useEffect(() => {
+    const bg = bgTheme.appBg;
+    document.documentElement.style.background = bg;
+    document.body.style.background = bg;
+    const r = parseInt(bg.slice(1, 3), 16);
+    const g = parseInt(bg.slice(3, 5), 16);
+    const b = parseInt(bg.slice(5, 7), 16);
+    document.documentElement.style.setProperty('--app-bg-r', String(r));
+    document.documentElement.style.setProperty('--app-bg-g', String(g));
+    document.documentElement.style.setProperty('--app-bg-b', String(b));
+  }, [bgTheme]);
+
   useEffect(() => {
     const handler = (e: Event) => setBgTheme(getThemeById((e as CustomEvent<string>).detail));
     window.addEventListener('flow-bg-change', handler);
@@ -96,11 +109,11 @@ export default function AdminLayout() {
                     type="button"
                     onClick={() => handleTabChange(key)}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                      isActive
-                        ? 'bg-accent text-white shadow-sm'
-                        : 'text-white/60 hover:bg-white/10 hover:text-white active:text-white'
-                    }`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+ isActive
+ ? 'bg-accent text-white shadow-sm'
+ : 'text-white/60 hover:bg-white/10 hover:text-white active:text-white'
+ }`}
                   >
                     <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
                     <span className="sm:hidden">{key === 'profili' ? 'Profili' : 'Impost.'}</span>

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Bell, BellOff, X, Info, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppData } from '../context/appSliceContexts';
@@ -42,13 +42,29 @@ export default function NotificationCenter({ denseTrigger = false }: { denseTrig
 
   const handleOpen = useCallback(() => {
     setIsOpen(true);
-    if (currentUser && unreadCount > 0) {
+    if (currentUser) {
+      // Marca sempre come viste tutte le notifiche nel feed, anche se il contatore è già 0
+      // (pulisce il badge PWA e previene badge residui da dati inconsistenti)
       markAllSeen(currentUser.id, feed.map((n) => n.id));
       setSeenTick((x) => x + 1);
       // Notifica AppContext di ricalcolare il badge sull'icona PWA
       window.dispatchEvent(new CustomEvent('notifications-seen'));
     }
-  }, [currentUser, unreadCount, feed]);
+  }, [currentUser, feed]);
+
+  // Ascolta l'evento per aprirsi da push notification / Service Worker
+  useEffect(() => {
+    const onOpenFromPush = () => {
+      setIsOpen(true);
+      if (currentUser) {
+        markAllSeen(currentUser.id, feed.map((n) => n.id));
+        setSeenTick((x) => x + 1);
+        window.dispatchEvent(new CustomEvent('notifications-seen'));
+      }
+    };
+    window.addEventListener('open-notification-center', onOpenFromPush);
+    return () => window.removeEventListener('open-notification-center', onOpenFromPush);
+  }, [currentUser, feed]);
 
   const getIcon = (_type: string, severity: string) => {
     switch (severity) {
@@ -63,7 +79,7 @@ export default function NotificationCenter({ denseTrigger = false }: { denseTrig
       <button
         type="button"
         onClick={handleOpen}
-        className={`relative flex items-center justify-center transition-all h-full w-full text-white/60 hover:text-white active:text-white hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]`}
+        className={`relative flex items-center justify-center transition-colors h-full w-full text-white/60 hover:text-white active:text-white hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]`}
         title={t.profile_notifications}
       >
         <Bell className={`${denseTrigger ? 'h-4 w-4' : 'h-5 w-5'} ${unreadCount > 0 ? 'animate-ring text-red-500' : ''}`} />
@@ -100,8 +116,8 @@ export default function NotificationCenter({ denseTrigger = false }: { denseTrig
                   <div
                     key={n.id}
                     className={`relative flex gap-3 rounded-2xl p-4 transition-colors ${
-                      !seenIds.has(n.id) ? 'bg-accent/[0.06]' : 'hover:bg-white/8'
-                    } active:bg-white/8'/80`}
+ !seenIds.has(n.id) ? 'bg-accent/[0.06]' : 'hover:bg-white/8'
+ } active:bg-white/8'/80`}
                   >
                     <div className="mt-0.5 shrink-0">{getIcon(n.type, n.severity)}</div>
                     <div className="min-w-0 flex-1">
@@ -123,7 +139,7 @@ export default function NotificationCenter({ denseTrigger = false }: { denseTrig
           <div className="border-t border-white/10 bg-white/5 p-4">
             <button
               onClick={() => setIsOpen(false)}
-              className="w-full rounded-xl py-3 text-sm font-bold text-white/80 transition-transform active:scale-95 rounded-xl border border-neutral-500 surface-ghost-interactive"
+              className="w-full rounded-xl py-3 text-sm font-bold text-white/80 transition-transform rounded-xl border border-neutral-500 surface-ghost-interactive"
             >
               {t.close}
             </button>

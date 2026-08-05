@@ -112,10 +112,10 @@ export function CalendarDatePicker({ value, onChange, minDate, maxDate }: Calend
                     type="button"
                     onClick={() => { setViewDate(dfSetMonth(viewDate, i)); setShowMonthPicker(false); }}
                     className={`rounded-lg py-1.5 text-[11px] font-semibold transition-colors ${
-                      i === viewMonth
-                        ? 'bg-accent text-white'
-                        : 'text-white/70 hover:bg-white/10'
-                    } active:bg-white/10'/80`}
+ i === viewMonth
+ ? 'bg-accent text-white'
+ : 'text-white/70 hover:bg-white/10'
+ } active:bg-white/10'/80`}
                   >
                     {m.slice(0, 3).toLowerCase()}
                   </button>
@@ -143,10 +143,10 @@ export function CalendarDatePicker({ value, onChange, minDate, maxDate }: Calend
                     type="button"
                     onClick={() => { setViewDate(dfSetYear(viewDate, y)); setShowYearPicker(false); }}
                     className={`rounded-lg py-1.5 text-[12px] font-semibold transition-colors ${
-                      y === viewYear
-                        ? 'bg-accent text-white'
-                        : 'text-white/70 hover:bg-white/10'
-                    } active:bg-white/10'/80`}
+ y === viewYear
+ ? 'bg-accent text-white'
+ : 'text-white/70 hover:bg-white/10'
+ } active:bg-white/10'/80`}
                   >
                     {y}
                   </button>
@@ -197,17 +197,17 @@ export function CalendarDatePicker({ value, onChange, minDate, maxDate }: Calend
               type="button"
               onClick={() => handleDayClick(day)}
               disabled={disabled}
-              className={`flex h-9 w-full items-center justify-center rounded-xl text-[13px] font-semibold transition-all duration-100 ${
-                disabled
-                  ? 'opacity-25 cursor-not-allowed'
-                  : isSelected
-                    ? 'bg-accent text-white shadow-sm'
-                    : isTodayDay
-                      ? 'border-2 border-accent text-accent'
-                        : isCurrentMonth
-                        ? 'text-white hover:bg-white/12'
-                        : 'text-white/30 hover:bg-white/8'
-              } active:bg-white/12'/80`}
+              className={`flex h-9 w-full items-center justify-center rounded-xl text-[13px] font-semibold transition-colors duration-100 ${
+ disabled
+ ? 'opacity-25 cursor-not-allowed'
+ : isSelected
+ ? 'bg-accent text-white shadow-sm'
+ : isTodayDay
+ ? 'border-2 border-accent text-accent'
+ : isCurrentMonth
+ ? 'text-white hover:bg-white/12'
+ : 'text-white/30 hover:bg-white/8'
+ } active:bg-white/12'/80`}
             >
               {format(day, 'd')}
             </button>
@@ -220,7 +220,7 @@ export function CalendarDatePicker({ value, onChange, minDate, maxDate }: Calend
         <button
           type="button"
           onClick={handleToday}
-          className="rounded-xl bg-accent px-4 py-1.5 text-[13px] font-bold text-white shadow-sm hover:bg-accent/90 active:scale-95 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+          className="rounded-xl bg-accent px-4 py-1.5 text-[13px] font-bold text-white shadow-sm hover:bg-accent/90 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
         >
           Oggi
         </button>

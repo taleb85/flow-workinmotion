@@ -209,16 +209,16 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
             type="button"
             onClick={() => void handleNotif()}
             disabled={notifDenied || notifLoading || pushSubLoading || (notifGranted && pushActive)}
-            className={`w-full flex items-center gap-3 rounded-xl px-4 py-3.5 text-left transition-all active:scale-[0.98] border
-              ${notifGranted && pushActive
-                ? 'bg-emerald-500/20 border-emerald-500/40'
-                : notifDenied
-                ? 'bg-rose-500/10 border-rose-500/40'
-                : 'bg-white/8 border-neutral-500 hover:bg-white/12 hover:border-white/25 cursor-pointer'
-              }`}
+            className={`w-full flex items-center gap-3 rounded-xl px-4 py-3.5 text-left transition-colors border
+ ${notifGranted && pushActive
+ ? 'bg-emerald-500/20 border-emerald-500/40'
+ : notifDenied
+ ? 'bg-rose-500/10 border-rose-500/40'
+ : 'bg-white/8 border-neutral-500 hover:bg-white/12 hover:border-white/25 cursor-pointer'
+ }`}
           >
             <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
-              ${notifGranted && pushActive ? 'bg-emerald-500/25' : notifDenied ? 'bg-rose-500/25' : 'bg-blue-500/20'}`}>
+ ${notifGranted && pushActive ? 'bg-emerald-500/25' : notifDenied ? 'bg-rose-500/25' : 'bg-blue-500/20'}`}>
               {notifGranted && pushActive
                 ? <CheckCircle className="h-5 w-5 text-emerald-400" />
                 : notifDenied
@@ -264,16 +264,16 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
             type="button"
             onClick={handleLocation}
             disabled={locGranted || locDenied || locationLoading}
-            className={`w-full flex items-center gap-3 rounded-xl px-4 py-3.5 text-left transition-all active:scale-[0.98] border
-              ${locGranted
-                ? 'bg-emerald-500/20 border-emerald-500/40'
-                : locDenied
-                ? 'bg-rose-500/10 border-rose-500/40'
-                : 'bg-white/8 border-neutral-500 hover:bg-white/12 hover:border-white/25 cursor-pointer'
-              } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
+            className={`w-full flex items-center gap-3 rounded-xl px-4 py-3.5 text-left transition-colors border
+ ${locGranted
+ ? 'bg-emerald-500/20 border-emerald-500/40'
+ : locDenied
+ ? 'bg-rose-500/10 border-rose-500/40'
+ : 'bg-white/8 border-neutral-500 hover:bg-white/12 hover:border-white/25 cursor-pointer'
+ } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
           >
             <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
-              ${locGranted ? 'bg-emerald-500/25' : locDenied ? 'bg-rose-500/25' : 'bg-emerald-500/20'}`}>
+ ${locGranted ? 'bg-emerald-500/25' : locDenied ? 'bg-rose-500/25' : 'bg-emerald-500/20'}`}>
               {locGranted
                 ? <CheckCircle className="h-5 w-5 text-emerald-400" />
                 : locDenied
@@ -334,11 +334,11 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
             type="button"
             onClick={handleContinua}
             disabled={!canProceed}
-            className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98]
-              ${canProceed
-                ? 'bg-blue-600 hover:bg-blue-500 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]'
-                : 'bg-white/10 text-white/40 cursor-not-allowed'
-              }`}
+            className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-colors 
+ ${canProceed
+ ? 'bg-blue-600 hover:bg-blue-500 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]'
+ : 'bg-white/10 text-white/40 cursor-not-allowed'
+ }`}
           >
             {canProceed ? 'Continua' : missingCount > 1 ? 'Consenti i 2 permessi per continuare' : 'Consenti il permesso per continuare'}
           </button>

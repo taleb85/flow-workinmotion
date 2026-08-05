@@ -41,11 +41,11 @@ export function SoundSettings({ compact = false }: SoundSettingsProps) {
     return (
       <button
         onClick={handleToggleSound}
-        className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
-          isSoundEnabled 
-            ? 'bg-accent/10 text-accent' 
-            : 'bg-slate-100 text-white/50'
-        } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
+        className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${
+ isSoundEnabled 
+ ? 'bg-accent/10 text-accent' 
+ : 'bg-slate-100 text-white/50'
+ } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
         title={isSoundEnabled ? 'Muta suoni' : 'Attiva suoni'}
       >
         {isSoundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
@@ -81,13 +81,13 @@ export function SoundSettings({ compact = false }: SoundSettingsProps) {
           <button
             onClick={handleToggleSound}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-              isSoundEnabled ? 'bg-accent' : 'bg-white/20'
-            } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
+ isSoundEnabled ? 'bg-accent' : 'bg-white/20'
+ } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                isSoundEnabled ? 'translate-x-6' : 'translate-x-1'
-              }`}
+ isSoundEnabled ? 'translate-x-6' : 'translate-x-1'
+ }`}
             />
           </button>
         </div>

@@ -25,12 +25,10 @@ export function loadShiftSlotPresets(slot: ShiftSlot): ShiftTimePreset[] {
     const raw = localStorage.getItem(`${STORAGE_PREFIX}${slot}`);
     if (raw) {
       const custom = JSON.parse(raw) as ShiftTimePreset[];
-      if (Array.isArray(custom) && custom.length > 0) {
-        // Unisce custom + default, eliminando duplicati (stesso start+end).
-        // I custom vengono prima, i default vengono dopo se non già presenti.
-        const seen = new Set(custom.map((p) => `${p.start}|${p.end}`));
-        const extras = defaults.filter((p) => !seen.has(`${p.start}|${p.end}`));
-        return [...custom, ...extras];
+      if (Array.isArray(custom)) {
+        // Se l'utente ha salvato una lista vuota, significa che vuole zero preset
+        // Se ha salvato una lista, la usiamo esattamente com'è (senza ri-aggiungere default)
+        return custom;
       }
     }
   } catch {

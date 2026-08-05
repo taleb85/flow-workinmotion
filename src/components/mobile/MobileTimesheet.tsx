@@ -157,10 +157,10 @@ export default function MobileTimesheet({
                         <div
                           key={shift.id}
                           className={`rounded-xl px-3 py-2.5 border ${
-                            isAbsent
-                              ? 'border-red-500/10'
-                              : 'bg-white/8 border-neutral-500'
-                          }`}
+ isAbsent
+ ? 'border-red-500/10'
+ : 'bg-white/8 border-neutral-500'
+ }`}
                           style={
                             typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
                               ? { background: 'transparent' }
@@ -170,8 +170,8 @@ export default function MobileTimesheet({
                           <div className="flex items-center justify-between mb-1.5">
                             {/* Ore lavorate */}
                             <p className={`font-black tabular-nums text-xl leading-none ${
-                              isAbsent ? 'text-white/50' : 'text-white/90'
-                            }`}>
+ isAbsent ? 'text-white/50' : 'text-white/90'
+ }`}>
                               {isAbsent ? '—' : hoursWorked}
                             </p>
                             {/* Badge stato */}
@@ -183,8 +183,8 @@ export default function MobileTimesheet({
                           {/* Orario pianificato + tipo */}
                           <div className="flex items-center justify-between">
                             <p className={`text-[11px] font-bold tabular-nums ${
-                              isAbsent ? 'text-white/50 line-through' : 'text-white/60'
-                            }`}>
+ isAbsent ? 'text-white/50 line-through' : 'text-white/60'
+ }`}>
                               {shift.start_time.slice(0, 5)} – {shift.end_time?.slice(0, 5) ?? '…'}
                             </p>
                             {shift.type && (

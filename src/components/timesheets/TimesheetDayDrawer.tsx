@@ -438,12 +438,12 @@ export default function TimesheetDayDrawer({ ctx, updateShift }: TimesheetDayDra
                     {!isEmployeeWeekReviewSheet && (
                       <div className="flex gap-2">
                         <button type="button" disabled={isDisabled} onClick={() => { void (async () => { if (needsSave) { const ok = await handleDrawerSaveTimbratures({ silentToast: false }); if (!ok) return; } closeTimesheetShiftDrawer(); })(); }}
-                          className="flex-1 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold transition-all duration-200 bg-accent text-white hover:bg-accent-hover disabled:opacity-50">
+                          className="flex-1 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold transition-colors duration-200 bg-accent text-white hover:bg-accent-hover disabled:opacity-50">
                           {t.ts_btn_save_changes ?? 'Salva modifiche'}
                         </button>
                         {canTimesheetApprove && needsSave && !drawerReviewQueue && (
                           <button type="button" disabled={isDisabled} onClick={() => void handleSaveAndFreeze()}
-                            className="flex-1 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold transition-all duration-200 bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50">
+                            className="flex-1 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold transition-colors duration-200 bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50">
                             {t.wst_save_freeze_btn ?? 'Salva, approva e congela'}
                           </button>
                         )}

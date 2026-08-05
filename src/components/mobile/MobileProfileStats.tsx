@@ -57,7 +57,7 @@ export default function MobileProfileStats({
         <button
           type="button"
           onClick={docs}
-          className={`flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-3xl border px-3 py-4 text-center transition active:scale-[0.98] ${cardShadow}`}
+          className={`flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-3xl border px-3 py-4 text-center transition ${cardShadow}`}
           style={typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
             ? { background: 'transparent', borderColor: 'rgba(255,255,255,0.08)', boxShadow: 'none' }
             : { background: 'rgba(255,255,255,0.95)', borderColor: 'rgba(241,245,249,0.80)' }}
@@ -72,7 +72,7 @@ export default function MobileProfileStats({
         <button
           type="button"
           onClick={payslip}
-          className={`flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-3xl border px-3 py-4 text-center transition active:scale-[0.98] ${cardShadow}`}
+          className={`flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-3xl border px-3 py-4 text-center transition ${cardShadow}`}
           style={typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
             ? { background: 'transparent', borderColor: 'rgba(255,255,255,0.08)', boxShadow: 'none' }
             : { background: 'rgba(255,255,255,0.95)', borderColor: 'rgba(241,245,249,0.80)' }}

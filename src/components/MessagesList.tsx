@@ -50,10 +50,10 @@ export function MessagesList({
           <div
             key={message.id}
             className={`rounded-lg border transition-colors ${
-              isUnread
-                ? 'border-accent/30 bg-accent/5'
-                : 'border-slate-200 bg-slate-50/50'
-            }`}
+ isUnread
+ ? 'border-accent/30 bg-accent/5'
+ : 'border-slate-200 bg-slate-50/50'
+ }`}
           >
             {/* Row compatta */}
             <button
@@ -65,8 +65,8 @@ export function MessagesList({
                 setExpandedId(isExpanded ? null : message.id);
               }}
               className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${
-                isExpanded ? 'rounded-t-lg' : 'rounded-lg'
-              } hover:bg-slate-100/50 active:bg-slate-100/80`}
+ isExpanded ? 'rounded-t-lg' : 'rounded-lg'
+ } hover:bg-slate-100/50 active:bg-slate-100/80`}
             >
               {/* Icona tipo messaggio */}
               <div className="flex-shrink-0">

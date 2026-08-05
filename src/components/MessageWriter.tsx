@@ -100,10 +100,10 @@ export function MessageWriter({
                 setSelectedRecipientId('');
               }}
               className={`flex-1 flex items-center justify-center gap-1 rounded px-2 py-1.5 text-xs font-semibold transition-colors ${
-                messageType === 'broadcast'
-                  ? 'bg-amber-300 text-amber-900'
-                  : 'bg-white/70 text-amber-700 hover:bg-white'
-              } active:bg-white'/80`}
+ messageType === 'broadcast'
+ ? 'bg-amber-300 text-amber-900'
+ : 'bg-white/70 text-amber-700 hover:bg-white'
+ } active:bg-white'/80`}
             >
               <Users className="h-3 w-3" />
               {t.messages_recipient_all ?? 'Tutti'}
@@ -112,10 +112,10 @@ export function MessageWriter({
               type="button"
               onClick={() => setMessageType('private')}
               className={`flex-1 flex items-center justify-center gap-1 rounded px-2 py-1.5 text-xs font-semibold transition-colors ${
-                messageType === 'private'
-                  ? 'bg-amber-300 text-amber-900'
-                  : 'bg-white/70 text-amber-700 hover:bg-white'
-              } active:bg-white'/80`}
+ messageType === 'private'
+ ? 'bg-amber-300 text-amber-900'
+ : 'bg-white/70 text-amber-700 hover:bg-white'
+ } active:bg-white'/80`}
             >
               <User className="h-3 w-3" />
               {t.messages_recipient_private ?? 'Privato'}

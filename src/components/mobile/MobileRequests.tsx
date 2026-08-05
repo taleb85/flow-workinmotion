@@ -45,7 +45,7 @@ export default function MobileRequests({ requests, onRequestNew, t = {} }: Mobil
         <p className="text-white/60 font-medium uppercase tracking-wider text-xs">{t.no_requests_made ?? 'Nessuna richiesta effettuata'}</p>
         <button
           onClick={onRequestNew}
-          className="mt-6 flex items-center gap-2 px-6 py-3 rounded-full bg-white/15 text-white font-bold uppercase tracking-wider shadow-lg active:scale-95 transition-all"
+          className="mt-6 flex items-center gap-2 px-6 py-3 rounded-full bg-white/15 text-white font-bold uppercase tracking-wider shadow-lg transition-colors"
         >
           <Plus className="w-5 h-5" />
           {t.new_request ?? 'Nuova Richiesta'}
@@ -102,7 +102,7 @@ export default function MobileRequests({ requests, onRequestNew, t = {} }: Mobil
       {/* Floating Action Button */}
       <button
         onClick={onRequestNew}
-        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-white/15 text-white shadow-2xl flex items-center justify-center active:scale-90 transition-transform z-40"
+        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-white/15 text-white shadow-2xl flex items-center justify-center transition-transform z-40"
         aria-label="Nuova richiesta"
       >
         <Plus className="w-7 h-7" strokeWidth={3} />

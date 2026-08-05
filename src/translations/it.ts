@@ -647,6 +647,8 @@ const baseIt = {
 
   // AdminLayout (/admin)
   // Messages / DirectMessagesPanel / MessageWriter / MessageComposer
+  messages_tab: 'Messaggi',
+  notifications_tab: 'Notifiche',
   messages_title: 'Messaggi',
   messages_new_chat: 'Nuova conversazione',
   messages_new_conversation: 'Nuova conversazione',

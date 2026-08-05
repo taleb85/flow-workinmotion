@@ -168,7 +168,7 @@ export function TimesheetDrawerHeader({
                 type="button"
                 disabled={markAbsentSaving}
                 onClick={onMarkAbsent}
-                className="flex shrink-0 items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium transition-all hover:scale-105 active:scale-95 disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" style={{ background: "rgba(239,68,68,0.15)", borderColor: "rgba(239,68,68,0.5)", color: "#fca5a5" }}
+                className="flex shrink-0 items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium transition-colors disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" style={{ background: "rgba(239,68,68,0.15)", borderColor: "rgba(239,68,68,0.5)", color: "#fca5a5" }}
                 title={t.shift_mark_absent}
               >
                 {markAbsentSaving ? (
@@ -186,7 +186,7 @@ export function TimesheetDrawerHeader({
                 <button
                   type="button"
                   onClick={onUnlockFrozen}
-                  className="flex shrink-0 items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:scale-105 active:scale-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+                  className="flex shrink-0 items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                   title={t.ts_drawer_unlock_title}
                 >
                   <Unlock className="w-3.5 h-3.5" />
@@ -196,7 +196,7 @@ export function TimesheetDrawerHeader({
                 <button
                   type="button"
                   onClick={onFreezeShift}
-                  className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#0B3573] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:scale-105 active:scale-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+                  className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#0B3573] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:opacity-90 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                   title={t.ts_drawer_freeze_title}
                 >
                   <Lock className="w-3.5 h-3.5" />
@@ -308,7 +308,7 @@ export function TimesheetDrawerHeader({
                 type="button"
                 disabled={markAbsentSaving}
                 onClick={onMarkAbsent}
-                className="flex shrink-0 items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium transition-all hover:scale-105 active:scale-95 disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" style={{ background: "rgba(239,68,68,0.15)", borderColor: "rgba(239,68,68,0.5)", color: "#fca5a5" }}
+                className="flex shrink-0 items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium transition-colors disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" style={{ background: "rgba(239,68,68,0.15)", borderColor: "rgba(239,68,68,0.5)", color: "#fca5a5" }}
                 title={t.shift_mark_absent}
               >
                 {markAbsentSaving ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" /> : <UserX className="w-3.5 h-3.5" />}
@@ -320,7 +320,7 @@ export function TimesheetDrawerHeader({
                 <button
                   type="button"
                   onClick={onUnlockFrozen}
-                  className="flex shrink-0 items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:scale-105 active:scale-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+                  className="flex shrink-0 items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                 >
                   <Unlock className="w-3.5 h-3.5" />
                   <span>{t.ts_drawer_unlock_btn}</span>
@@ -329,7 +329,7 @@ export function TimesheetDrawerHeader({
                 <button
                   type="button"
                   onClick={onFreezeShift}
-                  className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#0B3573] hover:opacity-90 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:scale-105 active:scale-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+                  className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#0B3573] hover:opacity-90 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                 >
                   <Lock className="w-3.5 h-3.5" />
                   <span>{t.ts_drawer_freeze_btn}</span>

@@ -21,7 +21,7 @@ import { TimeInputField } from './ui/TimeInputField';
 import { ShiftSlotPresetsSection } from './shifts/ShiftSlotPresetsSection';
 import { database } from '../lib/database';
 import { useAppUser, useAppData, useAppConfig, useAppOverlay, authorizeFrozenDelete } from '../context/AppContext';
-import { isManagementRole, isPurelyManagementRole, canEditTeamShifts, canPublishScheduleDrafts, canApproveShiftActions, findFreezeVerifierByPin } from '../utils/permissions';
+import { isManagementRole, isPurelyManagementRole, canEditTeamShifts, canPublishScheduleDrafts, canApproveShiftActions, findFreezeVerifierByPin, findFreezeVerifierById } from '../utils/permissions';
 import { getShiftViolations, DEFAULT_WORK_RULES } from '../utils/workRules';
 import { isShiftPayrollFrozen } from '../utils/timesheetFreezeCriteria';
 import { PinPadModal } from './ui/PinPadModal';
@@ -1081,7 +1081,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           {stacked ? (
             <>
               <input type="checkbox" checked={isChecked} readOnly
-                className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-all ${isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} />
+                className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-colors ${isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} />
               <Plus className="h-2.5 w-2.5 shrink-0 stroke-[3]" aria-hidden />
             </>
           ) : (
@@ -1143,7 +1143,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
             onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
-              className={`w-full text-left rounded-lg border-l-4 ${borderColor} ${bgColor} ${glow} px-2.5 py-2 transition-all active:scale-[0.98]`}>
+              className={`w-full text-left rounded-lg border-l-4 ${borderColor} ${bgColor} ${glow} px-2.5 py-2 transition-colors`}>
               <div className="flex items-center justify-between gap-1">
               {timeLabel}
               <div className="flex items-center gap-1 shrink-0">
@@ -1194,9 +1194,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           draggable={canEdit}
           onDragStart={(e) => handleDragStart(e, g.shift.id)}
           onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
-          className={`relative w-full min-w-0 text-left rounded-lg border ${borderColor} ${bgColor} ${glow} transition-all ${isDraft ? 'border-dashed' : ''} px-0.5 py-0.5`}>
+          className={`relative w-full min-w-0 text-left rounded-lg border ${borderColor} ${bgColor} ${glow} transition-colors ${isDraft ? 'border-dashed' : ''} px-0.5 py-0.5`}>
           <input type="checkbox" checked={selectedShiftIds.has(g.shift.id)} onChange={() => setSelectedShiftIds(prev => { const n = new Set(prev); if (n.has(g.shift.id)) n.delete(g.shift.id); else n.add(g.shift.id); return n; })}
-            className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-all ${selectedShiftIds.has(g.shift.id) ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} onClick={e => e.stopPropagation()} />
+            className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-colors ${selectedShiftIds.has(g.shift.id) ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} onClick={e => e.stopPropagation()} />
           <div
             className="flex items-end justify-center w-full gap-1 px-2 whitespace-nowrap overflow-hidden"
             style={{ minHeight: mainRowHeight, height: mainRowHeight }}
@@ -1220,8 +1220,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* Linea divisoria tra dipendenti */}
       <style>{`.wst-employee-row td { border-bottom: 1px solid rgba(255,255,255,0.20) !important; }
 .wst-employee-row td { border-top: 1px solid rgba(255,255,255,0.10) !important; }
-/* Header tabella opaco su scroll: copre il contenuto sottostante con vetro satinato */
-.wst-header-scrolled { background: rgba(10,10,12,0.92) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
+/* Header tabella opaco su scroll: solo vetro satinato senza colore, offusca il contenuto sottostante */
+.wst-header-scrolled { background: transparent !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
 .wst-header-scrolled th { color: rgba(255,255,255,0.75) !important; border-bottom-color: rgba(255,255,255,0.12) !important; }
 .wst-header-scrolled th div { color: rgba(255,255,255,0.75) !important; }
 .wst-header-scrolled .text-accent { color: rgba(255,255,255,0.75) !important; }`}</style>
@@ -1310,12 +1310,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           )}
           <div className="flex flex-1 sm:flex-none shrink-0 items-center gap-1 rounded-lg bg-white/5 p-0.5">
             <button type="button" onClick={() => setViewMode('week')}
-              className={`rounded-md px-1.5 md:px-2.5 py-1.5 text-[10px] md:text-[10px] font-bold uppercase tracking-wider transition-all ${viewMode === 'week' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
+              className={`rounded-md px-1.5 md:px-2.5 py-1.5 text-[10px] md:text-[10px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
               <span className="sm:hidden">{t.view_week_short ?? 'Sett.'}</span>
               <span className="hidden sm:inline">{t.view_week ?? 'Settimana'}</span>
             </button>
             <button type="button" onClick={() => setViewMode('period')}
-              className={`rounded-md px-1.5 md:px-2.5 py-1.5 text-[10px] md:text-[10px] font-bold uppercase tracking-wider transition-all ${viewMode === 'period' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
+              className={`rounded-md px-1.5 md:px-2.5 py-1.5 text-[10px] md:text-[10px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'period' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
               {t.view_period ?? 'Periodo'}
             </button>
           </div>
@@ -1374,8 +1374,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               type="button"
               onClick={() => setActionsDrawerOpen((open) => !open)}
               className={`hidden sm:flex shrink-0 items-center gap-1 rounded-lg bg-white/10 px-2 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-colors sm:px-2.5 ${
-                actionsDrawerOpen ? 'text-white' : 'text-white/60 hover:text-white'
-              }`}
+ actionsDrawerOpen ? 'text-white' : 'text-white/60 hover:text-white'
+ }`}
               aria-expanded={actionsDrawerOpen}
               aria-haspopup="true"
               aria-label={(t as Record<string, string>).wst_toolbar_hamburger_aria ?? 'Apri menu azioni'}
@@ -1430,8 +1430,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     </span>
                     <ChevronDown
                       className={`h-4 w-4 shrink-0 text-white/40 transition-transform ${
-                        actionsDrawerSection === 'templates' ? '-rotate-180' : ''
-                      }`}
+ actionsDrawerSection === 'templates' ? '-rotate-180' : ''
+ }`}
                       strokeWidth={2.25}
                       aria-hidden
                     />
@@ -1505,7 +1505,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               const isActive = periodNavOffset === 0 && cfg.startDate === periodConfig.startDate && cfg.numWeeks === periodConfig.numWeeks;
               return (
                 <button key={i} type="button" onClick={() => applyPeriod(cfg)}
-                  className={`rounded-xl border px-2.5 py-2 text-left transition-all ${isActive ? 'border-accent/50 bg-accent/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20'}`}>
+                  className={`rounded-xl border px-2.5 py-2 text-left transition-colors ${isActive ? 'border-accent/50 bg-accent/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20'}`}>
                   <div className={`text-[11px] font-bold ${isActive ? 'text-accent' : 'text-white'}`}>{MONTHS_IT[i]}</div>
                   <div className="text-[9px] text-white/40 mt-0.5 leading-tight tabular-nums">
                     {format(start, 'd MMM', { locale })}<br />— {format(end, 'd MMM', { locale })}
@@ -1570,7 +1570,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               <div className="space-y-2">
                 {!userHasShifts ? (
                   <div
-                    className={`py-4 text-center border-2 border-dashed border-white/10 rounded-xl ${dropTargetKey === `${user.id}_empty` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+                    className={`py-4 text-center border-2 border-dashed border-white/10 rounded-xl ${dropTargetKey ===`${user.id}_empty` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
                     onDragOver={(e) => handleDragOver(e, `${user.id}_empty`)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => { const firstDay = weekDateStrings[0]; if (firstDay) handleDrop(e, user.id, firstDay); }}
@@ -1586,7 +1586,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     const todayDate = isToday(day);
                     return (
                       <div key={dateStr}
-                        className={`flex items-start gap-3 p-2.5 rounded-xl ${todayDate ? 'bg-accent/5 ring-1 ring-accent/20' : 'bg-white/[0.04]'} ${dropTargetKey === `${user.id}_${dateStr}` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+                        className={`flex items-start gap-3 p-2.5 rounded-xl ${todayDate ? 'bg-accent/5 ring-1 ring-accent/20' : 'bg-white/[0.04]'} ${dropTargetKey ===`${user.id}_${dateStr}` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
                         onDragOver={(e) => handleDragOver(e, `${user.id}_${dateStr}`)}
                         onDragLeave={handleDragLeave}
                         onDrop={(e) => handleDrop(e, user.id, dateStr)}
@@ -1609,7 +1609,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                                 <div className="min-h-[28px]">
                                   {lunch ? renderGroupButton(lunch, 'mobile', false, extraLunchGroups) : canAddSecond ? (
                                     <button type="button" onClick={() => openCreateShiftModal(user.id, dateStr, 'lunch')}
-                                      className="w-full rounded-lg border border-dashed border-white/15 py-1.5 text-[10px] font-bold text-white/40 transition-all hover:border-white/30 hover:text-white/70 active:scale-[0.98]">
+                                      className="w-full rounded-lg border border-dashed border-white/15 py-1.5 text-[10px] font-bold text-white/40 transition-colors hover:border-white/30 hover:text-white/70">
                                       <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_shift ?? 'Aggiungi'}
                                     </button>
                                   ) : null}
@@ -1617,7 +1617,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                                 <div className="min-h-[28px]">
                                   {evening ? renderGroupButton(evening, 'mobile', false, extraEveningGroups) : canAddSecond ? (
                                     <button type="button" onClick={() => openCreateShiftModal(user.id, dateStr, 'evening')}
-                                      className="w-full rounded-lg border border-dashed border-white/15 py-1.5 text-[10px] font-bold text-white/40 transition-all hover:border-white/30 hover:text-white/70 active:scale-[0.98]">
+                                      className="w-full rounded-lg border border-dashed border-white/15 py-1.5 text-[10px] font-bold text-white/40 transition-colors hover:border-white/30 hover:text-white/70">
                                       <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_second_shift ?? '2° turno'}
                                     </button>
                                   ) : null}
@@ -1673,17 +1673,17 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   <th
                     key={i}
                     title={format(day, 'EEEE d MMMM', { locale })}
-                    className={`px-1.5 py-1.5 text-center border-b border-white/10 ${weekEnd ? 'border-r-2 border-r-white/20' : ''} ${isToday(day) ? 'border-b-2 !border-b-accent' : ''}`}
+                    className={`px-1.5 py-1.5 text-center border-b border-white/10 ${weekEnd ? 'border-r-2 border-r-white/20' : ''} ${isToday(day) ? '!border-b-white' : ''}`}
                   >
                     {isPeriodView ? (
                       <>
                         <div className={`text-[9px] font-bold uppercase leading-none ${isToday(day) ? 'text-white/60' : 'text-white/20'}`}>{format(day, 'EEEEE', { locale })}</div>
-                        <div className={`text-sm font-black leading-tight ${isToday(day) ? 'text-accent' : 'text-white/45'}`}>{format(day, 'd')}</div>
+                        <div className={`text-sm font-black leading-tight ${isToday(day) ? 'text-white' : 'text-white/45'}`}>{format(day, 'd')}</div>
                       </>
                     ) : (
                       <>
                         <div className={`text-[10px] font-bold uppercase tracking-wider ${isToday(day) ? 'text-white/80' : 'text-white/25'}`}>{format(day, 'EEE', { locale })}</div>
-                        <div className={`text-sm font-black ${isToday(day) ? 'text-accent' : 'text-white/50'}`}>{format(day, 'd')}</div>
+                        <div className={`text-sm font-black ${isToday(day) ? 'text-white' : 'text-white/50'}`}>{format(day, 'd')}</div>
                       </>
                     )}
                   </th>
@@ -1724,11 +1724,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     const weekEnd = isPeriodView && day.getDay() === 0;
                     return (
                       <td key={dIdx}
-                        className={`px-1 py-0.5 align-top group min-w-0 border-b border-r border-white/[0.06] ${weekEnd ? 'border-r-2 border-r-white/15' : ''} ${isToday(day) ? '!border-b-accent !border-b-2' : ''}`}
+                        className={`px-1 py-0.5 align-top group min-w-0 border-b border-r border-white/[0.06] ${weekEnd ? 'border-r-2 border-r-white/15' : ''} ${isToday(day) ? '!border-b-white' : ''}`}
                       >
                         {groups.length === 0 ? (
                           <div
-                            className={`flex items-center justify-center h-full ${dropTargetKey === `${user.id}_${dateStr}_lunch` ? 'ring-2 ring-inset ring-amber-400/50 rounded' : ''}`}
+                            className={`flex items-center justify-center h-full ${dropTargetKey ===`${user.id}_${dateStr}_lunch` ? 'ring-2 ring-inset ring-amber-400/50 rounded' : ''}`}
                             style={{ minHeight: slotCellHeight }}
                             onDragOver={(e) => handleDragOver(e, `${user.id}_${dateStr}_lunch`)}
                             onDragLeave={handleDragLeave}
@@ -1736,7 +1736,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                           >
                             {canEdit ? (
                               <button type="button" onClick={() => openCreateShiftModal(user.id, dateStr)}
-                                className={`rounded-lg border border-dashed border-white/20 flex items-center justify-center text-[10px] font-bold text-white/30 hover:text-white/60 hover:border-white/40 transition-all opacity-0 group-hover:opacity-100 ${isPeriodView ? 'w-7 h-7' : 'px-3 py-2'}`}>
+                                className={`rounded-lg border border-dashed border-white/20 flex items-center justify-center text-[10px] font-bold text-white/30 hover:text-white/60 hover:border-white/40 transition-colors opacity-0 group-hover:opacity-100 ${isPeriodView ? 'w-7 h-7' : 'px-3 py-2'}`}>
                                 <Plus className="h-3 w-3 inline-block" />{!isPeriodView && <span className="ml-1">{t.add_shift ?? 'Aggiungi'}</span>}
                               </button>
                             ) : (
@@ -1750,7 +1750,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             const emptySlot = (slot: 'lunch' | 'evening', label: string) => (
                               canAddSecond && !(slot === 'lunch' ? lunch : evening) ? (
                                 <button type="button" onClick={() => openCreateShiftModal(user.id, dateStr, slot)}
-                                  className={`w-full rounded-md border border-dashed border-white/15 flex items-center justify-center text-white/35 transition-all hover:border-white/30 hover:text-white/60 opacity-0 group-hover:opacity-100 ${isPeriodView ? '' : 'text-[10px] font-bold'}`}
+                                  className={`w-full rounded-md border border-dashed border-white/15 flex items-center justify-center text-white/35 transition-colors hover:border-white/30 hover:text-white/60 opacity-0 group-hover:opacity-100 ${isPeriodView ? '' : 'text-[10px] font-bold'}`}
                                   style={{ height: isPeriodView ? slotRowHeight - 2 : slotRowHeight }}
                                   title={label}
                                 >
@@ -1764,7 +1764,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             return (
                               <div className={`flex flex-col ${isPeriodView ? 'gap-px' : ''}`} style={{ height: slotCellHeight }}>
                                 <div
-                                  className={`flex items-center flex-1 ${dropTargetKey === `${user.id}_${dateStr}_lunch` ? 'ring-2 ring-inset ring-amber-400/50 rounded' : ''}`}
+                                  className={`flex items-center flex-1 ${dropTargetKey ===`${user.id}_${dateStr}_lunch` ? 'ring-2 ring-inset ring-amber-400/50 rounded' : ''}`}
                                   style={{ ...(isPeriodView ? {} : { borderBottom: '1px solid rgba(255,255,255,0.10)', paddingLeft: '1px', paddingRight: '1px' }) }}
                                   onDragOver={(e) => handleDragOver(e, `${user.id}_${dateStr}_lunch`)}
                                   onDragLeave={handleDragLeave}
@@ -1777,7 +1777,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                                   ) : emptySlot('lunch', t.add_shift ?? 'Aggiungi')}
                                 </div>
                                 <div
-                                  className={`flex items-center flex-1 ${isPeriodView ? 'border-t border-white/[0.08]' : ''} ${dropTargetKey === `${user.id}_${dateStr}_evening` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+                                  className={`flex items-center flex-1 ${isPeriodView ? 'border-t border-white/[0.08]' : ''} ${dropTargetKey ===`${user.id}_${dateStr}_evening` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
                                   style={{ ...(isPeriodView ? {} : { paddingLeft: '1px', paddingRight: '1px' }) }}
                                   onDragOver={(e) => handleDragOver(e, `${user.id}_${dateStr}_evening`)}
                                   onDragLeave={handleDragLeave}
@@ -1812,8 +1812,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* ── Detail Drawer ── */}
       {drawerOpen && selectedShift && createPortal(
         <div className="fixed inset-0 z-[10050] flex items-center justify-center px-4" onClick={handleCloseDrawer}>
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-xl supports-[backdrop-filter]:bg-black/30" />
-          <div className="relative w-full max-w-3xl rounded-2xl border border-white/15 p-5 shadow-2xl max-h-[85vh] z-10 flex flex-col bg-transparent" style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: `2px solid ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}40`, boxShadow: `0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08), 0 0 24px ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}20` }} onClick={e => e.stopPropagation()}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative w-full max-w-3xl rounded-2xl border border-white/15 p-5 shadow-2xl max-h-[85vh] z-10 flex flex-col" style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: `2px solid ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}40`, boxShadow: `0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08), 0 0 24px ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}20` }} onClick={e => e.stopPropagation()}>
             <div className="shrink-0">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -1850,39 +1850,39 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 {reviewQueue && (
                   <>
                     <span className="text-[10px] font-bold text-white/50 tabular-nums">{reviewIdx + 1}/{reviewQueue.length}</span>
-                    <button type="button" disabled={reviewIdx <= 0} onClick={() => { const next = reviewIdx - 1; if (next >= 0) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-all disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-4 w-4" /></button>
-                    <button type="button" disabled={reviewIdx >= reviewQueue.length - 1} onClick={() => { const next = reviewIdx + 1; if (next < reviewQueue.length) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-all disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-4 w-4" /></button>
+                    <button type="button" disabled={reviewIdx <= 0} onClick={() => { const next = reviewIdx - 1; if (next >= 0) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-4 w-4" /></button>
+                    <button type="button" disabled={reviewIdx >= reviewQueue.length - 1} onClick={() => { const next = reviewIdx + 1; if (next < reviewQueue.length) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-4 w-4" /></button>
                   </>
                 )}
                 {canDeleteShift(selectedShift) && !drawerDeleteConfirm && (
                   <button type="button" onClick={() => setDrawerDeleteConfirm(true)}
-                    className="rounded-lg bg-rose-600/20 p-2 text-rose-300 hover:bg-rose-600/30 transition-all" title={t.delete ?? 'Elimina'}>
+                    className="rounded-lg bg-rose-600/20 p-2 text-rose-300 hover:bg-rose-600/30 transition-colors" title={t.delete ?? 'Elimina'}>
                     <Trash2 className="h-4 w-4" />
                   </button>
                 )}
                 {canDeleteShift(selectedShift) && drawerDeleteConfirm && (
                   <div className="flex items-center gap-1.5">
                     <button type="button" onClick={() => setDrawerDeleteConfirm(false)}
-                      className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] font-bold text-white/70 hover:bg-white/20 transition-all whitespace-nowrap">
+                      className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] font-bold text-white/70 hover:bg-white/20 transition-colors whitespace-nowrap">
                       {t.cancel ?? 'Annulla'}
                     </button>
                     <button type="button" onClick={() => void handleDeleteShift(selectedShift, { skipConfirm: true })}
-                      className="rounded-lg bg-rose-600 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-rose-700 transition-all whitespace-nowrap">
+                      className="rounded-lg bg-rose-600 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-rose-700 transition-colors whitespace-nowrap">
                       {t.wst_confirm_delete_btn ?? 'Conferma elimina'}
                     </button>
                   </div>
                 )}
                 {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
                   <button type="button" onClick={() => handleFreezeShift(selectedShift)}
-                    className="rounded-lg bg-emerald-600/20 p-2 text-emerald-300 hover:bg-emerald-600/30 transition-all" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
+                    className="rounded-lg bg-emerald-600/20 p-2 text-emerald-300 hover:bg-emerald-600/30 transition-colors" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
                     <Unlock className="h-4 w-4" />
                   </button>
                 )}
-                <button type="button" onClick={handleCloseDrawer} className="ml-2 rounded-lg bg-white/10 p-2 text-white/50 hover:text-white hover:bg-white/20 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><X className="h-4 w-4" /></button>
+                <button type="button" onClick={handleCloseDrawer} className="ml-2 rounded-lg bg-white/10 p-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><X className="h-4 w-4" /></button>
               </div>
             </div>
             </div>
-            <div className="flex-1 grid grid-cols-2 gap-3 min-h-0">
+            <div className="flex-1 grid grid-cols-2 gap-3 min-h-0 overflow-y-auto">
               {/* Left column: Time editing, Status (no dept), Breaks */}
               <div className="space-y-3">
                 <div className={`rounded-xl p-3 space-y-2 ${isFrozen(selectedShift) ? 'bg-gradient-to-br from-emerald-500/15 to-teal-600/10' : selectedShift.approval_status === 'approved' ? 'bg-gradient-to-br from-emerald-500/15 to-teal-600/10' : selectedShift.approval_status === 'confirmed' ? 'bg-gradient-to-br from-cyan-500/15 to-blue-600/10' : 'bg-gradient-to-br from-neutral-500/15 to-slate-600/10'}`}>
@@ -1908,7 +1908,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       <TimeInputField value={editEndTime} onChange={setEditEndTime} size="md" className="w-full" disabled={selectedShift.approval_status === 'confirmed'} />
                     </div>
                     <button type="button" onClick={handleSaveShiftEdit} disabled={saving || selectedShift.approval_status === 'confirmed'}
-                      className="w-full rounded-lg bg-accent px-4 py-2.5 text-[11px] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-all uppercase tracking-wider hover:scale-[1.02] active:scale-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                      className="w-full rounded-lg bg-accent px-4 py-2.5 text-[11px] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                       {saving ? (t.saving ?? 'Salvataggio...') : <><Save className="h-3.5 w-3.5 inline-block mr-1.5" />{t.save_changes ?? 'Salva modifiche'}</>}
                     </button>
                   </div>
@@ -1987,7 +1987,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                               <TimeInputField value={editOut} onChange={setEditOut} size="md" hourInputRef={editOutHourRef} className={`w-full ${editOut ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
                             </div>
                             <button type="button" onClick={() => void handleConfirmPunches()} disabled={saving || (!editIn && !editOut)}
-                              className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[11px] font-bold text-white hover:bg-emerald-700 transition-all uppercase tracking-wider hover:scale-[1.02] active:scale-95">
+                              className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[11px] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider">
                               <Check className="h-3.5 w-3.5 inline-block mr-1.5" />{t.confirm_punches ?? 'Conferma timbrature'}
                             </button>
                           </>
@@ -2037,7 +2037,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               <div className="col-span-2 flex flex-wrap gap-2">
                 {canEdit && isFrozen(selectedShift) && (
                   <button type="button" onClick={() => handleUnfreezeShift(selectedShift)}
-                    className="ml-auto flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-2 text-[11px] font-bold text-accent hover:bg-accent/30 transition-all border border-transparent hover:border-accent/30 hover:scale-[1.02] active:scale-95">
+                    className="ml-auto flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-2 text-[11px] font-bold text-accent hover:bg-accent/30 transition-colors border border-transparent hover:border-accent/30">
                     <Lock className="h-3.5 w-3.5" />{t.wst_unfreeze_btn ?? 'Sblocca'}
                   </button>
                 )}
@@ -2051,9 +2051,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* ── Create Shift Modal ── */}
       {createModal && createPortal(
         <div className="fixed inset-0 z-[10050] flex items-center justify-center" onClick={() => setCreateModal(null)}>
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-xl supports-[backdrop-filter]:bg-black/30" />
+          <div className="fixed inset-0 bg-black/40" />
           <div className="relative w-full max-w-sm rounded-2xl border border-white/15 p-5 shadow-2xl z-10 bg-transparent" style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }} onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-bold text-white mb-4">{t.create_shift ?? 'Nuovo turno'}</h3>
+            <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">{t.create_shift ?? 'Nuovo turno'}</h3>
             <div className="space-y-3 mb-4">
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.start_time ?? 'Inizio'}</label>
@@ -2103,9 +2103,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             </div>
             <div className="flex gap-2">
               <button type="button" onClick={() => setCreateModal(null)}
-                className="flex-1 rounded-lg border border-white/20 px-4 py-2.5 text-[11px] font-bold text-white/70 hover:bg-white/[0.07] hover:text-white hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.3)] transition-all uppercase tracking-wider">{t.cancel ?? 'Annulla'}</button>
+                className="flex-1 rounded-lg border border-white/20 px-4 py-2.5 text-[11px] font-bold text-white/70 hover:bg-white/[0.07] hover:text-white uppercase tracking-wider"
+              >{t.cancel ?? 'Annulla'}</button>
               <button type="button" onClick={() => handleCreateShift()} disabled={saving}
-                className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-[11px] font-bold text-white hover:bg-accent/80 hover:shadow-[inset_0_0_36px_rgba(255,255,255,0.35)] disabled:opacity-40 transition-all uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-[11px] font-bold text-white hover:bg-accent/80 disabled:opacity-40 uppercase tracking-wider"
+              >
                 <Plus className="h-3.5 w-3.5 inline-block mr-1.5" />{t.create ?? 'Crea'}
               </button>
             </div>
@@ -2117,7 +2119,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* ── Drop confirm modal ── */}
       {dropConfirm && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center" onClick={() => setDropConfirm(null)}>
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-black/40" />
           <div className="relative w-full max-w-xs rounded-2xl border border-white/15 p-5 shadow-2xl z-10 bg-white/[0.04]" style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }} onClick={e => e.stopPropagation()}>
             <h3 className="text-sm font-bold text-white mb-2">{t.drop_confirm_title ?? 'Turno trascinato'}</h3>
             <p className="text-[12px] text-white/60 mb-3">
@@ -2137,11 +2139,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       prev ? { ...prev, selectedPresetIdx: i, targetTimeRange: `${p.start}–${p.end}` } : prev
                     )
                   }
-                  className={`rounded-lg px-2.5 py-1.5 text-[11px] font-bold tabular-nums transition-all ${
-                    i === dropConfirm.selectedPresetIdx
-                      ? 'ring-2 ring-accent/70 bg-accent/15 text-accent shadow-md'
-                      : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
-                  }`}
+                  className={`rounded-lg px-2.5 py-1.5 text-[11px] font-bold tabular-nums transition-colors ${
+ i === dropConfirm.selectedPresetIdx
+ ? 'ring-2 ring-accent/70 bg-accent/15 text-accent shadow-md'
+ : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+ }`}
                 >
                   {p.start}–{p.end}
                 </button>
@@ -2213,6 +2215,14 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           isLoading={saving}
           confirmLabel={t.confirm ?? 'Conferma'}
           cancelLabel={t.cancel ?? 'Annulla'}
+          userId={currentUser?.id}
+          userDisplayName={[currentUser?.first_name, currentUser?.last_name].filter(Boolean).join(' ')}
+          userEmail={currentUser?.email ?? ''}
+          onBiometricSuccess={() => {
+            const verifier = findFreezeVerifierById(users, currentUser?.id ?? '');
+            if (!verifier) { setPanelPinError(t.wst_freeze_pin_invalid ?? 'PIN non valido'); return; }
+            void handlePinConfirm();
+          }}
         />
       )}
     </div>

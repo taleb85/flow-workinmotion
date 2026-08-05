@@ -58,8 +58,8 @@ export default function MobileShiftList({ shifts, language }: MobileShiftListPro
             <div className="flex items-center justify-between pt-2 border-t border-white/10">
               <div className="flex items-center gap-1.5">
                 <div className={`w-2 h-2 rounded-full ${
-                  isAbsent ? 'bg-red-500' : isDraft ? 'bg-white' : 'bg-brand-500'
-                }`} />
+ isAbsent ? 'bg-red-500' : isDraft ? 'bg-white' : 'bg-brand-500'
+ }`} />
                 <span className="text-[11px] font-bold text-white/60 uppercase tracking-wider">
                   {isAbsent ? 'Assente' : isDraft ? 'Bozza' : 'Pubblicato'}
                 </span>

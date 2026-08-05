@@ -128,7 +128,7 @@ export default function RefreshLockOverlay() {
         onClick={handleDeviceUnlock}
         disabled={busy}
         title={t.sync_lock_device_unlock_title}
-        className="flex flex-col items-center justify-center gap-1 text-accent active:scale-95 transition-transform"
+        className="flex flex-col items-center justify-center gap-1 text-accent transition-transform"
       >
         {deviceUnlockLoading ? (
           <Loader2 className="w-6 h-6 animate-spin" />
@@ -142,7 +142,7 @@ export default function RefreshLockOverlay() {
         onClick={handleLinkDevice}
         disabled={busy}
         title={t.sync_lock_link_device_title}
-        className="flex flex-col items-center justify-center gap-0.5 text-white/50 active:scale-95 transition-transform"
+        className="flex flex-col items-center justify-center gap-0.5 text-white/50 transition-transform"
       >
         {linkDeviceLoading ? (
           <Loader2 className="w-5 h-5 animate-spin" />

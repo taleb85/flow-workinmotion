@@ -26,22 +26,6 @@ export function UnifiedBellButton({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Aggiorna il badge sull'icona dell'app in base alle notifiche non lette
-  useEffect(() => {
-    const updateBadge = () => {
-      if (!('setAppBadge' in navigator)) return;
-      if (unreadCount > 0) {
-        navigator.setAppBadge(unreadCount).catch(() => {});
-      } else {
-        navigator.clearAppBadge?.().catch(() => {});
-      }
-    };
-    updateBadge();
-    // Ricalcola badge quando l'app torna in primo piano
-    document.addEventListener('visibilitychange', updateBadge);
-    return () => document.removeEventListener('visibilitychange', updateBadge);
-  }, [unreadCount]);
-
   // Apri il modal notifiche quando l'utente clicca su una push notification
   useEffect(() => {
     // Caso 1: app già aperta → il SW invia un postMessage
@@ -112,11 +96,11 @@ export function UnifiedBellButton({
             ? `Errore caricamento notifiche`
             : `Campanella notifiche${unreadCount > 0 ? ` con ${unreadCount} nuovi messaggi` : ''}`
         }
-        className={`relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200 touch-manipulation liquid-glass text-accent ${
-          isDisabled
-            ? 'opacity-50 cursor-not-allowed'
-            : 'hover:scale-105 active:scale-95'
-        }`}
+        className={`relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 touch-manipulation liquid-glass text-accent ${
+ isDisabled
+ ? 'opacity-50 cursor-not-allowed'
+ : ' '
+ }`}
       >
         <svg
           viewBox="0 0 24 24"

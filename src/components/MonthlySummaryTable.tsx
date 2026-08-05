@@ -168,8 +168,8 @@ export default function MonthlySummaryTable() {
                           return (
                             <td key={week.toString()} className="px-4 py-3 text-center border-x border-white/10 snap-start">
                               <span className={`font-bold text-xs ${
-                                minutes > 0 ? 'text-white' : 'text-white/60'
-                              }`}>
+ minutes > 0 ? 'text-white' : 'text-white/60'
+ }`}>
                                 {minutes > 0 ? formatMinutesToHoursAndMinutes(minutes) : '-'}
                               </span>
                             </td>

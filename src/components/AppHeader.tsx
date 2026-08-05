@@ -119,10 +119,10 @@ export default function AppHeader({ onLogout }: AppHeaderProps) {
                       setLangOpen(false);
                     }}
                     className={`flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors ${
-                      effectiveLanguage === lang
-                        ? 'bg-accent/10 font-semibold text-accent'
-                        : 'text-white/80 hover:bg-white/8'
-                    } active:bg-white/8'/80`}
+ effectiveLanguage === lang
+ ? 'bg-accent/10 font-semibold text-accent'
+ : 'text-white/80 hover:bg-white/8'
+ } active:bg-white/8'/80`}
                   >
                     <span>{langFlags[lang]}</span>
                     <span className="text-xs font-medium">{langLabels[lang]}</span>
@@ -138,7 +138,7 @@ export default function AppHeader({ onLogout }: AppHeaderProps) {
               type="button"
               onClick={onLogout}
               title={t.header_logout}
-className="flex min-h-[44px] min-w-[44px] flex-shrink-0 items-center justify-center rounded-xl border border-neutral-500 text-white/70 surface-ghost-interactive md:hidden transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="flex min-h-[44px] min-w-[44px] flex-shrink-0 items-center justify-center rounded-xl border border-neutral-500 text-white/70 surface-ghost-interactive md:hidden transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
             >
               <LogOut className="w-4 h-4" strokeWidth={2} />
             </button>

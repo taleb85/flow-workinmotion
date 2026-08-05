@@ -2791,11 +2791,11 @@ export default function Timesheets() {
                   type="button"
                   data-tour={v === 'stats' ? 'stats' : undefined}
                   onClick={() => setTsView(v)}
-                  className={`h-9 px-5 rounded-full text-xs font-extrabold uppercase tracking-wider transition-all ${
-                    active
-                      ? 'shadow-lg'
-                      : 'bg-white/8 border border-white/20 hover:bg-white/15 hover:border-white/35'
-                  } active:bg-white/80`}
+                  className={`h-9 px-5 rounded-full text-xs font-extrabold uppercase tracking-wider transition-colors ${
+ active
+ ? 'shadow-lg'
+ : 'bg-white/8 border border-white/20 hover:bg-white/15 hover:border-white/35'
+ } active:bg-white/80`}
                   style={active
                     ? { background: 'linear-gradient(135deg, #1a56db 0%, #0b3573 100%)', boxShadow: '0 2px 12px rgba(26,86,219,0.45)', color: '#ffffff' }
                     : { color: '#ffffff' }}
@@ -2922,8 +2922,8 @@ export default function Timesheets() {
                     handleStatCardClick();
                   }}
                   className={`group w-full rounded-lg border px-3 py-1.5 shadow-none flex items-center gap-2 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 ${
-                    isActive
-                      ? `${border} ring-1 ring-inset ring-accent/30`
+ isActive
+ ?`${border} ring-1 ring-inset ring-accent/30`
                       : `${border} hover:bg-white/15`
                   }`}
                   style={{ background: isActive ? 'rgba(59,130,246,0.20)' : 'rgba(15, 35, 90, 0.82)' }}
@@ -3065,10 +3065,10 @@ export default function Timesheets() {
                     type="button"
                     onClick={() => { setViewMode('week'); goToToday(); }}
                     className={`ui-toolbar-tab !px-2.5 !text-xs shrink-0 ${
-                      viewMode === 'week'
-                        ? 'bg-accent text-white font-extrabold'
-                        : 'hover:bg-white/10'
-                    } active:bg-white/15`}
+ viewMode === 'week'
+ ? 'bg-accent text-white font-extrabold'
+ : 'hover:bg-white/10'
+ } active:bg-white/15`}
                     style={viewMode !== 'week' ? { color: 'rgba(255,255,255,0.80)' } : {}}
                   >
                     {t.ts_period_week}
@@ -3079,10 +3079,10 @@ export default function Timesheets() {
                     type="button"
                     onClick={() => { setViewMode('month'); setPeriodNavOffset(0); applyPeriodFromStorage(); }}
                     className={`ui-toolbar-tab !px-2.5 !text-xs shrink-0 ${
-                      viewMode === 'month' && periodNavOffset === 0
-                        ? 'bg-accent text-white font-extrabold'
-                        : 'hover:bg-white/10'
-                    } active:bg-white/15`}
+ viewMode === 'month' && periodNavOffset === 0
+ ? 'bg-accent text-white font-extrabold'
+ : 'hover:bg-white/10'
+ } active:bg-white/15`}
                     style={!(viewMode === 'month' && periodNavOffset === 0) ? { color: 'rgba(255,255,255,0.80)' } : {}}
                     title={monthTabTitle}
                   >
@@ -3136,10 +3136,10 @@ export default function Timesheets() {
                     isShowingTodayWeek ? t.ts_toolbar_current_week_already : t.ts_toolbar_today_hint
                   }
                   className={`hidden md:inline-flex ui-toolbar-chip !h-9 !min-h-9 lg:!h-10 lg:!min-h-10 !px-2.5 !text-xs shrink-0 items-center gap-1 hover:bg-white/10 ${
-                    isShowingTodayWeek
-                      ? 'cursor-default opacity-50'
-                      : 'cursor-pointer'
-                  } disabled:opacity-40 disabled:cursor-not-allowed active:bg-white/80`}
+ isShowingTodayWeek
+ ? 'cursor-default opacity-50'
+ : 'cursor-pointer'
+ } disabled:opacity-40 disabled:cursor-not-allowed active:bg-white/80`}
                 >
                   <Calendar className="h-3.5 w-3.5 lg:h-4 lg:w-4 shrink-0" style={{ color: 'rgba(255,255,255,0.70)' }} aria-hidden />
                   <span className="font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>
@@ -3173,8 +3173,8 @@ export default function Timesheets() {
                       setShowPeriodPopover(next);
                     }}
                     className={`ui-toolbar-tab !px-4 lg:!px-5 !text-[11px] lg:!text-sm shrink-0 ${
-                      showPeriodPopover ? 'bg-accent/10 text-accent' : 'text-white/80 hover:bg-white/10'
-                    } ${!periodSaved ? 'font-extrabold' : ''} active:bg-white/15`}
+ showPeriodPopover ? 'bg-accent/10 text-accent' : 'text-white/80 hover:bg-white/10'
+ } ${!periodSaved ? 'font-extrabold' : ''} active:bg-white/15`}
                     title="Seleziona periodo"
                   >
                     <span className="text-[12px] lg:text-sm font-bold tabular-nums capitalize text-white">
@@ -3249,18 +3249,18 @@ export default function Timesheets() {
                                 type="button"
                                 onClick={() => { applyAndSavePeriod(cfg); setShowPeriodPopover(false); }}
                                 className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-left transition-colors ${
-                                  isActive
-                                    ? 'bg-accent/15'
-                                    : 'hover:bg-white/8'
-                                } active:bg-white/10`}
+ isActive
+ ? 'bg-accent/15'
+ : 'hover:bg-white/8'
+ } active:bg-white/10`}
                               >
                                 <span className={`text-[12px] font-bold capitalize ${
-                                  isActive
-                                    ? 'text-accent'
-                                    : isCurrentMonth
-                                      ? 'text-white'
-                                      : 'text-white/70'
-                                }`}>
+ isActive
+ ? 'text-accent'
+ : isCurrentMonth
+ ? 'text-white'
+ : 'text-white/70'
+ }`}>
                                   {format(new Date(listYear, monthIdx, 1), 'MMMM', { locale })}
                                   {listYear !== nowYear && (
                                     <span className="ml-1 text-[11px] font-normal text-white/40">{listYear}</span>
@@ -3270,10 +3270,10 @@ export default function Timesheets() {
                                   )}
                                 </span>
                                 <span className={`shrink-0 text-[11px] tabular-nums ${
-                                  isActive
-                                    ? 'text-accent font-bold'
-                                    : 'text-white/45'
-                                }`}>
+ isActive
+ ? 'text-accent font-bold'
+ : 'text-white/45'
+ }`}>
                                   {format(s, 'dd/MM', { locale })}–{format(e, 'dd/MM', { locale })}
                                   <span className={`ml-1 font-extrabold ${cfg.numWeeks === 5 ? 'text-cyan-300' : ''}`}>
                                     {cfg.numWeeks}s
@@ -3304,7 +3304,7 @@ export default function Timesheets() {
                       setTsUndoStack(rest);
                       await top.fn();
                     }}
-                    className="inline-flex h-9 max-h-9 min-h-9 lg:h-10 lg:max-h-10 lg:min-h-10 shrink-0 items-center gap-1 rounded-lg border border-neutral-500 px-2 lg:px-2.5 text-[11px] lg:text-xs font-semibold text-white/80 shadow-sm transition-all hover:bg-white/10 active:bg-white/80"
+                    className="inline-flex h-9 max-h-9 min-h-9 lg:h-10 lg:max-h-10 lg:min-h-10 shrink-0 items-center gap-1 rounded-lg border border-neutral-500 px-2 lg:px-2.5 text-[11px] lg:text-xs font-semibold text-white/80 shadow-sm transition-colors hover:bg-white/10 active:bg-white/80"
                     style={{ background: 'rgba(255, 255, 255, 0.14)' }}
                     title={tsUndoStack[0]?.label ?? 'Annulla ultima azione'}
                   >
@@ -3349,12 +3349,12 @@ export default function Timesheets() {
                         setShowWeekApproveMenu(true);
                       }}
                       className={`ui-toolbar-chip !inline-flex !h-9 !min-h-9 lg:!h-10 lg:!min-h-10 !px-2 lg:!px-2.5 !text-[11px] lg:!text-xs items-center gap-1.5 shrink-0 border shadow-sm ${
-                        weekApproveDisabled
-                          ? 'cursor-not-allowed opacity-60'
-                          : wAp.isApprovedState
-                            ? '!border-red-500'
-                            : '!border-emerald-600'
-                      } disabled:cursor-not-allowed`}
+ weekApproveDisabled
+ ? 'cursor-not-allowed opacity-60'
+ : wAp.isApprovedState
+ ? '!border-red-500'
+ : '!border-emerald-600'
+ } disabled:cursor-not-allowed`}
                       title={
                         !wAp.hasApproveMenuAction
                           ? t.ts_toolbar_week_approve_no_action_hint
@@ -3529,10 +3529,10 @@ export default function Timesheets() {
                                       )
                                     }
                                     className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${
-                                      w.fullWeekComplete
-                                        ? 'text-white/85 hover:bg-white/10'
-                                        : 'cursor-not-allowed text-white/30 opacity-60'
-                                    } active:bg-white/15`}
+ w.fullWeekComplete
+ ? 'text-white/85 hover:bg-white/10'
+ : 'cursor-not-allowed text-white/30 opacity-60'
+ } active:bg-white/15`}
                                   >
                                     <Users className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
                                     <span className="flex-1">Settimana intera (tutti)</span>
@@ -3553,10 +3553,10 @@ export default function Timesheets() {
                                       }
                                       onClick={() => openSummary(pendingShifts, w.weekApproved, false, name)}
                                       className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${
-                                        complete
-                                          ? 'text-white/85 hover:bg-white/10'
-                                          : 'cursor-not-allowed text-white/30 opacity-60'
-                                      } active:bg-white/15`}
+ complete
+ ? 'text-white/85 hover:bg-white/10'
+ : 'cursor-not-allowed text-white/30 opacity-60'
+ } active:bg-white/15`}
                                     >
                                       <UserCheck className="h-3.5 w-3.5 shrink-0 text-white/40" aria-hidden />
                                       <span className="flex-1 truncate" title={name}>{name}</span>
@@ -3672,10 +3672,10 @@ export default function Timesheets() {
                                               )
                                             }
                                             className={`flex w-full items-center gap-2 rounded-lg px-2 py-2.5 text-left text-[11px] font-bold ${
-                                              w.fullWeekComplete
-                                                ? 'text-white/85 hover:bg-white/10'
-                                                : 'cursor-not-allowed text-white/30 opacity-60'
-                                            } active:bg-white/15`}
+ w.fullWeekComplete
+ ? 'text-white/85 hover:bg-white/10'
+ : 'cursor-not-allowed text-white/30 opacity-60'
+ } active:bg-white/15`}
                                           >
                                             <Users className="h-4 w-4 shrink-0 text-accent" aria-hidden />
                                             Settimana intera (tutti)
@@ -3690,10 +3690,10 @@ export default function Timesheets() {
                                               disabled={!complete}
                                               onClick={() => openSummary(pendingShifts, w.weekApproved, false, name)}
                                               className={`flex w-full items-center gap-2 rounded-lg px-2 py-2.5 text-left text-[11px] font-bold ${
-                                                complete
-                                                  ? 'text-white/85 hover:bg-white/10'
-                                                  : 'cursor-not-allowed text-white/30 opacity-60'
-                                              } active:bg-white/15`}
+ complete
+ ? 'text-white/85 hover:bg-white/10'
+ : 'cursor-not-allowed text-white/30 opacity-60'
+ } active:bg-white/15`}
                                             >
                                               <UserCheck className="h-4 w-4 shrink-0 text-white/40" aria-hidden />
                                               {name}
@@ -3745,11 +3745,11 @@ export default function Timesheets() {
                             <button
                               type="button"
                               onClick={() => { setPdfDeptFilter('all'); setShowPdfDeptMenu(false); }}
-                              className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-all ${
-                                pdfDeptFilter === 'all' 
-                                  ? 'bg-accent text-white shadow-md' 
-                                  : 'text-white/80 hover:bg-white/10'
-                              } active:bg-white/15`}
+                              className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${
+ pdfDeptFilter === 'all' 
+ ? 'bg-accent text-white shadow-md' 
+ : 'text-white/80 hover:bg-white/10'
+ } active:bg-white/15`}
                             >
                               <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                 <Check className={`h-3 w-3 ${pdfDeptFilter === 'all' ? 'text-white' : 'text-accent'}`} strokeWidth={3} />
@@ -3766,11 +3766,11 @@ export default function Timesheets() {
                                 key={dept.value}
                                 type="button"
                                 onClick={() => { setPdfDeptFilter(dept.value); setShowPdfDeptMenu(false); }}
-                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-all ${
-                                  pdfDeptFilter === dept.value 
-                                    ? 'bg-accent text-white shadow-md' 
-                                    : 'text-white/70 hover:bg-white/10'
-                                } active:bg-white/15`}
+                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${
+ pdfDeptFilter === dept.value 
+ ? 'bg-accent text-white shadow-md' 
+ : 'text-white/70 hover:bg-white/10'
+ } active:bg-white/15`}
                               >
                                 <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                   <span
@@ -3809,11 +3809,11 @@ export default function Timesheets() {
                               <button
                                 type="button"
                                 onClick={() => { setPdfDeptFilter('all'); setShowPdfDeptMenu(false); }}
-                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-all ${
-                                  pdfDeptFilter === 'all' 
-                                    ? 'bg-accent text-white shadow-md' 
-                                    : 'text-white/70 hover:bg-white/10'
-                                } active:bg-white/15`}
+                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${
+ pdfDeptFilter === 'all' 
+ ? 'bg-accent text-white shadow-md' 
+ : 'text-white/70 hover:bg-white/10'
+ } active:bg-white/15`}
                               >
                                 <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                   <Check className={`h-3 w-3 ${pdfDeptFilter === 'all' ? 'text-white' : 'text-accent'}`} strokeWidth={3} />
@@ -3830,11 +3830,11 @@ export default function Timesheets() {
                                   key={dept.value}
                                   type="button"
                                   onClick={() => { setPdfDeptFilter(dept.value); setShowPdfDeptMenu(false); }}
-                                  className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-all ${
-                                    pdfDeptFilter === dept.value 
-                                      ? 'bg-accent text-white shadow-md' 
-                                      : 'text-white/70 hover:bg-white/10'
-                                  } active:bg-white/15`}
+                                  className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${
+ pdfDeptFilter === dept.value 
+ ? 'bg-accent text-white shadow-md' 
+ : 'text-white/70 hover:bg-white/10'
+ } active:bg-white/15`}
                                 >
                                   <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                     <span
@@ -3938,7 +3938,7 @@ export default function Timesheets() {
                                       e.stopPropagation();
                                       openDrawer(s, user, dateStr, null, 'turno');
                                     }}
-                                    className={`flex w-full items-center justify-between rounded-lg border-l-4 ${border} ${bg} ${ring} p-2 text-left ${shiftClickBlocked ? 'cursor-default' : 'cursor-pointer transition-transform active:scale-[0.98]'}`}
+                                    className={`flex w-full items-center justify-between rounded-lg border-l-4 ${border} ${bg} ${ring} p-2 text-left ${shiftClickBlocked ? 'cursor-default' : 'cursor-pointer transition-transform '}`}
                                   >
                                     <div className="flex flex-col">
                                       <span className="text-xs font-bold text-white/90">
@@ -4007,8 +4007,8 @@ export default function Timesheets() {
                           <th key={dStr}
                             onClick={canReview ? () => handleOpenDayReview(dStr) : undefined}
                             className={`box-border px-2 py-2.5 text-center text-[11px] font-semibold whitespace-nowrap transition-colors md:px-1 md:py-1.5 ${
-                              weekEndCol ? 'border-r-2 border-r-white/20' : 'border-r border-r-white/10'
-                            } ${canReview ? 'cursor-pointer hover:bg-white/10 group' : ''} active:bg-white/80`}
+ weekEndCol ? 'border-r-2 border-r-white/20' : 'border-r border-r-white/10'
+ } ${canReview ? 'cursor-pointer hover:bg-white/10 group' : ''} active:bg-white/80`}
                             style={{ background: payrollHighlight ? 'rgba(51,102,204,0.35)' : todayDate ? 'rgba(0,82,255,0.08)' : 'transparent' }}
                           >
                             <div className={todayDate && inP ? 'text-cyan-300' : 'text-white/70'}>
@@ -4090,28 +4090,28 @@ export default function Timesheets() {
                               : undefined
                         }
                         className={`box-border px-2 py-1.5 text-center text-[11px] font-semibold whitespace-nowrap transition-colors md:px-1 md:py-1 ${
-                          weekEndCol ? 'border-r-2 border-r-white/15' : 'border-r border-r-white/10'
-                        } ${viewMode === 'month' && !inP ? 'opacity-40' : ''} ${canReview ? 'cursor-pointer hover:bg-white/10 group' : ''} active:bg-white/80`}
+ weekEndCol ? 'border-r-2 border-r-white/15' : 'border-r border-r-white/10'
+ } ${viewMode === 'month' && !inP ? 'opacity-40' : ''} ${canReview ? 'cursor-pointer hover:bg-white/10 group' : ''} active:bg-white/80`}
                         style={{ background: payrollHighlight ? 'rgba(51,102,204,0.35)' : todayDate ? 'rgba(0,82,255,0.08)' : 'transparent' }}
                       >
                         <div
                           className={`text-[11px] font-bold uppercase tracking-widest mb-0.5 ${
-                            todayDate && inP ? 'text-accent/70' : 'text-white/40'
-                          }`}
+ todayDate && inP ? 'text-accent/70' : 'text-white/40'
+ }`}
                         >
                           {format(day, 'EEE', { locale })}
                         </div>
                         <div className="flex items-center justify-center gap-1">
                           <div
                             className={`font-black tabular-nums text-[13px] md:text-xs ${
-                              todayDate && inP
-                                ? 'text-accent'
-                                : !inP
-                                  ? 'text-white/30'
-                                  : payrollHighlight
-                                    ? 'text-white/90'
-                                    : 'text-white/70'
-                            }`}
+ todayDate && inP
+ ? 'text-accent'
+ : !inP
+ ? 'text-white/30'
+ : payrollHighlight
+ ? 'text-white/90'
+ : 'text-white/70'
+ }`}
                           >
                             {format(day, 'd/MM')}
                           </div>
@@ -4217,7 +4217,7 @@ export default function Timesheets() {
                                     onClick={plannedOnlyTimesheetGrid ? undefined : () => {
                                       openDrawer(s, user, dateStr, null, 'turno');
                                     }}
-                                    className={`relative flex w-full items-stretch text-left rounded-lg border-l-[3px] ${border} ${bg} ${ring} py-1 pl-2 pr-2 shadow-sm transition-all group md:rounded-md md:py-0.5 md:pl-1.5 md:pr-1.5 md:border-l-2 ${plannedOnlyTimesheetGrid ? 'cursor-default' : 'hover:shadow-md'} ${isHighlighted ? 'ts-shift-highlighted' : ''} ${isDimmed ? 'opacity-20 pointer-events-none' : ''}`}
+                                    className={`relative flex w-full items-stretch text-left rounded-lg border-l-[3px] ${border} ${bg} ${ring} py-1 pl-2 pr-2 shadow-sm transition-colors group md:rounded-md md:py-0.5 md:pl-1.5 md:pr-1.5 md:border-l-2 ${plannedOnlyTimesheetGrid ? 'cursor-default' : 'hover:shadow-md'} ${isHighlighted ? 'ts-shift-highlighted' : ''} ${isDimmed ? 'opacity-20 pointer-events-none' : ''}`}
                                   >
                                     {/* Spunta / lucchetto subito dopo la barra verticale, poi orari */}
                                     {(s.status === 'confirmed' || s.status === 'approved') && (
@@ -4264,8 +4264,8 @@ export default function Timesheets() {
                                             </span>
                                             <span
                                               className={`max-w-[min(100%,5.5rem)] shrink-0 text-right text-[11px] font-semibold leading-tight tabular-nums md:max-w-[4.75rem] md:text-[11px] ${
-                                                s.breakMinutesActual > 0 ? 'text-white/50' : deltaColor
-                                              }`}
+ s.breakMinutesActual > 0 ? 'text-white/50' : deltaColor
+ }`}
                                               title={
                                                 s.breakMinutesActual > 0
                                                   ? `${t.ts_net_hours}: ${fmtHM(displayActualMins)}`
@@ -4699,8 +4699,8 @@ export default function Timesheets() {
             <div className="flex items-center gap-3 mb-4">
               <div
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
-                  isDone ? 'bg-emerald-500/20 ring-1 ring-emerald-400/30' : 'bg-brand-electric/12'
-                }`}
+ isDone ? 'bg-emerald-500/20 ring-1 ring-emerald-400/30' : 'bg-brand-electric/12'
+ }`}
               >
                 {isDone
                   ? <Check className="h-5 w-5 text-emerald-400" strokeWidth={2.5} />
@@ -4722,10 +4722,10 @@ export default function Timesheets() {
             {/* Lista turni */}
             <div
               className={`mb-4 max-h-[260px] overflow-y-auto rounded-xl border divide-y ${
-                isDone
-                  ? 'border-emerald-500/25 divide-emerald-500/15'
-                  : 'border-brand-electric/18 divide-brand-electric/10'
-              }`}
+ isDone
+ ? 'border-emerald-500/25 divide-emerald-500/15'
+ : 'border-brand-electric/18 divide-brand-electric/10'
+ }`}
             >
               {approveWeekSummary.previewRows.map((row, i) => {
                 const approved = isDone;
@@ -4733,16 +4733,16 @@ export default function Timesheets() {
                   <div
                     key={i}
                     className={`flex items-center justify-between px-3 py-2.5 transition-colors ${
-                      approved ? 'bg-emerald-500/10' : 'bg-brand-electric/4'
-                    }`}
+ approved ? 'bg-emerald-500/10' : 'bg-brand-electric/4'
+ }`}
                   >
                     <span className={`text-sm font-medium capitalize ${isDone ? 'text-white/90' : 'text-white/80'}`}>
                       {row.employeeLabel ? (
                         <span className="block text-left">
                           <span
                             className={`block text-[11px] font-semibold uppercase tracking-wide ${
-                              isDone ? 'text-white/50' : 'text-white/60'
-                            }`}
+ isDone ? 'text-white/50' : 'text-white/60'
+ }`}
                           >
                             {row.employeeLabel}
                           </span>

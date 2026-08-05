@@ -13,13 +13,23 @@ CREATE TABLE IF NOT EXISTS public.push_subscriptions (
 ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- Solo l'utente stesso può leggere/scrivere le proprie subscription
-CREATE POLICY "push_sub_own" ON public.push_subscriptions
-  USING (user_id = auth.uid())
-  WITH CHECK (user_id = auth.uid());
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'push_sub_own' AND tablename = 'push_subscriptions') THEN
+    CREATE POLICY "push_sub_own" ON public.push_subscriptions
+      USING (user_id = auth.uid())
+      WITH CHECK (user_id = auth.uid());
+  END IF;
+END $$;
 
 -- Service role può leggere tutto (per le Edge Functions)
-CREATE POLICY "push_sub_service" ON public.push_subscriptions
-  FOR SELECT USING (auth.role() = 'service_role');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'push_sub_service' AND tablename = 'push_subscriptions') THEN
+    CREATE POLICY "push_sub_service" ON public.push_subscriptions
+      FOR SELECT USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
 -- Trigger: quando viene inserito un messaggio in staff_messages,
 -- chiama la Edge Function send-push-notification via pg_net

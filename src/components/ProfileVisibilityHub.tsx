@@ -90,7 +90,7 @@ function NavPreviewBar({
         {tabs.map((id) => {
           const Icon = PREVIEW_TAB_ICONS[id];
           const selected = interactive && activeTab === id;
-          const cls = `flex-1 min-w-0 flex flex-col items-center justify-center text-white/90 ${gap} rounded-xl transition-all ${
+          const cls = `flex-1 min-w-0 flex flex-col items-center justify-center text-white/90 ${gap} rounded-xl transition-colors ${
             selected ? 'bg-white/20 ring-2 ring-white/80 shadow-inner' : ''
           }`;
           const label = (
@@ -452,10 +452,10 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                 type="button"
                 onClick={() => setRoleFilter(k)}
                 className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  roleFilter === k
-                    ? 'rounded-full border border-accent bg-accent text-white'
-                    : 'rounded-xl border border-neutral-500 !rounded-full text-white/70 surface-ghost-interactive hover:border-neutral-500'
-                } active:brightness-95`}
+ roleFilter === k
+ ? 'rounded-full border border-accent bg-accent text-white'
+ : 'rounded-xl border border-neutral-500 !rounded-full text-white/70 surface-ghost-interactive hover:border-neutral-500'
+ } active:brightness-95`}
               >
                 {k === 'all'
                   ? tv.profile_visibility_filter_all ?? 'Tutti'
@@ -489,8 +489,8 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                     type="button"
                     onClick={() => setSelectedId(u.id)}
                     className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors ${
-                      active ? 'bg-accent/8' : 'hover:bg-slate-50'
-                    } active:bg-slate-50'/80`}
+ active ? 'bg-accent/8' : 'hover:bg-slate-50'
+ } active:bg-slate-50'/80`}
                   >
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-white/70">
                       {(u.first_name?.[0] ?? '?').toUpperCase()}
@@ -574,7 +574,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
               <button
                 type="button"
                 onClick={handleSaveAndApply}
-                className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase shadow-sm transition-all hover:bg-accent-hover active:scale-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+                className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase shadow-sm transition-colors hover:bg-accent-hover hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               >
                 {tv.profile_visibility_save_apply ?? 'Salva e applica'}
               </button>
@@ -625,7 +625,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                   <button
                     type="button"
                     onClick={handleSmartRestore}
-className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 px-3 py-2 text-xs font-semibold text-white/70 surface-ghost-interactive hover:text-white active:text-white transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 px-3 py-2 text-xs font-semibold text-white/70 surface-ghost-interactive hover:text-white active:text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     {hasUnsavedChanges
@@ -638,7 +638,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                       type="button"
                       onClick={handleDeleteUser}
                       disabled={isDeleting}
-className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 px-3 py-2 text-xs font-semibold text-red-600 surface-ghost-interactive hover:bg-red-50 active:bg-red-50/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 px-3 py-2 text-xs font-semibold text-red-600 surface-ghost-interactive hover:bg-red-50 active:bg-red-50/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                     >
                       {isDeleting ? (
                         <RotateCcw className="w-3.5 h-3.5 animate-spin" />
@@ -687,10 +687,10 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                                   <div
                                     key={mod}
                                     className={`flex min-h-[44px] items-stretch gap-0 rounded-lg border-2 ${
-                                      enabled
-                                        ? 'border-slate-200 rounded-xl border border-neutral-500'
-                                        : 'border-dashed border-neutral-500/70 bg-slate-300/40'
-                                    }`}
+ enabled
+ ? 'border-slate-200 rounded-xl border border-neutral-500'
+ : 'border-dashed border-neutral-500/70 bg-slate-300/40'
+ }`}
                                   >
                                     <div
                                       className={`w-[3px] shrink-0 ${enabled ? 'bg-accent' : 'bg-slate-400'}`}
@@ -699,10 +699,10 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                                     <div className="flex min-w-0 flex-1 items-center justify-between gap-2 py-1.5 pl-2 pr-1.5">
                                       <p
                                         className={`text-xs font-semibold ${
-                                          enabled
-                                            ? 'text-white'
-                                            : 'text-white/60 line-through'
-                                        }`}
+ enabled
+ ? 'text-white'
+ : 'text-white/60 line-through'
+ }`}
                                       >
                                         {getModuleLabel(mod, effectiveLanguage)}
                                       </p>
@@ -713,13 +713,13 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                                           aria-checked={enabled}
                                           onClick={() => handleModuleToggle(previewUser, mod, !enabled)}
                                           className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${
-                                            enabled ? 'bg-accent' : 'bg-white/20'
-                                          }`}
+ enabled ? 'bg-accent' : 'bg-white/20'
+ }`}
                                         >
                                           <span
                                             className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white toggle-knob shadow transition ${
-                                              enabled ? 'translate-x-5' : 'translate-x-1'
-                                            }`}
+ enabled ? 'translate-x-5' : 'translate-x-1'
+ }`}
                                           />
                                         </button>
                                       )}
@@ -775,10 +775,10 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                                 <AdminRow
                                   key={key}
                                   className={`rounded-lg border border-neutral-500 !border-b-0 !p-2 ${
-                                    key === 'view_estimated_cost'
-                                      ? '[&_.font-bold]:border-l-2 [&_.font-bold]:border-accent/30 [&_.font-bold]:pl-2'
-                                      : ''
-                                  }`}
+ key === 'view_estimated_cost'
+ ? '[&_.font-bold]:border-l-2 [&_.font-bold]:border-accent/30 [&_.font-bold]:pl-2'
+ : ''
+ }`}
                                   label={FEATURE_LABELS[key]}
                                   description={desc}
                                   action={
@@ -795,13 +795,13 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                                         if (!isSelectedAdmin) handleFeatureToggle(previewUser, key, !eff);
                                       }}
                                       className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${
-                                        isSelectedAdmin ? 'cursor-default opacity-100' : 'cursor-pointer'
-                                      } ${eff ? 'bg-accent' : 'bg-white/20'}`}
+ isSelectedAdmin ? 'cursor-default opacity-100' : 'cursor-pointer'
+ } ${eff ? 'bg-accent' : 'bg-white/20'}`}
                                     >
                                       <span
                                         className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white toggle-knob shadow transition ${
-                                          eff ? 'translate-x-5' : 'translate-x-1'
-                                        }`}
+ eff ? 'translate-x-5' : 'translate-x-1'
+ }`}
                                       />
                                     </button>
                                   }

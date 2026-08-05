@@ -127,7 +127,7 @@ export default function TimesheetManagementKpiBlock({ visibleWeekDays, showDetai
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-left transition-all select-none"
+          className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-left transition-colors select-none"
           style={{ background: 'transparent', border: '1.5px solid rgba(255,255,255,0.35)' }}
         >
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/20 ring-1 ring-inset ring-accent/40">
@@ -150,8 +150,8 @@ export default function TimesheetManagementKpiBlock({ visibleWeekDays, showDetai
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className={`flex items-center gap-2 rounded-lg px-3 py-1.5 ${
-              estimatedCostStats.shiftsWithRate === 0 ? 'opacity-75' : ''
-            }`}
+ estimatedCostStats.shiftsWithRate === 0 ? 'opacity-75' : ''
+ }`}
             style={{ background: 'transparent', border: '1.5px solid rgba(255,255,255,0.35)' }}
           >
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/10 ring-1 ring-inset ring-accent/25">
@@ -181,7 +181,7 @@ export default function TimesheetManagementKpiBlock({ visibleWeekDays, showDetai
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-left transition-all select-none`}
+          className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-left transition-colors select-none`}
           style={{
             background: pendingCount > 0 ? 'rgba(245,158,11,0.12)' : 'transparent',
             border: pendingCount > 0 ? '1.5px solid rgba(245,158,11,0.30)' : '1.5px solid rgba(255,255,255,0.35)',
@@ -189,10 +189,10 @@ export default function TimesheetManagementKpiBlock({ visibleWeekDays, showDetai
         >
           <div
             className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset ${
-              pendingCount > 0
-                ? 'bg-amber-500/15 ring-amber-400/40'
-                : 'bg-white/8 ring-white/20'
-            }`}
+ pendingCount > 0
+ ? 'bg-amber-500/15 ring-amber-400/40'
+ : 'bg-white/8 ring-white/20'
+ }`}
           >
             <AlertCircle
               className={`h-3.5 w-3.5 ${pendingCount > 0 ? 'text-amber-400' : 'text-white/40'}`}

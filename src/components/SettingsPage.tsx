@@ -110,7 +110,7 @@ function DepartmentColorPicker({
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => setOpen((o) => !o)}
-        className="relative h-9 w-9 shrink-0 rounded-full border-2 border-white shadow-[0_2px_10px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/90 outline-none transition-transform hover:ring-slate-300 focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-2 active:scale-[0.96]"
+        className="relative h-9 w-9 shrink-0 rounded-full border-2 border-white shadow-[0_2px_10px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/90 outline-none transition-transform hover:ring-slate-300 focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-2"
         style={{ backgroundColor: value }}
       />
       {open && (
@@ -138,11 +138,11 @@ function DepartmentColorPicker({
                     onChange(hex);
                     setOpen(false);
                   }}
-                  className={`h-9 w-9 shrink-0 rounded-full outline-none transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-                    selected
-                      ? 'ring-2 ring-offset-2 ring-accent ring-offset-slate-100 shadow-md'
-                      : 'ring-2 ring-slate-400/90 ring-offset-1 ring-offset-white shadow-[inset_0_0_0_1px_rgba(15,23,42,0.12)]'
-                  } active:scale-[0.98]`}
+                  className={`h-9 w-9 shrink-0 rounded-full outline-none transition-transform focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+ selected
+ ? 'ring-2 ring-offset-2 ring-accent ring-offset-slate-100 shadow-md'
+ : 'ring-2 ring-slate-400/90 ring-offset-1 ring-offset-white shadow-[inset_0_0_0_1px_rgba(15,23,42,0.12)]'
+ }`}
                   style={{ backgroundColor: hex }}
                 />
               );
@@ -651,10 +651,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               className={`mb-4 rounded-xl border p-4 ${
-                importStatus.type === 'success'
-                  ? 'border-accent/40 bg-accent/10 text-accent'
-                  : 'border-red-500/30 bg-red-500/15 text-red-400'
-              }`}
+ importStatus.type === 'success'
+ ? 'border-accent/40 bg-accent/10 text-accent'
+ : 'border-red-500/30 bg-red-500/15 text-red-400'
+ }`}
             >
               {importStatus.message}
             </motion.div>
@@ -752,7 +752,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                                 e.stopPropagation();
                                 setShareMenuUserId(shareMenuUserId === user.id ? null : user.id);
                               }}
-                              className={`p-1.5 rounded-md border transition-all ${shareMenuUserId === user.id ? 'text-accent border-accent/30 bg-accent/5' : 'text-white/40 border-neutral-500 hover:text-accent hover:border-accent/30 hover:bg-accent/5'} active:text-accent`}
+                              className={`p-1.5 rounded-md border transition-colors ${shareMenuUserId === user.id ? 'text-accent border-accent/30 bg-accent/5' : 'text-white/40 border-neutral-500 hover:text-accent hover:border-accent/30 hover:bg-accent/5'} active:text-accent`}
                             >
                               <Link2 className="w-3.5 h-3.5" />
                             </button>
@@ -845,7 +845,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                               setExpandedVisibilityUserId(expandedVisibilityUserId === user.id ? null : user.id);
                               setExpandedPermsUserId(null);
                             }}
-                            className={`px-2 py-1 text-[11px] font-bold uppercase rounded-md transition-all border ${expandedVisibilityUserId === user.id ? 'bg-white/15 text-accent border-accent/30 shadow-sm' : 'text-white/55 border-transparent hover:text-white/80'} active:text-white/80'}`}
+                            className={`px-2 py-1 text-[11px] font-bold uppercase rounded-md transition-colors border ${expandedVisibilityUserId === user.id ? 'bg-white/15 text-accent border-accent/30 shadow-sm' : 'text-white/55 border-transparent hover:text-white/80'} active:text-white/80'}`}
                           >
                             {t.what_sees}
                           </button>
@@ -895,8 +895,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                               aria-checked={user.status === 'active'}
                               onClick={() => handleToggleStatus(user)}
                               className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${
-                                user.status === 'active' ? 'bg-accent' : 'bg-white/20'
-                              }`}
+ user.status === 'active' ? 'bg-accent' : 'bg-white/20'
+ }`}
                             >
                               <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${user.status === 'active' ? 'translate-x-5' : 'translate-x-0'}`} />
                             </button>
@@ -960,8 +960,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                                       action={
                                         <span
                                           className={`shrink-0 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${
-                                            isUserVisibleOnTeamSchedule(user) ? 'bg-accent text-white shadow-sm' : 'bg-white/10 text-white/55'
-                                          }`}
+ isUserVisibleOnTeamSchedule(user) ? 'bg-accent text-white shadow-sm' : 'bg-white/10 text-white/55'
+ }`}
                                         >
                                           {isUserVisibleOnTeamSchedule(user) ? t.role_template_yes : t.role_template_no}
                                         </span>
@@ -1000,10 +1000,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                                         action={
                                           <span
                                             className={`shrink-0 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${
-                                            enabled
-                                              ? 'bg-accent text-white shadow-sm'
-                                              : 'bg-white/10 text-white/55'
-                                          }`}
+ enabled
+ ? 'bg-accent text-white shadow-sm'
+ : 'bg-white/10 text-white/55'
+ }`}
                                         >
                                           {enabled ? t.role_template_yes : t.role_template_no}
                                           </span>
@@ -1083,10 +1083,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     <div
                       key={d.value}
                       className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold uppercase text-white transition-shadow ${
-                        isEditingChip
-                          ? 'shadow-md ring-2 ring-white/90 ring-offset-2 ring-offset-slate-100'
-                          : ''
-                      }`}
+ isEditingChip
+ ? 'shadow-md ring-2 ring-white/90 ring-offset-2 ring-offset-slate-100'
+ : ''
+ }`}
                       style={{ backgroundColor: badgeColor }}
                     >
                       <span className="truncate max-w-[10rem]" title={translateDepartmentValue(d.value, effectiveLanguage)}>{translateDepartmentValue(d.value, effectiveLanguage)}
@@ -1173,7 +1173,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           setHiddenBuiltins(getHiddenBuiltinValues());
                           void notifyDepartmentsChanged();
                         }}
-                        className="flex items-center gap-1.5 rounded-xl border border-dashed border-white/20 px-3 py-1.5 text-xs font-semibold text-white/55 transition-all opacity-0 group-hover/missing:opacity-100 hover:bg-white/10 hover:border-accent/50 hover:text-accent active:text-accent"
+                        className="flex items-center gap-1.5 rounded-xl border border-dashed border-white/20 px-3 py-1.5 text-xs font-semibold text-white/55 transition-colors opacity-0 group-hover/missing:opacity-100 hover:bg-white/10 hover:border-accent/50 hover:text-accent active:text-accent"
                       >
                         <span
                           className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -1521,11 +1521,11 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 return (
                   <div
                     key={rule.id}
-                    className={`rounded-xl border border-neutral-500 flex flex-col gap-3 p-4 transition-all ${
-                      isEnabled
-                        ? ''
-                        : 'border-white/10 opacity-70 bg-white/5'
-                    }`}
+                    className={`rounded-xl border border-neutral-500 flex flex-col gap-3 p-4 transition-colors ${
+ isEnabled
+ ? ''
+ : 'border-white/10 opacity-70 bg-white/5'
+ }`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="w-8 h-8 rounded-xl bg-amber-500/15 flex items-center justify-center flex-shrink-0">
@@ -1758,10 +1758,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       setDraftFromConfig(cfg);
                     }}
                     className={`flex flex-col items-start gap-1 rounded-xl border-2 px-3 py-2.5 text-left transition-colors ${
-                      periodRuleMode === 'last_sunday'
-                        ? 'border-accent bg-accent/8'
-                        : 'border-neutral-500 bg-white/8 hover:border-white/20'
-                    } active:brightness-95`}
+ periodRuleMode === 'last_sunday'
+ ? 'border-accent bg-accent/8'
+ : 'border-neutral-500 bg-white/8 hover:border-white/20'
+ } active:brightness-95`}
                   >
                     <span className={`text-[11px] font-extrabold uppercase tracking-wide ${periodRuleMode === 'last_sunday' ? 'text-accent' : 'text-white/70'}`}>
                       Ultima domenica
@@ -1779,10 +1779,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       setDraftFromConfig(cfg);
                     }}
                     className={`flex flex-col items-start gap-1 rounded-xl border-2 px-3 py-2.5 text-left transition-colors ${
-                      periodRuleMode === 'fixed_start'
-                        ? 'border-brand-deep bg-brand-deep/8'
-                        : 'border-neutral-500 bg-white/8 hover:border-white/20'
-                    } active:brightness-95`}
+ periodRuleMode === 'fixed_start'
+ ? 'border-brand-deep bg-brand-deep/8'
+ : 'border-neutral-500 bg-white/8 hover:border-white/20'
+ } active:brightness-95`}
                   >
                     <span className={`text-[11px] font-extrabold uppercase tracking-wide ${periodRuleMode === 'fixed_start' ? 'text-brand-deep' : 'text-white/70'}`}>
                       Primo giorno
@@ -1841,11 +1841,11 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 type="button"
                 disabled={!periodDraftDirty || periodSavingCloud}
                 onClick={() => applyPeriod({ startDate: periodDraftStart, numWeeks: periodDraftWeeks }, periodRuleMode)}
-                className={`w-full rounded-xl py-2.5 text-xs font-bold uppercase tracking-wider transition-all ${
-                  !periodDraftDirty || periodSavingCloud
-                    ? 'cursor-not-allowed'
-                    : 'hover:opacity-90 active:scale-[0.98]'
-                }`}
+                className={`w-full rounded-xl py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+ !periodDraftDirty || periodSavingCloud
+ ? 'cursor-not-allowed'
+ : 'hover:opacity-90 '
+ }`}
                 style={!periodDraftDirty || periodSavingCloud
                   ? { background: 'rgba(15, 35, 90, 0.82)', color: 'rgba(255,255,255,0.35)' }
                   : { background: '#3b82f6', color: '#ffffff', opacity: 1 }
@@ -1903,13 +1903,13 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     }
                   }}
                   className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${
-                    presenceVerificationConfig.requireVerification ? 'bg-accent' : 'bg-white/20'
-                  }`}
+ presenceVerificationConfig.requireVerification ? 'bg-accent' : 'bg-white/20'
+ }`}
                 >
                   <span
                     className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${
-                      presenceVerificationConfig.requireVerification ? 'translate-x-5' : 'translate-x-0'
-                    }`}
+ presenceVerificationConfig.requireVerification ? 'translate-x-5' : 'translate-x-0'
+ }`}
                   />
                 </button>
               </div>
@@ -1985,14 +1985,14 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     onChange={(e) => setHolidayEmailDraft(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') saveHolidayEmail(); }}
                     placeholder="es. direzione@azienda.it"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-brand-mid/25 bg-white/8 text-base text-white placeholder:text-white/40 outline-none transition-all focus:border-brand-mid focus:ring-2 focus:ring-brand-mid/20 focus:shadow-[0_0_0_3px_rgb(51_102_204/0.10)]"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-brand-mid/25 bg-white/8 text-base text-white placeholder:text-white/40 outline-none transition-colors focus:border-brand-mid focus:ring-2 focus:ring-brand-mid/20 focus:shadow-[0_0_0_3px_rgb(51_102_204/0.10)]"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={saveHolidayEmail}
                   disabled={holidayEmailDraft.trim() === holidayEmail}
-                  className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97]"
+                  className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{ background: '#0a0a0c' }}
                 >
                   {holidayEmailSaved ? (
@@ -2053,13 +2053,13 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 return (
                   <div
                     key={feature.slug}
-                    className={`relative flex flex-col gap-3 rounded-2xl border p-4 transition-all duration-200 ${
-                      isMaintenance
-                        ? enabled
-                          ? 'border-red-500/40 bg-red-500/15 shadow-[0_0_0_3px_rgba(239,68,68,0.15)]'
-                          : 'border-amber-500/30 bg-amber-500/10'
-                        : 'rounded-xl border border-neutral-500 shadow-none'
-                    }`}
+                    className={`relative flex flex-col gap-3 rounded-2xl border p-4 transition-colors duration-200 ${
+ isMaintenance
+ ? enabled
+ ? 'border-red-500/40 bg-red-500/15 shadow-[0_0_0_3px_rgba(239,68,68,0.15)]'
+ : 'border-amber-500/30 bg-amber-500/10'
+ : 'rounded-xl border border-neutral-500 shadow-none'
+ }`}
                   >
                     {/* Card top */}
                     <div className="flex items-start justify-between gap-3">
@@ -2067,28 +2067,28 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
                           className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl ${
-                            isMaintenance
-                              ? enabled
-                                ? 'bg-red-500/20 text-red-400'
-                                : 'bg-amber-500/15 text-amber-400'
-                              : enabled
-                                ? 'bg-accent/10 text-accent'
-                                : 'bg-white/10 text-white/40'
-                          }`}
+ isMaintenance
+ ? enabled
+ ? 'bg-red-500/20 text-red-400'
+ : 'bg-amber-500/15 text-amber-400'
+ : enabled
+ ? 'bg-accent/10 text-accent'
+ : 'bg-white/10 text-white/40'
+ }`}
                         >
                           {iconMap[feature.slug]}
                         </div>
                         <div className="min-w-0">
                           <p
                             className={`text-sm font-semibold leading-tight ${
-                              isMaintenance
-                                ? enabled
-                                  ? 'text-red-400'
-                                  : 'text-amber-400'
-                                : enabled
-                                  ? 'text-white'
-                                  : 'text-white/40'
-                            }`}
+ isMaintenance
+ ? enabled
+ ? 'text-red-400'
+ : 'text-amber-400'
+ : enabled
+ ? 'text-white'
+ : 'text-white/40'
+ }`}
                           >
                             {featureLabel}
                           </p>
@@ -2111,10 +2111,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           showSuccess?.(formatTrans(enabled ? t.settings_feature_toggle_off : t.settings_feature_toggle_on, { name: featureLabel }));
                         }}
                         className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${
-                          isMaintenance
-                            ? enabled ? 'bg-red-500' : 'bg-white/20'
-                            : enabled ? 'bg-accent' : 'bg-white/20'
-                        }`}
+ isMaintenance
+ ? enabled ? 'bg-red-500' : 'bg-white/20'
+ : enabled ? 'bg-accent' : 'bg-white/20'
+ }`}
                       >
                         <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
                       </button>
@@ -2123,12 +2123,12 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     {/* Description */}
                     <p
                       className={`text-[11px] leading-snug ${
-                        isMaintenance
-                          ? enabled
-                            ? 'text-red-500'
-                            : 'text-amber-600/80'
-                          : 'text-white/40'
-                      }`}
+ isMaintenance
+ ? enabled
+ ? 'text-red-500'
+ : 'text-amber-600/80'
+ : 'text-white/40'
+ }`}
                     >
                       {featureDescription}
                     </p>
@@ -2276,7 +2276,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     <button
                       type="button"
                       onClick={() => { setDataToolsPin(''); setDataToolsPinError(''); setShowDataToolsPinPad(true); }}
-                      className="flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-[12px] font-semibold text-white shadow-sm hover:bg-accent/90 active:scale-95 transition-all"
+                      className="flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-[12px] font-semibold text-white shadow-sm hover:bg-accent/90 transition-colors"
                     >
                       <KeyRound className="h-3.5 w-3.5" />
                       Sblocca con PIN
@@ -2301,7 +2301,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       <button
                         type="button"
                         onClick={handleImportClick}
-className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs font-medium uppercase text-white/70 surface-ghost-interactive transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs font-medium uppercase text-white/70 surface-ghost-interactive transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                       >
                         {t.restore}
                       </button>
@@ -2342,6 +2342,14 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                 isLoading={false}
                 confirmLabel="Sblocca"
                 cancelLabel="Annulla"
+                userId={currentUser?.id}
+                userDisplayName={[currentUser?.first_name, currentUser?.last_name].filter(Boolean).join(' ')}
+                userEmail={currentUser?.email ?? ''}
+                onBiometricSuccess={() => {
+                  setDataToolsLocked(false);
+                  setShowDataToolsPinPad(false);
+                  setDataToolsPin('');
+                }}
               />
             )}
           </SettingsAccordionSection>
@@ -2564,7 +2572,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
               <button
                 type="button"
                 onClick={handleConfirmImport}
-className="flex-1 rounded-xl bg-accent py-2.5 text-xs font-semibold uppercase text-white hover:bg-accent-hover active:bg-accent-hover/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="flex-1 rounded-xl bg-accent py-2.5 text-xs font-semibold uppercase text-white hover:bg-accent-hover active:bg-accent-hover/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               >
                 {t.confirm}
               </button>

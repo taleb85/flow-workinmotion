@@ -114,11 +114,11 @@ export default function AdminPanel() {
         <div className={`grid gap-4 mb-8 ${adminOnly ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-1'}`}>
           {adminOnly && (
             <>
-              <button onClick={handleImportClick} className="bg-black/15 backdrop-blur-xl rounded-[24px] p-5 border-2 border-white/30 hover:bg-black/25 transition-all active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+              <button onClick={handleImportClick} className="bg-black/15 backdrop-blur-xl rounded-[24px] p-5 border-2 border-white/30 hover:bg-black/25 transition-colors active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                 <Upload className="w-6 h-6 text-white mx-auto mb-2" />
                 <span className="text-white text-[11px] font-medium uppercase tracking-widest block font-sans">{t.restore}</span>
               </button>
-              <button onClick={handleExportJSON} className="bg-black/15 backdrop-blur-xl rounded-[24px] p-5 border-2 border-white/30 hover:bg-black/25 transition-all active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+              <button onClick={handleExportJSON} className="bg-black/15 backdrop-blur-xl rounded-[24px] p-5 border-2 border-white/30 hover:bg-black/25 transition-colors active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                 <Download className="w-6 h-6 text-white mx-auto mb-2" />
                 <span className="text-white text-[11px] font-medium uppercase tracking-widest block font-sans">{t.backup_json}</span>
               </button>
@@ -157,8 +157,8 @@ export default function AdminPanel() {
                 <div key={user.id} className={`p-5 flex items-center justify-between hover:bg-black/25 transition-colors ${user.status === 'suspended' ? 'opacity-50 grayscale' : ''} active:bg-black/80`}>
                   <div className="flex items-center space-x-5 flex-1">
                     <div className="flex flex-col space-y-1">
-                      <button onClick={() => reorderUsers(user.id, 'up')} disabled={index === 0} className="w-7 h-7 rounded-xl bg-black/15 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-black/25 disabled:opacity-20 transition-all active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronUp className="w-4 h-4 text-white" /></button>
-                      <button onClick={() => reorderUsers(user.id, 'down')} disabled={index === users.length - 1} className="w-7 h-7 rounded-xl bg-black/15 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-black/25 disabled:opacity-20 transition-all active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronDown className="w-4 h-4 text-white" /></button>
+                      <button onClick={() => reorderUsers(user.id, 'up')} disabled={index === 0} className="w-7 h-7 rounded-xl bg-black/15 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-black/25 disabled:opacity-20 transition-colors active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronUp className="w-4 h-4 text-white" /></button>
+                      <button onClick={() => reorderUsers(user.id, 'down')} disabled={index === users.length - 1} className="w-7 h-7 rounded-xl bg-black/15 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-black/25 disabled:opacity-20 transition-colors active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronDown className="w-4 h-4 text-white" /></button>
                     </div>
 
                     <div>
@@ -172,14 +172,14 @@ export default function AdminPanel() {
                   <div className="flex items-center space-x-3">
                     {canEdit && (
                       <>
-                        <button onClick={() => handleToggleStatus(user)} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-black/15 backdrop-blur-sm border-2 border-white/30 hover:bg-black/25 ${user.status === 'suspended' ? 'text-accent-light' : 'text-red-300'} active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]`}>
+                        <button onClick={() => handleToggleStatus(user)} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors bg-black/15 backdrop-blur-sm border-2 border-white/30 hover:bg-black/25 ${user.status === 'suspended' ? 'text-accent-light' : 'text-red-300'} active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]`}>
                           {user.status === 'suspended' ? <UserCheck className="w-5 h-5" /> : <UserX className="w-5 h-5" />}
                         </button>
-                        <button onClick={() => setEditingUser(user)} className="w-10 h-10 rounded-xl bg-black/15 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-black/25 text-white transition-all active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+                        <button onClick={() => setEditingUser(user)} className="w-10 h-10 rounded-xl bg-black/15 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-black/25 text-white transition-colors active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                           <Edit2 className="w-4 h-4" />
                         </button>
                         {adminOnly && (
-                          <button onClick={() => handleDeleteUser(user.id)} className="w-10 h-10 rounded-xl bg-black/15 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-red-500/30 text-white transition-all active:bg-red-500/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                          <button onClick={() => handleDeleteUser(user.id)} className="w-10 h-10 rounded-xl bg-black/15 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-red-500/30 text-white transition-colors active:bg-red-500/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         )}
@@ -212,8 +212,8 @@ export default function AdminPanel() {
                 <p className="text-white font-sans text-xs break-all text-center">{importFile?.name}</p>
               </div>
               <div className="flex space-x-3 pt-4">
-<button onClick={handleConfirmImport} className="flex-1 bg-red-600 text-white rounded-2xl py-4 font-medium uppercase tracking-widest text-xs transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">{t.confirm}</button>
-<button onClick={handleCancelImport} className="flex-1 bg-slate-200 text-white/80 rounded-2xl py-4 font-medium uppercase tracking-widest text-xs transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">{t.cancel}</button>
+<button onClick={handleConfirmImport} className="flex-1 bg-red-600 text-white rounded-2xl py-4 font-medium uppercase tracking-widest text-xs transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">{t.confirm}</button>
+<button onClick={handleCancelImport} className="flex-1 bg-slate-200 text-white/80 rounded-2xl py-4 font-medium uppercase tracking-widest text-xs transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">{t.cancel}</button>
               </div>
             </div>
           </div>

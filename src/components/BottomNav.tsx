@@ -330,21 +330,21 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                   onTouchMove={handleLongPressEnd}
                   title={buttonTitle}
                   aria-label={ariaLabel}
-                  className={`keep-white-glass flex ${id === 'profile' ? 'h-[46px] sm:h-[52px] px-2 sm:px-2.5 min-w-[46px] sm:min-w-[52px] lg:px-3 gap-2' : 'h-[46px] w-[46px] sm:h-[52px] sm:w-[52px]'} shrink-0 rounded-xl sm:rounded-2xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.97] items-center justify-center ${
-                    over
-                      ? isActive
-                        ? 'bg-white shadow-[0_0_6px_1px_rgba(0,26,128,0.22),0_0_14px_3px_rgba(51,102,204,0.12)] text-accent focus-visible:ring-accent/45 focus-visible:ring-offset-transparent'
-                        : 'bg-white/60 text-accent/55 hover:bg-white hover:text-accent focus-visible:ring-accent/45 focus-visible:ring-offset-transparent'
-                      : isActive
-                        ? 'bg-white/22 text-white focus-visible:ring-white/35 focus-visible:ring-offset-transparent'
-                        : 'bg-white/8 text-white/45 hover:bg-white/18 hover:text-white focus-visible:ring-white/35 focus-visible:ring-offset-transparent'
-                  }`}
+                  className={`keep-white-glass flex ${id === 'profile' ? 'h-[46px] sm:h-[52px] px-2 sm:px-2.5 min-w-[46px] sm:min-w-[52px] lg:px-3 gap-2' : 'h-[46px] w-[46px] sm:h-[52px] sm:w-[52px]'} shrink-0 rounded-xl sm:rounded-2xl transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 items-center justify-center ${
+ over
+ ? isActive
+ ? 'bg-white shadow-[0_0_6px_1px_rgba(0,26,128,0.22),0_0_14px_3px_rgba(51,102,204,0.12)] text-accent focus-visible:ring-accent/45 focus-visible:ring-offset-transparent'
+ : 'bg-white/60 text-accent/55 hover:bg-white hover:text-accent focus-visible:ring-accent/45 focus-visible:ring-offset-transparent'
+ : isActive
+ ? 'bg-white/22 text-white focus-visible:ring-white/35 focus-visible:ring-offset-transparent'
+ : 'bg-white/8 text-white/45 hover:bg-white/18 hover:text-white focus-visible:ring-white/35 focus-visible:ring-offset-transparent'
+ }`}
                 >
                   {showProfilePic ? (
                     <span
-                      className={`flex h-[22px] w-[22px] sm:h-6 sm:w-6 shrink-0 items-center justify-center overflow-hidden rounded-md transition-all duration-200 ${
-                        isActive ? 'opacity-100' : 'opacity-65'
-                      }`}
+                      className={`flex h-[22px] w-[22px] sm:h-6 sm:w-6 shrink-0 items-center justify-center overflow-hidden rounded-md transition-colors duration-200 ${
+ isActive ? 'opacity-100' : 'opacity-65'
+ }`}
                     >
                       <img
                         src={profileThumb}
@@ -357,9 +357,9 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                     </span>
                   ) : showProfileInitial ? (
                     <span
-                      className={`flex h-[22px] w-[22px] sm:h-6 sm:w-6 shrink-0 items-center justify-center overflow-hidden rounded-md text-[11px] sm:text-xs font-bold transition-all duration-200 ${
-                        over
-                          ? `bg-accent/10 ${isActive ? 'text-accent' : 'text-accent/65'}`
+                      className={`flex h-[22px] w-[22px] sm:h-6 sm:w-6 shrink-0 items-center justify-center overflow-hidden rounded-md text-[11px] sm:text-xs font-bold transition-colors duration-200 ${
+ over
+ ?`bg-accent/10 ${isActive ? 'text-accent' : 'text-accent/65'}`
                           : `bg-white/15 ${isActive ? 'text-white' : 'text-white/45'}`
                       }`}
                       aria-hidden
@@ -369,12 +369,12 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                   ) : (
                     <Icon
                       className={`h-[22px] w-[22px] sm:h-6 sm:w-6 flex-shrink-0 transition-[color,filter] duration-200 ${
-                        !over ? (isActive ? 'nav-icon-3d-active' : 'nav-icon-3d') : ''
-                      } ${
-                        over
-                          ? isActive ? 'text-accent' : 'text-accent/55'
-                          : isActive ? 'text-white' : 'text-white/45'
-                      }`}
+ !over ? (isActive ? 'nav-icon-3d-active' : 'nav-icon-3d') : ''
+ } ${
+ over
+ ? isActive ? 'text-accent' : 'text-accent/55'
+ : isActive ? 'text-white' : 'text-white/45'
+ }`}
                       strokeWidth={isActive ? 1.75 : 1.2}
                       aria-hidden
                     />
@@ -392,16 +392,16 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                 onClick={() => { triggerHapticFeedback('click'); onTabChange('settings'); }}
                 title="Admin"
                 aria-label="Scheda Admin"
-                className={`keep-white-glass flex h-[46px] w-[46px] sm:h-[52px] sm:w-[52px] shrink-0 rounded-xl sm:rounded-2xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent active:scale-[0.97] items-center justify-center ${
-                  activeTab === 'settings'
-                    ? 'bg-white/22 text-white'
-                    : 'bg-white/8 text-white/45 hover:bg-white/18 hover:text-white'
-                }`}
+                className={`keep-white-glass flex h-[46px] w-[46px] sm:h-[52px] sm:w-[52px] shrink-0 rounded-xl sm:rounded-2xl transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent items-center justify-center ${
+ activeTab === 'settings'
+ ? 'bg-white/22 text-white'
+ : 'bg-white/8 text-white/45 hover:bg-white/18 hover:text-white'
+ }`}
               >
                 <ShieldCheck
                   className={`h-[22px] w-[22px] sm:h-6 sm:w-6 flex-shrink-0 transition-[color,filter] duration-200 ${
-                    activeTab === 'settings' ? 'nav-icon-3d-active text-white' : 'nav-icon-3d text-white/45'
-                  }`}
+ activeTab === 'settings' ? 'nav-icon-3d-active text-white' : 'nav-icon-3d text-white/45'
+ }`}
                   strokeWidth={activeTab === 'settings' ? 1.75 : 1.2}
                   aria-hidden
                 />
@@ -463,16 +463,16 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                   key={u.id}
                   onClick={() => handleSelectUserForSwitch(u)}
                   className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-colors text-left ${
-                    currentUser?.id === u.id 
-                      ? 'bg-accent/12 text-accent ring-1 ring-accent/20' 
-                      : 'hover:bg-white/8 text-white/80 hover:text-white'
-                  } active:text-white'`}
+ currentUser?.id === u.id 
+ ? 'bg-accent/12 text-accent ring-1 ring-accent/20' 
+ : 'hover:bg-white/8 text-white/80 hover:text-white'
+ } active:text-white'`}
                 >
                   <div className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-sm transition-transform duration-200 ${
-                    currentUser?.id === u.id
-                      ? 'border border-accent/40 bg-accent/15 text-accent ring-1 ring-accent/30'
-                      : 'border border-neutral-500'
-                  }`}
+ currentUser?.id === u.id
+ ? 'border border-accent/40 bg-accent/15 text-accent ring-1 ring-accent/30'
+ : 'border border-neutral-500'
+ }`}
                   style={currentUser?.id !== u.id ? { background: 'rgba(15, 35, 90, 0.82)', color: 'rgba(255,255,255,0.7)' } : undefined}
                   >
                     {uThumb ? (
@@ -527,6 +527,18 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
             isLoading={false}
             confirmLabel={t.confirm}
             cancelLabel={t.cancel}
+            userId={pendingSwitchUser?.id}
+            userDisplayName={[pendingSwitchUser?.first_name, pendingSwitchUser?.last_name].filter(Boolean).join(' ')}
+            userEmail={pendingSwitchUser?.email ?? ''}
+            onBiometricSuccess={async () => {
+              const actor = switchingFromUser ?? currentUser;
+              if (actor && isAdminOnly(actor)) setImpersonating(pendingSwitchUser, actor);
+              setCurrentUser(pendingSwitchUser);
+              setIsQuickSwitchOpen(false);
+              setPendingSwitchUser(null);
+              setSwitchPin('');
+              void silentRefreshData?.();
+            }}
             leftActionButton={
               hasPinUnlockCredential(pendingSwitchUser.id) ? (
                 <button
@@ -543,7 +555,7 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                       void silentRefreshData?.();
                     }
                   }}
-                  className="flex flex-col items-center justify-center gap-1 text-[#455a3f] active:scale-95 transition-transform"
+                  className="flex flex-col items-center justify-center gap-1 text-[#455a3f] transition-transform"
                 >
                   <Fingerprint className="w-6 h-6" />
                 </button>

@@ -65,7 +65,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
           <button
             type="button"
             onClick={this.handleRetry}
-            className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-xs font-semibold text-white/80 transition-all hover:bg-white/20 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-xs font-semibold text-white/80 transition-colors hover:bg-white/20"
           >
             <RotateCw className="h-3.5 w-3.5" strokeWidth={2} />
             Riprova

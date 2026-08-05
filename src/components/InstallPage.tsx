@@ -56,7 +56,7 @@ function DeviceButton({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 text-left transition-all active:scale-[0.98]"
+      className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 text-left transition-colors"
       style={{
         background: 'rgba(255,255,255,0.05)',
         border: '1px solid rgba(255,255,255,0.12)',
@@ -84,7 +84,7 @@ function OsButton({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center justify-center gap-3 rounded-xl py-4 font-semibold text-[0.95rem] transition-all duration-200 active:scale-[0.97]"
+      className="w-full flex items-center justify-center gap-3 rounded-xl py-4 font-semibold text-[0.95rem] transition-colors duration-200"
       style={{
         background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
         color: '#fff',
@@ -166,7 +166,7 @@ export default function InstallPage() {
       <button
         type="button"
         onClick={handleContinue}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 mt-6 text-sm font-semibold transition-all active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 mt-6 text-sm font-semibold transition-colors"
         style={{
           background: 'rgba(102,153,255,0.2)',
           border: '1px solid rgba(102,153,255,0.4)',
@@ -207,7 +207,7 @@ export default function InstallPage() {
       <button
         type="button"
         onClick={handleBackToDevices}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-all active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-colors"
         style={{
           background: 'transparent',
           border: '1px solid rgba(255,255,255,0.10)',
@@ -220,7 +220,7 @@ export default function InstallPage() {
       <button
         type="button"
         onClick={handleContinue}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-all active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-colors"
         style={{
           background: 'rgba(102,153,255,0.2)',
           border: '1px solid rgba(102,153,255,0.4)',
@@ -261,7 +261,7 @@ export default function InstallPage() {
       <button
         type="button"
         onClick={handleBackToDevices}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-all active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-colors"
         style={{
           background: 'transparent',
           border: '1px solid rgba(255,255,255,0.10)',
@@ -274,7 +274,7 @@ export default function InstallPage() {
       <button
         type="button"
         onClick={handleContinue}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-all active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-colors"
         style={{
           background: 'rgba(102,153,255,0.2)',
           border: '1px solid rgba(102,153,255,0.4)',
@@ -314,7 +314,7 @@ export default function InstallPage() {
       <button
         type="button"
         onClick={handleBackToDevices}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mt-4 mb-3 text-sm font-medium transition-all active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mt-4 mb-3 text-sm font-medium transition-colors"
         style={{
           background: 'transparent',
           border: '1px solid rgba(255,255,255,0.10)',
@@ -327,7 +327,7 @@ export default function InstallPage() {
       <button
         type="button"
         onClick={handleContinue}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-all active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-colors"
         style={{
           background: 'rgba(102,153,255,0.2)',
           border: '1px solid rgba(102,153,255,0.4)',
@@ -368,7 +368,7 @@ export default function InstallPage() {
       <button
         type="button"
         onClick={handleBackFromOs}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-all active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-colors"
         style={{
           background: 'transparent',
           border: '1px solid rgba(255,255,255,0.10)',
@@ -381,7 +381,7 @@ export default function InstallPage() {
       <button
         type="button"
         onClick={handleContinue}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-all active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-colors"
         style={{
           background: 'rgba(102,153,255,0.2)',
           border: '1px solid rgba(102,153,255,0.4)',
@@ -422,7 +422,7 @@ export default function InstallPage() {
       <button
         type="button"
         onClick={handleBackFromOs}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-all active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-colors"
         style={{
           background: 'transparent',
           border: '1px solid rgba(255,255,255,0.10)',
@@ -435,7 +435,7 @@ export default function InstallPage() {
       <button
         type="button"
         onClick={handleContinue}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-all active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-colors"
         style={{
           background: 'rgba(102,153,255,0.2)',
           border: '1px solid rgba(102,153,255,0.4)',

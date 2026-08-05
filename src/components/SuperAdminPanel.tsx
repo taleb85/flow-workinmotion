@@ -106,7 +106,7 @@ function SuperAdminPinGate({ onUnlocked }: { onUnlocked: () => void }) {
         {Array.from({ length: SUPER_ADMIN_PIN.length }).map((_, i) => (
           <div
             key={i}
-            className="w-3 h-3 rounded-full transition-all duration-150"
+            className="w-3 h-3 rounded-full transition-colors duration-150"
             style={i < digits.length
               ? { background: '#0a0a0c', boxShadow: error ? '0 0 8px rgba(248,113,113,0.5)' : '0 0 8px rgba(107,107,107,0.55)' }
               : { background: 'rgba(10, 10, 12, 0.85)' }
@@ -124,9 +124,9 @@ function SuperAdminPinGate({ onUnlocked }: { onUnlocked: () => void }) {
             <button
               key={i}
               onClick={() => isDelete ? handleDelete() : handleDigit(key)}
-              className={`h-14 rounded-2xl text-lg font-bold transition-all active:scale-95 ${
-                isDelete ? 'bg-transparent text-white/40 hover:text-white/70' : 'text-white'
-              }`}
+              className={`h-14 rounded-2xl text-lg font-bold transition-colors ${
+ isDelete ? 'bg-transparent text-white/40 hover:text-white/70' : 'text-white'
+ }`}
               style={isDelete ? undefined : {
                 background: '#0a0a0c',
                 border: '1px solid rgba(255,255,255,0.10)',
@@ -270,7 +270,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
             pattern="[a-z0-9\-]+"
             className="flex-1 rounded-xl border border-neutral-500 bg-white/8 px-3 py-2.5 text-base font-mono text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40 transition"
           />
-<button type="button" onClick={() => { setSlugManual(false); setSlug(slugify(name)); }} className="text-xs text-accent hover:underline shrink-0 active:brightness-95 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">Auto</button>
+<button type="button" onClick={() => { setSlugManual(false); setSlug(slugify(name)); }} className="text-xs text-accent hover:underline shrink-0 active:brightness-95 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">Auto</button>
         </div>
         <p className="text-[11px] text-white/40">Sarà il sottodominio: <span className="font-mono">{slug || '…'}.tuodominio.com</span></p>
       </div>
@@ -305,12 +305,12 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
         <button
           type="submit"
           disabled={saving || !name.trim() || !slug.trim()}
-className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-accent-hover/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-accent-hover/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
         >
           <Check className="w-4 h-4" />
           {saving ? 'Salvataggio…' : 'Salva'}
         </button>
-<button type="button" onClick={onCancel} className="rounded-xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white/80 hover:bg-white/14 transition active:bg-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+<button type="button" onClick={onCancel} className="rounded-xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white/80 hover:bg-white/14 transition active:bg-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -408,14 +408,14 @@ function NewAdminCredentialsModal({ creds, onClose }: { creds: NewAdminCredentia
         <div className="flex gap-2">
           <button
             onClick={handleCopy}
-className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-neutral-500 py-2.5 text-sm font-semibold text-white/80 hover:bg-white/5 active:bg-white/10 transition transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-neutral-500 py-2.5 text-sm font-semibold text-white/80 hover:bg-white/5 active:bg-white/10 transition transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           >
             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
             {copied ? 'Copiato!' : 'Copia'}
           </button>
           <button
             onClick={onClose}
-className="flex-1 rounded-xl bg-accent py-2.5 text-sm font-bold text-white hover:bg-accent-hover active:brightness-95 transition transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="flex-1 rounded-xl bg-accent py-2.5 text-sm font-bold text-white hover:bg-accent-hover active:brightness-95 transition transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             Ho salvato
           </button>
@@ -628,7 +628,7 @@ function SuperAdminPanelInner() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => { setShowImport(!showImport); setShowForm(false); setEditingTenant(null); }}
-              className={`flex items-center gap-1.5 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-sm font-bold active:scale-95 transition ${showImport ? 'bg-amber-100 text-amber-700' : 'bg-white/10 text-white/55 hover:bg-white/14 hover:text-white/90'}`}
+              className={`flex items-center gap-1.5 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-sm font-bold transition ${showImport ? 'bg-amber-100 text-amber-700' : 'bg-white/10 text-white/55 hover:bg-white/14 hover:text-white/90'}`}
             >
               <ChevronRight className="w-4 h-4 rotate-90" />
               <span className="hidden sm:inline">Importa storico</span>
@@ -636,7 +636,7 @@ function SuperAdminPanelInner() {
             </button>
             <button
               onClick={() => { setShowForm(true); setEditingTenant(null); setShowImport(false); }}
-              className="flex items-center gap-1.5 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-sm font-bold text-white active:scale-95 transition"
+              className="flex items-center gap-1.5 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-sm font-bold text-white transition"
               style={{ background: '#0a0a0c' }}
             >
               <Plus className="w-4 h-4" />
@@ -647,7 +647,7 @@ function SuperAdminPanelInner() {
               onClick={handleLogout}
               title="Esci da Super Admin"
               aria-label="Esci da Super Admin"
-className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-red-50 hover:text-red-500 text-white/40 transition active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-red-50 hover:text-red-500 text-white/40 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               <LogOut className="w-4 h-4" aria-hidden />
             </button>
@@ -749,7 +749,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                             <div className="flex items-center gap-1 mt-1">
                               <Globe className="w-3 h-3 text-white/40 shrink-0" />
                               <span className="text-xs font-mono text-white/40 truncate" title={t.slug}>{t.slug}</span>
-<button onClick={() => copySlug(t.slug)} className="text-slate-300 hover:text-[#2255BB] transition p-0.5 shrink-0 active:text-[#2255BB] transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" title="Copia slug">
+<button onClick={() => copySlug(t.slug)} className="text-slate-300 hover:text-[#2255BB] transition p-0.5 shrink-0 active:text-[#2255BB] transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" title="Copia slug">
                                 <Copy className="w-3 h-3" />
                               </button>
                             </div>
@@ -780,36 +780,36 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/10">
                           <button
                             onClick={() => setExpandedSettings(expandedSettings === t.id ? null : t.id)}
-                            className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition active:scale-95 ${
-                              expandedSettings === t.id
-                                ? 'bg-brand-mid/10 text-[#2255BB]'
-                                : 'bg-white/10 text-white/55 hover:bg-brand-mid/8 hover:text-[#2255BB]'
-                            }`}
+                            className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition ${
+ expandedSettings === t.id
+ ? 'bg-brand-mid/10 text-[#2255BB]'
+ : 'bg-white/10 text-white/55 hover:bg-brand-mid/8 hover:text-[#2255BB]'
+ }`}
                           >
                             <Settings className="w-3.5 h-3.5" />
                             Impostazioni
                           </button>
                           <button
                             onClick={() => { setEditingTenant(t); setShowForm(false); setExpandedSettings(null); }}
-                            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 bg-white/10 text-white/55 hover:bg-white/14 hover:text-white/90 text-xs font-semibold transition active:scale-95"
+                            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 bg-white/10 text-white/55 hover:bg-white/14 hover:text-white/90 text-xs font-semibold transition"
                           >
                             <Pencil className="w-3.5 h-3.5" />
                             Modifica
                           </button>
                           <button
                             onClick={() => toggleActive(t)}
-                            className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition active:scale-95 ${
-                              t.is_active
-                                ? 'bg-brand-mid/10 text-[#2255BB] hover:bg-red-50 hover:text-red-500'
-                                : 'bg-white/10 text-white/40 hover:bg-brand-mid/8 hover:text-[#2255BB]'
-                            }`}
+                            className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition ${
+ t.is_active
+ ? 'bg-brand-mid/10 text-[#2255BB] hover:bg-red-50 hover:text-red-500'
+ : 'bg-white/10 text-white/40 hover:bg-brand-mid/8 hover:text-[#2255BB]'
+ }`}
                           >
                             {t.is_active ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
                             {t.is_active ? 'Attiva' : 'Inattiva'}
                           </button>
                           <button
                             onClick={() => setConfirmDeleteId(confirmDeleteId === t.id ? null : t.id)}
-                            className="flex items-center justify-center rounded-xl py-2 px-2.5 bg-white/10 text-white/40 hover:bg-red-50 hover:text-red-500 transition active:scale-95"
+                            className="flex items-center justify-center rounded-xl py-2 px-2.5 bg-white/10 text-white/40 hover:bg-red-50 hover:text-red-500 transition"
                             title="Elimina sede"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef, memo, type CSSProperties } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { User as UserIcon, Lock, Loader2, Eye, EyeOff, Fingerprint } from 'lucide-react';
@@ -96,6 +96,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const [staffName, setStaffName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [pinFocused, setPinFocused] = useState(false);
   const [error, setError] = useState('');
   const [deviceSuccess, setDeviceSuccess] = useState('');
   /** Evento install PWA nativo (Chrome/Android) — catturato e riesposto come bottone. */
@@ -296,6 +297,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       })();
     } else {
       setError('PIN non corretto. Riprova.');
+      setPassword('');
+      requestAnimationFrame(() => pinInputRef.current?.focus());
     }
   }, [users, pendingCreds, finalizeSession, maybeRegisterDeviceAfterPinLogin]);
 
@@ -428,9 +431,9 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
     return () => cancelAnimationFrame(id);
   }, [resolvedUser, showForm, isLoading, password.length]);
 
-  /** Auto‑login quando il PIN di 4 cifre corrisponde */
+  /** Auto‑login quando il PIN raggiunge 4 cifre (corretto o errato, per dare feedback immediato) */
   useEffect(() => {
-    if (!showForm || !resolvedUser || !pinMatches) return;
+    if (!showForm || !resolvedUser) return;
     if (password.length !== 4) return;
     if (isLoading || deviceLoading || linkDeviceLoading) return;
     if (autoLoginInFlightRef.current) return;
@@ -442,7 +445,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       clearTimeout(id);
       autoLoginInFlightRef.current = false;
     };
-  }, [password, resolvedUser, pinMatches, showForm, isLoading, deviceLoading, linkDeviceLoading, handleLogin]);
+  }, [password, resolvedUser, showForm, isLoading, deviceLoading, linkDeviceLoading, handleLogin]);
 
   const runBiometricLogin = useCallback(
     async (opts?: { silent?: boolean }): Promise<boolean> => {
@@ -569,7 +572,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
         {/* Schermata iniziale — identica al boot screen AppProvider */}
         {!showForm && (
         <div
-          className="relative flex flex-col items-center select-none"
+          className="fixed inset-0 flex flex-col items-center justify-center select-none cursor-pointer"
+          onClick={() => { if (!showForm) setShowForm(true); }}
           onPointerDown={() => { if (!showForm) setShowForm(true); }}
         >
           <button
@@ -650,14 +654,15 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                 placeholder={t.login_name_ph ?? 'Nome utente'}
                 aria-label={t.login_name_label}
                 autoComplete="name"
-                className="w-full pl-10 pr-4 py-3.5 rounded-2xl text-white text-base uppercase placeholder:normal-case placeholder:text-white/35 placeholder:text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-all"
-                style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid #525252' }}
+                className="w-full pl-10 pr-4 py-3.5 rounded-2xl text-white text-base uppercase placeholder:normal-case placeholder:text-white/35 placeholder:text-base focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors"
+                style={{ WebkitAppearance: 'none', appearance: 'none', backgroundColor: 'rgba(255,255,255,0.09)', border: '1px solid #525252', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
               />
             </div>
 
             {/* Password / PIN */}
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" aria-hidden />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 z-10" aria-hidden />
+              {/* Input nascosto per tastiera + PIN visivo a pallini */}
               <input
                 type="text"
                 inputMode="numeric"
@@ -666,6 +671,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                 autoComplete="current-password"
                 autoCorrect="off"
                 spellCheck={false}
+                maxLength={4}
                 value={password}
                 onChange={(e) => {
                   const digits = e.target.value.replace(/\D/g, '');
@@ -673,18 +679,37 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                   setError('');
                 }}
                 onKeyDown={handleKeyDown}
+                onFocus={() => setPinFocused(true)}
+                onBlur={() => setPinFocused(false)}
                 ref={pinInputRef}
-                placeholder={t.login_password_label ?? 'Password'}
                 aria-label={t.login_password_label}
-                style={!showPassword
-                  ? ({ WebkitTextSecurity: 'disc', background: 'rgba(255,255,255,0.09)', border: '1px solid #525252' } as CSSProperties)
-                  : { background: 'rgba(255,255,255,0.09)', border: '1px solid #525252' }}
-                className="w-full pl-10 pr-10 py-3.5 rounded-2xl text-white text-base placeholder:text-white/35 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-all"
+                className="absolute inset-0 opacity-0 z-20 cursor-default pointer-events-none"
+                style={{ caretColor: 'transparent' }}
               />
+              {/* Contenitore visivo */}
+              <div
+                className={`w-full pl-10 pr-10 py-3.5 rounded-2xl flex items-center justify-center gap-5 transition-all cursor-text ${pinFocused ? 'ring-2 ring-white/50' : ''}`}
+                style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid #525252' }}
+                onClick={() => pinInputRef.current?.focus()}
+              >
+                {showPassword ? (
+                  <span className="text-white text-base font-bold tracking-[0.3em]">{password || '\u00A0'}</span>
+                ) : (
+                  [0, 1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="w-4 h-4 rounded-full transition-colors duration-200"
+                      style={password.length > i
+                        ? { background: '#ffffff', boxShadow: '0 0 10px 3px rgba(255,255,255,0.60)' }
+                        : { background: 'rgba(255,255,255,0.35)' }}
+                    />
+                  ))
+                )}
+              </div>
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/35 hover:text-white/70 transition-colors active:text-white/70"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/35 hover:text-white/70 transition-colors active:text-white/70 z-10"
                 tabIndex={-1}
                 aria-label={showPassword ? t.pin_toggle_hide : t.pin_toggle_show}
                 aria-pressed={showPassword}
@@ -722,7 +747,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               type="button"
               onClick={handleLogin}
               disabled={!staffName.trim() || !password.trim() || isLoading || deviceLoading || linkDeviceLoading}
-              className="w-full py-3.5 rounded-2xl text-white font-semibold text-sm active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+              className="w-full py-3.5 rounded-2xl text-white font-semibold text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
               style={{ background: '#525252', border: '1px solid #6b6b6b' }}
             >
               {isLoading ? (
@@ -749,7 +774,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                     type="button"
                     onClick={handleDeviceLogin}
                     disabled={deviceLoading || isLoading || linkDeviceLoading}
-                    className="w-full py-3.5 rounded-2xl text-white/75 font-medium text-sm active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full py-3.5 rounded-2xl text-white/75 font-medium text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid #525252' }}
                   >
                     {deviceLoading ? (

@@ -245,8 +245,10 @@ const baseFr: Record<string, string> = {
   sync_lock_device_register_failed: 'Impossible de lier l’appareil. Réessayez.',
   pin_for_profile_named: 'PIN pour {name}',
   post_unlock_restart_title: 'Mise à jour en cours',
-  post_unlock_restart_body: 'Les données du profil ont été enregistrées. L’application va redémarrer sous peu…',
+  post_unlock_restart_body: 'Les données du profil ont été enregistrées. L\'application va redémarrer sous peu…',
 
+  messages_tab: 'Messages',
+  notifications_tab: 'Notifications',
   messages_title: 'Messages',
   messages_new_chat: 'Nouvelle conversation',
   messages_new_conversation: 'Nouvelle conversation',

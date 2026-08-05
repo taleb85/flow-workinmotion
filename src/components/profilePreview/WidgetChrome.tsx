@@ -40,8 +40,8 @@ export const WidgetChrome = memo(function WidgetChrome({
           >
             <span
               className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white toggle-knob shadow transition-transform ${
-                visible ? 'translate-x-5' : 'translate-x-0'
-              }`}
+ visible ? 'translate-x-5' : 'translate-x-0'
+ }`}
             />
           </button>
         </div>

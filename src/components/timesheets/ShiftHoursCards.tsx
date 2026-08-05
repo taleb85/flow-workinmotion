@@ -187,12 +187,12 @@ export function ShiftHoursCards({
         {/* Card Timbrato (GLASSMORPHISM PREMIUM) */}
         <div
           className={`px-4 py-4 min-h-[130px] rounded-2xl ${
-            s.punched && s.isCrossDay
-              ? 'bg-red-500/10'
-              : s.punched
-                ? ''
-                : 'bg-white/4 animate-pulse'
-          }`}
+ s.punched && s.isCrossDay
+ ? 'bg-red-500/10'
+ : s.punched
+ ? ''
+ : 'bg-white/4 animate-pulse'
+ }`}
           style={s.punched && !s.isCrossDay ? { 
             background: 'var(--bg-surface)',
             border: '1px solid var(--border-color)',
@@ -320,12 +320,12 @@ export function ShiftHoursCards({
         <div>
         <label
           className={`flex min-h-[44px] cursor-pointer items-center gap-2.5 rounded-xl border-2 px-3 py-2.5 transition-colors ${
-            deductBreakSaving ? 'pointer-events-none opacity-50' : ''
-          } ${
-            fullShift.deduct_break !== false
-              ? 'border-white/20 bg-white/8 hover:bg-white/12'
-              : 'border-white/12 bg-white/5 hover:bg-white/8'
-          }`}
+ deductBreakSaving ? 'pointer-events-none opacity-50' : ''
+ } ${
+ fullShift.deduct_break !== false
+ ? 'border-white/20 bg-white/8 hover:bg-white/12'
+ : 'border-white/12 bg-white/5 hover:bg-white/8'
+ }`}
         >
           <div className="relative shrink-0 mt-0.5">
             <input
@@ -338,8 +338,8 @@ export function ShiftHoursCards({
             <div className={`h-5 w-9 rounded-full transition-colors duration-200 ${fullShift.deduct_break !== false ? 'bg-accent' : 'bg-white/20'}`} />
             <div
               className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                fullShift.deduct_break !== false ? 'translate-x-4' : 'translate-x-0'
-              }`}
+ fullShift.deduct_break !== false ? 'translate-x-4' : 'translate-x-0'
+ }`}
             />
           </div>
           <div className="min-w-0 flex-1">
@@ -365,12 +365,12 @@ export function ShiftHoursCards({
                       htmlFor={`wst-deduct-rule-${s.id}-${it.ruleId}`}
                       aria-label={it.title}
                       className={`flex min-h-[40px] cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 transition-colors ${
-                        deductBreakSaving ? 'pointer-events-none opacity-50' : ''
-                      } ${
-                        !ruleExclusion.has(it.ruleId)
-                          ? 'border-white/18 bg-white/6 hover:bg-white/10'
-                          : 'border-white/10 bg-white/4 hover:bg-white/7'
-                      }`}
+ deductBreakSaving ? 'pointer-events-none opacity-50' : ''
+ } ${
+ !ruleExclusion.has(it.ruleId)
+ ? 'border-white/18 bg-white/6 hover:bg-white/10'
+ : 'border-white/10 bg-white/4 hover:bg-white/7'
+ }`}
                     >
                       <div className="relative shrink-0">
                         <input
@@ -386,20 +386,20 @@ export function ShiftHoursCards({
                         />
                         <div
                           className={`h-5 w-9 rounded-full transition-colors duration-200 ${
-                            !ruleExclusion.has(it.ruleId) ? 'bg-accent' : 'bg-white/20'
-                          }`}
+ !ruleExclusion.has(it.ruleId) ? 'bg-accent' : 'bg-white/20'
+ }`}
                         />
                         <div
                           className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                            !ruleExclusion.has(it.ruleId) ? 'translate-x-4' : 'translate-x-0'
-                          }`}
+ !ruleExclusion.has(it.ruleId) ? 'translate-x-4' : 'translate-x-0'
+ }`}
                         />
                       </div>
                       <div className="flex min-w-0 flex-1 items-baseline justify-between gap-2 tabular-nums">
                         <span
                           className={`text-[11px] font-medium ${
-                            !ruleExclusion.has(it.ruleId) ? 'text-white/85' : 'text-white/45 line-through'
-                          }`}
+ !ruleExclusion.has(it.ruleId) ? 'text-white/85' : 'text-white/45 line-through'
+ }`}
                         >
                           {it.title}
                         </span>
@@ -458,12 +458,12 @@ export function ShiftHoursCards({
           onAutoBreakChange && (
           <label
             className={`flex min-h-[44px] cursor-pointer items-center gap-2.5 rounded-xl border-2 px-3 py-2.5 transition-colors ${
-              deductBreakSaving ? 'pointer-events-none opacity-50' : ''
-            } ${
-              autoSubChecked
-                ? 'border-white/20 bg-white/8 hover:bg-white/12'
-                : 'border-white/12 bg-white/5 hover:bg-white/8'
-            }`}
+ deductBreakSaving ? 'pointer-events-none opacity-50' : ''
+ } ${
+ autoSubChecked
+ ? 'border-white/20 bg-white/8 hover:bg-white/12'
+ : 'border-white/12 bg-white/5 hover:bg-white/8'
+ }`}
           >
             <div className="relative shrink-0 mt-0.5">
               <input
@@ -476,8 +476,8 @@ export function ShiftHoursCards({
               <div className={`h-5 w-9 rounded-full transition-colors duration-200 ${autoSubChecked ? 'bg-accent' : 'bg-white/20'}`} />
               <div
                 className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                  autoSubChecked ? 'translate-x-4' : 'translate-x-0'
-                }`}
+ autoSubChecked ? 'translate-x-4' : 'translate-x-0'
+ }`}
               />
             </div>
             <div className="min-w-0 flex-1">
@@ -487,8 +487,8 @@ export function ShiftHoursCards({
                     <li
                       key={`${it.title}-${it.minutes}`}
                       className={`flex flex-wrap items-baseline justify-between gap-x-2 text-xs font-semibold tabular-nums ${
-                        autoSubChecked ? 'text-white' : 'text-white/70'
-                      }`}
+ autoSubChecked ? 'text-white' : 'text-white/70'
+ }`}
                     >
                       <span className="min-w-0 font-semibold text-left">{it.title}</span>
                       <span>−{fmtBreakDeductionShort(it.minutes)}</span>
@@ -498,8 +498,8 @@ export function ShiftHoursCards({
               ) : (
                 <p
                   className={`flex flex-wrap items-baseline gap-x-1.5 text-xs font-semibold ${
-                    autoSubChecked ? 'text-white' : 'text-white/70'
-                  }`}
+ autoSubChecked ? 'text-white' : 'text-white/70'
+ }`}
                 >
                   <span>{t.ts_deduct_break_auto}</span>
                   <span className="tabular-nums">−{fmtBreakDeductionShort(defaultAutoBreakMinutes)}</span>

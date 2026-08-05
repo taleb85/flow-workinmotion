@@ -185,7 +185,7 @@ function MyTimesheetSection({
               key={wIdx}
               type="button"
               onClick={() => toggleWeek(wIdx)}
-              className="w-full flex items-center justify-between rounded-2xl border border-neutral-500 px-4 py-3 text-left transition-all hover:border-white/20 active:brightness-95"
+              className="w-full flex items-center justify-between rounded-2xl border border-neutral-500 px-4 py-3 text-left transition-colors hover:border-white/20 active:brightness-95"
               style={cardBg}
             >
               <div className="flex flex-col gap-0.5">
@@ -250,13 +250,13 @@ function MyTimesheetSection({
                         {dayLetters[i]}
                       </span>
                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold ${
-                        isToday_ ? 'bg-white/20 text-white' : 'text-white/55'
-                      }`}>
+ isToday_ ? 'bg-white/20 text-white' : 'text-white/55'
+ }`}>
                         {format(day, 'd')}
                       </div>
-                      <div className={`w-full rounded-lg flex flex-col items-center justify-center py-1.5 px-0.5 min-h-[38px] transition-all ${blockCls} ${
-                        isSelected && !plannedOnly ? 'ring-2 ring-white/40 ring-offset-1' : ''
-                      }`}>
+                      <div className={`w-full rounded-lg flex flex-col items-center justify-center py-1.5 px-0.5 min-h-[38px] transition-colors ${blockCls} ${
+ isSelected && !plannedOnly ? 'ring-2 ring-white/40 ring-offset-1' : ''
+ }`}>
                         {shiftCount > 0 && (
                           <span className="text-[13px] font-black text-white leading-none drop-shadow-sm">
                             {shiftCount}
@@ -289,7 +289,7 @@ function MyTimesheetSection({
                     else { toggleWeek(wIdx); }
                   }}
                   aria-label={isOpen ? 'Comprimi' : 'Espandi'}
-                  className="flex items-center gap-1 px-2 h-7 rounded-lg border transition-all text-[11px] font-black uppercase tracking-widest border-white/20 text-white/80"
+                  className="flex items-center gap-1 px-2 h-7 rounded-lg border transition-colors text-[11px] font-black uppercase tracking-widest border-white/20 text-white/80"
                   style={{ background: 'rgba(15, 35, 90, 0.82)' }}
                 >
                   <span>{isDayInThisWeek ? (t.all ?? 'Tutti') : isOpen ? (t.collapse ?? 'Comprimi') : (t.ts_period_week ?? 'Espandi')}</span>
@@ -324,10 +324,10 @@ function MyTimesheetSection({
                         return (
                           <div key={shift.id}
                             className={`flex items-center justify-between rounded-xl px-3 py-2.5 mb-1 border shadow-sm ${
-                              isAbsent
-                                ? 'border-red-500/30 bg-red-500/15'
-                                : 'border-neutral-500'
-                            }`}
+ isAbsent
+ ? 'border-red-500/30 bg-red-500/15'
+ : 'border-neutral-500'
+ }`}
                             style={isAbsent ? undefined : cardBg}
                           >
                             <div className="flex flex-col gap-0.5">
@@ -451,8 +451,8 @@ function TeamTimesheetSection({
             >
               <div className="flex items-center gap-2 min-w-0">
                 <span className={`text-[11px] font-black uppercase tracking-widest truncate ${
-                  isToday_ ? 'text-white' : 'text-white/55'
-                }`}>
+ isToday_ ? 'text-white' : 'text-white/55'
+ }`}>
                   {format(day, 'EEE d MMM', { locale })}
                 </span>
                 {isToday_ && <span className="h-1.5 w-1.5 rounded-full bg-white/60 shrink-0" />}
@@ -481,18 +481,18 @@ function TeamTimesheetSection({
                   return (
                     <div key={shift.id}
                       className={`flex items-center justify-between rounded-lg px-2.5 py-2 border ${
-                        isAbsent
-                          ? 'border-red-500/30 bg-red-500/15'
-                          : 'border-neutral-500'
-                      }`}
+ isAbsent
+ ? 'border-red-500/30 bg-red-500/15'
+ : 'border-neutral-500'
+ }`}
                       style={isAbsent ? undefined : cardBg}
                     >
                       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                         <p className="text-[11px] font-black uppercase tracking-wide text-white/85 truncate" title={fullName}>{fullName}
                         </p>
                         <p className={`font-black tabular-nums text-sm leading-none ${
-                          isAbsent ? 'text-white/40 line-through' : 'text-white'
-                        }`}>
+ isAbsent ? 'text-white/40 line-through' : 'text-white'
+ }`}>
                           {shift.start_time.slice(0, 5)} – {shift.end_time?.slice(0, 5) ?? '…'}
                         </p>
                         {!plannedOnly && !isAbsent && (pIn || pOut) && (
@@ -640,11 +640,11 @@ export default function ManagementMobileTimesheet({
                   key={v}
                   type="button"
                   onClick={() => setTsView(v)}
-                  className={`h-8 px-4 rounded-full text-[11px] font-extrabold uppercase tracking-wider transition-all ${
-                    active
-                      ? 'bg-white/15 text-white shadow-sm'
-                      : 'bg-white/8 border border-white/20 text-white/60 hover:border-white/35 hover:text-white/90'
-                  } active:text-white/90`}
+                  className={`h-8 px-4 rounded-full text-[11px] font-extrabold uppercase tracking-wider transition-colors ${
+ active
+ ? 'bg-white/15 text-white shadow-sm'
+ : 'bg-white/8 border border-white/20 text-white/60 hover:border-white/35 hover:text-white/90'
+ } active:text-white/90`}
                 >
                   {label}
                 </button>

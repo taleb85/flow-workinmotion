@@ -540,10 +540,10 @@ export default memo(function Statistics() {
                       type="button"
                       onClick={() => { setStatsTab('current_week'); setNavOffset(0); }}
                       className={`ui-toolbar-tab !px-2.5 !text-xs shrink-0 ${
-                        statsTab === 'current_week'
-                          ? 'bg-white/20 text-white font-extrabold'
-                          : 'hover:bg-white/10'
-                      } active:bg-white/15`}
+ statsTab === 'current_week'
+ ? 'bg-white/20 text-white font-extrabold'
+ : 'hover:bg-white/10'
+ } active:bg-white/15`}
                       style={statsTab !== 'current_week' ? { color: 'rgba(255,255,255,0.80)' } : {}}
                     >
                       {t.view_week}
@@ -552,10 +552,10 @@ export default memo(function Statistics() {
                       type="button"
                       onClick={() => { setStatsTab('period'); setNavOffset(0); }}
                       className={`ui-toolbar-tab !px-2.5 !text-xs shrink-0 ${
-                        statsTab === 'period' && navOffset === 0
-                          ? 'bg-white/20 text-white font-extrabold'
-                          : 'hover:bg-white/10'
-                      } active:bg-white/15`}
+ statsTab === 'period' && navOffset === 0
+ ? 'bg-white/20 text-white font-extrabold'
+ : 'hover:bg-white/10'
+ } active:bg-white/15`}
                       style={!(statsTab === 'period' && navOffset === 0) ? { color: 'rgba(255,255,255,0.80)' } : {}}
                     >
                       {t.view_month}
@@ -623,8 +623,8 @@ export default memo(function Statistics() {
                       type="button"
                       onClick={() => setShowDeptMenu(prev => !prev)}
                       className={`ui-toolbar-tab !px-2.5 !text-xs shrink-0 ${
-                        showDeptMenu ? 'bg-white/10 text-white/80' : 'hover:bg-white/10'
-                      } ${deptFilter !== 'all' ? 'font-extrabold' : ''} active:bg-white/15`}
+ showDeptMenu ? 'bg-white/10 text-white/80' : 'hover:bg-white/10'
+ } ${deptFilter !== 'all' ? 'font-extrabold' : ''} active:bg-white/15`}
                       style={!showDeptMenu ? { color: 'rgba(255,255,255,0.80)' } : {}}
                     >
                       <Filter className="h-3 w-3 lg:h-3.5 lg:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
@@ -656,7 +656,7 @@ export default memo(function Statistics() {
                               {t.department_filter_label}
                             </div>
                             <button type="button" onClick={() => { setDeptFilter('all'); setShowDeptMenu(false); }}
-                              className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-all ${deptFilter === 'all' ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
+                              className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${deptFilter === 'all' ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
                               <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                 <Check className={`h-3 w-3 ${deptFilter === 'all' ? 'text-white' : 'text-white/80'}`} strokeWidth={3} />
                               </div>
@@ -666,7 +666,7 @@ export default memo(function Statistics() {
                             <div className="my-1 h-px bg-white/10" />
                             {departments.map((d) => (
                               <button key={d.value} type="button" onClick={() => { setDeptFilter(d.value); setShowDeptMenu(false); }}
-                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-all ${deptFilter === d.value ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
+                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${deptFilter === d.value ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
                                 <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                   <span className={`h-2.5 w-2.5 rounded-full shadow-sm ${deptFilter === d.value ? 'bg-white' : ''}`}
                                     style={deptFilter !== d.value ? { backgroundColor: d.color ?? getDeptColor(d.value) } : {}} />
@@ -697,7 +697,7 @@ export default memo(function Statistics() {
                                 </button>
                               </div>
                               <button type="button" onClick={() => { setDeptFilter('all'); setShowDeptMenu(false); }}
-                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-all ${deptFilter === 'all' ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
+                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${deptFilter === 'all' ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
                                 <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                   <Check className={`h-3 w-3 ${deptFilter === 'all' ? 'text-white' : 'text-white/80'}`} strokeWidth={3} />
                                 </div>
@@ -707,7 +707,7 @@ export default memo(function Statistics() {
                               <div className="my-1 h-px bg-white/10" />
                               {departments.map((d) => (
                                 <button key={d.value} type="button" onClick={() => { setDeptFilter(d.value); setShowDeptMenu(false); }}
-                                  className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-all ${deptFilter === d.value ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
+                                  className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${deptFilter === d.value ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
                                   <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                     <span className={`h-2.5 w-2.5 rounded-full shadow-sm ${deptFilter === d.value ? 'bg-white' : ''}`}
                                       style={deptFilter !== d.value ? { backgroundColor: d.color ?? getDeptColor(d.value) } : {}} />

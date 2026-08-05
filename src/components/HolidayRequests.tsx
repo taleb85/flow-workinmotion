@@ -196,7 +196,7 @@ export default function HolidayRequests() {
 
   // ── Shared input style ────────────────────────────────────────────────────
   const inputCls =
-    'w-full rounded-lg px-3 py-2 text-base outline-none transition-all bg-white/10 focus:bg-white/[0.15] focus:border-accent/50 focus:ring-2 focus:ring-accent/20';
+    'w-full rounded-lg px-3 py-2 text-base outline-none transition-colors bg-white/10 focus:bg-white/[0.15] focus:border-accent/50 focus:ring-2 focus:ring-accent/20';
   const inputStyle = {
     border: '1px solid rgba(255,255,255,0.20)',
     color: '#ffffff',
@@ -229,7 +229,7 @@ export default function HolidayRequests() {
         <button
           type="button"
           onClick={() => setShowForm(true)}
-          className="gap-1.5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-80 active:scale-[0.98]"
+          className="gap-1.5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-80"
           style={{ background: 'transparent', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1.5px solid rgba(255,255,255,0.25)', borderRadius: '0.5rem' }}
         >
           {t.request_holiday}
@@ -292,7 +292,7 @@ export default function HolidayRequests() {
                   />
                 </div>
 
-                <button type="submit" className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent to-amber-500 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-accent/20 transition-all hover:shadow-xl hover:shadow-accent/30 hover:scale-[1.02] active:scale-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                <button type="submit" className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent to-amber-500 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-accent/20 transition-colors hover:shadow-xl hover:shadow-accent/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                   <Check className="w-3.5 h-3.5" strokeWidth={3} />
                   {t.request_holiday}
                 </button>
@@ -435,8 +435,8 @@ export default function HolidayRequests() {
                   <div
                     key={day.toString()}
                     onClick={() => isPending && isAdmin && setSelectedH(holiday)}
-                    className={`min-h-[44px] min-w-[44px] aspect-square rounded-xl flex items-center justify-center text-xs font-semibold transition-all select-none touch-target
-                      ${isPending && isAdmin ? 'cursor-pointer hover:opacity-80' : 'cursor-default'} active:opacity-70`}
+                    className={`min-h-[44px] min-w-[44px] aspect-square rounded-xl flex items-center justify-center text-xs font-semibold transition-colors select-none touch-target
+ ${isPending && isAdmin ? 'cursor-pointer hover:opacity-80' : 'cursor-default'} active:opacity-70`}
                     style={dayStyle}
                     onMouseEnter={(e) => {
                       if (!status && !today) {

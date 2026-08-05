@@ -53,8 +53,8 @@ const LanguageToggleGrid = memo(function LanguageToggleGrid({ effectiveLanguage,
             title={LABELS[lang]}
             aria-label={LABELS[lang]}
             className={`flex flex-col items-center justify-center gap-0.5 py-1.5 px-0.5 rounded-lg font-semibold transition-colors min-h-[44px] min-w-0 ${
-              effectiveLanguage === lang ? 'bg-accent text-white' : 'bg-slate-100 text-white/70 active:bg-slate-200'
-            }`}
+ effectiveLanguage === lang ? 'bg-accent text-white' : 'bg-slate-100 text-white/70 active:bg-slate-200'
+ }`}
           >
             <span className="text-[15px] leading-none" aria-hidden>
               {FLAGS[lang]}
@@ -83,8 +83,8 @@ const LanguageToggleGrid = memo(function LanguageToggleGrid({ effectiveLanguage,
           type="button"
           onClick={() => setLanguage(lang)}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-colors min-h-[44px] ${
-            effectiveLanguage === lang ? 'bg-accent text-white' : 'bg-slate-100 text-white/70 hover:bg-slate-200'
-          } active:bg-slate-200'/80`}
+ effectiveLanguage === lang ? 'bg-accent text-white' : 'bg-slate-100 text-white/70 hover:bg-slate-200'
+ } active:bg-slate-200'/80`}
         >
           <span>{FLAGS[lang]}</span>
           <span className="text-xs">{LABELS[lang]}</span>

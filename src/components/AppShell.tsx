@@ -138,6 +138,20 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
   } = useAppOverlay();
   const [bgTheme, setBgTheme] = useState<BackgroundTheme>(() => getStoredTheme(currentUser?.id));
 
+  // Applica appBg a html e body così il colore del tema copre tutto lo schermo anche sotto il gradiente trasparente
+  useEffect(() => {
+    const bg = bgTheme.appBg;
+    document.documentElement.style.background = bg;
+    document.body.style.background = bg;
+    // CSS custom property per header sticky opaco (vetro satinato) — RGB components
+    const r = parseInt(bg.slice(1, 3), 16);
+    const g = parseInt(bg.slice(3, 5), 16);
+    const b = parseInt(bg.slice(5, 7), 16);
+    document.documentElement.style.setProperty('--app-bg-r', String(r));
+    document.documentElement.style.setProperty('--app-bg-g', String(g));
+    document.documentElement.style.setProperty('--app-bg-b', String(b));
+  }, [bgTheme]);
+
   useEffect(() => {
     const handler = (e: Event) => setBgTheme(getThemeById((e as CustomEvent<string>).detail));
     window.addEventListener('flow-bg-change', handler);
@@ -203,6 +217,21 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     const onVisibility = () => { if (!document.hidden) clearBadge(); };
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
+
+  // ── Apre campanella se app avviata da push notification (app chiusa) ────
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('open=notifications')) {
+      // Piccolo ritardo per dare tempo ai componenti di montarsi
+      const t = setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('open-notification-center'));
+        // Pulisci il parametro dall'URL senza ricaricare
+        const url = new URL(window.location.href);
+        url.searchParams.delete('open');
+        window.history.replaceState({}, '', url.toString());
+      }, 300);
+      return () => clearTimeout(t);
+    }
   }, []);
 
   const location = useLocation();
@@ -344,6 +373,12 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       if (t === 'OPEN_TURNI') {
         if (!visibleNavTabs.includes('turni')) return;
         void handleTabChange('turni');
+        return;
+      }
+      if (t === 'OPEN_NOTIFICATIONS') {
+        // Apre la campanella notifiche ovunque ci si trovi
+        window.dispatchEvent(new CustomEvent('open-notification-center'));
+        return;
       }
     };
     if ('serviceWorker' in navigator) {
@@ -652,7 +687,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
               setImpersonating(null, null);
               void silentRefreshData?.();
             }}
-            className="shrink-0 rounded-lg px-3 py-1 text-xs font-bold transition-colors hover:bg-amber-200 active:scale-95"
+            className="shrink-0 rounded-lg px-3 py-1 text-xs font-bold transition-colors hover:bg-amber-200"
             style={{ background: '#fcd34d', color: '#78350f' }}
           >
             Torna ad Admin
@@ -665,10 +700,10 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         ref={appStickyHeaderRef}
         aria-label="Navigazione principale"
         className={`sticky top-0 left-0 right-0 z-[10040] shrink-0 transition-[visibility,opacity,background] duration-150 ${
-          overlayOpen ? 'invisible opacity-0 pointer-events-none' : ''
-        } ${
-          isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''
-        } ${headerScrolled ? 'bg-app-bg/92 backdrop-blur-[20px]' : ''}`}
+ overlayOpen ? 'invisible opacity-0 pointer-events-none' : ''
+ } ${
+ isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''
+ } ${headerScrolled ? 'bg-app-bg/92 backdrop-blur-[20px]' : ''}`}
         style={{
           background: headerScrolled ? undefined : 'transparent',
           borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
@@ -688,13 +723,13 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                 disabled={isRefreshing || dataSyncInProgress}
                 title={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso...' : 'Sincronizza dati'}
                 aria-label={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso' : 'Sincronizza dati'}
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation liquid-glass ${
-                  isRefreshing || dataSyncInProgress
-                    ? 'text-amber-500 liquid-glass-amber'
-                    : isSynced
-                      ? 'text-emerald-500 liquid-glass-green'
-                      : 'text-slate-300'
-                }`}
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
+ isRefreshing || dataSyncInProgress
+ ? 'text-amber-500 liquid-glass-amber'
+ : isSynced
+ ? 'text-emerald-500 liquid-glass-green'
+ : 'text-slate-300'
+ }`}
               >
                 {isRefreshing || dataSyncInProgress ? (
                   <RotateCw className="h-3.5 w-3.5 animate-spin" strokeWidth={2.5} aria-hidden />
@@ -713,11 +748,11 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   onClick={() => setShowPinMenu(true)}
                   title={globalPinSessionId ? 'Sessione PIN attiva' : 'Sblocca sessione PIN'}
                   aria-label={globalPinSessionId ? 'Gestisci sessione PIN' : 'Sblocca sessione PIN'}
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation liquid-glass ${
-                    globalPinSessionId
-                      ? 'text-emerald-500 liquid-glass-green'
-                      : 'text-red-500 liquid-glass-red'
-                  }`}
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
+ globalPinSessionId
+ ? 'text-emerald-500 liquid-glass-green'
+ : 'text-red-500 liquid-glass-red'
+ }`}
                 >
                   {globalPinSessionId
                     ? <Unlock className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
@@ -791,11 +826,11 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                       <h2 className="text-white font-bold uppercase tracking-widest text-base mb-2">Sessione sbloccata</h2>
                       <p className="text-white/60 text-sm font-medium leading-tight px-4">Tutte le operazioni protette da PIN sono accessibili in questa sessione.</p>
                     </div>
-                    <button type="button" onClick={() => { setGlobalPinSessionId(null); closePinMenu(); }} className="w-full h-14 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold flex items-center justify-center gap-2.5 transition-all active:scale-95 mb-3">
+                    <button type="button" onClick={() => { setGlobalPinSessionId(null); closePinMenu(); }} className="w-full h-14 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold flex items-center justify-center gap-2.5 transition-colors mb-3">
                       <ShieldOff className="w-5 h-5" strokeWidth={2} />
                       Blocca sessione
                     </button>
-                    <button type="button" onClick={closePinMenu} className="w-full h-14 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white/70 font-bold transition-all active:scale-95">Annulla</button>
+                    <button type="button" onClick={closePinMenu} className="w-full h-14 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white/70 font-bold transition-colors">Annulla</button>
                   </motion.div>
                 </motion.div>
               )}

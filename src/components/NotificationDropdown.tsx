@@ -120,8 +120,8 @@ export function NotificationDropdown({
                 type="button"
                 onClick={() => handleMessageClick(msg)}
                 className={`w-full px-4 py-3 text-left transition-colors hover:bg-slate-50 ${
-                  isUnread ? 'bg-accent/5' : ''
-                } active:bg-slate-50/80`}
+ isUnread ? 'bg-accent/5' : ''
+ } active:bg-slate-50/80`}
               >
                 <div className="flex gap-3">
                   {/* Icona */}
@@ -142,10 +142,10 @@ export function NotificationDropdown({
                     {/* Titolo + Badge non letto */}
                     <div className="flex items-center gap-2">
                       <p className={`text-xs font-bold truncate ${
-                        isUnread
-                          ? 'text-white'
-                          : 'text-white/80'
-                      }`} title={msg.subject}>{msg.subject}
+ isUnread
+ ? 'text-white'
+ : 'text-white/80'
+ }`} title={msg.subject}>{msg.subject}
                       </p>
                       {isUnread && (
                         <div className="h-2 w-2 rounded-full bg-accent flex-shrink-0" />

@@ -74,13 +74,13 @@ export default function RoleFeatureSectionsBlock(props: Props) {
           props.onToggle(key);
         }}
         className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${
-          lockedOn || rowDisabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
-        } ${enabled ? 'bg-accent' : 'bg-white/20'}`}
+ lockedOn || rowDisabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
+ } ${enabled ? 'bg-accent' : 'bg-white/20'}`}
       >
         <span
           className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white toggle-knob shadow transition ${
-            enabled ? 'translate-x-5' : 'translate-x-1'
-          }`}
+ enabled ? 'translate-x-5' : 'translate-x-1'
+ }`}
         />
       </button>
     );

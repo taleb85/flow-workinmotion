@@ -32,6 +32,10 @@ export default function BackgroundGallery({
     onSelect?.(theme);
   }, [onSelect, userId]);
 
+  const activeTheme = themes.find(t => t.id === activeId) ?? themes[0];
+  // Deriviamo una tonalità leggermente più chiara/scura per il modale dal colore active
+  const modalBg = activeTheme.appBg;
+
   return (
     <>
       {variant === 'profile-row' ? (
@@ -39,7 +43,7 @@ export default function BackgroundGallery({
           type="button"
           onClick={() => setOpen(true)}
           aria-label={t.bg_gallery_open ?? 'Sfondi'}
-          className="w-full flex items-center justify-between px-4 py-3.5 transition-all active:scale-[0.98] hover:bg-white/10"
+          className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10"
         >
           <span className="text-[13px] font-semibold text-white">{t.bg_gallery_btn ?? 'Sfondo'}</span>
           <ChevronRight className="w-4 h-4 text-white/60" aria-hidden />
@@ -49,7 +53,7 @@ export default function BackgroundGallery({
           type="button"
           onClick={() => setOpen(true)}
           aria-label={t.bg_gallery_open ?? 'Sfondi'}
-          className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-neutral-500 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/15 active:scale-[0.99]"
+          className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-neutral-500 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/15"
         >
           <Palette className="h-4 w-4" />
           {t.bg_gallery_btn ?? 'Sfondo app'}
@@ -65,18 +69,20 @@ export default function BackgroundGallery({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-[10090] flex items-center justify-center p-4 font-sans"
-            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+            style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)' }}
+            onClick={() => setOpen(false)}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.92, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 20 }}
               transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.9 }}
-              className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl border border-white/10 shadow-2xl"
-              style={{ background: 'rgba(10,10,12,0.96)' }}
+              className="relative w-full max-w-xs max-h-[85vh] overflow-y-auto rounded-3xl border border-white/10 shadow-2xl"
+              style={{ background: modalBg }}
+              onClick={e => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 px-6 py-4 backdrop-blur-xl" style={{ background: 'rgba(10,10,12,0.92)' }}>
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 px-4 py-3 backdrop-blur-xl" style={{ background: modalBg }}>
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
                     <Palette className="h-4 w-4 text-white" />
@@ -96,7 +102,7 @@ export default function BackgroundGallery({
               </div>
 
               {/* Griglia */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 p-6">
+              <div className="grid grid-cols-2 gap-3 p-4">
                 {themes.map((theme) => {
                   const isActive = activeId === theme.id;
                   return (
@@ -104,11 +110,11 @@ export default function BackgroundGallery({
                       key={theme.id}
                       type="button"
                       onClick={() => handleSelect(theme)}
-                      className={`group relative flex flex-col items-center gap-2 rounded-2xl p-3 transition-all duration-200 ${
-                        isActive
-                          ? 'ring-2 ring-white/60 shadow-lg shadow-white/10 scale-[1.02]'
-                          : 'hover:scale-[1.02] ring-1 ring-transparent hover:ring-white/20'
-                      }`}
+                      className={`group relative flex flex-col items-center gap-2 rounded-2xl p-3 transition-colors duration-200 ${
+ isActive
+ ? 'ring-2 ring-white/60 shadow-lg shadow-white/10 scale-[1.02]'
+ : ' ring-1 ring-transparent hover:ring-white/20'
+ }`}
                       style={{ background: theme.appBg }}
                     >
                       {/* Preview glow */}
@@ -156,8 +162,8 @@ export default function BackgroundGallery({
               </div>
 
               {/* Footer */}
-              <div className="border-t border-white/10 px-6 py-3 text-center">
-                <p className="text-[11px] text-white/40">{t.bg_gallery_footer ?? 'Lo sfondo si aggiorna subito e rimane salvato'}</p>
+              <div className="border-t border-white/10 px-4 py-2.5 text-center">
+                <p className="text-[10px] text-white/40">{t.bg_gallery_footer ?? 'Lo sfondo si aggiorna subito e rimane salvato'}</p>
               </div>
             </motion.div>
           </motion.div>

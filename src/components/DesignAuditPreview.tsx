@@ -66,9 +66,9 @@ export default function DesignAuditPreview() {
             <div
               key={logo.id}
               onClick={() => toggleLogo(logo.id)}
-              className={`rounded-xl border-2 p-4 flex flex-col items-center justify-center gap-3 min-h-[140px] cursor-pointer transition-all ${
-                kept ? 'border-emerald-500/50 bg-emerald-500/10' : 'border-rose-500/30 bg-rose-500/5 opacity-50'
-              }`}
+              className={`rounded-xl border-2 p-4 flex flex-col items-center justify-center gap-3 min-h-[140px] cursor-pointer transition-colors ${
+ kept ? 'border-emerald-500/50 bg-emerald-500/10' : 'border-rose-500/30 bg-rose-500/5 opacity-50'
+ }`}
             >
               <div className="flex items-center justify-center min-h-[60px]">
                 {logo.render()}
@@ -93,17 +93,17 @@ export default function DesignAuditPreview() {
             <div
               key={bg.id}
               onClick={() => toggleBg(bg.id)}
-              className={`rounded-xl border-2 p-4 flex flex-col items-center justify-center gap-2 min-h-[120px] cursor-pointer transition-all ${
-                kept ? 'border-emerald-500/50' : 'border-rose-500/30 opacity-50'
-              }`}
+              className={`rounded-xl border-2 p-4 flex flex-col items-center justify-center gap-2 min-h-[120px] cursor-pointer transition-colors ${
+ kept ? 'border-emerald-500/50' : 'border-rose-500/30 opacity-50'
+ }`}
               style={{
                 background: bg.gradient || bg.color || bg.css,
                 ...(bg.css ? { background: bg.css } : {}),
               }}
             >
               <span className={`text-[11px] font-bold text-center px-2 py-1 rounded ${
-                bg.id === 'table-green' ? 'text-gray-800' : 'text-white'
-              }`}>{bg.label}</span>
+ bg.id === 'table-green' ? 'text-gray-800' : 'text-white'
+ }`}>{bg.label}</span>
             </div>
           );
         })}

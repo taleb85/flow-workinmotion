@@ -111,11 +111,11 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
                     <div key={i} className="flex flex-col items-center gap-1">
                       <span className={`text-[11px] font-bold ${isToday_ ? 'text-white' : 'text-white/50'}`}>{dayLetters[i]}</span>
                       <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                        isToday_ ? 'bg-white/20 text-white' : 'text-white/60'
-                      }`}>
+ isToday_ ? 'bg-white/20 text-white' : 'text-white/60'
+ }`}>
                         {format(day, 'd')}
                       </div>
-                      <div className={`w-full rounded-lg flex flex-col items-center justify-center py-1.5 px-0.5 min-h-[38px] transition-all ${blockCls}`}>
+                      <div className={`w-full rounded-lg flex flex-col items-center justify-center py-1.5 px-0.5 min-h-[38px] transition-colors ${blockCls}`}>
                         {shiftCount > 0 && (
                           <span className="text-[13px] font-black text-white leading-none drop-shadow-sm">
                             {shiftCount}
@@ -174,10 +174,10 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
                       return (
                         <div key={shift.id}
                           className={`flex items-center justify-between rounded-xl px-3 py-2.5 mb-1 border ${
-                            isAbsent
-                              ? 'border-red-500/30 bg-red-500/10'
-                              : 'border-neutral-500'
-                          }`}
+ isAbsent
+ ? 'border-red-500/30 bg-red-500/10'
+ : 'border-neutral-500'
+ }`}
                           style={isAbsent ? {} : { background: 'transparent' }}
                         >
                           <div className="flex flex-col gap-0.5">

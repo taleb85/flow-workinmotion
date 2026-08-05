@@ -108,11 +108,11 @@ export function MessageComposer({
         <button
           type="button"
           onClick={() => setMessageType('broadcast')}
-          className={`flex items-center justify-center gap-2 rounded-2xl border-2 py-4 transition-all active:scale-95 ${
-            messageType === 'broadcast'
-              ? 'border-accent bg-accent/10 text-accent'
-              : 'border-neutral-500 bg-white/8 text-white/50'
-          }`}
+          className={`flex items-center justify-center gap-2 rounded-2xl border-2 py-4 transition-colors ${
+ messageType === 'broadcast'
+ ? 'border-accent bg-accent/10 text-accent'
+ : 'border-neutral-500 bg-white/8 text-white/50'
+ }`}
         >
           <Users className="h-5 w-5" />
           <span className="text-[11px] font-black uppercase tracking-widest">Tutti (Staff)</span>
@@ -120,11 +120,11 @@ export function MessageComposer({
         <button
           type="button"
           onClick={() => setMessageType('private')}
-          className={`flex items-center justify-center gap-2 rounded-2xl border-2 py-4 transition-all active:scale-95 ${
-            messageType === 'private'
-              ? 'border-accent bg-accent/10 text-accent'
-              : 'border-neutral-500 bg-white/8 text-white/50'
-          }`}
+          className={`flex items-center justify-center gap-2 rounded-2xl border-2 py-4 transition-colors ${
+ messageType === 'private'
+ ? 'border-accent bg-accent/10 text-accent'
+ : 'border-neutral-500 bg-white/8 text-white/50'
+ }`}
         >
           <User className="h-5 w-5" />
           <span className="text-[11px] font-black uppercase tracking-widest">Privato</span>
@@ -174,7 +174,7 @@ export function MessageComposer({
         type="button"
         onClick={handleSend}
         disabled={isSending || successMessage}
-        className="w-full h-16 flex items-center justify-center gap-3 rounded-[24px] bg-accent text-white font-black uppercase tracking-[0.2em] text-sm shadow-xl shadow-accent/20 transition-all hover:bg-accent-hover active:scale-[0.98] disabled:opacity-50 disabled:grayscale hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+        className="w-full h-16 flex items-center justify-center gap-3 rounded-[24px] bg-accent text-white font-black uppercase tracking-[0.2em] text-sm shadow-xl shadow-accent/20 transition-colors hover:bg-accent-hover disabled:opacity-50 disabled:grayscale hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
       >
         {isSending ? (
           <Loader2 className="h-6 w-6 animate-spin" />

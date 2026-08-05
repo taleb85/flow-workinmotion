@@ -189,7 +189,7 @@ function LoginMock({ dark }: { dark: boolean }) {
         <div className="w-full flex flex-col gap-3">
           <input readOnly placeholder="Nome utente" className={`w-full rounded-xl px-4 py-3 text-base outline-none pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/70' : 'border border-slate-200 bg-white text-slate-700 shadow-sm'}`} />
           <input readOnly type="password" placeholder="Password" className={`w-full rounded-xl px-4 py-3 text-base outline-none pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/70' : 'border border-slate-200 bg-white text-slate-700 shadow-sm'}`} />
-<button className="w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white flex items-center justify-center gap-2 pointer-events-none transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+<button className="w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white flex items-center justify-center gap-2 pointer-events-none transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
             <LogIn size={16} /> Accedi
           </button>
         </div>
@@ -198,7 +198,7 @@ function LoginMock({ dark }: { dark: boolean }) {
           <span className="text-xs">oppure</span>
           <div className={`flex-1 h-px ${dark ? 'bg-white/10' : 'bg-slate-200'}`} />
         </div>
-<button className={`w-full rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/70' : 'border-2 border-blue-100 bg-blue-50 text-blue-700'} transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
+<button className={`w-full rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/70' : 'border-2 border-blue-100 bg-blue-50 text-blue-700'} transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
           <Fingerprint size={16} /> Accesso biometrico
         </button>
       </div>
@@ -267,7 +267,7 @@ function PwaAndroidMock({ dark }: { dark: boolean }) {
           </div>
         ))}
       </div>
-<button className={`w-full rounded-2xl py-4 font-bold flex items-center justify-center gap-2 pointer-events-none text-base ${dark ? 'bg-white text-slate-900' : 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'} transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
+<button className={`w-full rounded-2xl py-4 font-bold flex items-center justify-center gap-2 pointer-events-none text-base ${dark ? 'bg-white text-slate-900' : 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'} transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
         <Download size={18} /> Installa ora
       </button>
     </div>
@@ -281,7 +281,7 @@ function _StepList({ steps, doneIdx, dark }: { steps: string[]; doneIdx: number;
       {steps.map((label, i) => {
         const done = i < doneIdx; const active = i === doneIdx;
         return (
-          <div key={i} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active ? (dark ? 'bg-white/10' : 'bg-blue-50') : ''}`}>
+          <div key={i} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${active ? (dark ? 'bg-white/10' : 'bg-blue-50') : ''}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${done ? 'bg-green-500' : active ? (dark ? 'bg-white/20' : 'bg-blue-100') : (dark ? 'bg-white/5' : 'bg-slate-100')}`}>
               {done ? <Check size={16} className="text-white" /> : active ? <Loader2 size={16} className={`${dark ? 'text-white' : 'text-blue-600'} animate-spin`} /> : <span className={`text-xs font-bold ${dark ? 'text-white/30' : 'text-slate-400'}`}>{i + 1}</span>}
             </div>
@@ -434,10 +434,10 @@ function KioskMock({ dark }: { dark: boolean }) {
           </div>
         </div>
         <div className="flex flex-col gap-3 w-full max-w-xs pb-10">
-<button className="w-full rounded-2xl bg-blue-600 py-4 text-white font-bold text-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 pointer-events-none transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+<button className="w-full rounded-2xl bg-blue-600 py-4 text-white font-bold text-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 pointer-events-none transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
             Entra <ChevronRight size={20} />
           </button>
-<button className={`w-full rounded-2xl py-3 font-semibold text-base pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/50' : 'border border-slate-200 bg-white text-slate-500'} transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
+<button className={`w-full rounded-2xl py-3 font-semibold text-base pointer-events-none ${dark ? 'border border-white/10 bg-white/5 text-white/50' : 'border border-slate-200 bg-white text-slate-500'} transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
             Esci
           </button>
         </div>
@@ -548,13 +548,13 @@ function BottomNav({ dark, active }: { dark: boolean; active: 'home' | 'turni' |
       {items.map(item => (
         <div key={item.id} className="flex-1 flex flex-col items-center gap-0.5 py-1">
           <div className={`w-5 h-5 rounded-md ${item.id === active
-            ? (dark ? 'bg-[#7B2FBE]' : 'bg-blue-600')
-            : (dark ? 'bg-white/15' : 'bg-slate-200')
-          }`} />
+ ? (dark ? 'bg-[#7B2FBE]' : 'bg-blue-600')
+ : (dark ? 'bg-white/15' : 'bg-slate-200')
+ }`} />
           <span className={`text-[7px] font-semibold ${item.id === active
-            ? (dark ? 'text-white' : 'text-blue-600')
-            : (dark ? 'text-white/35' : 'text-slate-400')
-          }`}>{item.label}</span>
+ ? (dark ? 'text-white' : 'text-blue-600')
+ : (dark ? 'text-white/35' : 'text-slate-400')
+ }`}>{item.label}</span>
         </div>
       ))}
     </div>
@@ -735,7 +735,7 @@ function FerieMock({ dark }: { dark: boolean }) {
             </Card>
           ))}
         </div>
-<button className={`w-full rounded-2xl py-3 text-[11px] font-bold flex items-center justify-center gap-1.5 pointer-events-none ${dark ? 'bg-[#4361EE]/30 border border-[#4361EE]/40 text-white/70' : 'bg-blue-600 text-white'} transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
+<button className={`w-full rounded-2xl py-3 text-[11px] font-bold flex items-center justify-center gap-1.5 pointer-events-none ${dark ? 'bg-[#4361EE]/30 border border-[#4361EE]/40 text-white/70' : 'bg-blue-600 text-white'} transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
           + Richiedi ferie
         </button>
       </div>
@@ -823,10 +823,10 @@ function DesktopShell({ dark, active, children }: { dark: boolean; active: strin
           {navItems.map(item => (
             <div key={item.id}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                item.id === active
-                  ? (dark ? 'bg-[#4361EE]/25 text-white/70 border border-[#4361EE]/30' : 'bg-blue-600 text-white')
-                  : (dark ? 'text-white/50 hover:bg-white/5' : 'text-slate-500 hover:bg-slate-50')
-              } active:bg-white/5'/80`}>
+ item.id === active
+ ? (dark ? 'bg-[#4361EE]/25 text-white/70 border border-[#4361EE]/30' : 'bg-blue-600 text-white')
+ : (dark ? 'text-white/50 hover:bg-white/5' : 'text-slate-500 hover:bg-slate-50')
+ } active:bg-white/5'/80`}>
               <div className={`w-4 h-4 rounded ${item.id === active ? '' : (dark ? 'bg-white/20' : 'bg-slate-200')}`} />
               {item.label}
             </div>
@@ -1061,7 +1061,7 @@ function DFerieMock({ dark }: { dark: boolean }) {
                   <span className={`text-xs font-bold ${dark ? 'text-white/60' : 'text-slate-500'}`}>Seleziona…</span>
                 </div>
               ))}
-<button className={`w-full rounded-xl py-2.5 text-xs font-bold mt-1 pointer-events-none ${dark ? 'bg-[#4361EE]/30 border border-[#4361EE]/40 text-white/70' : 'bg-blue-600 text-white'} transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
+<button className={`w-full rounded-xl py-2.5 text-xs font-bold mt-1 pointer-events-none ${dark ? 'bg-[#4361EE]/30 border border-[#4361EE]/40 text-white/70' : 'bg-blue-600 text-white'} transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
                 Invia richiesta
               </button>
             </div>
@@ -1488,7 +1488,7 @@ export default function ScreensPreview() {
               whileHover={{ scale: 1.04, y: -2 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleOpen(t.id)}
-              className="flex flex-col gap-1 cursor-pointer focus:outline-none rounded-2xl p-1.5 transition-all hover:bg-white/5 active:bg-white/5/80"
+              className="flex flex-col gap-1 cursor-pointer focus:outline-none rounded-2xl p-1.5 transition-colors hover:bg-white/5 active:bg-white/5/80"
             >
               <p className="text-center text-[9px] font-bold uppercase tracking-widest text-white/30 mb-0.5">{t.label}</p>
               <div className="flex gap-1 justify-center">
@@ -1514,7 +1514,7 @@ export default function ScreensPreview() {
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => handleOpen('full-app-preview')}
-            className="flex flex-col gap-2 cursor-pointer focus:outline-none rounded-2xl p-4 transition-all bg-accent/10 border border-accent/20 hover:bg-accent/20 active:bg-accent/80"
+            className="flex flex-col gap-2 cursor-pointer focus:outline-none rounded-2xl p-4 transition-colors bg-accent/10 border border-accent/20 hover:bg-accent/20 active:bg-accent/80"
           >
             <p className="text-center text-xs font-black uppercase tracking-[0.3em] text-accent">✨ Anteprima Completa App ✨</p>
             <p className="text-center text-[10px] text-accent/60 uppercase tracking-widest">Componenti reali dell'app</p>
@@ -1524,7 +1524,7 @@ export default function ScreensPreview() {
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => handleOpen('mockup-cards')}
-            className="flex flex-col gap-2 cursor-pointer focus:outline-none rounded-2xl p-4 transition-all bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 active:bg-emerald-500/80"
+            className="flex flex-col gap-2 cursor-pointer focus:outline-none rounded-2xl p-4 transition-colors bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 active:bg-emerald-500/80"
           >
             <p className="text-center text-xs font-black uppercase tracking-[0.3em] text-emerald-500">🎨 Mockup delle Schede 🎨</p>
             <p className="text-center text-[10px] text-emerald-500/60 uppercase tracking-widest">Design statico e mockup grafici</p>
@@ -1541,7 +1541,7 @@ export default function ScreensPreview() {
                 whileHover={{ scale: 1.04, y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => handleOpen(t.id as ScreenId)}
-                className="flex flex-col gap-2 cursor-pointer focus:outline-none rounded-2xl p-2 transition-all hover:bg-white/5 active:bg-white/5/80"
+                className="flex flex-col gap-2 cursor-pointer focus:outline-none rounded-2xl p-2 transition-colors hover:bg-white/5 active:bg-white/5/80"
               >
                 <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">{t.label}</p>
                 <div className="flex gap-1 justify-center">
@@ -1573,7 +1573,7 @@ export default function ScreensPreview() {
                   whileHover={{ scale: 1.03, y: -2 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => handleOpen(tabId)}
-                  className="flex flex-col gap-1 cursor-pointer focus:outline-none rounded-2xl p-1 hover:bg-white/5 transition-all active:bg-white/5/80"
+                  className="flex flex-col gap-1 cursor-pointer focus:outline-none rounded-2xl p-1 hover:bg-white/5 transition-colors active:bg-white/5/80"
                 >
                   <p className="text-center text-[9px] font-semibold uppercase tracking-widest text-white/25">📱 Mobile</p>
                   <MockFrame label="" scale={0.26}>
@@ -1585,7 +1585,7 @@ export default function ScreensPreview() {
                   whileHover={{ scale: 1.03, y: -2 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => handleOpen(deskId)}
-                  className="flex flex-col gap-1 cursor-pointer focus:outline-none rounded-2xl p-1 hover:bg-white/5 transition-all active:bg-white/5/80"
+                  className="flex flex-col gap-1 cursor-pointer focus:outline-none rounded-2xl p-1 hover:bg-white/5 transition-colors active:bg-white/5/80"
                 >
                   <p className="text-center text-[9px] font-semibold uppercase tracking-widest text-white/25">🖥 Desktop</p>
                   <DesktopMockFrame label="" scale={0.155}>
@@ -1622,13 +1622,13 @@ export default function ScreensPreview() {
               <div className="flex rounded-full overflow-hidden border border-neutral-500 text-xs font-semibold">
                 <button
                   onClick={() => setIsDark(true)}
-                  className={`px-3 py-1 transition-all ${isDark ? 'bg-neutral-700 text-white' : 'text-white/40 hover:text-white/60'} active:text-white/60'}`}
+                  className={`px-3 py-1 transition-colors ${isDark ? 'bg-neutral-700 text-white' : 'text-white/40 hover:text-white/60'} active:text-white/60'}`}
                 >
                   Dark
                 </button>
                 <button
                   onClick={() => setIsDark(false)}
-                  className={`px-3 py-1 transition-all ${!isDark ? 'bg-white text-slate-800' : 'text-white/40 hover:text-white/60'} active:text-white/60'}`}
+                  className={`px-3 py-1 transition-colors ${!isDark ? 'bg-white text-slate-800' : 'text-white/40 hover:text-white/60'} active:text-white/60'}`}
                 >
                   Light
                 </button>
@@ -1652,13 +1652,13 @@ export default function ScreensPreview() {
                   const idx = TABS.findIndex(t => t.id === open);
                   handleOpen(TABS[(idx - 1 + TABS.length) % TABS.length].id);
                 }}
-                className="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-white/60 hover:bg-white/20 transition-all active:bg-white/80"
+                className="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-white/60 hover:bg-white/20 transition-colors active:bg-white/80"
               >
                 ← Precedente
               </button>
               <button
                 onClick={() => setOpen(null)}
-                className="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-white/60 hover:bg-white/20 transition-all active:bg-white/80"
+                className="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-white/60 hover:bg-white/20 transition-colors active:bg-white/80"
               >
                 ✕ Chiudi
               </button>
@@ -1667,7 +1667,7 @@ export default function ScreensPreview() {
                   const idx = TABS.findIndex(t => t.id === open);
                   handleOpen(TABS[(idx + 1) % TABS.length].id);
                 }}
-                className="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-white/60 hover:bg-white/20 transition-all active:bg-white/80"
+                className="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-white/60 hover:bg-white/20 transition-colors active:bg-white/80"
               >
                 Successiva →
               </button>

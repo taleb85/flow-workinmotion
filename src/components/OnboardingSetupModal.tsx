@@ -207,8 +207,8 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                   onKeyDown={handleKeyDown}
                   placeholder={lang === 'it' ? 'Inserisci la tua email…' : 'Enter your email…'}
                   className={`w-full rounded-xl border px-4 py-3 text-base font-medium transition-colors outline-none bg-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-accent/30 focus:border-accent ${
-                    emailError ? 'border-red-400 bg-red-50/50' : 'border-white/20'
-                  }`}
+ emailError ? 'border-red-400 bg-red-50/50' : 'border-white/20'
+ }`}
                 />
                 {emailError && (
                   <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
@@ -234,8 +234,8 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                   onKeyDown={handleKeyDown}
                   placeholder={lang === 'it' ? 'Es. +39 333 1234567' : lang === 'es' ? 'Ej. +34 600 000000' : '+1 555 000 0000'}
                   className={`w-full rounded-xl border px-4 py-3 text-base font-medium transition-colors outline-none bg-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-accent/30 focus:border-accent ${
-                    phoneError ? 'border-red-400 bg-red-50/50' : 'border-white/20'
-                  }`}
+ phoneError ? 'border-red-400 bg-red-50/50' : 'border-white/20'
+ }`}
                 />
                 {phoneError && (
                   <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
@@ -258,13 +258,13 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                   {Array.from({ length: 4 }).map((_, i) => (
                     <div
                       key={i}
-                      className={`flex h-12 w-12 items-center justify-center rounded-xl border-2 text-xl font-bold transition-all select-none ${
-                        pinDigits.length > i
-                          ? 'border-brand-deep bg-brand-deep/8 text-brand-deep'
-                          : pinError
-                          ? 'border-red-300 bg-red-50/50'
-                          : 'border-white/20 bg-white/10'
-                      }`}
+                      className={`flex h-12 w-12 items-center justify-center rounded-xl border-2 text-xl font-bold transition-colors select-none ${
+ pinDigits.length > i
+ ? 'border-brand-deep bg-brand-deep/8 text-brand-deep'
+ : pinError
+ ? 'border-red-300 bg-red-50/50'
+ : 'border-white/20 bg-white/10'
+ }`}
                     >
                       {pinDigits.length > i ? '●' : ''}
                     </div>
@@ -297,13 +297,13 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                           setTouched((p) => ({ ...p, pin: true }));
                         }
                       }}
-                      className={`flex h-11 items-center justify-center rounded-xl text-base font-semibold transition-all active:scale-95 touch-manipulation select-none ${
-                        !k
-                          ? 'pointer-events-none opacity-0'
-                          : k === '⌫'
-                          ? 'bg-white/10 text-white/70 hover:bg-white/20'
-                          : 'bg-white/10 text-white hover:bg-accent/20 hover:text-accent'
-                      }`}
+                      className={`flex h-11 items-center justify-center rounded-xl text-base font-semibold transition-colors touch-manipulation select-none ${
+ !k
+ ? 'pointer-events-none opacity-0'
+ : k === '⌫'
+ ? 'bg-white/10 text-white/70 hover:bg-white/20'
+ : 'bg-white/10 text-white hover:bg-accent/20 hover:text-accent'
+ }`}
                     >
                       {k}
                     </button>
@@ -327,15 +327,15 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                   {Array.from({ length: 4 }).map((_, i) => (
                     <div
                       key={i}
-                      className={`flex h-12 w-12 items-center justify-center rounded-xl border-2 text-xl font-bold transition-all select-none ${
-                        confirmPin.length > i
-                          ? confirmPin === newPin.slice(0, confirmPin.length)
-                            ? 'border-[#00C896] bg-[#00C896]/8 text-[#00C896]'
-                            : 'border-red-400 bg-red-50/50 text-red-500'
-                          : confirmPinError
-                          ? 'border-red-300 bg-red-50/50'
-                          : 'border-white/20 bg-white/10'
-                      }`}
+                      className={`flex h-12 w-12 items-center justify-center rounded-xl border-2 text-xl font-bold transition-colors select-none ${
+ confirmPin.length > i
+ ? confirmPin === newPin.slice(0, confirmPin.length)
+ ? 'border-[#00C896] bg-[#00C896]/8 text-[#00C896]'
+ : 'border-red-400 bg-red-50/50 text-red-500'
+ : confirmPinError
+ ? 'border-red-300 bg-red-50/50'
+ : 'border-white/20 bg-white/10'
+ }`}
                     >
                       {confirmPin.length > i ? '●' : ''}
                     </div>
@@ -356,13 +356,13 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                           setTouched((t) => ({ ...t, confirmPin: true }));
                         }
                       }}
-                      className={`flex h-11 items-center justify-center rounded-xl text-base font-semibold transition-all active:scale-95 touch-manipulation select-none ${
-                        !k
-                          ? 'pointer-events-none opacity-0'
-                          : k === '⌫'
-                          ? 'bg-white/10 text-white/70 hover:bg-white/20'
-                          : 'bg-white/10 text-white hover:bg-[#00C896]/20 hover:text-[#00C896]'
-                      }`}
+                      className={`flex h-11 items-center justify-center rounded-xl text-base font-semibold transition-colors touch-manipulation select-none ${
+ !k
+ ? 'pointer-events-none opacity-0'
+ : k === '⌫'
+ ? 'bg-white/10 text-white/70 hover:bg-white/20'
+ : 'bg-white/10 text-white hover:bg-[#00C896]/20 hover:text-[#00C896]'
+ }`}
                     >
                       {k}
                     </button>
@@ -389,7 +389,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                 type="button"
                 onClick={handleSave}
                 disabled={saving || !isFormValid}
-                className="w-full flex items-center justify-center gap-2.5 rounded-2xl py-4 text-sm font-bold tracking-wide uppercase text-white transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2.5 rounded-2xl py-4 text-sm font-bold tracking-wide uppercase text-white transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{
                   background: isFormValid
                     ? 'linear-gradient(135deg, rgb(0, 26, 128) 0%, #001266 100%)'

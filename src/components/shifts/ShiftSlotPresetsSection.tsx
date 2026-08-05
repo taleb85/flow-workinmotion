@@ -31,7 +31,11 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
   const dragOverIndexRef = useRef<number | null>(null);
 
   const slot = slotOverride ?? getShiftSlotFromStartTime(startTime);
-  const presets = useMemo(() => loadShiftSlotPresets(slot), [slot, revision]);
+  const presets = useMemo(() => {
+    const raw = loadShiftSlotPresets(slot);
+    // Ordina per orario di inizio crescente
+    return [...raw].sort((a, b) => a.start.localeCompare(b.start));
+  }, [slot, revision]);
 
   const persist = (next: ShiftTimePreset[]) => {
     saveShiftSlotPresets(slot, next);
@@ -103,10 +107,10 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
             setNewEnd('');
           }}
           className={`shrink-0 rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
-            editMode
-              ? 'bg-accent/20 text-accent'
-              : 'bg-white/10 text-white/60 hover:text-white'
-          }`}
+ editMode
+ ? 'bg-accent/20 text-accent'
+ : 'bg-white/10 text-white/60 hover:text-white'
+ }`}
         >
           {editMode ? (tv.done ?? 'Fatto') : (tv.edit ?? 'Modifica')}
         </button>
@@ -129,8 +133,8 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
                 onDrop={(e) => handleDrop(e, i)}
                 onDragEnd={handleDragEnd}
                 className={`flex items-center gap-1.5 rounded-lg transition-colors ${
-                  isDraggingOver(i) ? 'bg-white/10 ring-1 ring-white/30' : ''
-                } ${dragIndex === i ? 'opacity-40' : ''}`}
+ isDraggingOver(i) ? 'bg-white/10 ring-1 ring-white/30' : ''
+ } ${dragIndex === i ? 'opacity-40' : ''}`}
               >
                 <span className="flex shrink-0 cursor-grab active:cursor-grabbing px-1 text-[11px] text-white/30 hover:text-white/50" aria-hidden="true">
                   ⠿
@@ -179,7 +183,7 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
           </div>
         </div>
       ) : (
-        <div className="flex flex-wrap gap-3">
+        <div className="grid grid-cols-3 gap-3">
           {presets.map(({ start, end }, i) => {
             const isActive = selectedIdx === i;
             return (
@@ -191,11 +195,11 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
                   onApply(start, end);
                   onAutoCreate?.(start, end);
                 }}
-                className={`rounded-lg px-4 py-2 text-[12px] font-bold tabular-nums transition-all duration-200 border ${
-                  isActive
-                    ? 'border-[3px] border-white bg-white/15 text-white shadow-[0_0_8px_#fff]'
-                    : 'border-transparent bg-white/15 text-white hover:bg-white/20'
-                }`}
+                className={`rounded-lg px-2 py-2 text-[12px] font-bold tabular-nums transition-colors duration-200 border whitespace-nowrap ${
+ isActive
+ ? 'border-[3px] border-white bg-white/15 text-white shadow-[0_0_8px_#fff]'
+ : 'border-transparent bg-white/15 text-white hover:bg-white/20'
+ }`}
               >
                 {start}–{end}
               </button>

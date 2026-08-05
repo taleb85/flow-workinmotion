@@ -278,13 +278,13 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       disabled={locked}
       onClick={onToggle}
       className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-40 ${
-        enabled ? 'bg-accent' : 'bg-white/20'
-      } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
+ enabled ? 'bg-accent' : 'bg-white/20'
+ } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
     >
       <span
         className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform ${
-          enabled ? 'translate-x-[18px]' : 'translate-x-[3px]'
-        }`}
+ enabled ? 'translate-x-[18px]' : 'translate-x-[3px]'
+ }`}
       />
     </button>
   );
@@ -378,10 +378,10 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   const PreviewCard = ({ children, active, label }: { children: React.ReactNode; active?: boolean; label?: string }) => (
     <div
       className={`rounded-lg border px-2.5 py-2 text-[10px] leading-tight space-y-0.5 flex-1 ${
-        active
-          ? 'border-accent/40 bg-accent/[0.06] text-white/85'
-          : 'border-neutral-500 bg-white/8 text-white/50'
-      }`}
+ active
+ ? 'border-accent/40 bg-accent/[0.06] text-white/85'
+ : 'border-neutral-500 bg-white/8 text-white/50'
+ }`}
     >
       {label && (
         <div className="text-[9px] font-bold uppercase tracking-wider text-white/50 mb-1">
@@ -397,8 +397,8 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
     <div className="flex items-center gap-0.5 rounded-xl bg-white/10 p-0.5">
       {tabs.map(tab => (
         <div key={tab.key} className={`flex flex-col items-center px-1 py-0.5 rounded-lg flex-1 text-[8px] ${
-          tab.key === highlight ? 'bg-white/15 text-accent font-bold shadow-sm' : 'text-white/50'
-        }`}>
+ tab.key === highlight ? 'bg-white/15 text-accent font-bold shadow-sm' : 'text-white/50'
+ }`}>
           <span>{tab.icon}</span>
           <span className="truncate max-w-[28px] text-center" title={tab.label}>{tab.label}</span>
         </div>
@@ -541,11 +541,11 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
 
     const ShiftCell = ({ planned, active }: { planned: boolean; active: boolean }) => (
       <div
-        className={`rounded-lg border px-2.5 py-2 text-[10px] leading-tight space-y-0.5 transition-all ${
-          active
-            ? 'border-accent/40 bg-accent/[0.06]'
-            : 'border-neutral-500 bg-white/8'
-        }`}
+        className={`rounded-lg border px-2.5 py-2 text-[10px] leading-tight space-y-0.5 transition-colors ${
+ active
+ ? 'border-accent/40 bg-accent/[0.06]'
+ : 'border-neutral-500 bg-white/8'
+ }`}
         style={{ minWidth: 110 }}
       >
         {/* header */}
@@ -708,7 +708,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
               key={u.id}
               type="button"
               onClick={() => setMobileSelectedUserId(u.id)}
-              className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl border-2 transition-all ${isSelected ? 'border-accent bg-white/20' : 'border border-neutral-500 bg-white/8'}`}
+              className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl border-2 transition-colors ${isSelected ? 'border-accent bg-white/20' : 'border border-neutral-500 bg-white/8'}`}
             >
               <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-[11px] font-bold" style={{ backgroundColor: color }}>
                 {initials(u)}

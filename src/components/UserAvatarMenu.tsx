@@ -165,14 +165,14 @@ export default function UserAvatarMenu({
           title={titleHint}
           aria-label={titleHint}
           className={`flex items-center justify-end min-w-0 max-w-full min-h-[44px] hover:bg-slate-50 active:bg-slate-100/80 transition-colors touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-accent/25 focus-visible:ring-offset-1 ${
-            dense ? 'gap-1 py-0.5 pl-1 rounded-lg' : 'gap-2 py-1 pl-2 rounded-xl'
-          }`}
+ dense ? 'gap-1 py-0.5 pl-1 rounded-lg' : 'gap-2 py-1 pl-2 rounded-xl'
+ }`}
         >
           <div className="flex flex-col items-end min-w-0 text-right">
             <span
               className={`font-semibold text-white uppercase tracking-wide truncate max-w-[200px] ${
-                dense ? 'text-xs' : 'text-sm'
-              }`}
+ dense ? 'text-xs' : 'text-sm'
+ }`}
              title={displayName}>{displayName}
             </span>
             {displayRole ? (
@@ -189,7 +189,7 @@ export default function UserAvatarMenu({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           aria-label={titleHint}
-          className="flex items-center gap-1.5 sm:gap-2 min-w-0 rounded-xl border border-accent/30 bg-accent hover:bg-accent-hover active:scale-[0.98] transition-all outline-none focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2 min-h-[44px] touch-manipulation pl-3 pr-3"
+          className="flex items-center gap-1.5 sm:gap-2 min-w-0 rounded-xl border border-accent/30 bg-accent hover:bg-accent-hover transition-colors outline-none focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2 min-h-[44px] touch-manipulation pl-3 pr-3"
         >
           <div className="flex flex-col items-start min-w-0 overflow-hidden text-left">
             <span className="text-xs font-semibold text-white truncate w-full uppercase tracking-wide leading-tight" title={displayName}>{displayName}
@@ -253,7 +253,7 @@ export default function UserAvatarMenu({
                           setIsOpen(false);
                           onLogout();
                         }}
-                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-red-200 bg-red-50 text-red-700 font-semibold text-sm hover:bg-red-100 active:scale-[0.98] transition-all"
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-red-200 bg-red-50 text-red-700 font-semibold text-sm hover:bg-red-100 transition-colors"
                       >
                         <LogOut className="w-4 h-4 shrink-0" strokeWidth={2} />
                         {t.header_logout}

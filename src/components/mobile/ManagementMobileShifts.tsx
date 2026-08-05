@@ -154,7 +154,7 @@ function MyShiftsSection({
               key={wIdx}
               type="button"
               onClick={() => toggleWeek(wIdx)}
-              className="w-full flex items-center justify-between rounded-2xl border border-neutral-500 px-4 py-3 text-left transition-all hover:border-white/20 active:brightness-95"
+              className="w-full flex items-center justify-between rounded-2xl border border-neutral-500 px-4 py-3 text-left transition-colors hover:border-white/20 active:brightness-95"
               style={cardBg}
             >
               <div className="flex flex-col gap-0.5">
@@ -212,13 +212,13 @@ function MyShiftsSection({
                         {dayLetters[i]}
                       </span>
                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold ${
-                        isToday_ ? 'bg-white/20 text-white' : 'text-white/55'
-                      }`}>
+ isToday_ ? 'bg-white/20 text-white' : 'text-white/55'
+ }`}>
                         {format(day, 'd')}
                       </div>
-                      <div className={`w-full rounded-lg flex flex-col items-center justify-center py-1.5 px-0.5 min-h-[38px] transition-all ${blockCls} ${
-                        isSelected ? 'ring-2 ring-white/40 ring-offset-1' : ''
-                      }`}>
+                      <div className={`w-full rounded-lg flex flex-col items-center justify-center py-1.5 px-0.5 min-h-[38px] transition-colors ${blockCls} ${
+ isSelected ? 'ring-2 ring-white/40 ring-offset-1' : ''
+ }`}>
                         {shiftCount > 0 && (
                           <span className="text-[13px] font-black text-white leading-none drop-shadow-sm">
                             {shiftCount}
@@ -246,7 +246,7 @@ function MyShiftsSection({
                 <button
                   type="button"
                   onClick={() => toggleWeek(wIdx)}
-                  className="flex items-center gap-1 px-2 h-7 rounded-lg border transition-all text-[11px] font-black uppercase tracking-widest border-white/20 text-white/80"
+                  className="flex items-center gap-1 px-2 h-7 rounded-lg border transition-colors text-[11px] font-black uppercase tracking-widest border-white/20 text-white/80"
                   style={{ background: 'rgba(15, 35, 90, 0.82)' }}
                 >
                   <span>{isOpen ? (t.collapse ?? 'Comprimi') : (t.ts_period_week ?? 'Espandi')}</span>
@@ -386,8 +386,8 @@ function TeamShiftsSection({
             >
               <div className="flex items-center gap-2 min-w-0">
                 <span className={`text-[11px] font-black uppercase tracking-widest truncate ${
-                  isToday_ ? 'text-white' : 'text-white/55'
-                }`}>
+ isToday_ ? 'text-white' : 'text-white/55'
+ }`}>
                   {format(day, 'EEE d MMM', { locale })}
                 </span>
                 {isToday_ && <span className="h-1.5 w-1.5 rounded-full bg-white/60 shrink-0" />}

@@ -254,7 +254,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
     <div className="rounded-2xl border border-white/10 bg-black/20 p-4 space-y-4 mt-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-white/90">Importa turni storici</h3>
-<button onClick={onClose} className="text-white/40 hover:text-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><X className="w-4 h-4" /></button>
+<button onClick={onClose} className="text-white/40 hover:text-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><X className="w-4 h-4" /></button>
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -273,7 +273,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
           {fileName ? fileName.slice(0, 22) + (fileName.length > 22 ? '…' : '') : 'Carica CSV'}
         </button>
         <button onClick={downloadTemplate}
-className="rounded-xl border border-neutral-500 bg-white/5 px-3 py-2 text-xs text-white/50 hover:text-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+className="rounded-xl border border-neutral-500 bg-white/5 px-3 py-2 text-xs text-white/50 hover:text-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
           Template
         </button>
       </div>
@@ -340,7 +340,7 @@ className="rounded-xl border border-neutral-500 bg-white/5 px-3 py-2 text-xs tex
           </div>
           <div className="flex gap-2">
             <button onClick={handleImport} disabled={!canImport || importing}
-className={`rounded-xl px-4 py-2 text-xs font-bold ${canImport && !importing ? 'bg-emerald-600 text-white hover:bg-emerald-500' : 'bg-white/5 text-white/30 cursor-not-allowed'} transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
+className={`rounded-xl px-4 py-2 text-xs font-bold ${canImport && !importing ? 'bg-emerald-600 text-white hover:bg-emerald-500' : 'bg-white/5 text-white/30 cursor-not-allowed'} transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
               {importing ? 'Importando…' : `Importa ${matched.length} turni`}
             </button>
             <button onClick={() => { setRows([]); setFileName(''); setImportResult(null); }}

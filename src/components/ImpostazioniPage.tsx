@@ -112,7 +112,7 @@ const FeatureCard = memo(function FeatureCard({
                 type="button"
                 aria-expanded={detailsExpanded}
                 onClick={onToggleDetail}
-className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-accent hover:text-accent/80 active:text-accent/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-accent hover:text-accent/80 active:text-accent/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               >
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${detailsExpanded ? 'rotate-180' : ''}`} />
                 {toggleDetailLabel}

@@ -98,20 +98,20 @@ export default function StaffOperationalPermissionsEditor({ user, currentUser }:
                     disabled={busyKey !== null}
                     onClick={() => void handleToggle(perm.key, perm.adminOnly)}
                     className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200 ${
-                      enabled ? 'bg-accent' : 'bg-white/20'
-                    } ${busyKey !== null ? 'cursor-wait opacity-60' : ''}`}
+ enabled ? 'bg-accent' : 'bg-white/20'
+ } ${busyKey !== null ? 'cursor-wait opacity-60' : ''}`}
                   >
                     <span
                       className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${
-                        enabled ? 'translate-x-5' : 'translate-x-0'
-                      }`}
+ enabled ? 'translate-x-5' : 'translate-x-0'
+ }`}
                     />
                   </button>
                 ) : (
                   <span
                     className={`shrink-0 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${
-                      enabled ? 'bg-accent text-white shadow-sm' : 'bg-slate-100 text-white/60'
-                    }`}
+ enabled ? 'bg-accent text-white shadow-sm' : 'bg-slate-100 text-white/60'
+ }`}
                   >
                     {enabled ? t.role_template_yes : t.role_template_no}
                   </span>

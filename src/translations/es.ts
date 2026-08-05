@@ -560,6 +560,8 @@ const baseEs: Record<string, string> = {
   notif_push_not_supported: 'Notificaciones no compatibles con este dispositivo.',
   notif_push_saved: 'Preferencia de notificaciones guardada.',
 
+  messages_tab: 'Mensajes',
+  notifications_tab: 'Notificaciones',
   messages_title: 'Mensajes',
   messages_new_chat: 'Nueva conversación',
   messages_new_conversation: 'Nueva conversación',

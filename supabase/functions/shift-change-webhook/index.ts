@@ -37,6 +37,8 @@ function buildMessage(p: Payload): { recipientId: string; title: string; body: s
   if (!type) return null;
 
   if (type === 'DELETE' && old_record) {
+    // Ignora eliminazione turni in bozza
+    if (old_record.approval_status === 'draft') return null;
     const uid = old_record.user_id;
     if (typeof uid !== 'string') return null;
     return {
@@ -68,6 +70,9 @@ function buildMessage(p: Payload): { recipientId: string; title: string; body: s
         body: `Il tuo turno del ${fmtDate(record.date)} è stato pubblicato: ${fmtRange(record)}`,
       };
     }
+
+    // Ignora modifiche a turni ancora in bozza
+    if (record.approval_status === 'draft') return null;
 
     if (
       old_record.date === record.date &&

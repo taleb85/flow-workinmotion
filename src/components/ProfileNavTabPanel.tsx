@@ -350,7 +350,7 @@ export default function ProfileNavTabPanel({
     setTimeout(() => setLangSaved(false), 2000);
   };
 
-  const _menuRowBase = 'w-full flex items-center justify-between rounded-xl px-4 py-3.5 transition-all active:scale-[0.98] border border-neutral-500 hover:bg-white/10';
+  const _menuRowBase = 'w-full flex items-center justify-between rounded-xl px-4 py-3.5 transition-colors  border border-neutral-500 hover:bg-white/10';
   const chevronCls = 'text-white/60';
   const rowLabelCls = 'text-[13px] font-semibold text-white';
 
@@ -421,7 +421,7 @@ export default function ProfileNavTabPanel({
               aria-expanded={preferNativePhotoPicker ? undefined : photoSourceSheetOpen}
               aria-haspopup={preferNativePhotoPicker ? undefined : 'menu'}
               aria-controls={preferNativePhotoPicker ? undefined : 'profile-photo-source-menu'}
-              className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-md outline-none transition-colors hover:opacity-90 active:scale-[0.96] disabled:opacity-50 touch-manipulation focus-visible:ring-2 focus-visible:ring-white/50"
+              className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-md outline-none transition-colors hover:opacity-90 disabled:opacity-50 touch-manipulation focus-visible:ring-2 focus-visible:ring-white/50"
               style={{ background: 'rgba(255,255,255,0.12)' }}
               title={changePhoto}
               aria-label={changePhoto}
@@ -435,7 +435,7 @@ export default function ProfileNavTabPanel({
                 type="button"
                 onClick={(ev) => { ev.stopPropagation(); void handleRemovePhoto(); }}
                 disabled={photoBusy}
-                className="absolute -top-2 -right-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white shadow-md outline-none transition-colors hover:opacity-90 active:scale-[0.96] disabled:opacity-50 touch-manipulation focus-visible:ring-2 focus-visible:ring-white/50"
+                className="absolute -top-2 -right-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white shadow-md outline-none transition-colors hover:opacity-90 disabled:opacity-50 touch-manipulation focus-visible:ring-2 focus-visible:ring-white/50"
                 style={{ background: 'rgba(220,38,38,0.90)' }}
                 title={tv.profile_tab_remove_photo_confirm ?? 'Rimuovi foto'}
                 aria-label={tv.profile_tab_remove_photo_confirm ?? 'Rimuovi foto'}
@@ -489,7 +489,7 @@ export default function ProfileNavTabPanel({
 
           {/* Impostazioni profilo */}
           <div className="rounded-xl overflow-hidden border border-neutral-500">
-            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-all active:scale-[0.98] hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('settings')}>
+            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('settings')}>
               <span className={rowLabelCls}>{tv.profile_tab_group_settings ?? 'Impostazioni profilo'}</span>
               <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'settings' ? 'rotate-90' : ''}`} />
             </button>
@@ -516,7 +516,7 @@ export default function ProfileNavTabPanel({
 
           {/* Notifiche */}
           <div className="rounded-xl overflow-hidden border border-neutral-500">
-            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-all active:scale-[0.98] hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('notif')}>
+            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('notif')}>
               <span className={rowLabelCls}>{tv.profile_notifications ?? 'Notifiche'}</span>
               <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'notif' ? 'rotate-90' : ''}`} />
             </button>
@@ -533,7 +533,7 @@ export default function ProfileNavTabPanel({
 
           {/* Lingua */}
           <div className="rounded-xl overflow-hidden border border-neutral-500">
-            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-all active:scale-[0.98] hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('lang')}>
+            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('lang')}>
               <span className={rowLabelCls}>{t.language ?? 'Lingua'}</span>
               <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'lang' ? 'rotate-90' : ''}`} />
             </button>
@@ -573,7 +573,7 @@ export default function ProfileNavTabPanel({
                       type="button"
                       disabled={langSaving || (!hasLangChanges && !langSaved)}
                       onClick={() => void saveLang()}
-                      className="w-full py-2.5 rounded-xl text-sm font-bold transition-all active:scale-[0.98] disabled:opacity-40"
+                      className="w-full py-2.5 rounded-xl text-sm font-bold transition-colors disabled:opacity-40"
                       style={langSaved
                         ? { background: '#10b981', color: '#fff' }
                         : hasLangChanges
@@ -598,7 +598,7 @@ export default function ProfileNavTabPanel({
             <button
               type="button"
               onClick={() => setShowMgmtPinPad(true)}
-              className="w-full flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-all active:scale-[0.98]"
+              className="w-full flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-colors"
               style={{
                 background: 'rgba(99, 102, 241, 0.15)',
                 border: '1px solid rgba(99, 102, 241, 0.35)',

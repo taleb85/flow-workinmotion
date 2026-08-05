@@ -1587,7 +1587,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
 
   const getCellStyle = (shift: Shift, isSelected: boolean, _hasAnySelected: boolean, colorVariant: ShiftColorVariant = 'planned') => {
     const v = VARIANT_CLASSES[colorVariant];
-    let base = `relative group flex flex-col items-start justify-start ${v.bg} ${v.text} transition-all `;
+    let base = `relative group flex flex-col items-start justify-start ${v.bg} ${v.text} transition-colors `;
     if (v.border) base += `${v.border} `;
     if (v.borderBottom) base += `${v.borderBottom} `;
     const selectedStyle = isSelected
@@ -2232,8 +2232,8 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                     setShowPeriodPopover((v) => !v);
                   }}
                   className={`ui-toolbar-tab !px-4 lg:!px-5 !text-[11px] lg:!text-sm shrink-0 ${
-                    showPeriodPopover ? 'bg-accent/8 text-accent' : 'text-white/85 hover:bg-white/10'
-                  } active:bg-white/10'/80`}
+ showPeriodPopover ? 'bg-accent/8 text-accent' : 'text-white/85 hover:bg-white/10'
+ } active:bg-white/10'/80`}
                   title="Seleziona periodo"
                 >
                   <span className="text-[12px] lg:text-sm font-bold tabular-nums capitalize text-white">
@@ -2308,18 +2308,18 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                             type="button"
                             onClick={() => { applyAndSavePeriodWst(cfg); setShowPeriodPopover(false); }}
                             className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-left transition-colors ${
-                              isActive
-                                ? 'bg-accent/15'
-                                : 'hover:bg-white/8'
-                            } active:bg-white/10`}
+ isActive
+ ? 'bg-accent/15'
+ : 'hover:bg-white/8'
+ } active:bg-white/10`}
                           >
                             <span className={`text-[12px] font-bold capitalize ${
-                              isActive
-                                ? 'text-accent'
-                                : isCurrentMonth
-                                  ? 'text-white'
-                                  : 'text-white/70'
-                            }`}>
+ isActive
+ ? 'text-accent'
+ : isCurrentMonth
+ ? 'text-white'
+ : 'text-white/70'
+ }`}>
                               {format(new Date(listYear, monthIdx, 1), 'MMMM', { locale: getDateLocale(effectiveLanguage) ?? it })}
                               {listYear !== nowYear && (
                                 <span className="ml-1 text-[11px] font-normal text-white/40">{listYear}</span>
@@ -2329,10 +2329,10 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                               )}
                             </span>
                             <span className={`shrink-0 text-[11px] tabular-nums ${
-                              isActive
-                                ? 'font-bold text-accent'
-                                : 'text-white/45'
-                            }`}>
+ isActive
+ ? 'font-bold text-accent'
+ : 'text-white/45'
+ }`}>
                               {format(s, 'dd/MM', { locale: getDateLocale(effectiveLanguage) ?? it })}–{format(e, 'dd/MM', { locale: getDateLocale(effectiveLanguage) ?? it })}
                               <span className={`ml-1 font-extrabold ${cfg.numWeeks === 5 ? 'text-cyan-300' : ''}`}>
                                 {cfg.numWeeks}s
@@ -2369,10 +2369,10 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                 });
               }}
               className={`ui-toolbar-tab !px-2 !text-[11px] lg:!px-2.5 lg:!text-xs shrink-0 ${
-                wstToolbarDrawerOpen && wstToolbarDrawerSection === 'department'
-                  ? 'bg-accent/8 text-accent'
-                  : 'text-white/70 hover:bg-white/10'
-              } ${localFilterDepartment !== '' ? 'font-extrabold' : ''} active:bg-white/10'/80`}
+ wstToolbarDrawerOpen && wstToolbarDrawerSection === 'department'
+ ? 'bg-accent/8 text-accent'
+ : 'text-white/70 hover:bg-white/10'
+ } ${localFilterDepartment !== '' ? 'font-extrabold' : ''} active:bg-white/10'/80`}
               aria-expanded={wstToolbarDrawerOpen && wstToolbarDrawerSection === 'department'}
               aria-haspopup="true"
               title={t.wst_department_button}
@@ -2420,11 +2420,11 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                           setWstToolbarDrawerOpen(false);
                           setWstToolbarDrawerSection(null);
                         }}
-                        className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-all ${
-                          localFilterDepartment === dept
-                            ? 'bg-accent text-white shadow-md'
-                            : 'text-white/70 hover:bg-white/10'
-                        } active:bg-white/10'/80`}
+                        className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${
+ localFilterDepartment === dept
+ ? 'bg-accent text-white shadow-md'
+ : 'text-white/70 hover:bg-white/10'
+ } active:bg-white/10'/80`}
                       >
                         <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                           {dept ? (
@@ -2473,11 +2473,11 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                             setWstToolbarDrawerOpen(false);
                             setWstToolbarDrawerSection(null);
                           }}
-                          className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-all ${
-                            localFilterDepartment === dept
-                              ? 'bg-accent text-white shadow-md'
-                              : 'text-white/70 hover:bg-white/10'
-                          } active:bg-white/10'/80`}
+                          className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${
+ localFilterDepartment === dept
+ ? 'bg-accent text-white shadow-md'
+ : 'text-white/70 hover:bg-white/10'
+ } active:bg-white/10'/80`}
                         >
                           <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                             {dept ? (
@@ -2510,7 +2510,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                 setUndoStack(rest);
                 await top.fn();
               }}
-              className="inline-flex h-9 max-h-9 min-h-9 lg:h-10 lg:max-h-10 lg:min-h-10 shrink-0 items-center gap-1 rounded-lg px-2 lg:px-2.5 text-[11px] lg:text-xs font-semibold shadow-sm transition-all"
+              className="inline-flex h-9 max-h-9 min-h-9 lg:h-10 lg:max-h-10 lg:min-h-10 shrink-0 items-center gap-1 rounded-lg px-2 lg:px-2.5 text-[11px] lg:text-xs font-semibold shadow-sm transition-colors"
               style={{ background: 'rgba(15, 35, 90, 0.82)', border: '1px solid rgba(255,255,255,0.24)', color: 'rgba(255,255,255,0.90)' }}
               title={undoStack[0]?.label ?? 'Annulla ultima azione'}
             >
@@ -2579,8 +2579,8 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                 });
               }}
               className={`ui-toolbar-chip !inline-flex !h-9 !min-h-9 lg:!h-10 lg:!min-h-10 !px-2 lg:!px-2.5 !text-[11px] lg:!text-xs shrink-0 text-white/70 hover:bg-white/10 ${
-                wstToolbarDrawerOpen && wstToolbarDrawerSection !== 'department' ? 'border-accent/35 bg-accent/8 ring-1 ring-accent/15' : ''
-              } ${localFilterStatus !== 'all' ? 'border-accent/25 bg-accent/5' : ''} active:bg-white/80`}
+ wstToolbarDrawerOpen && wstToolbarDrawerSection !== 'department' ? 'border-accent/35 bg-accent/8 ring-1 ring-accent/15' : ''
+ } ${localFilterStatus !== 'all' ? 'border-accent/25 bg-accent/5' : ''} active:bg-white/80`}
               aria-expanded={wstToolbarDrawerOpen}
               aria-haspopup="true"
               title={(t as Record<string, string>).wst_toolbar_hamburger_title}
@@ -2619,8 +2619,8 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                   </span>
                   <ChevronDown
                     className={`h-4 w-4 shrink-0 text-white/40 transition-transform ${
-                      wstToolbarDrawerSection === 'filters' ? '-rotate-180' : ''
-                    }`}
+ wstToolbarDrawerSection === 'filters' ? '-rotate-180' : ''
+ }`}
                     strokeWidth={2.25}
                     aria-hidden
                   />
@@ -2646,8 +2646,8 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                             closeWstToolbarDrawer();
                           }}
                           className={`w-full px-2 py-1.5 text-left text-[11px] flex items-center gap-2 ${
-                            active ? 'bg-accent/10 text-accent font-semibold' : 'text-white/85 hover:bg-white/10'
-                          } active:bg-white/10'/80`}
+ active ? 'bg-accent/10 text-accent font-semibold' : 'text-white/85 hover:bg-white/10'
+ } active:bg-white/10'/80`}
                         >
                           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-neutral-500 bg-white/8">
                             <Icon className={`h-3.5 w-3.5 ${active ? 'text-accent' : 'text-white/50'}`} strokeWidth={2.25} />
@@ -2688,8 +2688,8 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                   </span>
                   <ChevronDown
                     className={`h-4 w-4 shrink-0 text-white/40 transition-transform ${
-                      wstToolbarDrawerSection === 'legend' ? '-rotate-180' : ''
-                    }`}
+ wstToolbarDrawerSection === 'legend' ? '-rotate-180' : ''
+ }`}
                     strokeWidth={2.25}
                     aria-hidden
                   />
@@ -2814,10 +2814,10 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                             setWeekIndex(0);
                           }}
                           className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-bold transition-colors ${
-                            periodDraftNumWeeks === 4
-                              ? 'bg-accent text-white'
-                              : ''
-                          }`}
+ periodDraftNumWeeks === 4
+ ? 'bg-accent text-white'
+ : ''
+ }`}
                           style={periodDraftNumWeeks !== 4 ? { background: 'rgba(255,255,255,0.13)', color: 'rgba(255,255,255,0.85)' } : {}}
                         >
                           {t.ts_preset_4weeks}
@@ -2830,10 +2830,10 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                             setWeekIndex(0);
                           }}
                           className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-bold transition-colors ${
-                            periodDraftNumWeeks === 5
-                              ? 'bg-accent text-white'
-                              : ''
-                          }`}
+ periodDraftNumWeeks === 5
+ ? 'bg-accent text-white'
+ : ''
+ }`}
                           style={periodDraftNumWeeks !== 5 ? { background: 'rgba(255,255,255,0.13)', color: 'rgba(255,255,255,0.85)' } : {}}
                         >
                           {t.ts_preset_5weeks}
@@ -2846,9 +2846,9 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                           closeWstToolbarDrawer();
                         }}
                         disabled={periodDraftSaved}
-                        className={`mt-2 w-full rounded-lg px-3 py-2 text-xs font-bold transition-all ${
-                          periodDraftSaved ? 'cursor-not-allowed' : 'hover:opacity-90'
-                        } active:opacity-80`}
+                        className={`mt-2 w-full rounded-lg px-3 py-2 text-xs font-bold transition-colors ${
+ periodDraftSaved ? 'cursor-not-allowed' : 'hover:opacity-90'
+ } active:opacity-80`}
                         style={periodDraftSaved
                           ? { background: 'rgba(15, 35, 90, 0.82)', color: 'rgba(255,255,255,0.35)' }
                           : { background: '#3b82f6', color: '#ffffff' }
@@ -3157,7 +3157,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                 <History className="h-4 w-4 text-white/70" />
                 <h3 className="text-sm font-bold text-white">{t.wst_schedule_history_title}</h3>
               </div>
-<button type="button" onClick={() => setShowHistoryModal(false)} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" aria-label={t.close ?? 'Chiudi'}>
+<button type="button" onClick={() => setShowHistoryModal(false)} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" aria-label={t.close ?? 'Chiudi'}>
                 <X className="h-4 w-4" aria-hidden />
               </button>
             </div>
@@ -3209,7 +3209,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                 <EyeOff className="h-4 w-4 text-white/70" />
                 <h3 className="text-sm font-bold text-white">{t.wst_hidden_periods_modal_title}</h3>
               </div>
-<button type="button" onClick={() => setShowHiddenPeriodsModal(false)} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" aria-label={t.close ?? 'Chiudi'}>
+<button type="button" onClick={() => setShowHiddenPeriodsModal(false)} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" aria-label={t.close ?? 'Chiudi'}>
                 <X className="h-4 w-4" aria-hidden />
               </button>
             </div>
@@ -3250,7 +3250,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
           <div className="modal-glass-panel flex max-h-[80vh] min-h-0 w-full max-w-sm flex-col overflow-hidden rounded-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex flex-shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
               <h3 className="text-sm font-bold text-white">{t.names_list_title}</h3>
-<button type="button" onClick={() => { setShowEditViewModal(false); setEditingNameUserId(null); setDraggingEditViewUserId(null); setDropTargetEditViewIdx(null); }} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80 transition-all hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+<button type="button" onClick={() => { setShowEditViewModal(false); setEditingNameUserId(null); setDraggingEditViewUserId(null); setDropTargetEditViewIdx(null); }} className="rounded-xl p-1.5 text-white/50 hover:bg-white/10 active:bg-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -3405,7 +3405,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                       type="button"
                       onClick={handleSaveOrder}
                       disabled={savingOrder}
-                      className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-accent text-white text-xs font-semibold uppercase hover:bg-accent-hover active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none transition-all shadow-sm hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+                      className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-accent text-white text-xs font-semibold uppercase hover:bg-accent-hover disabled:opacity-70 disabled:pointer-events-none transition-colors shadow-sm hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                     >
                       {savingOrder ? <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" /> : null}
                       <span>{t.save}</span>
@@ -3429,18 +3429,18 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
       {/* Barra date: sticky; bordo/ombra solo sulla card (stesso box) così sembra che fluttui — niente striscia full-bleed */}
       <div
         className={`sticky z-[39] mt-2 mb-2 sm:mt-2 ${
-          stickyDateBarInScrollPane ? 'top-0' : 'top-[var(--app-sticky-header-offset)]'
-        }`}
+ stickyDateBarInScrollPane ? 'top-0' : 'top-[var(--app-sticky-header-offset)]'
+ }`}
       >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.04, duration: 0.2 }}
           className={`rounded-lg overflow-hidden border-0 bg-transparent transition-[box-shadow,backdrop-filter] duration-300 ease-out ${
-            dateBarStuck
-              ? 'shadow-md backdrop-blur-md)]'
-              : 'shadow-none backdrop-blur-[2px]'
-          } ${viewMode === 'month' ? 'flex h-[22px] items-stretch' : 'relative h-[38px] min-h-[38px]'}`}
+ dateBarStuck
+ ? 'shadow-md backdrop-blur-md)]'
+ : 'shadow-none backdrop-blur-[2px]'
+ } ${viewMode === 'month' ? 'flex h-[22px] items-stretch' : 'relative h-[38px] min-h-[38px]'}`}
         >
           {viewMode === 'month' ? (
             <>
@@ -3554,7 +3554,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                 type="button"
                 disabled={weekIndex <= 0}
                 onClick={() => setWeekIndex((i) => Math.max(0, i - 1))}
-                className="absolute left-0.5 top-1/2 z-30 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 text-white/70 shadow-sm backdrop-blur-md transition-[color,box-shadow,transform] hover:border-white/40 hover:bg-white/15 hover:text-white active:scale-95 disabled:pointer-events-none disabled:opacity-0 bg-black/30"
+                className="absolute left-0.5 top-1/2 z-30 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 text-white/70 shadow-sm backdrop-blur-md transition-[color,box-shadow,transform] hover:border-white/40 hover:bg-white/15 hover:text-white disabled:pointer-events-none disabled:opacity-0 bg-black/30"
                 aria-label={t.week_prev}
               >
                 <ChevronLeft className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
@@ -3563,7 +3563,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                 type="button"
                 disabled={weekIndex >= maxWeekIndex}
                 onClick={() => setWeekIndex((i) => Math.min(maxWeekIndex, i + 1))}
-                className="absolute right-0.5 top-1/2 z-30 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 text-white/70 shadow-sm backdrop-blur-md transition-[color,box-shadow,transform] hover:border-white/40 hover:bg-white/15 hover:text-white active:scale-95 disabled:pointer-events-none disabled:opacity-0 bg-black/30"
+                className="absolute right-0.5 top-1/2 z-30 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 text-white/70 shadow-sm backdrop-blur-md transition-[color,box-shadow,transform] hover:border-white/40 hover:bg-white/15 hover:text-white disabled:pointer-events-none disabled:opacity-0 bg-black/30"
                 aria-label={t.week_next}
               >
                 <ChevronRight className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
@@ -3686,28 +3686,28 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                       if (ids.length > 0 && canEditShifts) setSidebarOpen(true);
                     }}
                     className={`min-h-[72px] sm:min-h-[84px] p-2 text-left transition-colors border-b border-white/10 ${!isLastCol ? 'border-r border-r-white/10' : ''} ${
-                      !inPlanning
-                        ? 'hover:bg-white/5'
-                        : isPayrollDay
-                          ? 'bg-cyan-600/10 ring-1 ring-inset ring-cyan-600/40 hover:bg-cyan-600/15'
-                          : isTodayDate
-                            ? 'bg-accent/8 hover:bg-accent/12'
-                            : 'hover:bg-white/8'
-                    } active:bg-white/5'/80`}
+ !inPlanning
+ ? 'hover:bg-white/5'
+ : isPayrollDay
+ ? 'bg-cyan-600/10 ring-1 ring-inset ring-cyan-600/40 hover:bg-cyan-600/15'
+ : isTodayDate
+ ? 'bg-accent/8 hover:bg-accent/12'
+ : 'hover:bg-white/8'
+ } active:bg-white/5'/80`}
                   >
                     {/* Numero giorno */}
                     <span
                       className={`inline-flex w-6 h-6 items-center justify-center rounded-full text-xs font-bold ${
-                        isTodayDate && inPlanning
-                          ? 'bg-accent text-white'
-                          : !inPlanning
-                            ? isPayrollDay
-                              ? 'bg-cyan-600/20 text-white/50 ring-1 ring-cyan-600/40'
-                              : 'text-white/25'
-                            : isPayrollDay
-                              ? 'bg-cyan-600 text-white'
-                              : 'text-white/70'
-                      }`}
+ isTodayDate && inPlanning
+ ? 'bg-accent text-white'
+ : !inPlanning
+ ? isPayrollDay
+ ? 'bg-cyan-600/20 text-white/50 ring-1 ring-cyan-600/40'
+ : 'text-white/25'
+ : isPayrollDay
+ ? 'bg-cyan-600 text-white'
+ : 'text-white/70'
+ }`}
                     >
                       {format(day, 'd')}
                     </span>
@@ -3966,7 +3966,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                                     }}
                                     onDragEnd={() => { setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
                                     onContextMenu={(e) => canEditInApp ? handleShiftContextMenu(e, user.id, dayStr, shift) : e.preventDefault()}
-                                    className={`w-full rounded-md flex items-center justify-between gap-1 px-1.5 text-[12px] font-bold select-none transition-all cursor-grab active:cursor-grabbing ${fv.bg} ${fv.text} ${flatBorderCls} ${isSelected ? 'ring-2 ring-brand-electric ring-offset-1' : ''}`}
+                                    className={`w-full rounded-md flex items-center justify-between gap-1 px-1.5 text-[12px] font-bold select-none transition-colors cursor-grab active:cursor-grabbing ${fv.bg} ${fv.text} ${flatBorderCls} ${isSelected ? 'ring-2 ring-brand-electric ring-offset-1' : ''}`}
                                     style={{ height: '28px' }}
                                   >
                                     {isSelected ? (
@@ -4252,16 +4252,16 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                           <td
                             key={dayStr}
                             className={`px-0 py-0 min-w-0 snap-start group border-r border-slate-400 ${pasteMode ? 'cursor-crosshair' : ''} ${
-                              pasteMode
-                                ? 'ring-2 ring-inset ring-accent/20 hover:ring-accent/60 hover:bg-accent/5 transition-colors'
-                                : isPayrollCol
-                                  ? 'bg-cyan-600/6 ring-1 ring-inset ring-brand-electric/18'
-                                  : isToday(day)
-                                    ? 'bg-accent/5'
-                                    : isUnavailDay
-                                      ? 'bg-red-500/20'
-                                      : 'bg-white/5'
-                            } active:bg-accent/5/80`}
+ pasteMode
+ ? 'ring-2 ring-inset ring-accent/20 hover:ring-accent/60 hover:bg-accent/5 transition-colors'
+ : isPayrollCol
+ ? 'bg-cyan-600/6 ring-1 ring-inset ring-brand-electric/18'
+ : isToday(day)
+ ? 'bg-accent/5'
+ : isUnavailDay
+ ? 'bg-red-500/20'
+ : 'bg-white/5'
+ } active:bg-accent/5/80`}
                             style={{ width: `calc(100% / ${allWeekDays.length})` }}
                           >
                             {/* Indisponibilità indicator + toggle (solo per staff sulla propria riga) */}
@@ -4319,20 +4319,20 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                                 onDrop={(e) => { e.preventDefault(); if (draggedShiftId) { if (e.shiftKey || dragCopyMode) { handleDropShiftCopy(draggedShiftId, user.id, dayStr); } else { handleDropShift(draggedShiftId, user.id, dayStr); } setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); } }}
                                 title={dayShift && needsCambioWarning(dayShift) ? t.no_change_at_16 : undefined}
                                 className={`flex flex-col focus:outline-none ${
-                                  dayShift
-                                    ? dayVariant === 'planned'
-                                      ? 'border-b-2 border-dashed border-neutral-500'
-                                      : dayVariant === 'inprogress'
-                                        ? 'border-b-2 border-brand-electric/60'
-                                        : dayVariant === 'punchMissing'
-                                          ? 'border-b-2 border-amber-500/55'
-                                          : dayVariant === 'absent'
-                                            ? 'border-b-2 border-rose-400/60'
-                                            : dayVariant === 'approved'
-                                              ? 'border-b-2 border-brand-electric/50'
-                                              : 'border-b-2 border-slate-400'
-                                    : 'border-b-2 border-slate-400'
-                                } relative select-none ${hasOverlap ? 'shadow-[0_0_10px_rgba(239,68,68,0.5)]' : ''} ${dropTargetKey === `${user.id}_${dayStr}_0` ? (dragCopyMode ? 'bg-accent/10 border-2 border-accent' : 'bg-amber-100 border-2 border-amber-400') : dayShift ? getCellStyle(dayShift, selectedShiftIds.includes(dayShift.id) || isInDragRect(0), selectedShiftIds.length > 0, dayVariant) : isInDragRect(0) ? 'bg-accent/10 border-2 border-accent' : 'border border-white/[0.12]'} ${dayShift ? 'shift-card-hover-group' : ''} ${!dayShift && canManageThisUser ? 'cursor-pointer hover:bg-white/[0.08]' : !dayShift ? 'cursor-default' : dayShift && canEditInApp ? 'cursor-pointer hover:ring-2 hover:ring-accent/40 hover:ring-inset' : ''}`}
+ dayShift
+ ? dayVariant === 'planned'
+ ? 'border-b-2 border-dashed border-neutral-500'
+ : dayVariant === 'inprogress'
+ ? 'border-b-2 border-brand-electric/60'
+ : dayVariant === 'punchMissing'
+ ? 'border-b-2 border-amber-500/55'
+ : dayVariant === 'absent'
+ ? 'border-b-2 border-rose-400/60'
+ : dayVariant === 'approved'
+ ? 'border-b-2 border-brand-electric/50'
+ : 'border-b-2 border-slate-400'
+ : 'border-b-2 border-slate-400'
+ } relative select-none ${hasOverlap ? 'shadow-[0_0_10px_rgba(239,68,68,0.5)]' : ''} ${dropTargetKey ===`${user.id}_${dayStr}_0` ? (dragCopyMode ? 'bg-accent/10 border-2 border-accent' : 'bg-amber-100 border-2 border-amber-400') : dayShift ? getCellStyle(dayShift, selectedShiftIds.includes(dayShift.id) || isInDragRect(0), selectedShiftIds.length > 0, dayVariant) : isInDragRect(0) ? 'bg-accent/10 border-2 border-accent' : 'border border-white/[0.12]'} ${dayShift ? 'shift-card-hover-group' : ''} ${!dayShift && canManageThisUser ? 'cursor-pointer hover:bg-white/[0.08]' : !dayShift ? 'cursor-default' : dayShift && canEditInApp ? 'cursor-pointer hover:ring-2 hover:ring-accent/40 hover:ring-inset' : ''}`}
                               >
                                 {dayShift ? (() => {
                                   const isAbsentCell = isShiftAbsentRecord(dayShift);
@@ -4486,16 +4486,16 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                                                 <span
                                                   key={sk}
                                                   className={`text-[11px] font-bold px-1 py-0 rounded ${
-                                                    dayVariant === 'approved'
-                                                      ? 'bg-white/20 text-white/90'
-                                                      : dayVariant === 'absent'
-                                                        ? 'bg-rose-500/25 text-rose-300'
-                                                        : dayVariant === 'punchMissing'
-                                                          ? 'bg-amber-500/20 text-amber-200'
-                                                          : dayVariant === 'inprogress'
-                                                            ? 'bg-cyan-600/20 text-cyan-200'
-                                                            : 'bg-white/15 text-white/70'
-                                                  }`}
+ dayVariant === 'approved'
+ ? 'bg-white/20 text-white/90'
+ : dayVariant === 'absent'
+ ? 'bg-rose-500/25 text-rose-300'
+ : dayVariant === 'punchMissing'
+ ? 'bg-amber-500/20 text-amber-200'
+ : dayVariant === 'inprogress'
+ ? 'bg-cyan-600/20 text-cyan-200'
+ : 'bg-white/15 text-white/70'
+ }`}
                                                 >
                                                   {sk}
                                                 </span>
@@ -4560,7 +4560,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                                 onDragLeave={() => setDropTargetKey(null)}
                                 onDrop={(e) => { e.preventDefault(); if (draggedShiftId) { if (e.shiftKey || dragCopyMode) { handleDropShiftCopy(draggedShiftId, user.id, dayStr); } else { handleDropShift(draggedShiftId, user.id, dayStr); } setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); } }}
                                 title={eveningShift && needsCambioWarning(eveningShift) ? t.no_change_at_16 : undefined}
-                                className={`flex flex-col relative select-none focus:outline-none ${hasOverlap ? 'shadow-[0_0_10px_rgba(239,68,68,0.5)]' : ''} ${dropTargetKey === `${user.id}_${dayStr}_1` ? (dragCopyMode ? 'bg-accent/10 border-2 border-accent' : 'bg-amber-100 border-2 border-amber-400') : eveningShift ? getCellStyle(eveningShift, selectedShiftIds.includes(eveningShift.id) || isInDragRect(1), selectedShiftIds.length > 0, eveningVariant) : isInDragRect(1) ? 'bg-accent/10 border-2 border-accent' : 'border border-white/[0.12]'} ${eveningShift ? 'shift-card-hover-group' : ''} ${!eveningShift && canManageThisUser ? 'cursor-pointer hover:bg-white/[0.08]' : !eveningShift ? 'cursor-default' : eveningShift && canEditInApp ? 'cursor-pointer hover:ring-2 hover:ring-accent/40 hover:ring-inset' : ''}`}
+                                className={`flex flex-col relative select-none focus:outline-none ${hasOverlap ? 'shadow-[0_0_10px_rgba(239,68,68,0.5)]' : ''} ${dropTargetKey ===`${user.id}_${dayStr}_1` ? (dragCopyMode ? 'bg-accent/10 border-2 border-accent' : 'bg-amber-100 border-2 border-amber-400') : eveningShift ? getCellStyle(eveningShift, selectedShiftIds.includes(eveningShift.id) || isInDragRect(1), selectedShiftIds.length > 0, eveningVariant) : isInDragRect(1) ? 'bg-accent/10 border-2 border-accent' : 'border border-white/[0.12]'} ${eveningShift ? 'shift-card-hover-group' : ''} ${!eveningShift && canManageThisUser ? 'cursor-pointer hover:bg-white/[0.08]' : !eveningShift ? 'cursor-default' : eveningShift && canEditInApp ? 'cursor-pointer hover:ring-2 hover:ring-accent/40 hover:ring-inset' : ''}`}
                               >
                                 {eveningShift ? (() => {
                                   const isAbsentEv = isShiftAbsentRecord(eveningShift);
@@ -5414,12 +5414,12 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                                       else if (st === 'confirmed') { updateShift(shift.id, { approval_status: 'confirmed' }); showSuccess?.(t.shift_status_toast_published); }
                                     }}
                                     className={`min-h-[36px] flex-1 rounded-md px-2 py-1.5 text-center text-[13px] font-semibold leading-none transition-colors ${
-                                      active
-                                        ? 'border border-neutral-500 bg-white/10 shadow-sm ' + cls
-                                        : canClick
-                                          ? 'text-white/40 hover:bg-white/10 hover:text-white/70'
-                                          : 'cursor-not-allowed text-white/30 opacity-60'
-                                    } active:text-white/70'`}
+ active
+ ? 'border border-neutral-500 bg-white/10 shadow-sm ' + cls
+ : canClick
+ ? 'text-white/40 hover:bg-white/10 hover:text-white/70'
+ : 'cursor-not-allowed text-white/30 opacity-60'
+ } active:text-white/70'`}
                                   >
                                     {label}
                                   </button>
@@ -5566,8 +5566,8 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                                     type="button"
                                     onClick={() => setBulkEditStatus(key)}
                                     className={`min-h-[36px] min-w-0 flex-1 rounded-md px-1.5 py-1.5 text-center text-[11px] font-semibold leading-tight transition-colors sm:px-2 sm:text-[13px] ${
-                                      active
-                                        ? `border border-neutral-500 bg-white/10 shadow-sm ${activeCls}`
+ active
+ ?`border border-neutral-500 bg-white/10 shadow-sm ${activeCls}`
                                         : 'text-white/40 hover:bg-white/10 hover:text-white/70'
                                     }`}
                                   >
@@ -6369,16 +6369,16 @@ function CreateShiftModal({ userId, date, defaultTime, existingShifts, showError
           {/* ── Header ── */}
           <div
             className={`flex items-start justify-between gap-3 border-b border-neutral-500 px-5 pb-4 pt-5 backdrop-blur-md ${
-              isOpenShift
-                ? 'bg-amber-500/15'
-                : 'bg-white/8'
-            }`}
+ isOpenShift
+ ? 'bg-amber-500/15'
+ : 'bg-white/8'
+ }`}
           >
             <div className="min-w-0">
               <h2
                 className={`font-sans text-base font-bold leading-tight ${
-                  isOpenShift ? 'text-amber-300' : 'text-white'
-                }`}
+ isOpenShift ? 'text-amber-300' : 'text-white'
+ }`}
               >
                 {isOpenShift ? t.open_shift : t.new_shift}
               </h2>
@@ -6508,10 +6508,10 @@ function CreateShiftModal({ userId, date, defaultTime, existingShifts, showError
                           animate={isActive ? { scale: [1, 1.08, 1] } : { scale: 1 }}
                           transition={{ duration: 0.18, ease: 'easeOut' }}
                           className={`rounded-lg px-2.5 py-1 text-[12px] font-bold tabular-nums transition-colors ${
-                              isActive
-                              ? 'bg-accent text-white shadow-sm active:bg-accent-hover/80'
-                              : 'bg-white/15 text-white hover:bg-white/20 active:bg-white/25'
-                          }`}
+ isActive
+ ? 'bg-accent text-white shadow-sm active:bg-accent-hover/80'
+ : 'bg-white/15 text-white hover:bg-white/20 active:bg-white/25'
+ }`}
                         >
                           {start}–{end}
                         </motion.button>
@@ -6538,10 +6538,10 @@ function CreateShiftModal({ userId, date, defaultTime, existingShifts, showError
                     htmlFor={wstF.deduct}
                     aria-label={t.deduct_break_label}
                     className={`flex min-h-[44px] cursor-pointer items-center gap-2.5 rounded-xl border-2 px-3 py-2.5 shadow-sm transition-colors ${
-                    deductBreak
-                      ? 'border-accent/60 bg-accent/5 hover:bg-accent/10'
-                      : 'border-white/20 bg-white/8 hover:bg-white/10'
-                  } active:bg-accent/20`}>
+ deductBreak
+ ? 'border-accent/60 bg-accent/5 hover:bg-accent/10'
+ : 'border-white/20 bg-white/8 hover:bg-white/10'
+ } active:bg-accent/20`}>
                     <div className="relative shrink-0 mt-0.5">
                       <input
                         id={wstF.deduct}
@@ -6604,10 +6604,10 @@ function CreateShiftModal({ userId, date, defaultTime, existingShifts, showError
                 type="submit"
                 disabled={saving}
                 className={`flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-colors font-sans flex items-center justify-center gap-2 disabled:opacity-60 ${
-                  isOpenShift
-                    ? 'bg-amber-500 text-white hover:bg-amber-600 active:bg-amber-700'
-                    : 'bg-accent text-white hover:bg-accent-hover active:bg-accent-hover/80'
-                } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
+ isOpenShift
+ ? 'bg-amber-500 text-white hover:bg-amber-600 active:bg-amber-700'
+ : 'bg-accent text-white hover:bg-accent-hover active:bg-accent-hover/80'
+ } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 {t.create_shift}
