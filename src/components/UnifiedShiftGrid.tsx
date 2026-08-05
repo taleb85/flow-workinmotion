@@ -166,7 +166,7 @@ function getShiftCellDisplay(
   };
 }
 type ShiftDetailTab = 'details' | 'punches' | 'history' | 'breaks';
-const MONTHS_IT = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+const MONTHS_IT = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET', 'OTT', 'NOV', 'DIC'];
 
 function useT() {
   const { effectiveLanguage } = useAppUser();
@@ -1507,8 +1507,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 <button key={i} type="button" onClick={() => applyPeriod(cfg)}
                   className={`rounded-xl border px-2.5 py-2 text-left transition-colors ${isActive ? 'border-accent/50 bg-accent/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20'}`}>
                   <div className={`text-[11px] font-bold ${isActive ? 'text-accent' : 'text-white'}`}>{MONTHS_IT[i]}</div>
-                  <div className="text-[9px] text-white/40 mt-0.5 leading-tight tabular-nums">
-                    {format(start, 'd MMM', { locale })}<br />— {format(end, 'd MMM', { locale })}
+                  <div className="text-[9px] text-white/40 mt-0.5 leading-tight tabular-nums truncate">
+                    {format(start, 'd MMM', { locale }).toUpperCase()} — {format(end, 'd MMM', { locale }).toUpperCase()}
                   </div>
                   <div className="text-[8px] text-white/30 mt-0.5 font-bold uppercase">{cfg.numWeeks} sett.</div>
                 </button>

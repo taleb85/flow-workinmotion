@@ -2178,8 +2178,8 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                 style={{ background: 'rgba(255,255,255,0.13)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.90)' }}
                 title={`${format(monthViewPeriodStart, 'd MMMM yyyy', { locale: getDateLocale(effectiveLanguage) ?? it })} → ${format(monthViewPeriodEnd, 'd MMMM yyyy', { locale: getDateLocale(effectiveLanguage) ?? it })}`}
               >
-                {format(monthViewPeriodStart, 'd MMM', { locale: getDateLocale(effectiveLanguage) ?? it })} –{' '}
-                {format(monthViewPeriodEnd, 'd MMM yyyy', { locale: getDateLocale(effectiveLanguage) ?? it })}
+                {format(monthViewPeriodStart, 'd MMM', { locale: getDateLocale(effectiveLanguage) ?? it }).toUpperCase()} –{' '}
+                {format(monthViewPeriodEnd, 'd MMM yyyy', { locale: getDateLocale(effectiveLanguage) ?? it }).toUpperCase()}
               </span>
               {periodPayrollChipDatesWst && (
                 <span
@@ -2237,7 +2237,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                   title="Seleziona periodo"
                 >
                   <span className="text-[12px] lg:text-sm font-bold tabular-nums capitalize text-white">
-                    {format(getPeriodStartDate(periodConfig), 'MMM yy', { locale: getDateLocale(effectiveLanguage) ?? it })}
+                    {format(getPeriodStartDate(periodConfig), 'MMM yy', { locale: getDateLocale(effectiveLanguage) ?? it }).toUpperCase()}
                   </span>
                   <span className="h-3 w-px bg-white/25 shrink-0 mx-1" aria-hidden />
                   {(() => {
@@ -3454,8 +3454,8 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
               </button>
               <div className="flex-1 min-w-0 flex items-center justify-center px-1.5 overflow-hidden">
                 <span className="text-center text-[11px] sm:text-[11px] font-bold text-white uppercase tracking-wide tabular-nums truncate leading-none">
-                  {format(monthViewPeriodStart, 'd MMM', { locale: getDateLocale(effectiveLanguage) ?? it })} –{' '}
-                  {format(monthViewPeriodEnd, 'd MMM yyyy', { locale: getDateLocale(effectiveLanguage) ?? it })}
+                  {format(monthViewPeriodStart, 'd MMM', { locale: getDateLocale(effectiveLanguage) ?? it }).toUpperCase()} –{' '}
+                  {format(monthViewPeriodEnd, 'd MMM yyyy', { locale: getDateLocale(effectiveLanguage) ?? it }).toUpperCase()}
                 </span>
               </div>
               <button

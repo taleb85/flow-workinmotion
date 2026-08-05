@@ -1504,7 +1504,7 @@ export default function TimesheetsGrid({ ctx }: TimesheetsGridProps) {
                               {format(day, 'EEE', { locale })}
                             </div>
                             <div className={`font-bold mt-0.5 text-sm md:text-xs ${todayDate && inP ? 'text-white' : payrollHighlight ? 'text-emerald-200' : 'text-white'}`}>
-                              {format(day, 'd MMM', { locale })}
+                              {format(day, 'd MMM', { locale }).toUpperCase()}
                             </div>
                             {payrollHighlight && (
                               <div className="mt-0.5 text-[11px] font-bold uppercase tracking-wide text-emerald-400">

@@ -4015,7 +4015,7 @@ export default function Timesheets() {
                               {format(day, 'EEE', { locale })}
                             </div>
                             <div className={`font-bold mt-0.5 text-sm md:text-xs ${todayDate && inP ? 'text-white' : payrollHighlight ? 'text-emerald-200' : 'text-white'}`}>
-                              {format(day, 'd MMM', { locale })}
+                              {format(day, 'd MMM', { locale }).toUpperCase()}
                             </div>
                             {payrollHighlight && (
                               <div className="mt-0.5 text-[11px] font-bold uppercase tracking-wide text-emerald-400">
@@ -4915,7 +4915,7 @@ export default function Timesheets() {
                       {t.ts_modal_close_shift_title}
                     </h3>
                     <p className="text-sm text-white/60 mt-0.5">
-                      {closingShift.employeeName} · {safeFormatDate(closingShift.dateStr, 'd MMM', { locale })}
+                      {closingShift.employeeName} · {safeFormatDate(closingShift.dateStr, 'd MMM', { locale }).toUpperCase()}
                     </p>
                   </div>
                   <button type="button" onClick={() => { setClosingShift(null); setClockOutTime(''); }}
