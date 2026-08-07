@@ -28,6 +28,9 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
   const notifSupported = 'Notification' in window;
   const locSupported = typeof navigator !== 'undefined' && 'geolocation' in navigator;
 
+  // iOS: necessario per saltare il silent probe e per la guida installazione PWA
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+
   useEffect(() => {
     if (notifSupported) setNotifStatus(Notification.permission);
     // Posizione: il flag locale è la fonte affidabile (iOS Safari può
@@ -48,10 +51,17 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
   // Se riesce → salviamo il flag → la modale non richiederà più la posizione.
   // Se fallisce → NON cambiamo stato: su iOS senza gesto utente il prompt
   // non appare, l'utente toccherà la card per richiederlo (con user activation).
+  //
+  // IMPORTANTE: su iOS Safari NON eseguiamo il silent probe perché chiamare
+  // getCurrentPosition senza gesto utente può causare un rifiuto silenzioso
+  // del permesso a livello OS, impedendo al prompt nativo di apparire anche
+  // dopo il click dell'utente.
   useEffect(() => {
     if (!locSupported) return;
     if (isLocationGrantedFlag()) return;
     if (locationStatus === 'granted' || locationStatus === 'denied') return;
+    // Salta il probe silenzioso su iOS: serve gesto utente esplicito
+    if (isIOS) return;
     let cancelled = false;
     navigator.geolocation.getCurrentPosition(
       () => {
@@ -67,7 +77,7 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
     return () => {
       cancelled = true;
     };
-  }, [locSupported, locationStatus]);
+  }, [locSupported, locationStatus, isIOS]);
 
   // All'apertura: se il permesso è GIÀ concesso ma la subscription manca,
   // avviala subito (senza dover cliccare nulla). Questo copre il caso
@@ -162,7 +172,6 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
 
   // Su iPhone le notifiche web richiedono l'app installata (PWA): senza,
   // il prompt non appare mai → guidiamo all'installazione.
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
   const isStandalone =
     typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
   const notifNeedsInstall = notifSupported && !notifGranted && isIOS && !isStandalone;
