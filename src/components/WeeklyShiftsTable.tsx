@@ -2874,7 +2874,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                     <div className="border-b border-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/55">
                       {t.wst_view_section}
                     </div>
-                    {canUseShiftManagementChrome && (
+                    {(canUseShiftManagementChrome || canShiftOps) && (
                       <button
                         type="button"
                         onClick={() => {
@@ -3282,7 +3282,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                 <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
                 <ul className="overflow-y-auto p-3 space-y-1 flex-1 min-h-0">
                   {/* Zona drop sopra il primo nome */}
-                  {canUseShiftManagementChrome && (
+                  {canShiftOps && (
                     <div
                       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDropTargetEditViewIdx(0); }}
                       onDrop={(e) => { e.preventDefault(); const id = draggingEditViewUserId || e.dataTransfer.getData('text/plain'); applyDropAt(id, 0); }}
@@ -3316,23 +3316,23 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                 return (
                   <li
                     key={u.id}
-                    draggable={canUseShiftManagementChrome}
+                    draggable={canShiftOps}
                     onDragStart={handleDragStart}
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     onDragEnd={handleDragEnd}
-                    className={`relative flex items-center gap-2 py-1.5 px-2 rounded-xl transition-colors ${canUseShiftManagementChrome ? 'cursor-grab active:cursor-grabbing' : ''} ${isDragging ? 'opacity-50' : 'hover:bg-white/10'}`}
+                    className={`relative flex items-center gap-2 py-1.5 px-2 rounded-xl transition-colors ${canShiftOps ? 'cursor-grab active:cursor-grabbing' : ''} ${isDragging ? 'opacity-50' : 'hover:bg-white/10'}`}
                   >
                     {/* Linea predittiva: dove verrà posizionata la riga al rilascio */}
                     {isDropTarget && !isDragging && (
                       <div className="absolute left-2 right-2 top-0 h-0.5 bg-accent rounded-full z-10 pointer-events-none" aria-hidden />
                     )}
-                    {canUseShiftManagementChrome && (
+                    {canShiftOps && (
                       <span className="shrink-0 text-white/40 touch-none" aria-hidden title={t.drag_to_reorder}>
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M8 6h2v2H8V6zm0 5h2v2H8v-2zm0 5h2v2H8v-2zm6-10h2v2h-2V6zm0 5h2v2h-2v-2zm0 5h2v2h-2v-2z"/></svg>
                       </span>
                     )}
-                    {canUseShiftManagementChrome && !isPurelyManagementRole(u.role) && editingNameUserId === u.id ? (
+                    {canShiftOps && !isPurelyManagementRole(u.role) && editingNameUserId === u.id ? (
                       <>
                         {/* no placeholder: contesto riga tabella */}
                         <input
@@ -3380,7 +3380,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                 );
               })}
                   {/* Zona drop sotto l'ultimo nome */}
-                  {canUseShiftManagementChrome && (
+                  {canShiftOps && (
                     <div
                       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDropTargetEditViewIdx(activeUsers.length); }}
                       onDrop={(e) => { e.preventDefault(); const id = draggingEditViewUserId || e.dataTransfer.getData('text/plain'); applyDropAt(id, activeUsers.length); }}
@@ -3392,7 +3392,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
                     </div>
                   )}
                 </ul>
-                {canUseShiftManagementChrome && (
+                {canShiftOps && (
                   <div className="flex items-center justify-end gap-3 px-4 py-3 border-t border-neutral-500 bg-white/10 flex-shrink-0 rounded-b-xl">
                     <button
                       type="button"
