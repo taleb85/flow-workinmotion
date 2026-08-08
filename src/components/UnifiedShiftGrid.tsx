@@ -1506,7 +1506,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   {actionsDrawerSection === 'reorder' && (
                     <div className="border-b border-white/10 px-4 py-2 max-h-64 overflow-y-auto space-y-0.5">
                       {users
-                        .filter((u) => u.status === 'active')
+                        .filter((u) => u.status === 'active' && u.role !== 'admin')
                         .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
                         .map((u, i, arr) => (
                           <div key={u.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/10">
@@ -1536,7 +1536,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             </span>
                           </div>
                         ))}
-                      {users.filter((u) => u.status === 'active').length === 0 && (
+                      {users.filter((u) => u.status === 'active' && u.role !== 'admin').length === 0 && (
                         <p className="text-center text-[11px] text-white/40 py-3">Nessun dipendente attivo</p>
                       )}
                     </div>
