@@ -20,6 +20,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "deploy": "npx vercel --prod",
+    "vai": "bash scripts/release.sh",
     "reset:production": "node scripts/reset-production.js",
     "clean:shifts": "node scripts/clean-shifts.js",
     "db:migrate-permissions": "node --dns-result-order=ipv4first scripts/run-migration-users-permissions.js",
