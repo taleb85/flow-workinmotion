@@ -38,10 +38,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 40px;
-        font-weight: 900;
-        letter-spacing: -2px;
-        color: #FF9500;
+        overflow: hidden;
+      }
+      #pwa-install-screen .logo svg {
+        width: 100%;
+        height: 100%;
+        display: block;
       }
       #pwa-install-screen h1 {
         font-size: 22px;
@@ -120,7 +122,7 @@
           screen.className = 'show';
 
           var inner = '';
-          inner += '<div class="logo">F</div>';
+          inner += '<div class="logo"><svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="fbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#253660"/><stop offset="50%" stop-color="#1a2744"/><stop offset="100%" stop-color="#111c36"/></linearGradient><linearGradient id="fa" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffcc00"/><stop offset="60%" stop-color="#ff9900"/><stop offset="100%" stop-color="#e07800"/></linearGradient><linearGradient id="fb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffd700"/><stop offset="60%" stop-color="#ffaa00"/><stop offset="100%" stop-color="#e08800"/></linearGradient><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,255,255,0.18)"/><stop offset="100%" stop-color="rgba(255,255,255,0.03)"/></linearGradient><clipPath id="fc"><rect width="160" height="160" rx="28"/></clipPath></defs><rect width="160" height="160" rx="28" fill="url(#fbg)"/><rect x="21" y="44" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="44" width="86" height="22" rx="11" fill="url(#fa)"/><rect x="21" y="76" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="76" width="118" height="22" rx="11" fill="url(#fb)"/><rect x="21" y="108" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="108" width="60" height="22" rx="11" fill="url(#fa)"/><rect x="0" y="0" width="160" height="83" fill="url(#fg)" clip-path="url(#fc)"/></svg></div>';
           inner += '<h1>Installa FLOW</h1>';
           inner += '<p class="subtitle">Aggiungi l\'app alla schermata Home per iniziare</p>';
 
