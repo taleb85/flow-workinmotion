@@ -275,6 +275,21 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     ? eachDayOfInterval({ start: periodStart, end: periodEnd })
     : eachDayOfInterval({ start: weekStart, end: weekEnd });
 
+  // ── Menu contestuale (tasto destro) ──
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; shift: Shift; group: DayShiftGroup } | null>(null);
+
+  const handleShiftContextMenu = useCallback((e: React.MouseEvent, shift: Shift, group: DayShiftGroup) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY, shift, group });
+  }, []);
+
+  const handleContextDelete = useCallback(() => {
+    if (!contextMenu) return;
+    setContextMenu(null);
+    handleDeleteShift(contextMenu.shift);
+  }, [contextMenu, handleDeleteShift]);
+
   const [showPeriodPopover, setShowPeriodPopover] = useState(false);
   const [periodPopoverYear, setPeriodPopoverYear] = useState(today.getFullYear());
   const [periodPopoverStyle, setPeriodPopoverStyle] = useState<React.CSSProperties>({});
@@ -1139,7 +1154,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       return (
         <div className="flex flex-col gap-1">
           <button type="button" onClick={handleShiftClick} title={display.title}
-            onContextMenu={(e) => { e.preventDefault(); }}
+            onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
             onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
@@ -1174,7 +1189,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             type="button"
             title={display.title ?? formatShiftTimeRangeFull(g.shift.start_time, g.shift.end_time)}
             onClick={handleShiftClick}
-            onContextMenu={(e) => { e.preventDefault(); }}
+            onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
             onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
@@ -1190,7 +1205,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     return (
       <div className={`flex w-full min-w-0 flex-col ${hasExtras ? 'gap-0.5 justify-center' : ''}`}>
         <button type="button" onClick={handleShiftClick} title={display.title}
-          onContextMenu={(e) => { e.preventDefault(); }}
+          onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
           draggable={canEdit}
           onDragStart={(e) => handleDragStart(e, g.shift.id)}
           onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
@@ -2266,6 +2281,38 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── Menu contestuale tasto destro ── */}
+      {contextMenu && createPortal(
+        <>
+          {/* Backdrop invisibile per chiudere */}
+          <div
+            className="fixed inset-0 z-[10050]"
+            onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); }}
+            onClick={() => setContextMenu(null)}
+          />
+          {/* Menu */}
+          <div
+            className="fixed z-[10060] min-w-[172px] rounded-xl border border-neutral-500 shadow-xl py-1 font-sans text-sm overflow-hidden"
+            style={{
+              background: '#152848',
+              left: Math.min(contextMenu.x, window.innerWidth - 192),
+              top: Math.min(contextMenu.y, window.innerHeight - 120),
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={handleContextDelete}
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-red-500 hover:bg-red-500/15 transition-colors active:bg-red-500/80"
+            >
+              <Trash2 className="h-3.5 w-3.5 shrink-0" />
+              Elimina turno
+            </button>
+          </div>
+        </>,
+        document.body,
       )}
 
       {/* ── PinPad Modal per congelare / sbloccare / eliminare turno ── */}
