@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="it">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Anteprima Modale iOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;background:#0f1629;min-height:100vh;display:flex;align-items:center;justify-content:center}.preview-btn{padding:14px 32px;border-radius:16px;background:#007AFF;color:#fff;font-size:16px;font-weight:700;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(0,122,255,.35)}.preview-btn:hover{opacity:.9}
+.modal-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(12px);padding:24px}
+.modal-overlay.hidden{display:none}
+.modal-card{width:100%;max-width:360px;border-radius:24px;padding:32px;text-align:center;background:rgba(30,41,59,.95);border:1px solid rgba(255,255,255,.1);box-shadow:0 32px 64px rgba(0,0,0,.5)}
+.modal-icon{width:64px;height:64px;border-radius:16px;background:#3b82f6;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.modal-icon svg{width:32px;height:32px;color:#fff}
+.modal-title{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+.modal-desc{font-size:14px;color:rgba(255,255,255,.6);margin-bottom:24px;line-height:1.5}
+.modal-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:16px;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,#007AFF,#0056CC);box-shadow:0 8px 24px rgba(0,122,255,.35);border:none;cursor:pointer;text-decoration:none;margin-bottom:12px}
+.modal-btn:hover{opacity:.9}
+.modal-hint{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:20px}
+.modal-hint strong{color:rgba(255,255,255,.6)}
+.modal-skip{font-size:14px;color:rgba(255,255,255,.4);background:none;border:none;cursor:pointer}
+.modal-skip:hover{color:rgba(255,255,255,.7)}
+</style>
+</head>
+<body>
+<button class="preview-btn" onclick="document.querySelector('.modal-overlay').classList.remove('hidden')">Mostra modale iOS</button>
+<div class="modal-overlay hidden" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="modal-card">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </div>
+    <h2 class="modal-title">Installa FLOW</h2>
+    <p class="modal-desc">Per ricevere notifiche e accedere velocemente, installa l'app sulla tua Home.</p>
+    <a href="/FLOW.mobileconfig" download class="modal-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Installa con 1 tocco
+    </a>
+    <p class="modal-hint">Poi vai su <strong>Impostazioni → Generali → Gestione dispositivo</strong> e tocca <strong>Installa</strong></p>
+    <button class="modal-skip" onclick="this.closest('.modal-overlay').classList.add('hidden')">Continua senza installare</button>
+  </div>
+</div>
+</body>
+</html>

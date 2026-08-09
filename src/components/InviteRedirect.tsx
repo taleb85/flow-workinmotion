@@ -1,12 +1,17 @@
 /**
  * Risolve /i/:slug → dipendente, salva nome + PIN,
- * poi reindirizza direttamente al login (l'app si usa subito in Safari, 
- * l'utente la installerà sulla Home quando Safari lo propone).
+ * poi reindirizza:
+ * - Su iOS (iPhone/iPad): alla pagina /install con userId e firstName
+ * - Altri dispositivi: direttamente al login via /profilo?t=TOKEN
  */
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { buildUserInviteSlug, buildProfiloAccessLink, PATH_PROFILO } from '../config/appPaths';
+
+function isAppleDevice(): boolean {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window as { MSStream?: unknown }).MSStream;
+}
 
 function cleanSlug(s: string | null | undefined): string {
   return (s ?? '')
@@ -73,6 +78,19 @@ export default function InviteRedirect() {
         }
 
         if (matched) {
+          // Su dispositivi Apple: vai alla pagina install (con .mobileconfig)
+          if (isAppleDevice()) {
+            const firstName = encodeURIComponent(matched.first_name ?? '');
+            const pin = (matched.pin ?? '').replace(/\D/g, '').slice(0, 4);
+            const pinParam = pin.length === 4 ? `&pin=${pin}` : '';
+            if (!cancelled && !redirected) {
+              redirected = true;
+              window.location.href = `/install?userId=${matched.id}&firstName=${firstName}${pinParam}`;
+            }
+            return;
+          }
+
+          // Altri dispositivi: login diretto con token
           const pin = matched.pin?.replace(/\D/g, '').slice(0, 4);
           const tokenUrl = buildProfiloAccessLink(matched.id, {
             pin: pin && pin.length === 4 ? pin : undefined,

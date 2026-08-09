@@ -1,15 +1,19 @@
 /**
- * InstallPage — Scelta manuale del dispositivo con passaggi PWA statici.
- * L'utente sceglie iPhone/iPad, Android o Computer → 3 passaggi chiari.
- * Per Computer: prima sceglie Mac o Windows.
+ * InstallPage — Pagina di installazione PWA.
+ * Su Apple (iPhone/iPad): mostra direttamente la guida iOS con .mobileconfig.
+ * Altri dispositivi: scelta manuale con passaggi per Android / Computer.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useT } from '../hooks/useT';
 import { formatTrans } from '../utils/translations';
 import { PATH_PROFILO } from '../config/appPaths';
 import FlowLogoSvg from './FlowLogoSvg';
+
+function isAppleDevice(): boolean {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window as { MSStream?: unknown }).MSStream;
+}
 
 function StepRow({
   icon,
@@ -105,12 +109,26 @@ export default function InstallPage() {
 
   const userId = searchParams.get('userId') ?? '';
   const firstName = searchParams.get('firstName') ?? '';
+  const pin = searchParams.get('pin') ?? '';
 
-  const [selectedDevice, setSelectedDevice] = useState<'ios' | 'android' | 'computer' | null>(null);
+  // Su Apple: vai direttamente alla vista iOS (salta scelta dispositivo)
+  const appleDevice = isAppleDevice();
+  const [selectedDevice, setSelectedDevice] = useState<'ios' | 'android' | 'computer' | null>(
+    appleDevice ? 'ios' : null
+  );
   const [selectedOs, setSelectedOs] = useState<'mac' | 'win' | null>(null);
 
   const handleContinue = () => {
-    navigate(PATH_PROFILO, { replace: true });
+    if (userId && pin.length === 4) {
+      // Login diretto con token pre-compilato
+      const payload = { u: userId, p: pin };
+      const token = btoa(JSON.stringify(payload));
+      navigate(`${PATH_PROFILO}?t=${encodeURIComponent(token)}`, { replace: true });
+    } else if (userId) {
+      navigate(`${PATH_PROFILO}?userId=${userId}`, { replace: true });
+    } else {
+      navigate(PATH_PROFILO, { replace: true });
+    }
   };
 
   const handleBackToDevices = () => {
