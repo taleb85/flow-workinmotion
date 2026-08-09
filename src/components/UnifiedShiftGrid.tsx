@@ -2299,7 +2299,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             style={{
               background: '#152848',
               left: Math.min(contextMenu.x, window.innerWidth - 192),
-              bottom: window.innerHeight - contextMenu.y,
+              top: contextMenu.y,
             }}
             onClick={(e) => e.stopPropagation()}
           >
