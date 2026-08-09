@@ -186,7 +186,7 @@ export default function MobileStaffDashboard({
 
   const rightContent = (
     <>
-      <div style={{ transform: 'scale(1.3)', transformOrigin: 'center' }}>
+      <div style={{ transform: 'scale(1.3)', transformOrigin: 'center', width: 36, height: 36, borderRadius: 10, background: 'rgba(255, 255, 255, 0.10)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         <UnifiedBellButton
           userId={user.id}
           effectiveLanguage={language}
