@@ -186,20 +186,22 @@ export default function MobileStaffDashboard({
 
   const rightContent = (
     <>
-      <UnifiedBellButton
-        userId={user.id}
-        effectiveLanguage={language}
-        onMessageClick={() => {}}
-      />
+      <div style={{ transform: 'scale(1.3)', transformOrigin: 'center' }}>
+        <UnifiedBellButton
+          userId={user.id}
+          effectiveLanguage={language}
+          onMessageClick={() => {}}
+        />
+      </div>
       <button
         type="button"
         onClick={handleMobileLogout}
         title="Esci"
         aria-label="Esci"
-        style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(255, 255, 255, 0.16)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
+        style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255, 255, 255, 0.16)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
         className="text-white/70 hover:bg-white/15 hover:text-white touch-manipulation"
       >
-        <LogOut style={{ width: 12, height: 12 }} strokeWidth={2} aria-hidden />
+        <LogOut style={{ width: 16, height: 16 }} strokeWidth={2} aria-hidden />
       </button>
     </>
   );
