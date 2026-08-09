@@ -184,12 +184,8 @@ export default function MobileStaffDashboard({
     navigate(PATH_PROFILO, { replace: true });
   }, [user.language, setIsSessionElevated, setCurrentUser, navigate]);
 
-  const todayFormatted = safeFormatDate(todayStr, 'EEE d MMM · HH:mm', { locale });
   const rightContent = (
     <>
-      <span className="text-[11px] font-medium whitespace-nowrap capitalize" style={{ color: 'rgba(255,255,255,0.50)' }}>
-        {todayFormatted}
-      </span>
       <UnifiedBellButton
         userId={user.id}
         effectiveLanguage={language}
