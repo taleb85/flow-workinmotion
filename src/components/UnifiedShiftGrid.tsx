@@ -664,7 +664,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const handleShiftContextMenu = useCallback((e: React.MouseEvent, shift: Shift, group: DayShiftGroup) => {
     e.preventDefault();
     e.stopPropagation();
-    setContextMenu({ x: e.clientX, y: e.clientY, shift, group });
+    const rect = e.currentTarget.getBoundingClientRect();
+    setContextMenu({ x: rect.left, y: rect.top, shift, group });
   }, []);
 
   const handleContextDelete = useCallback(() => {
@@ -2294,22 +2295,21 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           />
           {/* Menu */}
           <div
-            className="fixed z-[10060] rounded-xl border border-neutral-500 shadow-xl py-1 font-sans overflow-hidden"
+            className="fixed z-[10060] min-w-[172px] rounded-xl border border-neutral-500 shadow-xl py-1 font-sans text-sm overflow-hidden"
             style={{
               background: '#152848',
-              left: Math.min(contextMenu.x, window.innerWidth - 56),
-              top: Math.min(contextMenu.y, window.innerHeight - 56),
+              left: Math.min(contextMenu.x, window.innerWidth - 192),
+              bottom: window.innerHeight - contextMenu.y,
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
               onClick={handleContextDelete}
-              title="Elimina turno"
-              aria-label="Elimina turno"
-              className="flex items-center justify-center w-10 h-9 text-red-500 hover:bg-red-500/15 transition-colors active:bg-red-500/80"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-red-500 hover:bg-red-500/15 transition-colors active:bg-red-500/80"
             >
-              <Trash2 className="h-4 w-4 shrink-0" />
+              <Trash2 className="h-3.5 w-3.5 shrink-0" />
+              Elimina turno
             </button>
           </div>
         </>,
