@@ -145,7 +145,7 @@ export default function MobileHome({
           </p>
         </div>
         {rightContent && (
-          <div className="flex shrink-0 items-center gap-3 rounded-xl px-2 py-1.5" style={{ background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="flex shrink-0 items-center gap-3">
             {rightContent}
           </div>
         )}
