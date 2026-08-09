@@ -2323,7 +2323,19 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* ── PinPad Modal per congelare / sbloccare / eliminare turno ── */}
       {panelPinModalOpen && (
         <PinPadModal
-          title={panelPinMode === 'delete' ? 'Elimina turno' : panelPinMode === 'freeze' ? (t.ts_drawer_freeze_title ?? 'Congela questo turno') : (t.wst_freeze_pin_title ?? 'Sblocca turno')}
+          title={(() => {
+            if (panelPinMode === 'delete') {
+              const targetShift = panelPinTargetShiftId ? allShifts.find(s => s.id === panelPinTargetShiftId) : null;
+              const statusLabel = targetShift?.approval_status === 'draft' ? 'bozza'
+                : targetShift?.approval_status === 'frozen' ? 'congelato'
+                : targetShift?.approval_status === 'confirmed' ? 'confermato'
+                : targetShift?.approval_status === 'approved' ? 'approvato'
+                : targetShift?.approval_status === 'absent' ? 'assente'
+                : '';
+              return statusLabel ? `Elimina turno ${statusLabel}` : 'Elimina turno';
+            }
+            return panelPinMode === 'freeze' ? (t.ts_drawer_freeze_title ?? 'Congela questo turno') : (t.wst_freeze_pin_title ?? 'Sblocca turno');
+          })()}
           subtitle={panelPinMode === 'delete' ? 'Inserisci il PIN per confermare l\'eliminazione' : panelPinMode === 'freeze' ? (t.ts_drawer_freeze_subtitle ?? 'Inserisci il PIN del manager/assistant per congelare il turno') : (t.wst_freeze_pin_subtitle ?? 'Inserisci il PIN del manager/assistant per sbloccare il turno')}
           pinLabel={t.wst_pin_label ?? 'PIN'}
           pin={panelPin}
