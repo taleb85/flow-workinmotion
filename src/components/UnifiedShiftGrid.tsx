@@ -275,21 +275,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     ? eachDayOfInterval({ start: periodStart, end: periodEnd })
     : eachDayOfInterval({ start: weekStart, end: weekEnd });
 
-  // ── Menu contestuale (tasto destro) ──
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; shift: Shift; group: DayShiftGroup } | null>(null);
-
-  const handleShiftContextMenu = useCallback((e: React.MouseEvent, shift: Shift, group: DayShiftGroup) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setContextMenu({ x: e.clientX, y: e.clientY, shift, group });
-  }, []);
-
-  const handleContextDelete = useCallback(() => {
-    if (!contextMenu) return;
-    setContextMenu(null);
-    handleDeleteShift(contextMenu.shift);
-  }, [contextMenu, handleDeleteShift]);
-
   const [showPeriodPopover, setShowPeriodPopover] = useState(false);
   const [periodPopoverYear, setPeriodPopoverYear] = useState(today.getFullYear());
   const [periodPopoverStyle, setPeriodPopoverStyle] = useState<React.CSSProperties>({});
@@ -672,6 +657,21 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       setPanelPinModalOpen(true);
     });
   }, [deleteShift, showSuccess, showError, t, canDeleteShift, sessionActive]);
+
+  // ── Menu contestuale (tasto destro) ──
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; shift: Shift; group: DayShiftGroup } | null>(null);
+
+  const handleShiftContextMenu = useCallback((e: React.MouseEvent, shift: Shift, group: DayShiftGroup) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY, shift, group });
+  }, []);
+
+  const handleContextDelete = useCallback(() => {
+    if (!contextMenu) return;
+    setContextMenu(null);
+    handleDeleteShift(contextMenu.shift);
+  }, [contextMenu, handleDeleteShift]);
 
   const handleSaveShiftEdit = useCallback(async () => {
     if (!selectedShift) return;
