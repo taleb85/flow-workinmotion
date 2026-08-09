@@ -138,8 +138,8 @@ export default function MobileProfileHeader({
         )}
       </div>
 
-      {/* Destra: live dot + data | separatore | azioni (extra + campanella + logout) */}
-      <div className="flex shrink-0 items-center gap-2.5">
+      {/* Destra: live dot + data | separatore | azioni (extra + campanella + logout) — nascosto su mobile */}
+      <div className="hidden md:flex shrink-0 items-center gap-2.5">
         {/* Status: live dot + data */}
         <span
           className="hidden sm:inline text-[13px] font-medium whitespace-nowrap capitalize tabular-nums"

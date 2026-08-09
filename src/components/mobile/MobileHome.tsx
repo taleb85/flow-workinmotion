@@ -1,3 +1,4 @@
+import { type ReactNode, useMemo } from 'react';
 import { Play, LogOut, ChevronRight, Clock, RotateCcw } from 'lucide-react';
 import HeaderTodayCoworkersCard from '../HeaderTodayCoworkersCard';
 import { usePullToRefresh } from '../../hooks/usePullToRefresh';
@@ -9,6 +10,7 @@ export interface MobileHomeProps {
   onRefresh?: () => Promise<void> | void;
   greetingText: string;
   todayLabel: string;
+  rightContent?: ReactNode;
   statsLabels: {
     title: string;
     week: string;
@@ -132,13 +134,20 @@ export default function MobileHome({
       )}
 
       {/* ── Saluto compatto ─────────────────────────────────────────── */}
-      <div className="px-1 mt-5">
-        <h1 className="text-xl font-extrabold tracking-tight leading-tight text-white">
-          {greetingText}
-        </h1>
-        <p className="text-sm font-bold capitalize mt-0.5 tracking-wide text-white/70">
-          {todayLabel}
-        </p>
+      <div className="px-1 mt-5 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl font-extrabold tracking-tight leading-tight text-white">
+            {greetingText}
+          </h1>
+          <p className="text-sm font-bold capitalize mt-0.5 tracking-wide text-white/70">
+            {todayLabel}
+          </p>
+        </div>
+        {rightContent && (
+          <div className="flex shrink-0 items-center gap-2">
+            {rightContent}
+          </div>
+        )}
       </div>
 
       {/* ── Il tuo turno oggi ──────────────────────────────────────────── */}
