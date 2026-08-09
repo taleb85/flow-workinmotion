@@ -250,6 +250,15 @@ export default function MobileHome({
         )}
       </section>
 
+      {/* ── Colleghi in turno oggi ───────────────────────────────────── */}
+      <div className="rounded-2xl overflow-hidden border border-neutral-500"
+        style={{
+          background: 'transparent',
+        }}
+      >
+        <HeaderTodayCoworkersCard />
+      </div>
+
       {/* ── Questa settimana ──────────────────────────────────────────────── */}
       <div className={`${cardCls} px-4 py-3`} style={cardStyle}>
         <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-2">
@@ -340,15 +349,6 @@ className="text-[11px] font-bold text-white/70 flex items-center gap-0.5 hover:o
           </div>
         </div>
       </section>
-
-      {/* ── Colleghi in turno oggi ───────────────────────────────────── */}
-      <div className="rounded-2xl overflow-hidden border border-neutral-500"
-        style={{
-          background: 'transparent',
-        }}
-      >
-        <HeaderTodayCoworkersCard />
-      </div>
 
     </div>
   );
