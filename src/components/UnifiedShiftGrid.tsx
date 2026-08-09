@@ -2310,7 +2310,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             <button
               type="button"
               onClick={handleContextDelete}
-              className="flex w-full h-full items-center justify-center gap-2.5 text-white font-bold hover:bg-red-700 transition-colors active:bg-red-800"
+              className="flex w-full h-full items-center justify-center gap-2.5 text-white font-bold hover:bg-white/10 transition-colors active:bg-white/20"
             >
               <Trash2 className="h-3.5 w-3.5 shrink-0" />
               Elimina turno
