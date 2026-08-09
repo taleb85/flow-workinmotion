@@ -94,7 +94,7 @@ export default function MobileProfileHeader({
   const body = (
     <div className="relative" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }} ref={wrapperRef}>
     <div
-      className="flow-brand-header px-4 flex items-center justify-between gap-3"
+      className="flow-brand-header px-4 flex items-center justify-end md:justify-between gap-3"
       style={{ height: 50 }}
     >
       {/* Sinistra: icona F + testo */}
