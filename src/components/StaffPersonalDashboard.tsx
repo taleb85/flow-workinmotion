@@ -1071,7 +1071,56 @@ export default function StaffPersonalDashboard({
       </div>
 
       <AnimatePresence>
-        {showInstallBanner && (
+        {showInstallBanner && isIos && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/60 backdrop-blur-md px-6"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 24 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 24 }}
+              className="modal-glass-panel w-full max-w-sm rounded-3xl p-8 text-center"
+            >
+              <div className="mb-5 flex justify-center">
+                <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center">
+                  <Download className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">Installa FLOW</h2>
+              <p className="text-sm text-white/60 mb-6 leading-relaxed">
+                Per ricevere notifiche e accedere velocemente, installa l'app sulla tua Home.
+              </p>
+              <a
+                href="/FLOW.mobileconfig"
+                download
+                className="w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 mb-3 text-sm font-bold text-white"
+                style={{
+                  background: 'linear-gradient(135deg, #007AFF, #0056CC)',
+                  boxShadow: '0 8px 24px rgba(0,122,255,0.35)',
+                }}
+                onClick={dismissInstallBanner}
+              >
+                <Download className="w-4 h-4" />
+                Installa con 1 tocco
+              </a>
+              <p className="text-[11px] text-white/40 mb-5">
+                Poi vai su <strong>Impostazioni → Generali → Gestione dispositivo</strong> e tocca <strong>Installa</strong>
+              </p>
+              <button
+                type="button"
+                onClick={dismissInstallBanner}
+                className="text-sm text-white/40 hover:text-white/70 transition-colors"
+              >
+                Continua senza installare
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {showInstallBanner && !isIos && (
           <motion.div
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -1081,28 +1130,16 @@ export default function StaffPersonalDashboard({
           >
             <div className="modal-glass-panel flex w-full max-w-lg items-center gap-3 rounded-2xl px-4 py-3 !border-accent/25">
               <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
-                {isIos ? <Share className="w-4 h-4 text-white" /> : <Download className="w-4 h-4 text-white" />}
+                <Download className="w-4 h-4 text-white" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white/90 leading-tight">Installa l'app FLOW</p>
-                {isIos ? (
-                  <a
-                    href="/FLOW.mobileconfig"
-                    download
-                    className="text-[11px] text-accent mt-0.5 leading-snug inline-block underline"
-                  >
-                    Tocca qui per installare con 1 tocco
-                  </a>
-                ) : (
-                  <p className="text-[11px] text-white/60 mt-0.5">Accedi più velocemente ai tuoi turni</p>
-                )}
+                <p className="text-[11px] text-white/60 mt-0.5">Accedi più velocemente ai tuoi turni</p>
               </div>
-              {!isIos && (
-                <button type="button" onClick={handleInstall}
-                  className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent-hover transition-colors active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
-                  Installa
-                </button>
-              )}
+              <button type="button" onClick={handleInstall}
+                className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent-hover transition-colors active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                Installa
+              </button>
               <button type="button" onClick={dismissInstallBanner}
                 className="flex-shrink-0 p-1 rounded-xl text-white/50 hover:text-white/70 hover:bg-slate-100 transition-colors active:text-white/70 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]" aria-label={t.close}>
                 <X className="w-4 h-4" />
