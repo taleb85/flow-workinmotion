@@ -716,7 +716,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
           compact={staffMobileCompactHeader}
           hideToolbarAvatar={false}
           rightExtra={
-            <div className="flex items-center gap-1.5">
+            <div className="hidden md:flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={handleHardRefresh}
