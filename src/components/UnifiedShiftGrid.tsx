@@ -2323,8 +2323,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* ── PinPad Modal per congelare / sbloccare / eliminare turno ── */}
       {panelPinModalOpen && (
         <PinPadModal
-          title={panelPinMode === 'delete' ? (t.ts_drawer_delete_pin_title ?? 'Elimina turno congelato') : panelPinMode === 'freeze' ? (t.ts_drawer_freeze_title ?? 'Congela questo turno') : (t.wst_freeze_pin_title ?? 'Sblocca turno')}
-          subtitle={panelPinMode === 'delete' ? (t.ts_drawer_delete_pin_subtitle ?? 'Inserisci il PIN del manager/assistant per eliminare il turno') : panelPinMode === 'freeze' ? (t.ts_drawer_freeze_subtitle ?? 'Inserisci il PIN del manager/assistant per congelare il turno') : (t.wst_freeze_pin_subtitle ?? 'Inserisci il PIN del manager/assistant per sbloccare il turno')}
+          title={panelPinMode === 'delete' ? 'Elimina turno' : panelPinMode === 'freeze' ? (t.ts_drawer_freeze_title ?? 'Congela questo turno') : (t.wst_freeze_pin_title ?? 'Sblocca turno')}
+          subtitle={panelPinMode === 'delete' ? 'Inserisci il PIN per confermare l\'eliminazione' : panelPinMode === 'freeze' ? (t.ts_drawer_freeze_subtitle ?? 'Inserisci il PIN del manager/assistant per congelare il turno') : (t.wst_freeze_pin_subtitle ?? 'Inserisci il PIN del manager/assistant per sbloccare il turno')}
           pinLabel={t.wst_pin_label ?? 'PIN'}
           pin={panelPin}
           onPinChange={setPanelPin}
