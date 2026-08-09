@@ -1,8 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useMessages } from '../hooks/useMessages';
 import { useMultisensorialFeedback } from '../hooks/useMultisensorialFeedback';
-import { useAppUser } from '../context/AppContext';
+import { useAppUser, useAppData } from '../context/AppContext';
 import { NotificationModal } from './NotificationModal';
+import { countUnreadNotifications } from '../utils/notifications';
+import { getTranslations } from '../utils/translations';
 
 interface UnifiedBellButtonProps {
   userId?: string;
@@ -19,12 +21,22 @@ export function UnifiedBellButton({
   onMessageClick,
 }: UnifiedBellButtonProps) {
   const { triggerHapticFeedback } = useMultisensorialFeedback();
-  const { currentUser } = useAppUser();
+  const { currentUser, users, effectiveLanguage } = useAppUser();
+  const { shifts, holidays } = useAppData();
   const isAdmin = currentUser?.role === 'admin';
-  const { messages, unreadCount, markAsRead, markAllAsRead, loadMessages, error, sendMessage, deleteMessage } = useMessages(userId, isAdmin);
+  const { messages, unreadCount: msgUnread, markAsRead, markAllAsRead, loadMessages, error, sendMessage, deleteMessage } = useMessages(userId, isAdmin);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Conteggio unificato: messaggi non letti + notifiche turni/ferie non lette
+  const shiftNotifUnread = useMemo(() => {
+    if (!currentUser) return 0;
+    const t = getTranslations(effectiveLanguage);
+    return countUnreadNotifications(currentUser, shifts, holidays, users, t, effectiveLanguage);
+  }, [currentUser, shifts, holidays, users, effectiveLanguage]);
+
+  const totalUnread = msgUnread + shiftNotifUnread;
 
   // Apri il modal notifiche quando l'utente clicca su una push notification
   useEffect(() => {
@@ -89,12 +101,12 @@ export function UnifiedBellButton({
         title={
           error
             ? `Errore caricamento notifiche: ${error}`
-            : `Notifiche${unreadCount > 0 ? ` (${unreadCount} non lette)` : ''}`
+            : `Notifiche${totalUnread > 0 ? ` (${totalUnread} non lette)` : ''}`
         }
         aria-label={
           error
             ? `Errore caricamento notifiche`
-            : `Campanella notifiche${unreadCount > 0 ? ` con ${unreadCount} nuovi messaggi` : ''}`
+            : `Campanella notifiche${totalUnread > 0 ? ` con ${totalUnread} nuovi messaggi` : ''}`
         }
         className={`relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 touch-manipulation liquid-glass text-accent ${
  isDisabled
@@ -116,9 +128,9 @@ export function UnifiedBellButton({
         </svg>
 
         {/* Badge numero notifiche non lette - Rosso acceso con numero bianco */}
-        {unreadCount > 0 && (
+        {totalUnread > 0 && (
           <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[8px] font-black text-white" style={{ background: 'linear-gradient(135deg,#f87171,#dc2626)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.18), 0 2px 8px rgba(220,38,38,0.55)', border: '1.5px solid rgba(255,255,255,0.55)' }}>
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {totalUnread > 9 ? '9+' : totalUnread}
           </span>
         )}
       </button>
@@ -128,7 +140,7 @@ export function UnifiedBellButton({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         messages={messages}
-        unreadCount={unreadCount}
+        unreadCount={totalUnread}
         onMessageClick={(messageId) => {
           markAsRead(messageId);
           triggerHapticFeedback('success');

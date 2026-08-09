@@ -2,12 +2,13 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, MessageCircle, Bell, BellOff, Info, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useMessages } from '../hooks/useMessages';
-import { useAppUser } from '../context/AppContext';
+import { useAppUser, useAppData } from '../context/AppContext';
 import { useT } from '../hooks/useT';
 import { supabase } from '../lib/supabase';
 import type { User } from '../types';
 import { readProfileAvatarFromStorage } from '../utils/profilePhotoStorage';
 import { getIntlLocale } from '../utils/translations';
+import { generateNotifications, syncNotificationFeed, getSeenIds, markAllSeen, type AppNotification } from '../utils/notifications';
 
 const BRAND = '#525252';
 
@@ -137,6 +138,18 @@ type DbNotification = {
   created_at: string;
 };
 
+/** Entry unificata (DB + generateNotifications) per il rendering */
+type UnifiedNotifItem = {
+  id: string;
+  title: string;
+  body: string;
+  type: string;
+  severity: string;
+  timestamp: string;
+  isRead: boolean;
+  source: 'db' | 'generated';
+};
+
 function NotificationsView({
   onClose,
   t = {},
@@ -144,10 +157,11 @@ function NotificationsView({
   onClose?: () => void;
   t?: Record<string, string>;
 }) {
-  const { currentUser } = useAppUser();
-  const [notifs, setNotifs] = useState<DbNotification[]>([]);
+  const { currentUser, users, effectiveLanguage } = useAppUser();
+  const { shifts, holidays } = useAppData();
+  const [dbNotifs, setDbNotifs] = useState<DbNotification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [seenTick, setSeenTick] = useState(0);
 
   // Carica notifiche dal database
   useEffect(() => {
@@ -158,23 +172,17 @@ function NotificationsView({
 
     const load = async () => {
       setLoading(true);
-      setError(null);
       try {
-        const { data, error: err } = await supabase!
+        const { data } = await supabase!
           .from('notifications')
           .select('*')
           .eq('user_id', currentUser.id)
           .order('created_at', { ascending: false })
           .limit(50);
 
-        if (err) {
-          // Se la tabella non esiste o non ha RLS, mostra errore leggibile
-          setError('Nessuna notifica personale disponibile');
-        } else {
-          setNotifs(data || []);
-        }
+        setDbNotifs(data || []);
       } catch {
-        setError('Errore nel caricamento notifiche');
+        // tabella assente o errore RLS — ignorato, useremo solo generated
       } finally {
         setLoading(false);
       }
@@ -183,11 +191,59 @@ function NotificationsView({
     load();
   }, [currentUser]);
 
-  // Marca come lette quando apri
-  useEffect(() => {
-    if (!currentUser || !supabase || notifs.length === 0) return;
+  // Unisce notifiche generate (turni/ferie) + DB + gestione visto
+  const allNotifs = useMemo((): UnifiedNotifItem[] => {
+    if (!currentUser) return [];
 
-    const unread = notifs.filter((n) => !n.is_read).map((n) => n.id);
+    // 1. Notifiche generate da turni/ferie
+    const generated = generateNotifications(currentUser, shifts, holidays, users, t as Record<string, string>, effectiveLanguage);
+    syncNotificationFeed(currentUser.id, generated);
+    const seenIds = getSeenIds(currentUser.id);
+
+    const generatedItems: UnifiedNotifItem[] = generated.map((n) => ({
+      id: n.id,
+      title: n.title,
+      body: n.body,
+      type: n.type,
+      severity: n.severity,
+      timestamp: n.timestamp,
+      isRead: seenIds.has(n.id),
+      source: 'generated' as const,
+    }));
+
+    // 2. Notifiche dal DB
+    const dbItems: UnifiedNotifItem[] = dbNotifs.map((n) => ({
+      id: n.id,
+      title: n.title,
+      body: n.message,
+      type: n.type,
+      severity: 'info',
+      timestamp: n.created_at,
+      isRead: n.is_read,
+      source: 'db' as const,
+    }));
+
+    // 3. Merge e ordina per timestamp decrescente
+    const merged = [...generatedItems, ...dbItems].sort(
+      (a, b) => b.timestamp.localeCompare(a.timestamp)
+    );
+    return merged;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, shifts, holidays, users, effectiveLanguage, dbNotifs, seenTick]);
+
+  // Marca come lette tutte le generated quando apri
+  useEffect(() => {
+    if (!currentUser) return;
+    const generated = generateNotifications(currentUser, shifts, holidays, users, t as Record<string, string>, effectiveLanguage);
+    markAllSeen(currentUser.id, generated.map((n) => n.id));
+    setSeenTick((x) => x + 1);
+    window.dispatchEvent(new CustomEvent('notifications-seen'));
+  }, [currentUser]); // si attiva una sola volta al mount del componente
+
+  // Marca come lette le DB quando apri
+  useEffect(() => {
+    if (!currentUser || !supabase || dbNotifs.length === 0) return;
+    const unread = dbNotifs.filter((n) => !n.is_read).map((n) => n.id);
     if (unread.length === 0) return;
 
     supabase
@@ -195,54 +251,45 @@ function NotificationsView({
       .update({ is_read: true })
       .in('id', unread)
       .then(() => {
-        setNotifs((prev) =>
+        setDbNotifs((prev) =>
           prev.map((n) => (unread.includes(n.id) ? { ...n, is_read: true } : n))
         );
         window.dispatchEvent(new CustomEvent('notifications-seen'));
-      })
-      .catch(() => {});
-  }, [currentUser, notifs]);
+      }, () => {
+        // errore silenzioso — tabella assente o permessi
+      });
+  }, [currentUser, dbNotifs]);
 
   // Formatta data relativa
   function formatRelativeDate(iso: string): string {
     const d = new Date(iso);
     const now = new Date();
-
-    // Aggiusta per fuso orario italiano
     const pad = (n: number) => String(n).padStart(2, '0');
     const timeStr = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
-    // Stesso giorno
-    if (d.toDateString() === now.toDateString()) {
-      return `Oggi, ${timeStr}`;
-    }
+    if (d.toDateString() === now.toDateString()) return `Oggi, ${timeStr}`;
 
-    // Ieri
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
-    if (d.toDateString() === yesterday.toDateString()) {
-      return `Ieri, ${timeStr}`;
-    }
+    if (d.toDateString() === yesterday.toDateString()) return `Ieri, ${timeStr}`;
 
-    // Meno di 7 giorni fa
     const days = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
     const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
-    if (diffDays < 7) {
-      return `${days[d.getDay()]}, ${timeStr}`;
-    }
+    if (diffDays < 7) return `${days[d.getDay()]}, ${timeStr}`;
 
-    // Data completa
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}, ${timeStr}`;
   }
 
   const getIcon = (_type: string) => {
     switch (_type) {
+      case 'new_shift':
       case 'shift_change':
       case 'shift_assigned':
         return <CheckCircle2 className="h-4 w-4 text-brand-500" />;
       case 'holiday_approved':
         return <CheckCircle2 className="h-4 w-4 text-brand-500" />;
       case 'holiday_rejected':
+      case 'holiday_pending':
         return <AlertTriangle className="h-4 w-4 text-amber-500" />;
       case 'message_received':
         return <Bell className="h-4 w-4 text-accent" />;
@@ -250,6 +297,18 @@ function NotificationsView({
         return <Info className="h-4 w-4 text-accent" />;
     }
   };
+
+  const unreadCount = allNotifs.filter((n) => !n.isRead).length;
+
+  // All'apertura, marca tutto come letto
+  useEffect(() => {
+    if (!currentUser) return;
+    const generated = generateNotifications(currentUser, shifts, holidays, users, t as Record<string, string>, effectiveLanguage);
+    markAllSeen(currentUser.id, generated.map((n) => n.id));
+    setSeenTick((x) => x + 1);
+    window.dispatchEvent(new CustomEvent('notifications-seen'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <motion.div
@@ -263,18 +322,11 @@ function NotificationsView({
     >
       {/* Feed */}
       <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-contain p-2 [-webkit-overflow-scrolling:touch]">
-        {loading ? (
+        {loading && dbNotifs.length === 0 && allNotifs.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-6 h-6 animate-spin" style={{ color: BRAND }} />
           </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
-              <BellOff className="h-8 w-8 text-white/30" />
-            </div>
-            <p className="text-sm font-medium text-white/60">{error}</p>
-          </div>
-        ) : notifs.length === 0 ? (
+        ) : allNotifs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
               <BellOff className="h-8 w-8 text-white/30" />
@@ -283,22 +335,22 @@ function NotificationsView({
           </div>
         ) : (
           <div className="flex flex-col gap-1">
-            {notifs.map((n) => (
+            {allNotifs.map((n) => (
               <div
                 key={n.id}
                 className={`relative flex gap-3 rounded-2xl p-4 transition-colors ${
-                  !n.is_read ? 'bg-accent/[0.06]' : 'hover:bg-white/8'
+                  !n.isRead ? 'bg-accent/[0.06]' : 'hover:bg-white/8'
                 } active:bg-white/8/80`}
               >
                 <div className="mt-0.5 shrink-0">{getIcon(n.type)}</div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold text-white">{n.title}</p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-white/70">{n.message}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-white/70">{n.body}</p>
                   <p className="mt-2 text-[11px] font-medium uppercase tracking-wider text-white/50">
-                    {formatRelativeDate(n.created_at)}
+                    {formatRelativeDate(n.timestamp)}
                   </p>
                 </div>
-                {!n.is_read && (
+                {!n.isRead && (
                   <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-red-500" />
                 )}
               </div>

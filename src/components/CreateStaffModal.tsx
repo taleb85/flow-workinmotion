@@ -36,12 +36,16 @@ function dateToDbYmd(s: string): string | null {
   return m ? m[1] : null;
 }
 
+function generateRandomPin(): string {
+  return String(Math.floor(1000 + Math.random() * 9000)); // 1000-9999
+}
+
 const emptyForm = (): ProfileFormAdminData => ({
   first_name: '',
   last_name: '',
   email: '',
   role: 'server',
-  pin: '',
+  pin: generateRandomPin(),
   status: 'active',
   department: undefined,
   hourly_rate_eur: '',

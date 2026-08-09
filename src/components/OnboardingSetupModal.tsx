@@ -146,7 +146,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-start overflow-y-auto font-sans"
+      className="fixed inset-0 z-[11000] flex flex-col items-center justify-start overflow-y-auto font-sans"
       style={{
         background: 'transparent',
         paddingTop: 'env(safe-area-inset-top, 0px)',
@@ -155,14 +155,14 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
       <div className="relative mx-auto flex w-full max-w-7xl flex-col min-h-full px-4 py-safe">
         <div className="mx-auto w-full max-w-md flex flex-col min-h-full">
         {/* Header FLOW */}
-        <div className="pt-8 pb-8 text-center text-white">
-          {/* Logo FLOW — versione bianca su sfondo blu */}
+        <div className="bg-white rounded-3xl shadow-2xl shadow-black/30 p-6 -mb-6 text-center relative z-10">
+          {/* Logo FLOW */}
           <div className="mb-6 flex justify-center">
             <FlowLogo size={38} subtitle="Work in Motion" colorScheme="white" />
           </div>
 
-          <h1 className="text-2xl font-bold tracking-tight mb-2">{greeting}</h1>
-          <p className="text-sm text-white/70 leading-relaxed max-w-xs mx-auto">{subtitle}</p>
+          <h1 className="text-2xl font-bold tracking-tight mb-2 text-gray-900">{greeting}</h1>
+          <p className="text-sm text-gray-600 leading-relaxed max-w-xs mx-auto">{subtitle}</p>
         </div>
 
         {/* Card form */}

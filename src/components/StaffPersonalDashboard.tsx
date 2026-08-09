@@ -1086,9 +1086,13 @@ export default function StaffPersonalDashboard({
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white/90 leading-tight">Installa l'app FLOW</p>
                 {isIos ? (
-                  <p className="text-[11px] text-white/60 mt-0.5 leading-snug">
-                    Tocca <strong>Condividi</strong> → <strong>Aggiungi a schermata Home</strong>
-                  </p>
+                  <a
+                    href="/FLOW.mobileconfig"
+                    download
+                    className="text-[11px] text-accent mt-0.5 leading-snug inline-block underline"
+                  >
+                    Tocca qui per installare con 1 tocco
+                  </a>
                 ) : (
                   <p className="text-[11px] text-white/60 mt-0.5">Accedi più velocemente ai tuoi turni</p>
                 )}

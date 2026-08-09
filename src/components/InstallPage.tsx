@@ -198,6 +198,31 @@ export default function InstallPage() {
         {tr('install_ios_title')}
       </p>
 
+      {/* Opzione rapida: .mobileconfig */}
+      <a
+        href="/FLOW.mobileconfig"
+        download
+        className="w-full flex items-center justify-center gap-3 rounded-2xl py-3.5 mb-4 text-sm font-semibold transition-colors"
+        style={{
+          background: 'linear-gradient(135deg, #007AFF 0%, #0056CC 100%)',
+          color: '#fff',
+          boxShadow: '0 8px 24px rgba(0, 122, 255, 0.35)',
+        }}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Installa con 1 tocco (consigliato)
+      </a>
+
+      <p className="text-[11px] text-white/40 text-center leading-relaxed mb-3">
+        Scarica il profilo e vai su <strong>Impostazioni → Generali → Gestione dispositivo → FLOW → Installa</strong>
+      </p>
+
+      <div className="flex items-center gap-3 mb-5">
+        <div className="flex-1 h-px bg-white/10" />
+        <span className="text-[10px] text-white/30 uppercase tracking-wider">oppure manualmente</span>
+        <div className="flex-1 h-px bg-white/10" />
+      </div>
+
       <div className="w-full space-y-2 mb-6">
         <StepRow icon={<span className="text-white font-bold text-xs">1</span>} title={tr('invite_install_ios_1')} />
         <StepRow icon={<span className="text-white font-bold text-xs">2</span>} title={tr('invite_install_ios_2')} />

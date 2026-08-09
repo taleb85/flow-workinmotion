@@ -137,39 +137,30 @@ export function generateNotifications(
         !s.notes?.startsWith('__OPEN__') &&
         s.approval_status !== 'draft'
     );
-    const byWeek = new Map<string, Shift[]>();
-    for (const s of myShifts) {
+
+    // Una notifica per turno (ID = shift_ + shift.id), così ogni nuovo turno appare sempre
+    const sortedShifts = [...myShifts].sort((a, b) => a.date.localeCompare(b.date));
+    for (const s of sortedShifts) {
+      let day: string;
       try {
         const d = parseISO(s.date);
-        const ws = format(startOfWeek(d, { weekStartsOn: 1 }), 'yyyy-MM-dd');
-        const arr = byWeek.get(ws) ?? [];
-        arr.push(s);
-        byWeek.set(ws, arr);
+        day = isValid(d) ? safeFormatDate(s.date, 'EEE d MMM', { locale: dateLocale }) : s.date;
       } catch {
-        /* skip malformed date */
+        day = s.date;
       }
-    }
-    const sortedWeekKeys = [...byWeek.keys()].sort((a, b) => a.localeCompare(b));
-    for (const weekStart of sortedWeekKeys) {
-      const group = (byWeek.get(weekStart) ?? []).sort((a, b) => a.date.localeCompare(b.date));
-      if (group.length === 0) continue;
-      const startD = parseISO(weekStart);
-      if (!isValid(startD)) continue;
-      const endD = endOfWeek(startD, { weekStartsOn: 1 });
-      const rangeLabel = `${format(startD, 'd MMM', { locale: dateLocale })} – ${format(endD, 'd MMM', { locale: dateLocale })}`;
-      const parts = group.map((s) => {
-        const day = safeFormatDate(s.date, 'EEE d', { locale: dateLocale });
-        return `${day} ${(s.start_time || '').slice(0, 5)}–${(s.end_time || '').slice(0, 5)}`;
-      });
-      let body = `${rangeLabel}: ${parts.join(' · ')}`;
-      if (body.length > 240) body = `${body.slice(0, 237)}…`;
+      const start = (s.start_time || '').slice(0, 5);
+      const end = (s.end_time || '').slice(0, 5);
+      let body = `${day} ${start}–${end}`;
+      if (s.break_minutes && s.break_minutes > 0) {
+        body += ` · ${s.break_minutes}min pausa`;
+      }
       notifications.push({
-        id: `shift_week_${weekStart}`,
+        id: `shift_${s.id}`,
         type: 'new_shift',
         title: t.notif_shift_assigned,
         body,
         severity: 'info',
-        timestamp: group[group.length - 1]!.date,
+        timestamp: s.date,
       });
     }
 
