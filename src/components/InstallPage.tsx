@@ -111,11 +111,9 @@ export default function InstallPage() {
   const firstName = searchParams.get('firstName') ?? '';
   const pin = searchParams.get('pin') ?? '';
 
-  // Su Apple: vai direttamente alla vista iOS (salta scelta dispositivo)
+  // Mostra direttamente la vista iOS come default (mobileconfig)
   const appleDevice = isAppleDevice();
-  const [selectedDevice, setSelectedDevice] = useState<'ios' | 'android' | 'computer' | null>(
-    appleDevice ? 'ios' : null
-  );
+  const [selectedDevice, setSelectedDevice] = useState<'ios' | 'android' | 'computer' | null>('ios');
   const [selectedOs, setSelectedOs] = useState<'mac' | 'win' | null>(null);
 
   const handleContinue = () => {
