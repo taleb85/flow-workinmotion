@@ -2297,7 +2297,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           <div
             className="fixed z-[10060] rounded-xl font-sans text-sm overflow-hidden"
             style={{
-              background: '#ef4444',
+              background: 'rgba(239, 68, 68, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
               left: contextMenu.x,
               top: contextMenu.y,
               width: contextMenu.w,
