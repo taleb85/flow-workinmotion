@@ -17,7 +17,7 @@
         display: none;
         position: fixed;
         inset: 0;
-        background: #020617;
+        background: #0a0a0e;
         z-index: 999999;
         flex-direction: column;
         align-items: center;
@@ -26,6 +26,39 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         text-align: center;
         color: #fff;
+      }
+      #pwa-install-screen::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 50% 0%, rgba(148,163,184,0.10) 0%, rgba(80,90,110,0.06) 30%, transparent 70%);
+        pointer-events: none;
+      }
+      /* Aureole sfumate (glows) */
+      #pwa-install-screen .aurora {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      #pwa-install-screen .aurora-1 {
+        top: -5rem; left: 50%; transform: translateX(-50%);
+        width: 56rem; height: 40rem;
+        background: #94a3b8; opacity: 0.09; filter: blur(190px);
+      }
+      #pwa-install-screen .aurora-2 {
+        top: -2rem; right: 10%;
+        width: 30rem; height: 26rem;
+        background: #cbd5e1; opacity: 0.06; filter: blur(150px);
+      }
+      #pwa-install-screen .aurora-3 {
+        bottom: 20%; right: 8%;
+        width: 28rem; height: 24rem;
+        background: #5eead4; opacity: 0.07; filter: blur(160px);
+      }
+      #pwa-install-screen .aurora-4 {
+        top: 25%; left: -6rem;
+        width: 24rem; height: 20rem;
+        background: #67e8f9; opacity: 0.05; filter: blur(140px);
       }
       #pwa-install-screen.show { display: flex; }
       #pwa-install-screen .logo {
@@ -122,6 +155,10 @@
           screen.className = 'show';
 
           var inner = '';
+          inner += '<div class="aurora aurora-1"></div>';
+          inner += '<div class="aurora aurora-2"></div>';
+          inner += '<div class="aurora aurora-3"></div>';
+          inner += '<div class="aurora aurora-4"></div>';
           inner += '<div class="logo"><svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="fbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#253660"/><stop offset="50%" stop-color="#1a2744"/><stop offset="100%" stop-color="#111c36"/></linearGradient><linearGradient id="fa" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffcc00"/><stop offset="60%" stop-color="#ff9900"/><stop offset="100%" stop-color="#e07800"/></linearGradient><linearGradient id="fb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffd700"/><stop offset="60%" stop-color="#ffaa00"/><stop offset="100%" stop-color="#e08800"/></linearGradient><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,255,255,0.18)"/><stop offset="100%" stop-color="rgba(255,255,255,0.03)"/></linearGradient><clipPath id="fc"><rect width="160" height="160" rx="28"/></clipPath></defs><rect width="160" height="160" rx="28" fill="url(#fbg)"/><rect x="21" y="44" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="44" width="86" height="22" rx="11" fill="url(#fa)"/><rect x="21" y="76" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="76" width="118" height="22" rx="11" fill="url(#fb)"/><rect x="21" y="108" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="108" width="60" height="22" rx="11" fill="url(#fa)"/><rect x="0" y="0" width="160" height="83" fill="url(#fg)" clip-path="url(#fc)"/></svg></div>';
           inner += '<h1>Installa FLOW</h1>';
           inner += '<p class="subtitle">Aggiungi l\'app alla schermata Home per iniziare</p>';
