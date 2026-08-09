@@ -659,13 +659,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   }, [deleteShift, showSuccess, showError, t, canDeleteShift, sessionActive]);
 
   // ── Menu contestuale (tasto destro) ──
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; shift: Shift; group: DayShiftGroup } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; w: number; h: number; shift: Shift; group: DayShiftGroup } | null>(null);
 
   const handleShiftContextMenu = useCallback((e: React.MouseEvent, shift: Shift, group: DayShiftGroup) => {
     e.preventDefault();
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
-    setContextMenu({ x: rect.left, y: rect.top, shift, group });
+    setContextMenu({ x: rect.left, y: rect.top, w: rect.width, h: rect.height, shift, group });
   }, []);
 
   const handleContextDelete = useCallback(() => {
@@ -2295,11 +2295,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           />
           {/* Menu */}
           <div
-            className="fixed z-[10060] min-w-[172px] rounded-xl border border-neutral-500 shadow-xl py-1 font-sans text-sm overflow-hidden"
+            className="fixed z-[10060] rounded-xl border border-neutral-500 shadow-xl py-1 font-sans text-sm overflow-hidden"
             style={{
               background: '#152848',
-              left: Math.min(contextMenu.x, window.innerWidth - 192),
+              left: contextMenu.x,
               top: contextMenu.y,
+              width: contextMenu.w,
+              minHeight: contextMenu.h,
             }}
             onClick={(e) => e.stopPropagation()}
           >
