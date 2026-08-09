@@ -59,6 +59,7 @@ const DAY_LABELS = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
 export default function MobileHome({
   greetingText,
   todayLabel,
+  rightContent,
   statsLabels,
   weeklyMinutes,
   monthlyMinutes,
