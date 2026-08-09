@@ -2295,9 +2295,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           />
           {/* Menu */}
           <div
-            className="fixed z-[10060] rounded-xl border border-white/20 font-sans text-sm overflow-hidden"
+            className="fixed z-[10060] rounded-xl font-sans text-sm overflow-hidden"
             style={{
-              background: '#1a2744',
+              background: '#dc2626',
               left: contextMenu.x,
               top: contextMenu.y,
               width: contextMenu.w,
@@ -2308,7 +2308,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             <button
               type="button"
               onClick={handleContextDelete}
-              className="flex w-full h-full items-center justify-center gap-2.5 text-red-500 hover:bg-red-500/15 transition-colors active:bg-red-500/80"
+              className="flex w-full h-full items-center justify-center gap-2.5 text-white font-bold hover:bg-red-700 transition-colors active:bg-red-800"
             >
               <Trash2 className="h-3.5 w-3.5 shrink-0" />
               Elimina turno
