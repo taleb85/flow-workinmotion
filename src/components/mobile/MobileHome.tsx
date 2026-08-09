@@ -145,7 +145,7 @@ export default function MobileHome({
           </p>
         </div>
         {rightContent && (
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-3">
             {rightContent}
           </div>
         )}
