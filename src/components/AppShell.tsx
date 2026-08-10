@@ -699,7 +699,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       <header
         ref={appStickyHeaderRef}
         aria-label="Navigazione principale"
-        className={`sticky top-0 left-0 right-0 z-[10040] shrink-0 transition-[visibility,opacity,background] duration-150 ${
+        className={`fixed top-0 left-0 right-0 z-[10040] shrink-0 transition-[visibility,opacity,background] duration-150 ${
  overlayOpen ? 'invisible opacity-0 pointer-events-none' : ''
  } ${
  isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''
@@ -768,7 +768,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         role="main"
         aria-label="Contenuto principale"
         className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''}`}>
-        <div className="w-full app-horizontal-pad pt-0 flex-1 min-h-0 flex flex-col pb-[48px]">
+        <div className="w-full app-horizontal-pad pt-[50px] flex-1 min-h-0 flex flex-col pb-[48px]">
           {/* PIN portals */}
           {createPortal(
             <AnimatePresence>
