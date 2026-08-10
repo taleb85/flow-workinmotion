@@ -1353,7 +1353,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               type="button"
               onClick={() => void handlePublishWeek()}
               aria-label={t.publish_week ?? 'Pubblica settimana'}
-              className="flex shrink-0 items-center gap-1 rounded-lg bg-emerald-600/20 px-2 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-300 transition-colors hover:bg-emerald-600/30 sm:px-2.5"
+              className="hidden md:flex shrink-0 items-center gap-1 rounded-lg bg-emerald-600/20 px-2 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-300 transition-colors hover:bg-emerald-600/30 sm:px-2.5"
             >
               <Send className="h-3 w-3 shrink-0" />
               <span className="hidden min-[520px]:inline lg:hidden">Pubblica</span>
