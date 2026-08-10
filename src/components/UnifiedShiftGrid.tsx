@@ -517,7 +517,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       .filter(u => !deptFilter || u.department === deptFilter);
 
   const weekDateStrings = weekDays.map(d => format(d, 'yyyy-MM-dd'));
-  const weekShifts = allShifts.filter(s => weekDateStrings.includes(s.date) && (!filterUserId || s.user_id === filterUserId));
+  const weekShifts = useMemo(
+    () => allShifts.filter(s => weekDateStrings.includes(s.date) && (!filterUserId || s.user_id === filterUserId)),
+    [allShifts, weekDateStrings, filterUserId]
+  );
   const weekPunchRecords = allPunchRecords.filter(pr => weekDateStrings.some(ds => pr.timestamp?.startsWith(ds)));
   const departments = [...new Set(users.filter(u => u.department).map(u => u.department as string))];
   const hasWeekDraftShifts = weekShifts.some(s => s.approval_status === 'draft');
@@ -2191,9 +2194,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 className="flex-1 rounded-lg border border-white/20 px-4 py-2.5 text-[11px] font-bold text-white/70 hover:bg-white/[0.07] hover:text-white uppercase tracking-wider"
               >{t.cancel ?? 'Annulla'}</button>
               <button type="button" onClick={() => handleCreateShift()} disabled={saving}
-                className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-[11px] font-bold text-white hover:bg-accent/80 disabled:opacity-40 uppercase tracking-wider"
+                className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-[11px] font-bold text-white hover:bg-accent/80 disabled:opacity-60 uppercase tracking-wider flex items-center justify-center gap-1.5"
               >
-                <Plus className="h-3.5 w-3.5 inline-block mr-1.5" />{t.create ?? 'Crea'}
+                {saving ? (
+                  <><span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Salvando…</>
+                ) : (
+                  <><Plus className="h-3.5 w-3.5" />{t.create ?? 'Crea'}</>
+                )}
               </button>
             </div>
           </div>

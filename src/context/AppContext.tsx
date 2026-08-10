@@ -922,15 +922,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       shift.user_id
     );
     const normalized = { ...shift, end_time: endTime, approval_status: 'draft' as const, ...autoBreak };
-    console.log('[addShift] normalized payload:', JSON.stringify(normalized, null, 2));
     const res = await database.shifts.insert(normalized);
-    console.log('[addShift] insert result:', res ? `OK id=${res.id} tenant_id=${(res as any).tenant_id ?? 'MISSING'} date=${res.date} start=${res.start_time}` : 'NULL');
-    // Dopo insert, verifica se lo shift è recuperabile via getAll
-    if (res) {
-      const allAfter = await database.shifts.getAll().catch(() => []);
-      const found = allAfter.find(s => s.id === res.id);
-      console.log('[addShift] getAll post-insert:', allAfter.length, 'turni, shift appena creato trovato:', !!found);
-    }
     if (res) {
       setShifts(prev => [...prev, res]);
       recentlyAddedShiftIdsRef.current.add(res.id);
