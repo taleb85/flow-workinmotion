@@ -706,7 +706,6 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
  } ${headerScrolled ? 'bg-app-bg/92 backdrop-blur-[20px]' : ''}`}
         style={{
           background: headerScrolled ? undefined : 'transparent',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
         }}
       >
         <MobileProfileHeader
