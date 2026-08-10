@@ -762,13 +762,6 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
             </div>
           }
         />
-        {!noNavTabs && (
-          <TopTabBar
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            visibleTabs={bottomNavTabs}
-          />
-        )}
       </header>
 
       <main
@@ -861,6 +854,27 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
           ) : null}
         </div>
       </main>
+
+      {/* ── Bottom Tab Bar ── */}
+      {!noNavTabs && (
+        <nav
+          className="sticky bottom-0 left-0 right-0 z-[10040] shrink-0 flex items-center scrollbar-none"
+          style={{
+            background: 'rgba(10, 10, 14, 0.92)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+            borderTop: '1px solid rgba(255,255,255,0.10)',
+          }}
+          aria-label={t.nav_primary_tabs}
+        >
+          <TopTabBar
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            visibleTabs={bottomNavTabs}
+          />
+        </nav>
+      )}
 
       {/* Sovrapposizione viola/indaco durante refresh globale */}
       {isGlobalRefreshing && (() => {

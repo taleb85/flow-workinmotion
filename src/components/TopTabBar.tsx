@@ -63,7 +63,7 @@ export default function TopTabBar({ activeTab, onTabChange, visibleTabs }: TopTa
                 color: isActive ? 'white' : 'rgba(255,255,255,0.45)',
                 background: 'none',
                 border: 'none',
-                borderBottom: isActive ? '1px solid white' : '1px solid transparent',
+                borderTop: isActive ? '1px solid white' : '1px solid transparent',
                 borderRadius: 0,
                 cursor: 'pointer',
                 letterSpacing: '0.3px',
