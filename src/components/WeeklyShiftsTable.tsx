@@ -2112,7 +2112,7 @@ function WeeklyShiftsTable({ filterUserId, stickyDateBarInScrollPane = false }: 
       {wTurniToolbar && (
       <>
       {/* Toolbar: navigazione + pubblica + ☰ */}
-      <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 flex flex-row flex-wrap lg:flex-nowrap items-center justify-start gap-x-2 gap-y-2 overflow-x-auto md:sticky md:top-[50px] md:z-50 mb-2 py-2">
+      <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 flex flex-row flex-wrap lg:flex-nowrap items-center justify-start gap-x-2 gap-y-2 overflow-x-auto md:sticky md:top-0 md:z-50 mb-2 py-2">
         {/* ── Sinistra: navigazione periodo / vista ── */}
         <div className="ui-toolbar-row-tight min-w-0 shrink-0 !gap-2">
           {/* Wrapper compatto: nav + chip data sempre vicini */}

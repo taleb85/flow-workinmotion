@@ -1255,7 +1255,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* ── Sezione superiore fissa (toolbar + selezioni + mobile view) ── */}
       <div ref={contentAboveRef}>
       {/* Toolbar sticky in tutte le viewport */}
-       <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mb-3 w-full min-w-0 md:sticky md:top-0 md:z-50 py-2"
+       <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mb-3 w-full min-w-0 sticky top-0 z-50 py-2"
         data-toolbar-mode={mode}>
         <div className="ui-toolbar-row-tight flex min-w-0 flex-1 flex-wrap items-center gap-1.5 sm:gap-2">
           <div className="flex shrink-0 items-center gap-1">
