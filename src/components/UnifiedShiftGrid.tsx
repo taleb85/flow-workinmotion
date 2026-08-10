@@ -1890,6 +1890,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             })}
           </tbody>
         </table>
+        <div className="h-12 shrink-0" />
       </div>
 
       {/* ── Detail Drawer ── */}
