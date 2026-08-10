@@ -650,7 +650,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     </AnimatePresence>
     <div
       role="region" aria-label="Applicazione"
-      className="relative w-full flex-1 min-h-0 text-white font-sans antialiased safe-area-pad pt-0 flex flex-col"
+      className="relative w-full h-dvh text-white font-sans antialiased safe-area-pad pt-0 flex flex-col"
       style={{ background: bgTheme.appBg }}
     >
       <DeepAuroraShell theme={bgTheme} />
