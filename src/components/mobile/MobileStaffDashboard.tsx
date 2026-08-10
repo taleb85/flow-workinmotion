@@ -201,7 +201,7 @@ export default function MobileStaffDashboard({
         style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255, 255, 255, 0.10)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
         className="text-white/70 hover:bg-white/15 hover:text-white touch-manipulation"
       >
-        <LogOut className="!text-red-500" style={{ width: 16, height: 16, color: '#ef4444' }} strokeWidth={2} aria-hidden />
+        <LogOut style={{ width: 16, height: 16 }} strokeWidth={2} color="#ef4444" aria-hidden />
       </button>
     </>
   );
