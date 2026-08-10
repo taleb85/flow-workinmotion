@@ -227,7 +227,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       const rootRect = root.getBoundingClientRect();
       const aboveRect = above.getBoundingClientRect();
       const usedAbove = aboveRect.bottom - rootRect.top;
-      const bottomGap = 52; // bottom bar + safe area
+      const bottomGap = 4;
       setTableMaxHeight(Math.max(200, window.innerHeight - rootRect.top - usedAbove - bottomGap));
     };
     update();
@@ -1729,7 +1729,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       )}
       <div
         ref={tableScrollRef}
-        className="hidden md:flex flex-col min-h-0 overflow-auto rounded-2xl border border-white/10 md:mb-[48px]"
+        className="hidden md:flex flex-col min-h-0 overflow-auto rounded-2xl border border-white/10"
         style={tableMaxHeight ? { maxHeight: tableMaxHeight } : { flex: '1 1 0', minHeight: 0 }}
         data-table-container
       >
