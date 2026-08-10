@@ -768,7 +768,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         role="main"
         aria-label="Contenuto principale"
         className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''}`}>
-        <div className="w-full app-horizontal-pad pt-0 flex-1 min-h-0 flex flex-col pb-[48px] md:pb-0">
+        <div className="w-full app-horizontal-pad pt-0 flex-1 min-h-0 flex flex-col pb-[48px]">
           {/* PIN portals */}
           {createPortal(
             <AnimatePresence>
@@ -856,7 +856,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
 
       {/* ── Bottom Tab Bar ── */}
       {!noNavTabs && (
-        <div className="fixed md:relative bottom-0 left-0 right-0 z-[10040] shrink-0" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="fixed bottom-0 left-0 right-0 z-[10040] shrink-0" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
           <TopTabBar
             activeTab={activeTab}
             onTabChange={handleTabChange}
