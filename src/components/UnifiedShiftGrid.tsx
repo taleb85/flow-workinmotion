@@ -1239,6 +1239,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 /* Header tabella opaco su scroll: solo vetro satinato senza colore, offusca il contenuto sottostante */
 .wst-header-scrolled { background: transparent !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
 .wst-header-scrolled th { color: rgba(255,255,255,0.75) !important; border-bottom-color: rgba(255,255,255,0.12) !important; }
+.wst-header-scrolled th.\!border-b-white { border-bottom-color: white !important; }
 .wst-header-scrolled th div { color: rgba(255,255,255,0.75) !important; }
 .wst-header-scrolled .text-accent { color: rgba(255,255,255,0.75) !important; }`}</style>
       {mode === 'planning' && (
