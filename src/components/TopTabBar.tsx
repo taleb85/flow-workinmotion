@@ -52,7 +52,7 @@ export default function TopTabBar({ activeTab, onTabChange, visibleTabs }: TopTa
               type="button"
               data-tour={id === 'profile' ? 'profile' : id === 'turni' ? 'shifts' : undefined}
               onClick={() => onTabChange(id)}
-              className="top-tab whitespace-nowrap"
+              className={`top-tab whitespace-nowrap ${id === 'settings' ? 'hidden md:inline' : ''}`}
               style={{
                 flex: '1 1 0',
                 minWidth: 0,
