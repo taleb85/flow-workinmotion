@@ -1232,7 +1232,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   };
 
   return (
-    <div ref={gridRootRef} className="w-full flex-1 min-h-0 flex flex-col font-sans">
+    <div ref={gridRootRef} className="w-full flex-1 min-h-0 flex flex-col font-sans sticky top-[50px]" style={{ maxHeight: 'calc(100vh - 50px - 48px)', overflow: 'auto' }}>
       {/* Linea divisoria tra dipendenti */}
       <style>{`.wst-employee-row td { border-bottom: 1px solid rgba(255,255,255,0.20) !important; }
 .wst-employee-row td { border-top: 1px solid rgba(255,255,255,0.10) !important; }
