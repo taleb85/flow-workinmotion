@@ -9,7 +9,6 @@ import { getStoredTheme, getThemeById } from '../utils/backgroundThemes';
 import type { BackgroundTheme } from '../utils/backgroundThemes';
 import DeepAuroraShell from './DeepAuroraShell';
 import SettingsPage from './SettingsPage';
-import ImpostazioniPage from './ImpostazioniPage';
 
 type AdminTab = 'profili' | 'impostazioni';
 
@@ -142,7 +141,6 @@ export default function AdminLayout() {
                   <SettingsPage view="regole" />
                 </div>
               )}
-              <ImpostazioniPage onOpenProfilesTab={() => handleTabChange('profili')} />
             </div>
           )}
         </div>
