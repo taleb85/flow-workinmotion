@@ -170,11 +170,6 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
   const locGranted = !locSupported || locationStatus === 'granted';
   const locDenied = locSupported && locationStatus === 'denied';
 
-  // Su iPhone le notifiche web richiedono l'app installata (PWA): senza,
-  // il prompt non appare mai → guidiamo all'installazione.
-  const isStandalone =
-    typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
-  const notifNeedsInstall = notifSupported && !notifGranted && isIOS && !isStandalone;
 
   // La subscription push è necessaria solo se le notifiche sono supportate e c'è un utente
   const pushRequired = notifSupported && !!userId;
@@ -313,17 +308,11 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
             </div>
           )}
 
-          {/* Avviso permessi bloccati o installazione richiesta */}
-          {(notifDenied || locDenied || notifNeedsInstall) && (
+          {/* Avviso permessi bloccati */}
+          {(notifDenied || locDenied) && (
             <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
               <Settings className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
               <p className="text-[11px] leading-relaxed text-amber-200/90">
-                {notifNeedsInstall ? (
-                  <>
-                    Per ricevere le notifiche su iPhone devi installare l’app: Safari → <b>Condividi</b> → <b>Aggiungi alla schermata Home</b>. Poi riapri l’app da lì e dai il consenso alle notifiche.
-                  </>
-                ) : (
-                  <>
                     {notifDenied && locDenied
                       ? 'Notifiche e posizione sono bloccate. '
                       : notifDenied

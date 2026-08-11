@@ -4,11 +4,6 @@ import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { User as UserIcon, Lock, Loader2, Eye, EyeOff, Fingerprint } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 
-/** Evento beforeinstallprompt (PWA install su Chrome/Edge/Android) */
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
-}
 import { useAppConfig } from '../context/appSliceContexts';
 import type { User as UserType, Language as LangType, Theme } from '../types';
 import { userRowToSessionUser } from '../utils/staffPermissionDefaults';
@@ -99,30 +94,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const [pinFocused, setPinFocused] = useState(false);
   const [error, setError] = useState('');
   const [deviceSuccess, setDeviceSuccess] = useState('');
-  /** Evento install PWA nativo (Chrome/Android) — catturato e riesposto come bottone. */
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-
-  // Cattura beforeinstallprompt (Chrome/Android, Edge, etc.)
-  useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  /** Su Chrome/Android: mostra il dialog nativo di installazione PWA. */
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') setDeferredPrompt(null);
-    } catch {
-      // user dismissed
-    }
-  };
   const shakeControls = useAnimation();
   useEffect(() => {
     if (!error) return;
@@ -540,19 +511,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
           {tenantBootstrapError}
         </div>
       ) : null}
-
-      {/* Banner installazione PWA — solo Android/Chrome con beforeinstallprompt */}
-      {deferredPrompt !== null && (
-        <div className="absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-green-400/20 bg-green-500/10 backdrop-blur-lg px-3 py-2.5">
-          <button
-            type="button"
-            onClick={handleInstallClick}
-            className="w-full flex items-center justify-center gap-2 text-[13px] font-semibold text-white"
-          >
-            📲 Installa l'app sulla Home
-          </button>
-        </div>
-      )}
 
       {/* F watermark di sfondo */}
       <div

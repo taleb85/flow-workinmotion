@@ -1,19 +1,10 @@
 <!doctype html>
-<!-- v1.8.0-pwagate-removed -->
+<!-- v1.9.0-no-pwa-prompts -->
 <html lang="it" data-theme="dark">
   <head>
-    <!-- Cattura beforeinstallprompt prima che React carichi (race condition fix) -->
-    <script>
-      window.__deferredInstallPrompt = null;
-      window.addEventListener('beforeinstallprompt', function(e) {
-        e.preventDefault();
-        window.__deferredInstallPrompt = e;
-      });
-    </script>
-    <!-- Banner installazione PWA iOS — visibile subito, prima che React carichi -->
+    <!-- Blocco accesso se non installata come PWA -->
     <style>
-      /* Schermata di installazione — visibile solo se NON in modalità app */
-      #pwa-install-screen {
+      #pwa-required-screen {
         display: none;
         position: fixed;
         inset: 0;
@@ -27,228 +18,43 @@
         text-align: center;
         color: #fff;
       }
-      #pwa-install-screen::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(ellipse at 50% 0%, rgba(148,163,184,0.10) 0%, rgba(80,90,110,0.06) 30%, transparent 70%);
-        pointer-events: none;
-      }
-      /* Aureole sfumate (glows) */
-      #pwa-install-screen .aurora {
-        position: absolute;
-        border-radius: 50%;
-        pointer-events: none;
-      }
-      #pwa-install-screen .aurora-1 {
-        top: -5rem; left: 50%; transform: translateX(-50%);
-        width: 56rem; height: 40rem;
-        background: #94a3b8; opacity: 0.09; filter: blur(190px);
-      }
-      #pwa-install-screen .aurora-2 {
-        top: -2rem; right: 10%;
-        width: 30rem; height: 26rem;
-        background: #cbd5e1; opacity: 0.06; filter: blur(150px);
-      }
-      #pwa-install-screen .aurora-3 {
-        bottom: 20%; right: 8%;
-        width: 28rem; height: 24rem;
-        background: #5eead4; opacity: 0.07; filter: blur(160px);
-      }
-      #pwa-install-screen .aurora-4 {
-        top: 25%; left: -6rem;
-        width: 24rem; height: 20rem;
-        background: #67e8f9; opacity: 0.05; filter: blur(140px);
-      }
-      #pwa-install-screen.show { display: flex; }
-      #pwa-install-screen .logo {
-        width: 100px;
-        height: 100px;
-        border-radius: 26px;
+      #pwa-required-screen.show { display: flex; }
+      #pwa-required-screen .logo {
+        width: 80px; height: 80px;
+        border-radius: 22px;
         background: linear-gradient(135deg, #253660, #1a2744);
-        box-shadow: 0 0 40px rgba(255,149,0,0.5);
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
+        box-shadow: 0 0 30px rgba(255,149,0,0.3);
+        margin-bottom: 24px;
+        display: flex; align-items: center; justify-content: center;
       }
-      #pwa-install-screen .logo svg {
-        width: 100%;
-        height: 100%;
-        display: block;
+      #pwa-required-screen h1 {
+        font-size: 20px; font-weight: 700; margin: 0 0 8px;
       }
-      #pwa-install-screen h1 {
-        font-size: 22px;
-        font-weight: 800;
-        margin: 0 0 6px 0;
-      }
-      #pwa-install-screen .subtitle {
-        font-size: 13px;
-        color: rgba(255,255,255,0.5);
-        margin: 0 0 28px 0;
-      }
-      #pwa-install-screen .step {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        width: 100%;
-        max-width: 300px;
-        padding: 12px 16px;
-        border-radius: 14px;
-        background: rgba(40,32,24,0.8);
-        border: 1px solid rgba(255,255,255,0.12);
-        margin-bottom: 10px;
-        font-size: 13px;
-        text-align: left;
-        color: rgba(255,255,255,0.85);
-      }
-      #pwa-install-screen .step-num {
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        background: rgba(255,149,0,0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 12px;
-        color: #FF9500;
-        flex-shrink: 0;
-      }
-      #pwa-install-screen .install-btn {
-        margin-top: 20px;
-        width: 100%;
-        max-width: 300px;
-        padding: 14px;
-        border-radius: 16px;
-        background: #FF9500;
-        color: #fff;
-        font-weight: 700;
-        font-size: 15px;
-        border: none;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-        display: none;
-      }
-      #pwa-install-screen .install-btn.show { display: block; }
-      #pwa-install-screen .skip-btn {
-        margin-top: 12px;
-        width: 100%;
-        max-width: 300px;
-        padding: 12px;
-        border-radius: 16px;
-        background: transparent;
-        color: rgba(255,255,255,0.55);
-        font-weight: 600;
-        font-size: 13px;
-        border: 1px solid rgba(255,255,255,0.15);
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-        transition: color 0.2s, border-color 0.2s;
-      }
-      #pwa-install-screen .skip-btn:hover {
-        color: rgba(255,255,255,0.85);
-        border-color: rgba(255,255,255,0.35);
+      #pwa-required-screen p {
+        font-size: 13px; color: rgba(255,255,255,0.5);
+        max-width: 280px; line-height: 1.5;
       }
     </style>
     <script>
       (function(){
-        var ua = navigator.userAgent;
-        var isIOS = /iPhone|iPad|iPod/.test(ua);
-        var isAndroid = /Android/.test(ua);
-        var isStandalone = navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+        if (window.matchMedia('(display-mode: standalone)').matches) return;
+        if (navigator.standalone === true) return;
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
 
-        // Se è in modalità app → tutto normale, React carica
-        if (isStandalone) return;
-
-        // Su localhost/development non bloccare
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('super-admin')) return;
-
-        // Nascondi #root per evitare sovrapposizione React
         document.documentElement.style.overflow = 'hidden';
+        document.addEventListener('DOMContentLoaded', function() {
+          var root = document.getElementById('root');
+          if (root) root.style.display = 'none';
 
-        function buildInstallScreen() {
           var screen = document.createElement('div');
-          screen.id = 'pwa-install-screen';
+          screen.id = 'pwa-required-screen';
           screen.className = 'show';
-
-          var inner = '';
-          inner += '<div class="aurora aurora-1"></div>';
-          inner += '<div class="aurora aurora-2"></div>';
-          inner += '<div class="aurora aurora-3"></div>';
-          inner += '<div class="aurora aurora-4"></div>';
-          inner += '<div class="logo"><svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="fbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#253660"/><stop offset="50%" stop-color="#1a2744"/><stop offset="100%" stop-color="#111c36"/></linearGradient><linearGradient id="fa" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffcc00"/><stop offset="60%" stop-color="#ff9900"/><stop offset="100%" stop-color="#e07800"/></linearGradient><linearGradient id="fb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffd700"/><stop offset="60%" stop-color="#ffaa00"/><stop offset="100%" stop-color="#e08800"/></linearGradient><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,255,255,0.18)"/><stop offset="100%" stop-color="rgba(255,255,255,0.03)"/></linearGradient><clipPath id="fc"><rect width="160" height="160" rx="28"/></clipPath></defs><rect width="160" height="160" rx="28" fill="url(#fbg)"/><rect x="21" y="44" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="44" width="86" height="22" rx="11" fill="url(#fa)"/><rect x="21" y="76" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="76" width="118" height="22" rx="11" fill="url(#fb)"/><rect x="21" y="108" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="108" width="60" height="22" rx="11" fill="url(#fa)"/><rect x="0" y="0" width="160" height="83" fill="url(#fg)" clip-path="url(#fc)"/></svg></div>';
-          inner += '<h1>Installa FLOW</h1>';
-          inner += '<p class="subtitle">Aggiungi l\'app alla schermata Home per iniziare</p>';
-
-          if (isIOS) {
-            inner += '<div class="step"><span class="step-num">1</span>Tocca ☰ nella barra indirizzi di Safari</div>';
-            inner += '<div class="step"><span class="step-num">2</span>Scorri e tocca <strong>Aggiungi a Schermata Home</strong></div>';
-            inner += '<div class="step"><span class="step-num">3</span>Tocca <strong>Aggiungi</strong> per confermare</div>';
-          } else if (isAndroid) {
-            inner += '<div class="step"><span class="step-num">1</span>Tocca ⋮ in alto a destra</div>';
-            inner += '<div class="step"><span class="step-num">2</span>Seleziona <strong>Installa app</strong> o <strong>Aggiungi a Home</strong></div>';
-            inner += '<div class="step"><span class="step-num">3</span>Conferma l\'installazione</div>';
-            inner += '<button class="install-btn show" id="pwa-install-btn">📲 Installa l\'app</button>';
-            inner += '<button class="skip-btn" id="pwa-skip-btn">Continua senza installare →</button>';
-          } else {
-            inner += '<div class="step"><span class="step-num">1</span>Clicca l\'icona ⊕ nella barra indirizzi</div>';
-            inner += '<div class="step"><span class="step-num">2</span>Seleziona <strong>Installa</strong></div>';
-            inner += '<div class="step"><span class="step-num">3</span>FLOW apparirà sul desktop</div>';
-            inner += '<button class="install-btn show" id="pwa-install-btn">📲 Installa l\'app</button>';
-            inner += '<button class="skip-btn" id="pwa-skip-btn">Continua senza installare →</button>';
-          }
-
-          screen.innerHTML = inner;
+          screen.innerHTML =
+            '<div class="logo"><svg width="44" height="44" viewBox="0 0 160 160"><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffcc00"/><stop offset="60%" stop-color="#ff9900"/><stop offset="100%" stop-color="#e07800"/></linearGradient></defs><rect width="160" height="160" rx="28" fill="#1a2744"/><rect x="21" y="44" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="44" width="86" height="22" rx="11" fill="url(#fg)"/><rect x="21" y="76" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="76" width="118" height="22" rx="11" fill="#253660"/><rect x="21" y="108" width="118" height="22" rx="11" fill="#3a2e35"/><rect x="21" y="108" width="60" height="22" rx="11" fill="url(#fg)"/></svg></div>' +
+            '<h1>FLOW</h1>' +
+            '<p>FLOW è disponibile solo come app installata.<br>Apri l\'app dalla schermata Home o dal menu Applicazioni.</p>';
           document.body.insertBefore(screen, document.body.firstChild);
-
-          // Bottone install (Android/Desktop)
-          var installBtn = document.getElementById('pwa-install-btn');
-          if (installBtn) {
-            var deferredPrompt = window.__deferredInstallPrompt;
-            if (deferredPrompt) {
-              installBtn.addEventListener('click', function() {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(function(result) {
-                  if (result.outcome === 'accepted') {
-                    // L'app è stata installata — ricarica
-                    window.location.reload();
-                  }
-                });
-              });
-            }
-            // Ascolta anche eventi futuri (se il listener non ha ancora catturato)
-            window.addEventListener('beforeinstallprompt', function(e) {
-              e.preventDefault();
-              window.__deferredInstallPrompt = e;
-              installBtn.addEventListener('click', function() {
-                e.prompt();
-                e.userChoice.then(function(result) {
-                  if (result.outcome === 'accepted') window.location.reload();
-                });
-              });
-            }, { once: true });
-          }
-
-          // Bottone skip — mostra l'app normalmente
-          var skipBtn = document.getElementById('pwa-skip-btn');
-          if (skipBtn) {
-            skipBtn.addEventListener('click', function() {
-              var screen = document.getElementById('pwa-install-screen');
-              if (screen) screen.remove();
-              var root = document.getElementById('root');
-              if (root) root.style.display = '';
-              document.documentElement.style.overflow = '';
-            });
-          }
-        }
-
-        // Nascondi #root mentre la schermata install è visibile
-        var root = document.getElementById('root');
-        if (root) root.style.display = 'none';
-
-        document.addEventListener('DOMContentLoaded', buildInstallScreen);
+        });
       })();
     </script>
     <script>

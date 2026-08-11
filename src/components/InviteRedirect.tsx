@@ -78,19 +78,7 @@ export default function InviteRedirect() {
         }
 
         if (matched) {
-          // Su dispositivi Apple: vai alla pagina install (con .mobileconfig)
-          if (isAppleDevice()) {
-            const firstName = encodeURIComponent(matched.first_name ?? '');
-            const pin = (matched.pin ?? '').replace(/\D/g, '').slice(0, 4);
-            const pinParam = pin.length === 4 ? `&pin=${pin}` : '';
-            if (!cancelled && !redirected) {
-              redirected = true;
-              window.location.href = `/install?userId=${matched.id}&firstName=${firstName}${pinParam}`;
-            }
-            return;
-          }
-
-          // Altri dispositivi: login diretto con token
+          // Login diretto con token
           const pin = matched.pin?.replace(/\D/g, '').slice(0, 4);
           const tokenUrl = buildProfiloAccessLink(matched.id, {
             pin: pin && pin.length === 4 ? pin : undefined,

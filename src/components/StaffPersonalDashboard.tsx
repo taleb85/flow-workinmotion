@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Download, X, ChevronRight, ChevronLeft, LogOut, Shield, Calendar } from 'lucide-react';
+import { Clock, X, ChevronRight, ChevronLeft, LogOut, Shield, Calendar } from 'lucide-react';
 import { database } from '../lib/database';
 import { useAppUser, useAppData, useAppConfig, useAppOverlay } from '../context/AppContext';
 import { useT } from '../hooks/useT';
@@ -496,68 +496,6 @@ export default function StaffPersonalDashboard({
     (s) => s.approval_status === 'confirmed' || s.approval_status === 'absent'
   );
   const upcomingShifts = visibleShifts.filter((shift) => isFuture(new Date(shift.date)));
-
-  // ── PWA Install Prompt ────────────────────────────────────────────────────
-  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<Event | null>(null);
-  const [showInstallBanner, setShowInstallBanner] = useState(false);
-  const [isIos, setIsIos] = useState(false);
-
-  useEffect(() => {
-    // Already installed as PWA — don't show the banner
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as { standalone?: boolean }).standalone === true;
-    if (isStandalone) return;
-
-    // Already dismissed
-    if (localStorage.getItem('pwa_install_dismissed') === '1') return;
-
-    // iOS detection (no beforeinstallprompt — show manual instructions)
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window as { MSStream?: unknown }).MSStream;
-    if (ios) {
-      setIsIos(true);
-      setShowInstallBanner(true);
-      return;
-    }
-
-    // Legge il prompt già catturato in index.html prima del caricamento di React
-    const already = (window as { __deferredInstallPrompt?: Event }).__deferredInstallPrompt;
-    if (already) {
-      setDeferredInstallPrompt(already);
-      setShowInstallBanner(true);
-      return;
-    }
-    // Fallback: ascolta nel caso il componente monti prima del prompt
-    const handler = (e: Event) => {
-      e.preventDefault();
-      (window as { __deferredInstallPrompt?: Event }).__deferredInstallPrompt = e;
-      setDeferredInstallPrompt(e);
-      setShowInstallBanner(true);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  const handleInstall = () => {
-    if (!deferredInstallPrompt) return;
-    const p = deferredInstallPrompt as Event & { prompt: () => void; userChoice: Promise<{ outcome: string }> };
-    p.prompt();
-    p.userChoice
-      .then(({ outcome }) => {
-        if (outcome === 'accepted') {
-          setShowInstallBanner(false);
-          setDeferredInstallPrompt(null);
-          (window as { __deferredInstallPrompt?: Event }).__deferredInstallPrompt = undefined;
-        }
-      })
-      .catch(() => {});
-  };
-
-  const dismissInstallBanner = () => {
-    setShowInstallBanner(false);
-    localStorage.setItem('pwa_install_dismissed', '1');
-  };
-  // ─────────────────────────────────────────────────────────────────────────
 
   const monthKey = format(new Date(), 'yyyy-MM');
   const _confirmedThisMonth = displayUser.monthly_confirmed?.[monthKey];
@@ -1070,84 +1008,7 @@ export default function StaffPersonalDashboard({
       </div>
       </div>
 
-      <AnimatePresence>
-        {showInstallBanner && isIos && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/60 backdrop-blur-md px-6"
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 24 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 24 }}
-              className="modal-glass-panel w-full max-w-sm rounded-3xl p-8 text-center"
-            >
-              <div className="mb-5 flex justify-center">
-                <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center">
-                  <Download className="w-8 h-8 text-white" />
-                </div>
-              </div>
-              <h2 className="text-xl font-bold text-white mb-2">Installa FLOW</h2>
-              <p className="text-sm text-white/60 mb-6 leading-relaxed">
-                Per ricevere notifiche e accedere velocemente, installa l'app sulla tua Home.
-              </p>
-              <a
-                href="/FLOW.mobileconfig"
-                download
-                className="w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 mb-3 text-sm font-bold text-white"
-                style={{
-                  background: 'linear-gradient(135deg, #007AFF, #0056CC)',
-                  boxShadow: '0 8px 24px rgba(0,122,255,0.35)',
-                }}
-                onClick={dismissInstallBanner}
-              >
-                <Download className="w-4 h-4" />
-                Installa con 1 tocco
-              </a>
-              <p className="text-[11px] text-white/40 mb-5">
-                Poi vai su <strong>Impostazioni → Generali → Gestione dispositivo</strong> e tocca <strong>Installa</strong>
-              </p>
-              <button
-                type="button"
-                onClick={dismissInstallBanner}
-                className="text-sm text-white/40 hover:text-white/70 transition-colors"
-              >
-                Continua senza installare
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {showInstallBanner && !isIos && (
-          <motion.div
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 80, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-            className="fixed bottom-[5.5rem] left-0 right-0 z-[45] flex justify-center px-4 max-w-screen-xl mx-auto"
-          >
-            <div className="modal-glass-panel flex w-full max-w-lg items-center gap-3 rounded-2xl px-4 py-3 !border-accent/25">
-              <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
-                <Download className="w-4 h-4 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white/90 leading-tight">Installa l'app FLOW</p>
-                <p className="text-[11px] text-white/60 mt-0.5">Accedi più velocemente ai tuoi turni</p>
-              </div>
-              <button type="button" onClick={handleInstall}
-                className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent-hover transition-colors active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
-                Installa
-              </button>
-              <button type="button" onClick={dismissInstallBanner}
-                className="flex-shrink-0 p-1 rounded-xl text-white/50 hover:text-white/70 hover:bg-slate-100 transition-colors active:text-white/70 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]" aria-label={t.close}>
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* FINE install banner rimosso */}
 
       <RequestHolidayModal isOpen={isHolidayModalOpen} onClose={() => setIsHolidayModalOpen(false)} userId={user.id} />
     </div>

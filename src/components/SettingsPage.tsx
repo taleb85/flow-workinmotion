@@ -812,44 +812,6 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                                       Copia link accesso
                                     </button>
                                     <div className="h-px bg-white/10" />
-                                    {/* Condividi installazione iPhone */}
-                                    <button
-                                      type="button"
-                                      onClick={async () => {
-                                        const _accessLink = buildShortInviteLink(user, users);
-                                        const installPath = `/install?userId=${encodeURIComponent(user.id)}&firstName=${encodeURIComponent(user.first_name ?? '')}`;
-                                        const configUrl = `${window.location.origin}${installPath}`;
-                                        const nome = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim();
-                                        const pin = (user.pin ?? '').replace(/\D/g, '');
-                                        const pinLine = pin.length === 4 ? `PIN: ${pin}` : '';
-                                        const text = [
-                                          `Ciao ${user.first_name || nome}! 👋`,
-                                          `Ecco come accedere all'app FLOW:`,
-                                          '',
-                                          `Nome: ${nome}`,
-                                          ...(pinLine ? [pinLine] : []),
-                                          `📱 Installa FLOW sul tuo iPhone:`,
-                                          `1. Apri questo link da Safari`,
-                                          `2. Tocca l'icona Condividi (□↑) in basso`,
-                                          `3. Scorri e tocca "Aggiungi a schermata Home"`,
-                                          `4. Tocca "Aggiungi" in alto a destra`,
-                                          `5. Apri FLOW dalla Home`,
-                                          '',
-                                          `🔗 ${configUrl}`,
-                                        ].join('\n');
-                                        if (navigator.share) {
-                                          try { await navigator.share({ title: 'Accesso FLOW', text }); } catch { /* annullato */ }
-                                        } else {
-                                          await navigator.clipboard.writeText(text).catch(() => undefined);
-                                          showSuccess?.('Testo copiato negli appunti');
-                                        }
-                                        setShareMenuUserId(null);
-                                      }}
-                                      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-[12px] font-medium text-white/80 hover:bg-white/5 transition-colors active:bg-white/5/80"
-                                    >
-                                      <Smartphone className="w-3.5 h-3.5 shrink-0 text-white/40" />
-                                      Condividi installazione iPhone
-                                    </button>
                                   </motion.div>
                                 </>
                               )}

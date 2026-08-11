@@ -1029,7 +1029,6 @@ function AppContent() {
     <main role="main" aria-label="Contenuto principale">
       <Routes>
         <Route path="/i/:slug" element={<InviteRedirect />} />
-        <Route path="/install" element={<Navigate to={PATH_PROFILO} replace />} />
         <Route path={PATH_PROFILO} element={<LoginRoute />} />
         <Route path="/login" element={<Navigate to={PATH_PROFILO} replace />} />
         <Route path="/" element={<Navigate to={PATH_PROFILO} replace />} />
