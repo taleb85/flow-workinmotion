@@ -2032,6 +2032,87 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             subtitle={t.settings_master_panel_sub}
             defaultOpen={false}
           >
+            {/* Feature flag cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+              {FEATURE_DEFINITIONS.filter((f) => !['kiosk_active', 'staff_requests', 'unlock_with_pin'].includes(f.slug)).map((feature) => {
+                const { label: featureLabel, description: featureDescription, detailLines } = getFeatureStrings(t, feature.slug);
+                const enabled = featureFlags[feature.slug] !== false;
+                const isMaintenance = feature.slug === 'maintenance_mode';
+                const [detailsOpen, setDetailsOpen] = useState(false);
+
+                const iconMap: Record<string, React.ReactNode> = {
+                  maintenance_mode: <Wrench className="w-4 h-4" />,
+                  unlock_with_pin:  <Unlock className="w-4 h-4" />,
+                  auto_breaks:      <Coffee className="w-4 h-4" />,
+                  staff_requests:   <Palmtree className="w-4 h-4" />,
+                  kiosk_active:     <Monitor className="w-4 h-4" />,
+                  geofence_punch:   <MapPin className="w-4 h-4" />,
+                  visibility_management: <LayoutGrid className="w-4 h-4" />,
+                  department_creation: <Building2 className="w-4 h-4" />,
+                  violation_rules: <ShieldAlert className="w-4 h-4" />,
+                  master_control_panel: <Zap className="w-4 h-4" />,
+                };
+
+                return (
+                  <div
+                    key={feature.slug}
+                    className={`rounded-xl border border-neutral-500 flex h-full flex-col p-3.5 transition-colors surface-ghost-interactive hover:border-white/20 sm:p-4 active:brightness-95 ${
+                      isMaintenance && enabled ? 'border-red-500/40 bg-red-500/15' : ''
+                    }`}
+                  >
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        isMaintenance && enabled ? 'bg-red-500/20 text-red-400' : 'bg-accent/10 text-accent'
+                      }`}>
+                        <span className="w-[18px] h-[18px]">{iconMap[feature.slug]}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className={`text-sm font-semibold leading-tight ${
+                              isMaintenance && enabled ? 'text-red-400' : 'text-white/90'
+                            }`}>{featureLabel}</p>
+                            <p className="text-[11px] sm:text-xs text-white/60 mt-1 leading-snug">{featureDescription}</p>
+                          </div>
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={enabled}
+                            aria-label={featureLabel}
+                            onClick={async () => {
+                              await setFeatureFlag(feature.slug, !enabled);
+                              showSuccess?.(formatTrans(enabled ? t.settings_feature_toggle_off : t.settings_feature_toggle_on, { name: featureLabel }));
+                            }}
+                            className={`relative mt-0.5 h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${
+                              isMaintenance ? (enabled ? 'bg-red-500' : '') : (enabled ? 'bg-accent' : '')
+                            }`}
+                          >
+                            <span className={`pointer-events-none absolute top-0.5 left-0.5 h-5 w-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                          </button>
+                        </div>
+                        {detailLines.length > 0 && (
+                          <>
+                            <button type="button" aria-expanded={detailsOpen} onClick={() => setDetailsOpen(!detailsOpen)} className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-white/70 transition-colors">
+                              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${detailsOpen ? 'rotate-180' : ''}`} />
+                              {t.impostazioni_detail_label || 'Dettagli'}
+                            </button>
+                            {detailsOpen && (
+                              <div className="rounded-xl border border-neutral-500 mt-2 bg-white/5 px-2.5 py-2">
+                                <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-white/60">{t.impostazioni_detail_label || 'Dettagli'}</p>
+                                <ul className="list-disc space-y-1 pl-3.5 text-[11px] leading-relaxed text-white/70">
+                                  {detailLines.map((line, i) => (<li key={i}>{line}</li>))}
+                                </ul>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
             <div className="rounded-xl border border-neutral-500 mt-0 bg-white/5 p-4">
               <div className="mb-2 flex items-center gap-2">
                 <MapPin className="h-4 w-4 flex-shrink-0 text-accent" />
