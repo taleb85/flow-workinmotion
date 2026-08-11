@@ -2247,8 +2247,9 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     await updateFeatureFlagInSupabase(name, enabled).catch(() => {});
     const rev = await bumpClientSyncRevisionOnSupabase();
     if (rev != null) writeAckClientSyncRevision(rev);
-    await silentRefreshData({ pullRemoteConfig: true });
-  }, [silentRefreshData, markManagementDataTouched]);
+    // Non forziamo pullRemoteConfig: la scrittura è appena avvenuta e lo stato locale è già aggiornato.
+    // silentRefreshData immediato causerebbe race condition (legge vecchio valore prima della propagazione).
+  }, [markManagementDataTouched]);
 
   const saveGeofenceConfig = useCallback(
     async (config: GeofenceConfig) => {
