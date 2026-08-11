@@ -132,6 +132,25 @@
         display: none;
       }
       #pwa-install-screen .install-btn.show { display: block; }
+      #pwa-install-screen .skip-btn {
+        margin-top: 12px;
+        width: 100%;
+        max-width: 300px;
+        padding: 12px;
+        border-radius: 16px;
+        background: transparent;
+        color: rgba(255,255,255,0.55);
+        font-weight: 600;
+        font-size: 13px;
+        border: 1px solid rgba(255,255,255,0.15);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: color 0.2s, border-color 0.2s;
+      }
+      #pwa-install-screen .skip-btn:hover {
+        color: rgba(255,255,255,0.85);
+        border-color: rgba(255,255,255,0.35);
+      }
     </style>
     <script>
       (function(){
@@ -171,12 +190,14 @@
             inner += '<div class="step"><span class="step-num">1</span>Tocca ⋮ in alto a destra</div>';
             inner += '<div class="step"><span class="step-num">2</span>Seleziona <strong>Installa app</strong> o <strong>Aggiungi a Home</strong></div>';
             inner += '<div class="step"><span class="step-num">3</span>Conferma l\'installazione</div>';
-            inner += '<button class="install-btn" id="pwa-install-btn">📲 Installa l\'app</button>';
+            inner += '<button class="install-btn show" id="pwa-install-btn">📲 Installa l\'app</button>';
+            inner += '<button class="skip-btn" id="pwa-skip-btn">Continua senza installare →</button>';
           } else {
             inner += '<div class="step"><span class="step-num">1</span>Clicca l\'icona ⊕ nella barra indirizzi</div>';
             inner += '<div class="step"><span class="step-num">2</span>Seleziona <strong>Installa</strong></div>';
             inner += '<div class="step"><span class="step-num">3</span>FLOW apparirà sul desktop</div>';
-            inner += '<button class="install-btn" id="pwa-install-btn">📲 Installa l\'app</button>';
+            inner += '<button class="install-btn show" id="pwa-install-btn">📲 Installa l\'app</button>';
+            inner += '<button class="skip-btn" id="pwa-skip-btn">Continua senza installare →</button>';
           }
 
           screen.innerHTML = inner;
@@ -187,7 +208,6 @@
           if (installBtn) {
             var deferredPrompt = window.__deferredInstallPrompt;
             if (deferredPrompt) {
-              installBtn.classList.add('show');
               installBtn.addEventListener('click', function() {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then(function(result) {
@@ -202,7 +222,6 @@
             window.addEventListener('beforeinstallprompt', function(e) {
               e.preventDefault();
               window.__deferredInstallPrompt = e;
-              installBtn.classList.add('show');
               installBtn.addEventListener('click', function() {
                 e.prompt();
                 e.userChoice.then(function(result) {
@@ -210,6 +229,18 @@
                 });
               });
             }, { once: true });
+          }
+
+          // Bottone skip — mostra l'app normalmente
+          var skipBtn = document.getElementById('pwa-skip-btn');
+          if (skipBtn) {
+            skipBtn.addEventListener('click', function() {
+              var screen = document.getElementById('pwa-install-screen');
+              if (screen) screen.remove();
+              var root = document.getElementById('root');
+              if (root) root.style.display = '';
+              document.documentElement.style.overflow = '';
+            });
           }
         }
 
