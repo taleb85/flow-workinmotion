@@ -157,7 +157,7 @@ export default function ImpostazioniPage({ onOpenProfilesTab: _onOpenProfilesTab
   const t = useT();
   const [_howOpen, _setHowOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState<Record<string, boolean>>({});
-  const [showAdvancedFlags, _setShowAdvancedFlags] = useState(true);
+  const [showAdvancedFlags, setShowAdvancedFlags] = useState(true);
   const [teamNotifyLoading, setTeamNotifyLoading] = useState(false);
 
   useEffect(() => {
@@ -298,11 +298,42 @@ export default function ImpostazioniPage({ onOpenProfilesTab: _onOpenProfilesTab
           </button>
         </div>
 
-        {/* Sezione funzionalità e regole */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {IMPOSTAZIONI_GROUPS.flatMap((group) => group.slugs).map((slug) => renderCard(slug))}
-          {showAdvancedFlags && ADVANCED_SLUGS.map((slug) => renderCard(slug))}
-        </div>
+        {/* Master Control Panel — feature flags in card grid */}
+        <section className="mb-6" role="region" aria-label={t.settings_master_panel_title || 'Master Control Panel'}>
+          <button
+            type="button"
+            className="-ml-1 mb-3 flex w-full items-center justify-between gap-2 rounded-xl py-2 pl-3 pr-3 text-left transition-colors"
+            style={{ background: 'transparent', border: '1.5px solid rgba(255,255,255,0.35)' }}
+            aria-expanded={showAdvancedFlags}
+            onClick={() => setShowAdvancedFlags(!showAdvancedFlags)}
+          >
+            <div className="min-w-0 flex-1">
+              <h2 style={{ color: '#fff', fontWeight: 600, fontSize: '0.8rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                {t.settings_master_panel_title || 'Master Control Panel'}
+              </h2>
+              <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem', marginTop: '0.125rem', fontWeight: 400, letterSpacing: 'normal', textTransform: 'none' }}>
+                {t.settings_master_panel_sub || 'Le modifiche sono immediate · salvate in DB o localStorage'}
+              </p>
+            </div>
+            <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${showAdvancedFlags ? 'rotate-180' : ''}`} style={{ color: 'rgba(255,255,255,0.6)' }} aria-hidden />
+          </button>
+          <AnimatePresence initial={false}>
+            {showAdvancedFlags && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {IMPOSTAZIONI_GROUPS.flatMap((group) => group.slugs).map((slug) => renderCard(slug))}
+                  {ADVANCED_SLUGS.map((slug) => renderCard(slug))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </section>
 
       </motion.div>
     </div>
