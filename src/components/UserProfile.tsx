@@ -507,7 +507,7 @@ export function ProfileFormAdmin({
   /** Condivisione: link con URL separato per AirDrop + WhatsApp/SMS/Telegram. */
   const handleShareInviteSimple = useCallback(async () => {
     const name = `${formData.first_name} ${formData.last_name ?? ''}`.trim();
-    const shareText = `Ciao ${name}! 👋\n\nApri questo link per accedere subito all'app FLOW.`;
+    const shareText = `Ciao ${name}! 👋\n\nApri questo link per attivare il tuo account FLOW. Il PIN è già incluso.`;
 
     if (navigator.share) {
       try {
@@ -807,7 +807,7 @@ export function ProfileFormAdmin({
             <p className="text-[12px] leading-relaxed text-white/70 font-sans text-center">
               {formatTrans(
                 tv.admin_employee_access_link_hint_simple ??
-                  'Invia il link a {name}. Aprendolo da telefono installerà l\'app in 30 secondi.',
+                  'Invia il link a {name}. Aprendolo compilerà i dati mancanti e attiverà le notifiche.',
                 { name: formData.first_name || 'il dipendente' }
               )}
             </p>
@@ -832,12 +832,6 @@ export function ProfileFormAdmin({
               <Copy className="w-3.5 h-3.5" />
               <span>Copia solo il link</span>
             </button>
-
-            {!invitePinComplete && (
-              <p className="text-[11px] text-amber-300/80 font-sans text-center">
-                {tv.admin_employee_access_link_pin_incomplete ?? 'Aggiungi 4 cifre nel campo PIN per includerle nel link.'}
-              </p>
-            )}
           </div>
         )}
 

@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { User as UserIcon, Lock, Loader2, Eye, EyeOff, Fingerprint } from 'lucide-react';
+import { User as UserIcon, Lock, Loader2, Eye, EyeOff, Fingerprint, Mail, Phone, Save } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 
 import { useAppConfig } from '../context/appSliceContexts';
 import type { User as UserType, Language as LangType, Theme } from '../types';
+import { database } from '../lib/database';
 import { userRowToSessionUser } from '../utils/staffPermissionDefaults';
 import { getTranslations } from '../utils/translations';
 import { applyUnauthenticatedDocumentTheme } from '../utils/theme';
@@ -115,6 +116,48 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
 
   // true solo se il dispositivo ha biometria integrata (Face ID / Touch ID / Windows Hello)
   const [hasBiometric, setHasBiometric] = useState(false);
+
+  // Invite onboarding — il nuovo dipendente compila i campi mancanti
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [invitePhone, setInvitePhone] = useState('');
+  const [inviteOnboardLoading, setInviteOnboardLoading] = useState(false);
+  const [inviteOnboardDone, setInviteOnboardDone] = useState(false);
+
+  const handleInviteOnboard = useCallback(async () => {
+    if (!inviteUserId || inviteOnboardLoading) return;
+    setInviteOnboardLoading(true);
+    setError('');
+    try {
+      // Aggiorna i dati utente (email, telefono)
+      const patch: Record<string, string> = {};
+      if (inviteEmail.trim()) patch.email = inviteEmail.trim();
+      if (invitePhone.trim()) patch.phone = invitePhone.trim();
+      if (Object.keys(patch).length > 0) {
+        await database.users.update(inviteUserId, patch as Partial<UserType>);
+      }
+
+      // Richiedi permessi notifiche
+      if ('Notification' in window && Notification.permission === 'default') {
+        await Notification.requestPermission();
+      }
+
+      // Richiedi geolocalizzazione
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          () => {},
+          () => {},
+          { timeout: 5000, enableHighAccuracy: false }
+        );
+      }
+
+      setInviteOnboardDone(true);
+    } catch (err: unknown) {
+      setError('Errore durante il salvataggio. Riprova.');
+      console.error('Invite onboarding error:', err);
+    } finally {
+      setInviteOnboardLoading(false);
+    }
+  }, [inviteUserId, inviteEmail, invitePhone, inviteOnboardLoading]);
   useEffect(() => {
     hasPlatformBiometricAuthenticator().then(setHasBiometric).catch(() => setHasBiometric(false));
   }, []);
@@ -581,20 +624,85 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
           {/* Form fields */}
           <motion.div animate={shakeControls} className="w-full max-w-[272px] space-y-3">
 
-            {/* Invite banner */}
+            {/* Invite onboarding — nuovo dipendente */}
+            {isInviteLink && !inviteOnboardDone && (
+              <div className="rounded-xl px-4 py-4 text-xs space-y-3" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid #525252' }}>
+                <p className="text-sm font-bold text-white">
+                  Benvenuto{linkedUser ? ` ${linkedUser.first_name}` : ''}! 👋
+                </p>
+                <p className="text-white/60 leading-relaxed">
+                  Completa i tuoi dati per iniziare a usare FLOW.
+                </p>
+
+                {/* Email */}
+                <div className="relative">
+                  <Mail className="absolute left-3 top-[13px] w-4 h-4 text-accent" aria-hidden />
+                  <input
+                    type="email"
+                    inputMode="email"
+                    autoCapitalize="off"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="Email"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm focus:outline-none ring-2 ring-accent/60 transition-all"
+                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid #525252', WebkitAppearance: 'none', appearance: 'none', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
+                  />
+                </div>
+
+                {/* PIN (pre-compilato) */}
+                <div className="relative">
+                  <Lock className="absolute left-3 top-[13px] w-4 h-4 text-accent" aria-hidden />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value.replace(/\D/g, ''))}
+                    placeholder="PIN (4 cifre)"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm font-bold tracking-[0.3em] focus:outline-none ring-2 ring-accent/60 transition-all"
+                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid #525252', WebkitAppearance: 'none', appearance: 'none', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
+                  />
+                </div>
+
+                {/* Telefono */}
+                <div className="relative">
+                  <Phone className="absolute left-3 top-[13px] w-4 h-4 text-accent" aria-hidden />
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    value={invitePhone}
+                    onChange={(e) => setInvitePhone(e.target.value)}
+                    placeholder="Numero di telefono"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm focus:outline-none ring-2 ring-accent/60 transition-all"
+                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid #525252', WebkitAppearance: 'none', appearance: 'none', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
+                  />
+                </div>
+
+                {/* Error */}
+                {error && (
+                  <p className="text-red-300 text-[11px] text-center rounded-lg px-3 py-1.5" style={{ background: 'rgba(255,80,80,0.16)' }}>{error}</p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleInviteOnboard}
+                  disabled={!password.trim() || inviteOnboardLoading}
+                  className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+                  style={{ background: '#FF9500', border: '1px solid rgba(255,255,255,0.15)' }}
+                >
+                  {inviteOnboardLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Salva e inizia
+                </button>
+              </div>
+            )}
+
+            {/* Invite done — mostra login normale */}
+            {(!isInviteLink || inviteOnboardDone) && (
+              <>
+            {/* Invite banner (solo informativo, onboarding già fatto) */}
             {isInviteLink && (
               <div className="rounded-xl px-3 py-2.5 text-xs text-white/80 space-y-1" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid #525252' }}>
-                <p className="font-semibold text-white">{t.login_invite_banner}</p>
-                {inviteUserId && !linkedUser && users.length > 0 && (
-                  <p className="text-xs text-amber-300">
-                    {(t as { login_invite_user_unknown?: string }).login_invite_user_unknown}
-                  </p>
-                )}
-                {linkedUser && linkedUser.status !== 'active' && (
-                  <p className="text-xs text-amber-300">
-                    {(t as { admin_employee_access_link_inactive?: string }).admin_employee_access_link_inactive}
-                  </p>
-                )}
+                <p className="font-semibold text-white">✅ Dati salvati. Accedi con nome e PIN.</p>
               </div>
             )}
 
@@ -760,8 +868,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               </div>
             )}
           </motion.div>
-        </motion.div>
-        )}
+            )}
+          </motion.div>
         </AnimatePresence>
 
         {/* Kiosk link rimosso — la timbratura avviene via QR Code */}
