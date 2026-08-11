@@ -91,15 +91,15 @@ export function Toggle({ value, onChange, danger }: { value: boolean; onChange: 
       role="switch"
       aria-checked={value}
       onClick={() => onChange(!value)}
-      className={`relative w-10 h-5.5 rounded-full transition-colors duration-200 shrink-0 ${
+      className={`relative w-10 h-5.5 rounded-full transition-all duration-200 shrink-0 ${
  value
  ? danger ? 'bg-red-500' : 'bg-accent'
- : 'bg-white/20'
+ : ''
  }`}
       style={{ minWidth: '2.5rem', height: '1.375rem' }}
     >
       <span
-        className={`absolute top-0.5 left-0.5 w-4.5 h-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+        className={`absolute top-0.5 left-0.5 w-4.5 h-4.5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${
  value ? 'translate-x-[1.125rem]' : 'translate-x-0'
  }`}
         style={{ width: '1.125rem', height: '1.125rem' }}

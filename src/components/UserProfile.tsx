@@ -398,12 +398,12 @@ export function AdminTimesheetGridPrivacyEditor({ user }: { user: UserType }) {
           aria-label={tv.admin_timesheet_grid_planned_only_label}
           disabled={busy}
           onClick={() => void handleToggle()}
-          className={`relative flex h-7 w-12 shrink-0 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-50 ${
- plannedOnly ? 'bg-accent' : 'bg-slate-300'
+          className={`relative flex h-7 w-12 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-50 ${
+ plannedOnly ? 'bg-accent' : ''
  }`}
         >
           <span
-            className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            className={`absolute top-0.5 h-6 w-6 rounded-full toggle-knob transition-all duration-200 ease-in-out ${
  plannedOnly ? 'translate-x-5' : 'translate-x-0.5'
  }`}
           />

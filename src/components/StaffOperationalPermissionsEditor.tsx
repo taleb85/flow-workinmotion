@@ -97,12 +97,12 @@ export default function StaffOperationalPermissionsEditor({ user, currentUser }:
                     aria-label={perm.label}
                     disabled={busyKey !== null}
                     onClick={() => void handleToggle(perm.key, perm.adminOnly)}
-                    className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200 ${
- enabled ? 'bg-accent' : 'bg-white/20'
+                    className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 ${
+ enabled ? 'bg-accent' : ''
  } ${busyKey !== null ? 'cursor-wait opacity-60' : ''}`}
                   >
                     <span
-                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${
  enabled ? 'translate-x-5' : 'translate-x-0'
  }`}
                     />

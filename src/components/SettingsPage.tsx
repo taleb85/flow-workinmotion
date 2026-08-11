@@ -242,6 +242,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [teamSectionExpanded, setTeamSectionExpanded] = useState(false);
+  const [cloudHintExpanded, setCloudHintExpanded] = useState(false);
   const [dataToolsLocked, setDataToolsLocked] = useState(true);
   const [showDataToolsPinPad, setShowDataToolsPinPad] = useState(false);
   const [dataToolsPin, setDataToolsPin] = useState('');
@@ -664,22 +665,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
         {/* ── SEZIONE: Gestione Profili ── */}
         <div style={view === 'regole' ? { display: 'none' } : undefined}>
         <section className="mb-6">
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <button
-              type="button"
-              onClick={toggleTeamSectionExpanded}
-              className="-ml-1 flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-white/30 py-1.5 pl-1 pr-2 text-left transition-colors hover:bg-white/8 active:bg-white/8/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-              aria-expanded={teamSectionExpanded}
-            >
-              <ChevronDown
-                className={`h-4 w-4 shrink-0 text-white/40 transition-transform ${teamSectionExpanded ? 'rotate-180' : ''}`}
-                aria-hidden
-              />
-              <h2 className="text-[11px] font-semibold uppercase tracking-widest text-white/80">
-                {t.settings_team_section_title}
-              </h2>
-            </button>
-            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="mb-3">
+            <div className="flex flex-row items-center gap-1.5 sm:gap-2 shrink-0 mb-2">
               {canEdit && (
                 <button
                   type="button"
@@ -700,6 +687,20 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 </button>
               )}
             </div>
+            <button
+              type="button"
+              onClick={toggleTeamSectionExpanded}
+              className="-ml-1 flex w-full items-center gap-2 rounded-xl border border-white/30 py-1.5 pl-1 pr-2 text-left transition-colors hover:bg-white/8 active:bg-white/8/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              aria-expanded={teamSectionExpanded}
+            >
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 text-white/40 transition-transform ${teamSectionExpanded ? 'rotate-180' : ''}`}
+                aria-hidden
+              />
+              <h2 className="text-[11px] font-semibold uppercase tracking-widest text-white/80">
+                {t.settings_team_section_title}
+              </h2>
+            </button>
           </div>
 
           <AnimatePresence initial={false}>
@@ -894,11 +895,11 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                               role="switch"
                               aria-checked={user.status === 'active'}
                               onClick={() => handleToggleStatus(user)}
-                              className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${
- user.status === 'active' ? 'bg-accent' : 'bg-white/20'
+                              className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-all duration-200 ${
+ user.status === 'active' ? 'bg-accent' : ''
  }`}
                             >
-                              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${user.status === 'active' ? 'translate-x-5' : 'translate-x-0'}`} />
+                              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${user.status === 'active' ? 'translate-x-5' : 'translate-x-0'}`} />
                             </button>
                           </div>
                         )}
@@ -1385,9 +1386,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     role="switch"
                     aria-checked={workRules.criticEnabled}
                     onClick={() => updateWorkRule('criticEnabled', !workRules.criticEnabled)}
-                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${workRules.criticEnabled ? 'bg-accent' : 'bg-white/20'}`}
+                    className={`relative w-11 h-6 rounded-full transition-all duration-200 ${workRules.criticEnabled ? 'bg-accent' : ''}`}
                   >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${workRules.criticEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${workRules.criticEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                   </button>
                 </div>
                 {workRules.criticEnabled && (
@@ -1436,9 +1437,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     role="switch"
                     aria-checked={workRules.attentionEnabled}
                     onClick={() => updateWorkRule('attentionEnabled', !workRules.attentionEnabled)}
-                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${workRules.attentionEnabled ? 'bg-accent' : 'bg-white/20'}`}
+                    className={`relative w-11 h-6 rounded-full transition-all duration-200 ${workRules.attentionEnabled ? 'bg-accent' : ''}`}
                   >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${workRules.attentionEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${workRules.attentionEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                   </button>
                 </div>
                 {workRules.attentionEnabled && (
@@ -1487,9 +1488,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     role="switch"
                     aria-checked={workRules.overlapEnabled}
                     onClick={() => updateWorkRule('overlapEnabled', !workRules.overlapEnabled)}
-                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${workRules.overlapEnabled ? 'bg-accent' : 'bg-white/20'}`}
+                    className={`relative w-11 h-6 rounded-full transition-all duration-200 ${workRules.overlapEnabled ? 'bg-accent' : ''}`}
                   >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${workRules.overlapEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${workRules.overlapEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                   </button>
                 </div>
               </div>
@@ -1559,9 +1560,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           aria-checked={isEnabled}
                           onClick={toggle}
                           title={isEnabled ? t.settings_break_toggle_disable : t.settings_break_toggle_enable}
-                          className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${isEnabled ? 'bg-accent' : 'bg-white/20'} hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
+                          className={`relative w-11 h-6 rounded-full transition-all duration-200 flex-shrink-0 ${isEnabled ? 'bg-accent' : ''}`}
                         >
-                          <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${isEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                          <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${isEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
                         <button type="button" onClick={() => setEditingBreakRule(rule)} className="p-1.5 rounded-xl hover:bg-white/10 text-white/40 hover:text-white/80 transition-colors active:text-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                           <Pencil className="w-3.5 h-3.5" />
@@ -1902,12 +1903,12 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       showError?.(e instanceof Error ? e.message : t.settings_presence_save_error);
                     }
                   }}
-                  className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${
- presenceVerificationConfig.requireVerification ? 'bg-accent' : 'bg-white/20'
+                  className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-all duration-200 ${
+ presenceVerificationConfig.requireVerification ? 'bg-accent' : ''
  }`}
                 >
                   <span
-                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${
  presenceVerificationConfig.requireVerification ? 'translate-x-5' : 'translate-x-0'
  }`}
                   />
@@ -2110,13 +2111,13 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           await setFeatureFlag(feature.slug, !enabled);
                           showSuccess?.(formatTrans(enabled ? t.settings_feature_toggle_off : t.settings_feature_toggle_on, { name: featureLabel }));
                         }}
-                        className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${
+                        className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-all duration-200 ${
  isMaintenance
- ? enabled ? 'bg-red-500' : 'bg-white/20'
- : enabled ? 'bg-accent' : 'bg-white/20'
+ ? enabled ? 'bg-red-500' : ''
+ : enabled ? 'bg-accent' : ''
  }`}
-                      >
-                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
                       </button>
                     </div>
 
@@ -2375,13 +2376,34 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
         {adminOnly && (
           <div className="rounded-2xl border border-accent/25 bg-accent/[0.04] p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex gap-3 min-w-0">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
-                <UploadCloud className="h-5 w-5" aria-hidden />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15">
+                <UploadCloud className="h-5 w-5 text-white" style={{ color: '#fff' }} aria-hidden />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-white">{t.settings_cloud_sync_heading}</p>
-                <p className="text-xs text-white/70 mt-0.5 leading-relaxed">{t.settings_cloud_sync_hint}</p>
-                <p className="text-[11px] font-medium text-accent mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => setCloudHintExpanded(!cloudHintExpanded)}
+                  className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold transition-colors"
+                  style={{ color: '#fff' }}
+                >
+                  <ChevronDown className={`w-3 h-3 transition-transform ${cloudHintExpanded ? 'rotate-180' : ''}`} />
+                  {cloudHintExpanded ? 'Nascondi dettagli' : 'Dettagli'}
+                </button>
+                <AnimatePresence initial={false}>
+                  {cloudHintExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <p className="text-xs text-white/70 mt-1.5 leading-relaxed">{t.settings_cloud_sync_hint}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <p className="text-[11px] font-semibold mt-1.5" style={{ color: 'rgba(255,255,255,0.85)' }}>
                   {settingsCloudLastSyncedAt
                     ? formatTrans(t.settings_cloud_synced_at, {
                         when: new Date(settingsCloudLastSyncedAt).toLocaleString(
@@ -2394,12 +2416,12 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                 </p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 shrink-0">
+            <div className="flex flex-row gap-2 shrink-0">
               <button
                 type="button"
                 disabled={pullSyncBusy || pushSyncBusy || dataSyncInProgress}
                 onClick={() => void handlePullSync()}
-                className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border border-accent/40 bg-white/80 px-4 text-xs font-bold uppercase tracking-wider text-accent hover:bg-accent/10 disabled:opacity-60 transition-colors active:bg-accent/80"
+                className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${pullSyncBusy ? 'animate-spin' : ''}`} />
                 {pullSyncBusy ? t.ui_ellipsis : 'Sincronizza'}
@@ -2408,10 +2430,10 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                 type="button"
                 disabled={pushSyncBusy || settingsCloudPushBusy || pullSyncBusy || dataSyncInProgress}
                 onClick={() => void handlePushSync()}
-                className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80"
+                className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80 whitespace-nowrap"
               >
-                <UploadCloud className={`h-3.5 w-3.5 ${pushSyncBusy ? 'animate-spin' : ''}`} />
-                {pushSyncBusy ? t.ui_ellipsis : t.settings_cloud_save_all_devices}
+                <UploadCloud className={`h-5 w-5 text-white ${pushSyncBusy ? 'animate-spin' : ''}`} style={{ color: '#fff' }} />
+                {pushSyncBusy ? t.ui_ellipsis : 'Carica sul cloud'}
               </button>
             </div>
           </div>
@@ -2759,9 +2781,9 @@ function BreakRuleModal({
                     role="switch"
                     aria-checked={minShiftThresholdOn}
                     onClick={() => setMinShiftThresholdOn((v) => !v)}
-                    className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200 ${minShiftThresholdOn ? 'bg-accent' : 'bg-white/20'}`}
+                    className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 ${minShiftThresholdOn ? 'bg-accent' : ''}`}
                   >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white toggle-knob shadow-sm transition-transform duration-200 ${minShiftThresholdOn ? 'translate-x-5' : 'translate-x-0'}`} />
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${minShiftThresholdOn ? 'translate-x-5' : 'translate-x-0'}`} />
                   </button>
                 </div>
                 {minShiftThresholdOn && (

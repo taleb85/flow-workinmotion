@@ -98,10 +98,10 @@ const FeatureCard = memo(function FeatureCard({
               aria-checked={enabled}
               aria-label={label}
               onClick={onToggle}
-              className={`relative mt-0.5 h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${enabled ? 'bg-accent' : 'bg-white/20'} hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
+              className={`relative mt-0.5 h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${enabled ? 'bg-accent' : ''}`}
             >
               <span
-                className={`pointer-events-none absolute top-0 left-0 h-5 w-5 rounded-full bg-white toggle-knob shadow transition-transform duration-200 ${enabled ? 'translate-x-5' : 'translate-x-0'}`}
+                className={`pointer-events-none absolute top-0.5 left-0.5 h-5 w-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'}`}
               />
             </button>
           </div>
@@ -111,7 +111,7 @@ const FeatureCard = memo(function FeatureCard({
                 type="button"
                 aria-expanded={detailsExpanded}
                 onClick={onToggleDetail}
-className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-accent hover:text-accent/80 active:text-accent/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-white/70 transition-colors"
               >
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${detailsExpanded ? 'rotate-180' : ''}`} />
                 {toggleDetailLabel}

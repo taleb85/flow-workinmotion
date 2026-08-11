@@ -1162,7 +1162,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
             onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
-              className={`w-full text-left rounded-lg border-l-4 ${borderColor} ${bgColor} ${glow} px-2.5 py-2 transition-colors`}>
+              className={`w-full text-left rounded-lg border-l-4 ${borderColor} ${bgColor} ${glow} px-2.5 py-2 transition-colors ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''}`}>
               <div className="flex items-center justify-between gap-1">
               {timeLabel}
               <div className="flex items-center gap-1 shrink-0">
@@ -1197,7 +1197,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
             onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
-            className={`w-full flex items-center justify-center rounded-md border-l-[3px] ${accent} bg-white/[0.07] transition-colors ${g.isAbsent ? 'opacity-70' : ''} ${isDraft ? 'border-dashed' : ''}`}
+            className={`w-full flex items-center justify-center rounded-md border-l-[3px] ${accent} bg-white/[0.07] transition-colors ${g.isAbsent ? 'opacity-70' : ''} ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''}`}
             style={{ height: mainRowHeight, minHeight: mainRowHeight }}
           >
             {timeLabel}
@@ -1213,7 +1213,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           draggable={canEdit}
           onDragStart={(e) => handleDragStart(e, g.shift.id)}
           onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
-          className={`relative w-full min-w-0 text-left rounded-lg border ${borderColor} ${bgColor} ${glow} transition-colors ${isDraft ? 'border-dashed' : ''} px-0.5 py-0.5`}>
+          className={`relative w-full min-w-0 text-left rounded-lg border ${borderColor} ${bgColor} ${glow} transition-colors ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''} px-0.5 py-0.5`}>
           <input type="checkbox" checked={selectedShiftIds.has(g.shift.id)} onChange={() => setSelectedShiftIds(prev => { const n = new Set(prev); if (n.has(g.shift.id)) n.delete(g.shift.id); else n.add(g.shift.id); return n; })}
             className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-colors ${selectedShiftIds.has(g.shift.id) ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} onClick={e => e.stopPropagation()} />
           <div
@@ -1823,7 +1823,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                           >
                             {canEdit ? (
                               <button type="button" onClick={() => openCreateShiftModal(user.id, dateStr)}
-                                className={`rounded-lg border border-dashed border-white/20 flex items-center justify-center text-[10px] font-bold text-white/30 hover:text-white/60 hover:border-white/40 transition-colors opacity-0 group-hover:opacity-100 ${isPeriodView ? 'w-7 h-7' : 'px-3 py-2'}`}>
+                                className={`rounded-lg border border-dashed border-white flex items-center justify-center text-[10px] font-bold transition-colors opacity-0 group-hover:opacity-100 text-white [color:#fff_!important] ${isPeriodView ? 'w-7 h-7' : 'px-3 py-2'}`}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                              >
                                 <Plus className="h-3 w-3 inline-block" />{!isPeriodView && <span className="ml-1">{t.add_shift ?? 'Aggiungi'}</span>}
                               </button>
                             ) : (
@@ -1837,9 +1840,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             const emptySlot = (slot: 'lunch' | 'evening', label: string) => (
                               canAddSecond && !(slot === 'lunch' ? lunch : evening) ? (
                                 <button type="button" onClick={() => openCreateShiftModal(user.id, dateStr, slot)}
-                                  className={`w-full rounded-md border border-dashed border-white/15 flex items-center justify-center text-white/35 transition-colors hover:border-white/30 hover:text-white/60 opacity-0 group-hover:opacity-100 ${isPeriodView ? '' : 'text-[10px] font-bold'}`}
+                                  className={`w-full rounded-md border border-dashed border-white flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 text-white [color:#fff_!important] ${isPeriodView ? '' : 'text-[10px] font-bold'}`}
                                   style={{ height: isPeriodView ? slotRowHeight - 2 : slotRowHeight }}
                                   title={label}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                                 >
                                   <Plus className={`${isPeriodView ? 'h-3 w-3' : 'inline-block h-3 w-3 mr-0.5'}`} />
                                   {!isPeriodView && label}

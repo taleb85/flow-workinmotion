@@ -104,28 +104,30 @@ body {
     --flow-slate:    #6b6b6b;
     --flow-border:   rgba(255, 255, 255, 0.15);
     --flow-bg-light: rgba(255, 255, 255, 0.06);
-    --brand: #6b6b6b;
-    --brand-from: #6b6b6b;
-    --brand-to:   #6b6b6b;
-    --brand-gradient: #6b6b6b;
-    --brand-rgb: 107 107 107;
-    --brand-50:  hsl(0 0% 97%);
-    --brand-100: hsl(0 0% 93%);
-    --brand-200: hsl(0 0% 85%);
-    --brand-300: hsl(0 0% 73%);
-    --brand-400: hsl(0 0% 62%);
-    --brand-500: hsl(0 0% 50%);
-    --brand-600: hsl(0 0% 40%);
-    --brand-700: hsl(0 0% 30%);
-    --brand-800: hsl(0 0% 20%);
-    --brand-900: hsl(0 0% 12%);
-    --brand-hover: #858585;
-    --brand-dark:  #525252;
-    --brand-light: hsl(0 0% 92%);
-    --brand-muted: rgb(107 107 107 / 0.15);
-    --brand-nav-from: rgba(107, 107, 107, 0.92);
-    --brand-nav-to:   rgba(82, 82, 82, 0.88);
-    --brand-nav-dark-from: rgba(107, 107, 107, 0.88);
+    --brand: #10b981;
+    --brand-from: #10b981;
+    --brand-to:   #34d399;
+    --brand-gradient: #10b981;
+    --brand-rgb: 16 185 129;
+    --brand-from: #10b981;
+    --brand-to:   #34d399;
+    --brand-50:  #ecfdf5;
+    --brand-100: #d1fae5;
+    --brand-200: #a7f3d0;
+    --brand-300: #6ee7b7;
+    --brand-400: #34d399;
+    --brand-500: #10b981;
+    --brand-600: #059669;
+    --brand-700: #047857;
+    --brand-800: #065f46;
+    --brand-900: #064e3b;
+    --brand-light: #6ee7b7;
+    --brand-muted: #064e3b;
+    --brand-hover: #059669;
+    --brand-dark: #047857;
+    --brand-nav-from: rgba(16, 185, 129, 0.92);
+    --brand-nav-to:   rgba(5, 150, 105, 0.88);
+    --brand-nav-dark-from: rgba(16, 185, 129, 0.88);
     --brand-nav-dark-to:   rgba(71, 71, 71, 0.84);
     --brand-header-font: 'Inter', system-ui, sans-serif;
     --flow-primary: var(--brand);
@@ -1319,10 +1321,7 @@ td, th {
   color: var(--text-primary) !important;
 }
 
-/* Table hover */
-tbody tr:hover {
-  background: rgba(255, 255, 255, 0.04) !important;
-}
+
 
 /* ══════════════════════════════════════════════════════════════════════════
    DARK THEME CONTRAST FIXES
@@ -1689,8 +1688,55 @@ thead th {
   color: #ffffff !important;
 }
 
+[data-theme="dark"] .toggle-knob { background: #ffffff !important; }
+
+/* Neon knob glow when toggle is ON */
+[data-theme="dark"] [role="switch"].bg-accent .toggle-knob,
+[data-theme="dark"] [role="switch"][class*="bg-accent"] .toggle-knob,
+[data-theme="dark"] .peer:checked + div .toggle-knob {
+  box-shadow: 0 0 12px rgba(255,255,255,0.7) !important;
+}
+
+/* Force text-white variants to be actually white, not gray */
+[data-theme="dark"] [class*="text-white/25"] { color: rgba(255,255,255,0.85) !important; }
+[data-theme="dark"] [class*="text-white/30"] { color: rgba(255,255,255,0.85) !important; }
+[data-theme="dark"] [class*="text-white/35"] { color: rgba(255,255,255,0.85) !important; }
+[data-theme="dark"] [class*="text-white/40"] { color: rgba(255,255,255,0.88) !important; }
+[data-theme="dark"] [class*="text-white/45"] { color: rgba(255,255,255,0.88) !important; }
+[data-theme="dark"] [class*="text-white/50"] { color: rgba(255,255,255,0.90) !important; }
+[data-theme="dark"] [class*="text-white/55"] { color: rgba(255,255,255,0.90) !important; }
+
+/* ── NEON TOGGLE globali: glow verde su tutti i toggle nella app ── */
+/* ON state: verde + glow + bordo verde + knob glow */
+[data-theme="dark"] [role="switch"].bg-accent,
+[data-theme="dark"] [role="switch"][class*="bg-accent"] {
+  background: #10b981 !important;
+  border-color: rgba(16,185,129,0.4) !important;
+  box-shadow: 0 0 20px rgba(16,185,129,0.5), inset 0 0 8px rgba(255,255,255,0.15) !important;
+}
+/* OFF state: sottile */
+[data-theme="dark"] [role="switch"]:not(.bg-accent):not([class*="bg-accent"]) {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  box-shadow: none !important;
+}
+/* Peer-checkbox toggles */
+[data-theme="dark"] .peer:checked + div.bg-accent {
+  background: #10b981 !important;
+  border-color: rgba(16,185,129,0.4) !important;
+  box-shadow: 0 0 20px rgba(16,185,129,0.5), inset 0 0 8px rgba(255,255,255,0.15) !important;
+}
+[data-theme="dark"] .peer:not(:checked) + div:not(.bg-accent) {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  box-shadow: none !important;
+}
+
+/* Force role labels to white in ElevatedAccessPanel */
+[data-theme="dark"] .elevated-role-label { color: #ffffff !important; }
+
 /* Background overrides — white/light → dark surfaces */
-[data-theme="dark"] .bg-white:not(input):not(textarea):not(select):not([class*="modal"]):not([class*="pin"]):not([class*="kiosk"]) {
+[data-theme="dark"] .bg-white:not(input):not(textarea):not(select):not([class*="modal"]):not([class*="pin"]):not([class*="kiosk"]):not(button[role="switch"] span):not([class*="knob"]) {
   background: transparent !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
@@ -2045,10 +2091,10 @@ html[data-theme="dark"] body {
   --color-text:           rgba(255, 255, 255, 0.97);
   --color-text-secondary: rgba(255, 255, 255, 0.72);
 
-  --brand:       #6b6b6b;
-  --brand-hover: #858585;
-  --accent-blue: #6b6b6b;
-  --flow-blue:   #6b6b6b;
+  --brand:       #10b981;
+  --brand-hover: #059669;
+  --accent-blue: #10b981;
+  --flow-blue:   #10b981;
 }
 
 /* ── Topbar / header ── */
@@ -2268,9 +2314,6 @@ thead tr, thead th {
   background: transparent !important;
   color: rgba(255, 255, 255, 0.60) !important;
   border-color: rgba(255, 255, 255, 0.10) !important;
-}
-tbody tr:hover {
-  background: rgba(255, 255, 255, 0.14) !important;
 }
 td, th {
   border-color: rgba(255, 255, 255, 0.08) !important;

@@ -52,7 +52,7 @@ export default function ElevatedAccessPanel() {
             key={u.id}
             className="flex items-center justify-between rounded-xl border px-3 py-2.5 transition-colors"
             style={{
-              background: enabled ? 'rgba(51,102,204,0.12)' : 'rgba(255, 255, 255, 0.16)',
+              background: 'transparent',
               borderColor: enabled ? 'rgba(51,102,204,0.35)' : 'rgba(255,255,255,0.12)',
             }}
           >
@@ -61,7 +61,7 @@ export default function ElevatedAccessPanel() {
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-white truncate" title={u.first_name}>{u.first_name} {u.last_name ?? ''}
                 </p>
-                <p className="text-[11px] text-white/60 uppercase tracking-wide">
+                <p className="text-[11px] uppercase tracking-wide elevated-role-label" style={{ color: '#ffffff' }}>
                   {translateRole(u.role, effectiveLanguage)}
                 </p>
               </div>
@@ -73,16 +73,13 @@ export default function ElevatedAccessPanel() {
               onClick={() => handleToggle(u.id, enabled)}
               role="switch"
               aria-checked={enabled}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50 ${
- enabled ? 'bg-accent' : 'bg-white/20'
- }`}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 transition-all duration-200 focus:outline-none disabled:opacity-50 ${enabled ? 'bg-accent' : ''}`}
             >
               <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition duration-200 ease-in-out ${
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full toggle-knob transition-all duration-200 ease-in-out ${
  enabled ? 'translate-x-5' : 'translate-x-0'
  }`}
-              />
-            </button>
+              />            </button>
           </div>
         );
       })}

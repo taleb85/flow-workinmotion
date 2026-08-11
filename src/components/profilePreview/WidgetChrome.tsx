@@ -36,10 +36,10 @@ export const WidgetChrome = memo(function WidgetChrome({
             aria-checked={visible}
             aria-label={previewWidgetLabel(widgetKey)}
             onClick={() => onUiToggle(widgetKey, !visible)}
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${visible ? 'bg-accent' : 'bg-white/20'}`}
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-all duration-200 ${visible ? 'bg-accent' : ''}`}
           >
             <span
-              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white toggle-knob shadow transition-transform ${
+              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${
  visible ? 'translate-x-5' : 'translate-x-0'
  }`}
             />

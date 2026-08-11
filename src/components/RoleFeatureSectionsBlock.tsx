@@ -73,12 +73,12 @@ export default function RoleFeatureSectionsBlock(props: Props) {
           if (props.mode !== 'toggles') return;
           props.onToggle(key);
         }}
-        className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${
+        className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${
  lockedOn || rowDisabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
- } ${enabled ? 'bg-accent' : 'bg-white/20'}`}
+ } ${enabled ? 'bg-accent' : ''}`}
       >
         <span
-          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white toggle-knob shadow transition ${
+          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full toggle-knob transition-all duration-200 ease-in-out ${
  enabled ? 'translate-x-5' : 'translate-x-1'
  }`}
         />

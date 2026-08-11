@@ -80,12 +80,14 @@ export function SoundSettings({ compact = false }: SoundSettingsProps) {
           </div>
           <button
             onClick={handleToggleSound}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
- isSoundEnabled ? 'bg-accent' : 'bg-white/20'
- } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
+            role="switch"
+            aria-checked={isSoundEnabled}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-200 focus:outline-none ${
+ isSoundEnabled ? 'bg-accent' : ''
+ }`}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+              className={`inline-block h-4 w-4 transform rounded-full toggle-knob transition-all duration-200 ease-in-out ${
  isSoundEnabled ? 'translate-x-6' : 'translate-x-1'
  }`}
             />
