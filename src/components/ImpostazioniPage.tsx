@@ -12,7 +12,6 @@ import {
   Coffee,
   ChevronDown,
   MapPin,
-  Bell,
 } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppConfig } from '../context/appSliceContexts';
@@ -23,7 +22,6 @@ import { isAdminOnly } from '../utils/permissions';
 import { translateRole } from '../utils/roles';
 import { FEATURE_DEFINITIONS } from '../utils/featureFlags';
 // import { RoleFeatureTemplatesPanel } from './RoleFeatureTemplatesPage'; // unused
-import { supabase } from '../lib/supabase';
 
 const IMPOSTAZIONI_GROUPS: readonly {
   readonly titleKey: 'impostazioni_group_org' | 'impostazioni_group_rules' | 'impostazioni_group_tools';
@@ -157,8 +155,6 @@ export default function ImpostazioniPage({ onOpenProfilesTab: _onOpenProfilesTab
   const t = useT();
   const [_howOpen, _setHowOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState<Record<string, boolean>>({});
-  const [showAdvancedFlags, setShowAdvancedFlags] = useState(true);
-  const [teamNotifyLoading, setTeamNotifyLoading] = useState(false);
 
   useEffect(() => {
     // Chiudi tutti i dettagli all'avvio per la modalità compatta
@@ -168,49 +164,6 @@ export default function ImpostazioniPage({ onOpenProfilesTab: _onOpenProfilesTab
   const toggleDetail = useCallback((slug: string) => {
     setDetailOpen((prev) => ({ ...prev, [slug]: !prev[slug] }));
   }, []);
-
-  const handleNotifyTeam = useCallback(async () => {
-    if (!supabase || !currentUser?.id) {
-      showError?.(t.admin_notify_team_error);
-      return;
-    }
-    setTeamNotifyLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('notify-team-next-week-shifts', {
-        body: { operator_user_id: currentUser.id },
-      });
-      if (error) {
-        showError?.(error.message || t.admin_notify_team_error);
-        return;
-      }
-      if (data && typeof data === 'object' && 'error' in data && data.error) {
-        showError?.(String(data.error));
-        return;
-      }
-      const rec = typeof (data as { recipients?: number }).recipients === 'number' ? (data as { recipients: number }).recipients : 0;
-      const sent = typeof (data as { sent?: number }).sent === 'number' ? (data as { sent: number }).sent : 0;
-      const ws = String((data as { week_start?: string }).week_start ?? '');
-      const we = String((data as { week_end?: string }).week_end ?? '');
-      if (rec === 0) {
-        showSuccess?.(t.admin_notify_team_none);
-      } else {
-        showSuccess?.(
-          formatTrans(t.admin_notify_team_success, {
-            count: rec,
-            sent,
-            week_start: ws,
-            week_end: we,
-          })
-        );
-      }
-    } catch {
-      showError?.(t.admin_notify_team_error);
-    } finally {
-      setTeamNotifyLoading(false);
-    }
-  }, [currentUser?.id, t, showError, showSuccess]);
-
-
 
   const renderCard = useCallback((slug: string) => {
     const def = FEATURE_DEFINITIONS.find((f) => f.slug === slug);
@@ -278,25 +231,6 @@ export default function ImpostazioniPage({ onOpenProfilesTab: _onOpenProfilesTab
       >
         {/* Divider */}
         <div className="h-px bg-white/10 rounded my-6" />
-
-        <div className="rounded-xl border border-neutral-500 p-4 rounded-xl mb-6">
-          <h2 className="text-md font-bold mb-1 flex items-center gap-2">
-            <Bell className="w-4 h-4 text-accent" />
-            {t.admin_notify_team_title}
-          </h2>
-          <p className="text-[11px] sm:text-xs text-white/70 mb-3 leading-relaxed">
-            {t.admin_notify_team_desc}
-          </p>
-          <button
-            type="button"
-            disabled={teamNotifyLoading}
-            onClick={() => void handleNotifyTeam()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-accent/25 bg-accent/[0.07] px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/12 transition-colors disabled:opacity-50 disabled:pointer-events-none"
-          >
-            <Bell className="w-3.5 h-3.5 opacity-80" />
-            {teamNotifyLoading ? '…' : t.admin_notify_team_button}
-          </button>
-        </div>
 
       </motion.div>
     </div>
