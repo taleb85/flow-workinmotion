@@ -872,9 +872,11 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                 )}
               </div>
             )}
-          </motion.div>
+              </>
             )}
           </motion.div>
+      </motion.div>
+        )}
         </AnimatePresence>
 
         {/* Kiosk link rimosso — la timbratura avviene via QR Code */}

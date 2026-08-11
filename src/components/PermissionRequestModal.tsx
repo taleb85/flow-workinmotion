@@ -313,14 +313,12 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
             <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
               <Settings className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
               <p className="text-[11px] leading-relaxed text-amber-200/90">
-                    {notifDenied && locDenied
-                      ? 'Notifiche e posizione sono bloccate. '
-                      : notifDenied
-                      ? 'Le notifiche sono bloccate. '
-                      : 'La posizione è bloccata. '}
-                    Vai nelle impostazioni del dispositivo (Safari/Chrome → Impostazioni sito web o Notifiche) e abilita {notifDenied && locDenied ? 'entrambi' : 'il permesso'}, poi torna qui.
-                  </>
-                )}
+                {notifDenied && locDenied
+                  ? 'Notifiche e posizione sono bloccate. '
+                  : notifDenied
+                  ? 'Le notifiche sono bloccate. '
+                  : 'La posizione è bloccata. '}
+                Vai nelle impostazioni del dispositivo (Safari/Chrome → Impostazioni sito web o Notifiche) e abilita {notifDenied && locDenied ? 'entrambi' : 'il permesso'}, poi torna qui.
               </p>
             </div>
           )}
