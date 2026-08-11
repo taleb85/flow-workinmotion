@@ -356,10 +356,16 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       prevTabRef.current = 'turni';
       setActiveTab('turni');
     } else {
-      setActiveTab('home');
+      // Ripristina l'ultima tab attiva prima del refresh
+      const saved = readMainViewState(currentUser.id);
+      if (saved && visibleNavTabs.includes(saved.activeTab as AppNavTab)) {
+        prevTabRef.current = saved.activeTab as AppNavTab;
+        setActiveTab(saved.activeTab as AppNavTab);
+        pendingScrollRestoreRef.current = { tab: saved.activeTab as AppNavTab, y: saved.scrollY };
+      } else {
+        setActiveTab('home');
+      }
     }
-    pendingScrollRestoreRef.current = null;
-    void readMainViewState; // mantenuto per uso futuro
   }, [currentUser?.id, visibleNavTabs]);
 
   useEffect(() => {
