@@ -150,14 +150,14 @@ type ImpostazioniPageProps = {
   onOpenProfilesTab?: () => void;
 };
 
-export default function ImpostazioniPage({ onOpenProfilesTab }: ImpostazioniPageProps) {
+export default function ImpostazioniPage({ onOpenProfilesTab: _onOpenProfilesTab }: ImpostazioniPageProps) {
   const { currentUser, effectiveLanguage, logout, isSessionElevated } = useAppUser();
   const { featureFlags, setFeatureFlag } = useAppConfig();
   const { showSuccess, showError } = useAppOverlay();
   const t = useT();
   const [_howOpen, _setHowOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState<Record<string, boolean>>({});
-  const [showAdvancedFlags, setShowAdvancedFlags] = useState(true);
+  const [showAdvancedFlags, _setShowAdvancedFlags] = useState(true);
   const [teamNotifyLoading, setTeamNotifyLoading] = useState(false);
 
   useEffect(() => {

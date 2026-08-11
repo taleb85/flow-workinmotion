@@ -66,7 +66,7 @@ export default function ProfileNavTabPanel({
   });
   const [isSaving, setIsSaving] = useState(false);
   const [showSavedToast, setShowSavedToast] = useState(false);
-  const [toastField, setToastField] = useState<string | null>(null);
+  const [toastField, _setToastField] = useState<string | null>(null);
   const [toastPos, setToastPos] = useState<{ top: number; left: number } | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
 
@@ -341,8 +341,27 @@ export default function ProfileNavTabPanel({
 
   const [savedLang, setSavedLang] = useState<import('../types').Language | null>(() => readStoredUiLanguage());
   const [pendingLang, setPendingLang] = useState<import('../types').Language | null>(() => readStoredUiLanguage());
-  const [langSaving, setLangSaving] = useState(false);
-  const [langSaved, setLangSaved] = useState(false);
+  const [langSaving, _setLangSaving] = useState(false);
+  const [langSaved, _setLangSaved] = useState(false);
+
+  // ── Auto-salvataggio lingua con debounce ──────────────────────────────
+  const langMountedRef = useRef(false);
+  useEffect(() => {
+    if (!langMountedRef.current) {
+      langMountedRef.current = true;
+      return;
+    }
+    if (pendingLang === savedLang) return;
+    const timer = setTimeout(() => {
+      if (pendingLang && pendingLang !== savedLang) {
+        persistStoredUiLanguage(pendingLang);
+        setSavedLang(pendingLang);
+        _setLangSaved(true);
+        setTimeout(() => _setLangSaved(false), 2000);
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [pendingLang, savedLang]);
 
   if (!currentUser) return null;
 
@@ -374,35 +393,10 @@ export default function ProfileNavTabPanel({
     if (window.confirm(logoutConfirm)) onLogout();
   };
 
-  const hasLangChanges = pendingLang !== savedLang;
-
-  // ── Auto-salvataggio lingua con debounce ──────────────────────────────
-  const langMountedRef = useRef(false);
-  useEffect(() => {
-    if (!langMountedRef.current) {
-      langMountedRef.current = true;
-      return;
-    }
-    if (pendingLang === savedLang) return;
-    const timer = setTimeout(() => {
-      void saveLang().then(() => {
-        setToastField('lang');
-        const el = document.querySelector('[data-save-field="lang"]');
-        if (el) {
-          const input = el.querySelector('input, select') ?? el;
-          const rect = input.getBoundingClientRect();
-          setToastPos({ top: rect.bottom - 2, left: rect.right - 100 });
-        }
-        setShowSavedToast(true);
-        setTimeout(() => setShowSavedToast(false), 2000);
-      });
-    }, 600);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingLang]);
+  const _hasLangChanges = pendingLang !== savedLang;
 
   const saveLang = async () => {
-    setLangSaving(true);
+    _setLangSaving(true);
     if (pendingLang !== savedLang) {
       if (pendingLang === null) {
         clearLanguage();
@@ -411,9 +405,9 @@ export default function ProfileNavTabPanel({
       }
       setSavedLang(pendingLang);
     }
-    setLangSaving(false);
-    setLangSaved(true);
-    setTimeout(() => setLangSaved(false), 2000);
+    _setLangSaving(false);
+    _setLangSaved(true);
+    setTimeout(() => _setLangSaved(false), 2000);
   };
 
   const _menuRowBase = 'w-full flex items-center justify-between rounded-xl px-4 py-3.5 transition-colors  border border-neutral-500 hover:bg-white/10';

@@ -1030,7 +1030,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setDropTargetKey(null);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent, targetUserId: string, targetDate: string, targetSlot?: 'lunch' | 'evening') => {
+  const handleDrop = useCallback((e: React.DragEvent, targetUserId: string, targetDate: string, _targetSlot?: 'lunch' | 'evening') => {
     e.preventDefault();
     const shiftId = draggedShiftIdRef.current;
     if (!shiftId) return;
@@ -1242,7 +1242,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 /* Header tabella opaco su scroll: solo vetro satinato senza colore, offusca il contenuto sottostante */
 .wst-header-scrolled { background: transparent !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
 .wst-header-scrolled th { color: rgba(255,255,255,0.75) !important; border-bottom-color: rgba(255,255,255,0.12) !important; }
-.wst-header-scrolled th.\!border-b-white { border-bottom-color: white !important; }
+.wst-header-scrolled th.border-b-white { border-bottom-color: white !important; }
 .wst-header-scrolled th div { color: rgba(255,255,255,0.75) !important; }
 .wst-header-scrolled .text-accent { color: rgba(255,255,255,0.75) !important; }`}</style>
       {mode === 'planning' && (
@@ -1754,7 +1754,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 {t.employee ?? 'Dipendente'}
               </th>
               {weekDays.map((day, i) => {
-                const weekStripe = isPeriodView && Math.floor(i / 7) % 2 === 1;
+                const _weekStripe = isPeriodView && Math.floor(i / 7) % 2 === 1;
                 const weekEnd = isPeriodView && day.getDay() === 0;
                 return (
                   <th
@@ -1782,7 +1782,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             </tr>
           </thead>
           <tbody>
-            {visibleUsers.map((user, uIdx) => {
+            {visibleUsers.map((user, _uIdx) => {
               const totalNet = getTotalPlanned(user.id);
               const totalActual = getTotalActual(user.id);
               return (
@@ -1807,7 +1807,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   {weekDays.map((day, dIdx) => {
                     const dateStr = format(day, 'yyyy-MM-dd');
                     const groups = getDayGroup(user.id, dateStr);
-                    const weekStripe = isPeriodView && Math.floor(dIdx / 7) % 2 === 1;
+                    const _weekStripe = isPeriodView && Math.floor(dIdx / 7) % 2 === 1;
                     const weekEnd = isPeriodView && day.getDay() === 0;
                     return (
                       <td key={dIdx}

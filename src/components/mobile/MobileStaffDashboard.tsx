@@ -72,7 +72,7 @@ export default function MobileStaffDashboard({
   const { updatePunchRecord, shifts: allShifts } = useAppData();
   const { showError, showSuccess } = useAppOverlay();
   const navigate = useNavigate();
-  const { currentUser, setCurrentUser, setIsSessionElevated } = useAppUser();
+  const { setCurrentUser, setIsSessionElevated } = useAppUser();
   const { featureFlags, breakRules } = useAppConfig();
   const { requestProof, modal: presenceModal } = usePunchPresenceVerification(language);
   const [tick, setTick] = useState(0);

@@ -3,7 +3,7 @@
  * Su Apple (iPhone/iPad): mostra direttamente la guida iOS con .mobileconfig.
  * Altri dispositivi: scelta manuale con passaggi per Android / Computer.
  */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useT } from '../hooks/useT';
@@ -112,7 +112,6 @@ export default function InstallPage() {
   const pin = searchParams.get('pin') ?? '';
 
   // Mostra direttamente la vista iOS come default (mobileconfig)
-  const appleDevice = isAppleDevice();
   const [selectedDevice, setSelectedDevice] = useState<'ios' | 'android' | 'computer' | null>('ios');
   const [selectedOs, setSelectedOs] = useState<'mac' | 'win' | null>(null);
 

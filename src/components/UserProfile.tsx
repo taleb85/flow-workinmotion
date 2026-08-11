@@ -173,7 +173,7 @@ export function ProfileFormSelf({
         <input
           type="email"
           value={formData.email}
-          onChange={(e) => { onFieldChange?.('email'); !readOnly && setFormData((prev) => ({ ...prev, email: e.target.value })); }}
+          onChange={(e) => { onFieldChange?.('email'); if (!readOnly) setFormData((prev) => ({ ...prev, email: e.target.value })); }}
           readOnly={readOnly}
           className={readOnly ? inputClassDisabled : inputClass}
           placeholder={(t as { email_placeholder?: string }).email_placeholder}
@@ -320,11 +320,12 @@ export function ProfileFormSelf({
             value={formData.phone_national}
             onChange={(e) => {
               onFieldChange?.('phone');
-              !readOnly &&
-              setFormData((prev) => ({
-                ...prev,
-                phone_national: e.target.value.replace(/[^\d\s]/g, ''),
-              }));
+              if (!readOnly) {
+                setFormData((prev) => ({
+                  ...prev,
+                  phone_national: e.target.value.replace(/[^\d\s]/g, ''),
+                }));
+              }
             }}
             readOnly={readOnly}
             className={readOnly ? inputClassDisabled : inputClass}
@@ -463,7 +464,7 @@ export function ProfileFormAdmin({
   /** Creazione dipendente da delegato: solo ruoli operativi sala/cucina/bar. */
   operationalRolesOnly?: boolean;
 }) {
-  const { effectiveLanguage, users, isSessionElevated } = useAppUser();
+  const { effectiveLanguage, isSessionElevated } = useAppUser();
   const { departmentsRevision } = useAppConfig();
   const { showSuccess, showError } = useAppOverlay();
   void departmentsRevision;

@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase';
 import type { User } from '../types';
 import { readProfileAvatarFromStorage } from '../utils/profilePhotoStorage';
 import { getIntlLocale } from '../utils/translations';
-import { generateNotifications, syncNotificationFeed, getSeenIds, markAllSeen, type AppNotification } from '../utils/notifications';
+import { generateNotifications, syncNotificationFeed, getSeenIds, markAllSeen } from '../utils/notifications';
 
 const BRAND = '#525252';
 
@@ -53,9 +53,9 @@ function BroadcastList({
   messages,
   currentUserId,
   users,
-  onClose,
+  onClose: _onClose,
   intlLocale,
-  t = {},
+  t: _t = {},
 }: {
   messages: ReturnType<typeof useMessages>['broadcastMessages'];
   currentUserId: string;
@@ -151,7 +151,7 @@ type UnifiedNotifItem = {
 };
 
 function NotificationsView({
-  onClose,
+  onClose: _onClose,
   t = {},
 }: {
   onClose?: () => void;
@@ -298,7 +298,7 @@ function NotificationsView({
     }
   };
 
-  const unreadCount = allNotifs.filter((n) => !n.isRead).length;
+  const _unreadCount = allNotifs.filter((n) => !n.isRead).length;
 
   // All'apertura, marca tutto come letto
   useEffect(() => {
