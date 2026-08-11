@@ -774,7 +774,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
               const sbFlagsOnly = await loadFeatureFlagsFromSupabase().catch(() => null);
               if (sbFlagsOnly) {
                 const local = getLocalFeatureFlags();
-                const merged = { ...local, ...sbFlagsOnly };
+                const merged = { ...sbFlagsOnly, ...local };
                 setFeatureFlagsState(merged);
                 writeFeatureFlagsToStorage(merged);
               } else {
@@ -799,7 +799,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
             const sbFlags = await loadFeatureFlagsFromSupabase().catch(() => null);
             if (sbFlags) {
               const local = getLocalFeatureFlags();
-              const merged = { ...local, ...sbFlags };
+              const merged = { ...sbFlags, ...local };
               setFeatureFlagsState(merged);
               writeFeatureFlagsToStorage(merged);
             } else {
