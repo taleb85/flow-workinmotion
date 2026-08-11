@@ -10,6 +10,8 @@ import {
   authenticatePinUnlockCredential,
   registerPinUnlockCredential,
   hasPlatformBiometricAuthenticator,
+  hasAnyPinUnlockCredentialOnDevice,
+  authenticatePinUnlockAndResolveUserId,
 } from '../../utils/pinUnlockWebAuthn';
 
 interface PinPadModalProps {
@@ -64,20 +66,27 @@ export function PinPadModal({
   // ── Biometrica interna (solo se leftActionButton non è fornito) ─────────────
   const [hasBiometric, setHasBiometric] = useState(false);
   useEffect(() => {
-    if (!leftActionButton && !!userId && supportsPinUnlockWebAuthn()) {
+    if (!leftActionButton && supportsPinUnlockWebAuthn()) {
       hasPlatformBiometricAuthenticator().then(setHasBiometric);
     }
-  }, [leftActionButton, userId]);
-  const webAuthnOk = !leftActionButton && !!userId && hasBiometric;
-  const credRegistered = webAuthnOk && hasPinUnlockCredential(userId!);
+  }, [leftActionButton]);
+  const webAuthnOk = !leftActionButton && hasBiometric;
+  // Mostra impronta se l'utente corrente ha una credenziale OPPURE se ce n'è una qualsiasi sul dispositivo
+  const credRegistered = webAuthnOk && (!!userId ? hasPinUnlockCredential(userId) : hasAnyPinUnlockCredentialOnDevice());
   const [bioLoading, setBioLoading] = useState(false);
   const [bioRegLoading, setBioRegLoading] = useState(false);
 
   const handleBiometric = useCallback(async () => {
-    if (!userId || bioLoading || isLoading) return;
+    if (bioLoading || isLoading) return;
     setBioLoading(true);
     try {
-      const ok = await authenticatePinUnlockCredential(userId);
+      let ok = false;
+      if (userId) {
+        ok = await authenticatePinUnlockCredential(userId);
+      } else {
+        const resolvedId = await authenticatePinUnlockAndResolveUserId();
+        ok = !!resolvedId;
+      }
       if (ok) {
         if (onBiometricSuccess) await onBiometricSuccess();
         else onConfirm();
@@ -212,7 +221,7 @@ export function PinPadModal({
           ))}
           {leftActionButton ? (
             <div className="h-14 rounded-2xl flex items-center justify-center" style={btnBase}>{leftActionButton}</div>
-          ) : !!userId && supportsPinUnlockWebAuthn() ? (
+          ) : webAuthnOk ? (
             credRegistered ? (
               <button type="button" onClick={handleBiometric} disabled={bioLoading || isLoading}
                 className="h-14 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-white/80 transition-colors disabled:opacity-50 hover:bg-white/10 hover:border-white/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"

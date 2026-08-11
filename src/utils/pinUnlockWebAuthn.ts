@@ -37,7 +37,7 @@ function bytesToB64(buf: ArrayBuffer): string {
   return btoa(bin);
 }
 
-/** Copia in Uint8Array “stretto” per compatibilità TypeScript / BufferSource (WebAuthn). */
+/** Copia in Uint8Array "stretto" per compatibilità TypeScript / BufferSource (WebAuthn). */
 function toBufferSource(arr: Uint8Array): BufferSource {
   return new Uint8Array(arr);
 }
@@ -152,7 +152,7 @@ export async function authenticatePinUnlockCredential(userId: string): Promise<b
   return !!assertion?.rawId?.byteLength;
 }
 
-/** Credenziali salvate per l’host corrente (login / sblocco PIN condividono lo stesso storage). */
+/** Credenziali salvate per l'host corrente (login / sblocco PIN condividono lo stesso storage). */
 export function listCredentialsForCurrentRp(): { userId: string; credentialIdB64: string }[] {
   if (typeof window === 'undefined') return [];
   const host = window.location.hostname;
@@ -167,7 +167,7 @@ export function hasAnyPinUnlockCredentialOnDevice(): boolean {
 }
 
 /**
- * WebAuthn con tutte le passkey note per questo dominio; restituisce l’userId associato alla credenziale usata.
+ * WebAuthn con tutte le passkey note per questo dominio; restituisce l'userId associato alla credenziale usata.
  * Utile per la schermata di login senza digitare email/PIN.
  */
 export async function authenticatePinUnlockAndResolveUserId(): Promise<string | null> {
