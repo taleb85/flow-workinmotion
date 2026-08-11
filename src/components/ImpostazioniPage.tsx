@@ -298,12 +298,6 @@ export default function ImpostazioniPage({ onOpenProfilesTab: _onOpenProfilesTab
           </button>
         </div>
 
-        {/* Sezione funzionalità e regole */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {IMPOSTAZIONI_GROUPS.flatMap((group) => group.slugs).map((slug) => renderCard(slug))}
-          {ADVANCED_SLUGS.map((slug) => renderCard(slug))}
-        </div>
-
       </motion.div>
     </div>
   );
