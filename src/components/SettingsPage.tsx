@@ -1087,22 +1087,24 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
         {/* Notifica team */}
         {adminOnly && (
           <div className="rounded-xl border border-neutral-500 p-4 mb-6">
-            <h2 className="text-md font-bold mb-1 flex items-center gap-2">
-              <Bell className="w-4 h-4 text-accent" />
-              {t.admin_notify_team_title}
-            </h2>
-            <p className="text-[11px] sm:text-xs text-white/70 mb-3 leading-relaxed">
+            <div className="flex items-center justify-between gap-3 mb-1">
+              <h2 className="text-md font-bold flex items-center gap-2">
+                <Bell className="w-4 h-4 text-accent" />
+                {t.admin_notify_team_title}
+              </h2>
+              <button
+                type="button"
+                disabled={teamNotifyLoading}
+                onClick={() => void handleNotifyTeam()}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-accent/25 bg-accent/[0.07] px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/12 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+              >
+                <Bell className="w-3.5 h-3.5 opacity-80" />
+                {teamNotifyLoading ? '…' : t.admin_notify_team_button}
+              </button>
+            </div>
+            <p className="text-[11px] sm:text-xs text-white/70 leading-relaxed">
               {t.admin_notify_team_desc}
             </p>
-            <button
-              type="button"
-              disabled={teamNotifyLoading}
-              onClick={() => void handleNotifyTeam()}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-accent/25 bg-accent/[0.07] px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/12 transition-colors disabled:opacity-50 disabled:pointer-events-none"
-            >
-              <Bell className="w-3.5 h-3.5 opacity-80" />
-              {teamNotifyLoading ? '…' : t.admin_notify_team_button}
-            </button>
           </div>
         )}
 
