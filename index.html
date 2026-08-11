@@ -144,7 +144,7 @@
         if (isStandalone) return;
 
         // Su localhost/development non bloccare
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('super-admin')) return;
 
         // Nascondi #root per evitare sovrapposizione React
         document.documentElement.style.overflow = 'hidden';
