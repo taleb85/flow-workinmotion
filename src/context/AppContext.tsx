@@ -2682,9 +2682,15 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
   ]);
 
+  // Regole pausa effettive: vuote se flag auto_breaks è off
+  const effectiveBreakRules = useMemo(
+    () => (featureFlags.auto_breaks ? breakRules : []),
+    [featureFlags.auto_breaks, breakRules]
+  );
+
   const configSlice = useMemo<ConfigSlice>(() => ({
     featureFlags, setFeatureFlag, workRules, setWorkRules,
-    breakRules, setBreakRules,
+    breakRules: effectiveBreakRules, setBreakRules,
     geofenceEffectiveConfig, presenceVerificationConfig,
     roleTemplatesRevision, adminModulesRevision, departmentsRevision,
     toggleAvailability,
@@ -2694,7 +2700,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     notifyDepartmentsChanged,
   }), [
     featureFlags, setFeatureFlag, workRules, setWorkRules,
-    breakRules, setBreakRules,
+    effectiveBreakRules, setBreakRules,
     geofenceEffectiveConfig, presenceVerificationConfig,
     roleTemplatesRevision, adminModulesRevision, departmentsRevision,
     toggleAvailability,
