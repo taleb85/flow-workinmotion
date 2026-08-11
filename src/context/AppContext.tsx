@@ -2034,20 +2034,20 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           if (bundle) {
             if (!bundle.featureFlags) {
               const localFlags = getLocalFeatureFlags();
-              const mergedFlags = sbFlags ? { ...localFlags, ...sbFlags } : localFlags;
-              setFeatureFlagsState(mergedFlags);
-              writeFeatureFlagsToStorage(mergedFlags);
-            }
-            applyAppSettingsBundle(bundle);
-            await refreshGeofenceEffectiveConfig();
-            if (!bundle.presenceVerification) {
-              await refreshPresenceVerificationConfig();
-            }
-            const deptRemoteSr = await loadDepartmentsFromSupabase().catch(() => null);
-            mergeDepartmentsRemoteAfterPull(deptRemoteSr);
-          } else {
-            const localFlags = getLocalFeatureFlags();
-            const mergedFlags = sbFlags ? { ...localFlags, ...sbFlags } : localFlags;
+            const mergedFlags = sbFlags ? { ...sbFlags, ...localFlags } : localFlags;
+            setFeatureFlagsState(mergedFlags);
+            writeFeatureFlagsToStorage(mergedFlags);
+          }
+          applyAppSettingsBundle(bundle);
+          await refreshGeofenceEffectiveConfig();
+          if (!bundle.presenceVerification) {
+            await refreshPresenceVerificationConfig();
+          }
+          const deptRemoteSr = await loadDepartmentsFromSupabase().catch(() => null);
+          mergeDepartmentsRemoteAfterPull(deptRemoteSr);
+        } else {
+          const localFlags = getLocalFeatureFlags();
+          const mergedFlags = sbFlags ? { ...sbFlags, ...localFlags } : localFlags;
             setFeatureFlagsState(mergedFlags);
             writeFeatureFlagsToStorage(mergedFlags);
             const rtRemote = await loadRoleFeatureTemplatesFromSupabase().catch(() => null);
