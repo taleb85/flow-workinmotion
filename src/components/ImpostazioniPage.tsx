@@ -11,7 +11,6 @@ import {
   Zap,
   Coffee,
   ChevronDown,
-  Users,
   MapPin,
   Bell,
 } from 'lucide-react';
@@ -158,7 +157,7 @@ export default function ImpostazioniPage({ onOpenProfilesTab }: ImpostazioniPage
   const t = useT();
   const [_howOpen, _setHowOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState<Record<string, boolean>>({});
-  const [showAdvancedFlags, setShowAdvancedFlags] = useState(false);
+  const [showAdvancedFlags, setShowAdvancedFlags] = useState(true);
   const [teamNotifyLoading, setTeamNotifyLoading] = useState(false);
 
   useEffect(() => {
@@ -275,42 +274,10 @@ export default function ImpostazioniPage({ onOpenProfilesTab }: ImpostazioniPage
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-        className="max-w-5xl"
+        className="w-full"
       >
-        {/* Sezione utente attuale */}
-        <div className="rounded-xl border border-neutral-500 p-4 rounded-xl mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-bold mb-1">{t.settings_current_user || 'Utente attuale'}</h2>
-            <div className="flex items-center gap-3">
-              <span className="font-semibold text-accent">{currentUser.first_name} {currentUser.last_name}</span>
-              <span className="text-xs bg-white/15 rounded px-2 py-0.5 ml-2 text-white/70">{translateRole(currentUser.role, effectiveLanguage as 'it' | 'en' | 'es' | 'fr')}</span>
-            </div>
-          </div>
-          <button
-            className="px-3 py-1.5 rounded-lg border border-red-500/50 bg-red-500/20 text-[#fca5a5] font-semibold hover:bg-red-500/30 transition-colors active:bg-red-500/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
-            onClick={logout}
-          >
-            {t.logout || 'Logout'}
-          </button>
-        </div>
-
         {/* Divider */}
         <div className="h-px bg-white/10 rounded my-6" />
-
-        {/* Sezione gestione utenti */}
-        {onOpenProfilesTab && (
-          <div className="rounded-xl border border-neutral-500 p-4 rounded-xl mb-6">
-            <h2 className="text-md font-bold mb-2 flex items-center gap-2"><Users className="w-4 h-4" />{t.impostazioni_open_profiles || 'Gestione utenti'}</h2>
-            <button
-              type="button"
-              onClick={onOpenProfilesTab}
-              className="inline-flex items-center gap-1.5 self-start rounded-lg border border-accent/25 bg-accent/[0.07] px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/12 transition-colors active:bg-accent/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
-            >
-              <Users className="w-3.5 h-3.5 opacity-80" />
-              {t.impostazioni_open_profiles}
-            </button>
-          </div>
-        )}
 
         <div className="rounded-xl border border-neutral-500 p-4 rounded-xl mb-6">
           <h2 className="text-md font-bold mb-1 flex items-center gap-2">
@@ -332,42 +299,9 @@ export default function ImpostazioniPage({ onOpenProfilesTab }: ImpostazioniPage
         </div>
 
         {/* Sezione funzionalità e regole */}
-        <div className="space-y-6">
-          {IMPOSTAZIONI_GROUPS.map((group) => (
-            <section key={group.titleKey}>
-              <h2 className="ui-section-title mb-2.5 text-white/50">
-                {t[group.titleKey]}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{group.slugs.map((slug) => renderCard(slug))}</div>
-            </section>
-          ))}
-
-          {/* Impostazioni avanzate collapsibile */}
-          <section>
-            <button
-              type="button"
-              onClick={() => setShowAdvancedFlags((v) => !v)}
-              className="flex items-center gap-2 text-xs font-semibold text-white/50 hover:text-white/80 transition-colors py-1 mb-1 active:text-white/80"
-            >
-              <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${showAdvancedFlags ? 'rotate-180' : ''}`} />
-              {(t as Record<string, string>)['impostazioni_advanced_section'] ?? 'Impostazioni avanzate'}
-            </button>
-            <AnimatePresence initial={false}>
-              {showAdvancedFlags && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="overflow-hidden"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    {ADVANCED_SLUGS.map((slug) => renderCard(slug))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </section>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {IMPOSTAZIONI_GROUPS.flatMap((group) => group.slugs).map((slug) => renderCard(slug))}
+          {showAdvancedFlags && ADVANCED_SLUGS.map((slug) => renderCard(slug))}
         </div>
 
       </motion.div>

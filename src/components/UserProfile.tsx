@@ -82,6 +82,10 @@ export function ProfileFormSelf({
   departmentLocked = false,
   /** Se true: solo il ruolo è bloccato (es. tab Profilo); PIN e resto restano modificabili se !readOnly. */
   roleLocked = false,
+  /** Se false: nasconde il pulsante "Salva" (per auto-salvataggio). */
+  showSaveButton = true,
+  /** Callback per tracciare il campo modificato (per posizionamento toast). */
+  onFieldChange,
 }: {
   formData: ProfileFormSelfData;
   setFormData: React.Dispatch<React.SetStateAction<ProfileFormSelfData>>;
@@ -93,6 +97,8 @@ export function ProfileFormSelf({
   nameLocked?: boolean;
   departmentLocked?: boolean;
   roleLocked?: boolean;
+  showSaveButton?: boolean;
+  onFieldChange?: (field: string) => void;
 }) {
   const { effectiveLanguage, setLanguage, currentUser } = useAppUser();
   const { departmentsRevision } = useAppConfig();
@@ -159,7 +165,7 @@ export function ProfileFormSelf({
         </div>
       </div>
 
-      <div>
+      <div className="relative" data-save-field="email">
         <label className={labelClass}>
           <Mail className={`w-4 h-4 inline mr-2 ${iconMuted}`} aria-hidden />
           {t.email}
@@ -167,7 +173,7 @@ export function ProfileFormSelf({
         <input
           type="email"
           value={formData.email}
-          onChange={(e) => !readOnly && setFormData((prev) => ({ ...prev, email: e.target.value }))}
+          onChange={(e) => { onFieldChange?.('email'); !readOnly && setFormData((prev) => ({ ...prev, email: e.target.value })); }}
           readOnly={readOnly}
           className={readOnly ? inputClassDisabled : inputClass}
           placeholder={(t as { email_placeholder?: string }).email_placeholder}
@@ -209,7 +215,7 @@ export function ProfileFormSelf({
             />
           )}
         </div>
-        <div>
+        <div className="relative" data-save-field="pin">
           <label className={labelClass}>
             <Lock className={`w-3.5 h-3.5 inline mr-1.5 ${iconMuted}`} aria-hidden />
             {t.pin_4_digits}
@@ -220,6 +226,7 @@ export function ProfileFormSelf({
               inputMode="numeric"
               value={formData.pin}
               onChange={(e) => {
+                onFieldChange?.('pin');
                 const value = e.target.value.replace(/\D/g, '').slice(0, 4);
                 setFormData((prev) => ({ ...prev, pin: value }));
               }}
@@ -301,7 +308,7 @@ export function ProfileFormSelf({
             ))}
           </select>
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 relative" data-save-field="phone">
           <label className={labelClass}>
             <Phone className={`w-4 h-4 inline mr-2 ${iconMuted}`} aria-hidden />
             {t.phone}
@@ -311,13 +318,14 @@ export function ProfileFormSelf({
             inputMode="tel"
             autoComplete="tel-national"
             value={formData.phone_national}
-            onChange={(e) =>
+            onChange={(e) => {
+              onFieldChange?.('phone');
               !readOnly &&
               setFormData((prev) => ({
                 ...prev,
                 phone_national: e.target.value.replace(/[^\d\s]/g, ''),
-              }))
-            }
+              }));
+            }}
             readOnly={readOnly}
             className={readOnly ? inputClassDisabled : inputClass}
             placeholder={phoneExample}
@@ -326,7 +334,7 @@ export function ProfileFormSelf({
       </div>
 
 
-      {!readOnly && (
+      {!readOnly && showSaveButton && (
         <button
           type="submit"
           disabled={isSaving}

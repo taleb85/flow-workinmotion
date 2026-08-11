@@ -14,7 +14,7 @@ import ImpostazioniPage from './ImpostazioniPage';
 type AdminTab = 'profili' | 'impostazioni';
 
 const adminHeaderCardClass =
-  'w-full rounded-2xl border border-white/12 overflow-visible';
+  'w-full rounded-2xl border border-white/12 overflow-visible backdrop-blur-[20px] shadow-[0_4px_16px_-4px_rgba(0,0,0,0.3)]';
 
 interface TabDef {
   key: AdminTab;

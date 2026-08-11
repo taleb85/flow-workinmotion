@@ -65,6 +65,9 @@ export default function ProfileNavTabPanel({
     pin: '',
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [showSavedToast, setShowSavedToast] = useState(false);
+  const [toastField, setToastField] = useState<string | null>(null);
+  const [toastPos, setToastPos] = useState<{ top: number; left: number } | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
 
   // PIN gate per Area Gestionale
@@ -125,6 +128,44 @@ export default function ProfileNavTabPanel({
     setFormData(fd);
     savedSnapshotRef.current = serializeProfileForm(fd);
   }, [currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps -- solo cambio utente (id), non ogni sync di currentUser
+
+  // ── Auto-salvataggio con debounce ──────────────────────────────────────
+  const mountedRef = useRef(false);
+  const lastChangedRef = useRef<string | null>(null);
+  const handleFieldChange = useCallback((field: string) => {
+    lastChangedRef.current = field;
+  }, []);
+
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    if (!currentUser) return;
+
+    const field = lastChangedRef.current;
+    const timer = setTimeout(() => {
+      if (serializeProfileForm(formData) !== savedSnapshotRef.current) {
+        void performProfileSave().then(() => {
+          setToastField(field);
+          // Calcola posizione del campo
+          if (field) {
+            const el = document.querySelector(`[data-save-field="${field}"]`);
+            if (el) {
+              const input = el.querySelector('input, select') ?? el;
+              const rect = input.getBoundingClientRect();
+              setToastPos({ top: rect.bottom - 2, left: rect.right - 100 });
+            }
+          }
+          setShowSavedToast(true);
+          setTimeout(() => setShowSavedToast(false), 2000);
+        });
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData]);
 
   // Tieni formData.language in sync con effectiveLanguage: evita che il salvataggio del profilo
   // sovrascriva nel DB la lingua scelta dall'accordion "Tema & Lingua"
@@ -335,6 +376,31 @@ export default function ProfileNavTabPanel({
 
   const hasLangChanges = pendingLang !== savedLang;
 
+  // ── Auto-salvataggio lingua con debounce ──────────────────────────────
+  const langMountedRef = useRef(false);
+  useEffect(() => {
+    if (!langMountedRef.current) {
+      langMountedRef.current = true;
+      return;
+    }
+    if (pendingLang === savedLang) return;
+    const timer = setTimeout(() => {
+      void saveLang().then(() => {
+        setToastField('lang');
+        const el = document.querySelector('[data-save-field="lang"]');
+        if (el) {
+          const input = el.querySelector('input, select') ?? el;
+          const rect = input.getBoundingClientRect();
+          setToastPos({ top: rect.bottom - 2, left: rect.right - 100 });
+        }
+        setShowSavedToast(true);
+        setTimeout(() => setShowSavedToast(false), 2000);
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingLang]);
+
   const saveLang = async () => {
     setLangSaving(true);
     if (pendingLang !== savedLang) {
@@ -507,6 +573,8 @@ export default function ProfileNavTabPanel({
                       nameLocked={true}
                       departmentLocked={true}
                       roleLocked={true}
+                      showSaveButton={false}
+                      onFieldChange={handleFieldChange}
                     />
                   </div>
                 </motion.div>
@@ -540,7 +608,7 @@ export default function ProfileNavTabPanel({
             <AnimatePresence initial={false}>
               {expanded === 'lang' && (
                 <motion.div key="lang-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
-                  <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.12)' }} className="px-4 py-3 space-y-3">
+                  <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.12)' }} className="px-4 py-3 space-y-3" data-save-field="lang">
                     <div className="flex gap-1 rounded-xl p-1 border border-neutral-500" style={{ background: 'transparent' }}>
                       {(() => {
                         const deviceLang = getDeviceUiLanguage();
@@ -569,19 +637,6 @@ export default function ProfileNavTabPanel({
                         </button>
                       ))}
                     </div>
-                    <button
-                      type="button"
-                      disabled={langSaving || (!hasLangChanges && !langSaved)}
-                      onClick={() => void saveLang()}
-                      className="w-full py-2.5 rounded-xl text-sm font-bold transition-colors disabled:opacity-40"
-                      style={langSaved
-                        ? { background: '#10b981', color: '#fff' }
-                        : hasLangChanges
-                          ? { background: 'rgba(255,255,255,0.12)', color: '#fff' }
-                          : { background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.40)', border: '1px solid rgba(255,255,255,0.12)' }}
-                    >
-                      {langSaved ? '✓ Salvato' : langSaving ? 'Salvataggio…' : 'Salva'}
-                    </button>
                   </div>
                 </motion.div>
               )}
@@ -647,6 +702,30 @@ export default function ProfileNavTabPanel({
               openMgmtArea();
             }}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Toast "Salvato" — fixed sopra il campo modificato */}
+      <AnimatePresence>
+        {showSavedToast && toastPos && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.92 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="fixed z-[9999] pointer-events-none"
+            style={{
+              top: `${toastPos.top}px`,
+              left: `${toastPos.left}px`,
+              transform: 'translate(-100%, 0)',
+            }}
+          >
+            <span className="relative inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-xl shadow-emerald-500/30" style={{ marginTop: 6 }}>
+              <span className="absolute -top-[5px] right-3 w-0 h-0 border-l-[5px] border-r-[5px] border-b-[6px] border-l-transparent border-r-transparent border-b-emerald-500" />
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Salvato
+            </span>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

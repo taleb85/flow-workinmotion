@@ -1,12 +1,23 @@
 import { useRef } from 'react';
 import { useT } from '../hooks/useT';
 import type { AppNavTab } from '../utils/enabledModules';
+import { LayoutDashboard, CalendarDays, Clock, Palmtree, User, Settings } from 'lucide-react';
 
 interface TopTabBarProps {
   activeTab: AppNavTab;
   onTabChange: (tab: AppNavTab) => void;
   visibleTabs: AppNavTab[];
 }
+
+const tabIcons: Record<AppNavTab, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
+  home: LayoutDashboard,
+  turni: CalendarDays,
+  timesheet: Clock,
+  ferie: Palmtree,
+  profile: User,
+  reports: Clock,
+  settings: Settings,
+};
 
 export default function TopTabBar({ activeTab, onTabChange, visibleTabs }: TopTabBarProps) {
   const t = useT();
@@ -45,6 +56,7 @@ export default function TopTabBar({ activeTab, onTabChange, visibleTabs }: TopTa
       <div className="flex w-full">
         {tabs.map(({ id, label }) => {
           const isActive = activeTab === id;
+          const Icon = tabIcons[id];
           return (
             <button
               key={id}
@@ -52,6 +64,8 @@ export default function TopTabBar({ activeTab, onTabChange, visibleTabs }: TopTa
               type="button"
               data-tour={id === 'profile' ? 'profile' : id === 'turni' ? 'shifts' : undefined}
               onClick={() => onTabChange(id)}
+              title={label}
+              aria-label={label}
               className={`top-tab whitespace-nowrap ${id === 'settings' ? 'hidden md:inline' : ''}`}
               style={{
                 flex: '1 1 0',
@@ -70,9 +84,12 @@ export default function TopTabBar({ activeTab, onTabChange, visibleTabs }: TopTa
                 letterSpacing: '0.3px',
                 outline: 'none',
                 transition: 'color 0.15s, border-color 0.15s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              {label}
+              {Icon && <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />}
             </button>
           );
         })}
