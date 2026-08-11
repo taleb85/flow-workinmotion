@@ -6,7 +6,7 @@
  * Persistenza: updateUser -> database.users.update (tabella `users`), campo `department` incluso.
  */
 import { useMemo, useCallback, useState, useRef } from 'react';
-import { User, Mail, Lock, Shield, CheckCircle, AlertTriangle, Euro, Copy, Share2, Phone, Calendar } from 'lucide-react';
+import { User, Mail, Lock, Shield, CheckCircle, AlertTriangle, Euro, Share2, Phone, Calendar } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppConfig } from '../context/appSliceContexts';
 import { useAppOverlay } from '../context/appSliceContexts';
@@ -495,15 +495,6 @@ export function ProfileFormAdmin({
     [user.id, formData.pin, formData.first_name, formData.last_name]
   );
 
-  const handleCopyAccessLink = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(accessLink);
-      showSuccess?.(tv.admin_employee_access_link_copied ?? 'Link copiato.');
-    } catch {
-      showError?.(tv.copy_failed ?? 'Copia non riuscita. Seleziona il link manualmente.');
-    }
-  }, [accessLink, showSuccess, showError, tv.admin_employee_access_link_copied, tv.copy_failed]);
-
   /** Condivisione: link con URL separato per AirDrop + WhatsApp/SMS/Telegram. */
   const handleShareInviteSimple = useCallback(async () => {
     const name = `${formData.first_name} ${formData.last_name ?? ''}`.trim();
@@ -823,15 +814,6 @@ export function ProfileFormAdmin({
               <span>Invia accesso</span>
             </button>
 
-            {/* Pulsante secondario: solo copia link */}
-            <button
-              type="button"
-              onClick={handleCopyAccessLink}
-              className="flex w-full items-center justify-center gap-1.5 text-[11px] text-white/40 hover:text-white/60 transition-colors font-sans"
-            >
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copia solo il link</span>
-            </button>
           </div>
         )}
 
