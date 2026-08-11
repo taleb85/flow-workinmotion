@@ -292,6 +292,11 @@ export function getBreakMinutesForShift(
   if (shift.break_minutes != null && shift.break_minutes > 0 && shift.is_auto_break !== true) {
     return shift.break_minutes;
   }
+  /* Se le regole sono state esplicitamente passate come vuote (feature flag auto_breaks OFF),
+     non applicare la pausa automatica pasto. */
+  if (rules !== undefined && rules !== null && rules.length === 0 && activeRules.length === 0) {
+    return 0;
+  }
   const startStr = (options?.breakRuleWindow?.start ?? String(shift.start_time ?? '')).slice(0, 5);
   const endStr   = (options?.breakRuleWindow?.end   ?? String(shift.end_time   ?? '')).slice(0, 5);
   // Turni che attraversano la mezzanotte (escluso 00:00 = fine giornata): niente fasce pasto né fallback generico
