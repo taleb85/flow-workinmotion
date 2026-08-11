@@ -128,10 +128,12 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
     setInviteOnboardLoading(true);
     setError('');
     try {
-      // Aggiorna i dati utente (email, telefono)
+      // Aggiorna i dati utente (email, telefono, PIN)
       const patch: Record<string, string> = {};
       if (inviteEmail.trim()) patch.email = inviteEmail.trim();
       if (invitePhone.trim()) patch.phone = invitePhone.trim();
+      const pinDigits = password.replace(/\D/g, '');
+      if (pinDigits.length === 4) patch.pin = pinDigits;
       if (Object.keys(patch).length > 0) {
         await database.users.update(inviteUserId, patch as Partial<UserType>);
       }
@@ -185,7 +187,10 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       const nameForLogin = `${linkedUser.first_name} ${linkedUser.last_name ?? ''}`.trim();
       if (nameForLogin) setStaffName(nameForLogin.toUpperCase());
     }
-    if (invitePinFromUrl) setPassword(invitePinFromUrl);
+    if (invitePinFromUrl) {
+      // Non pre-compilare il PIN — l'utente lo imposta nel form onboarding
+      // setPassword(invitePinFromUrl);
+    }
   }, [inviteUserId, inviteNameFromUrl, invitePinFromUrl, linkedUser]);
 
   useEffect(() => {

@@ -507,7 +507,7 @@ export function ProfileFormAdmin({
   /** Condivisione: link con URL separato per AirDrop + WhatsApp/SMS/Telegram. */
   const handleShareInviteSimple = useCallback(async () => {
     const name = `${formData.first_name} ${formData.last_name ?? ''}`.trim();
-    const shareText = `Ciao ${name}! 👋\n\nApri questo link per attivare il tuo account FLOW. Il PIN è già incluso.`;
+    const shareText = `Ciao ${name}! 👋\n\nApri questo link per attivare il tuo account FLOW. Imposta il tuo PIN personale di 4 cifre.`;
 
     if (navigator.share) {
       try {
