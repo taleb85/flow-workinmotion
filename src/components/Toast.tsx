@@ -15,7 +15,7 @@ interface ToastProps {
  */
 export default function Toast({ message, type = 'error', onClose }: ToastProps) {
   useEffect(() => {
-    const t = setTimeout(onClose, 10000);
+    const t = setTimeout(onClose, 3000);
     return () => clearTimeout(t);
   }, [onClose]);
 
