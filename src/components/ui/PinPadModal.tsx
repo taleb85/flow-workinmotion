@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Lock, ShieldCheck, Delete, Fingerprint, Loader2, Smartphone } from 'lucide-react';
+import { Lock, ShieldCheck, Delete, Fingerprint, Loader2 } from 'lucide-react';
 import React, { ReactNode, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
@@ -8,7 +8,6 @@ import {
   supportsPinUnlockWebAuthn,
   hasPinUnlockCredential,
   authenticatePinUnlockCredential,
-  registerPinUnlockCredential,
   hasPlatformBiometricAuthenticator,
   hasAnyPinUnlockCredentialOnDevice,
   authenticatePinUnlockAndResolveUserId,
@@ -74,7 +73,6 @@ export function PinPadModal({
   // Mostra impronta se l'utente corrente ha una credenziale OPPURE se ce n'è una qualsiasi sul dispositivo
   const credRegistered = webAuthnOk && (!!userId ? hasPinUnlockCredential(userId) : hasAnyPinUnlockCredentialOnDevice());
   const [bioLoading, setBioLoading] = useState(false);
-  const [bioRegLoading, setBioRegLoading] = useState(false);
 
   const handleBiometric = useCallback(async () => {
     if (bioLoading || isLoading) return;
@@ -95,20 +93,6 @@ export function PinPadModal({
       setBioLoading(false);
     }
   }, [userId, bioLoading, isLoading, onBiometricSuccess, onConfirm]);
-
-  const handleBioRegister = useCallback(async () => {
-    if (!userId || bioRegLoading) return;
-    setBioRegLoading(true);
-    try {
-      await registerPinUnlockCredential(
-        userId,
-        userDisplayName ?? userId,
-        userEmail ?? '',
-      );
-    } finally {
-      setBioRegLoading(false);
-    }
-  }, [userId, bioRegLoading, userDisplayName, userEmail]);
 
   // Auto-trigger biometrica al mount se credenziale già registrata
   useEffect(() => {
@@ -221,21 +205,12 @@ export function PinPadModal({
           ))}
           {leftActionButton ? (
             <div className="h-14 rounded-2xl flex items-center justify-center" style={btnBase}>{leftActionButton}</div>
-          ) : webAuthnOk ? (
-            credRegistered ? (
-              <button type="button" onClick={handleBiometric} disabled={bioLoading || isLoading}
-                className="h-14 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-white/80 transition-colors disabled:opacity-50 hover:bg-white/10 hover:border-white/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-                style={btnBase} title="Usa impronta digitale">
-                {bioLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Fingerprint className="w-6 h-6" />}
-              </button>
-            ) : (
-              <button type="button" onClick={handleBioRegister} disabled={bioRegLoading || isLoading}
-                className="h-14 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-white/50 hover:text-white/80 transition-colors hover:bg-white/10 hover:border-white/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-                style={btnBase} title="Collega impronta digitale">
-                {bioRegLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Smartphone style={{ width: '1.25rem', height: '1.25rem' }} />}
-                <span className="text-[7px] font-black uppercase tracking-tighter leading-none">Collega</span>
-              </button>
-            )
+          ) : webAuthnOk && credRegistered ? (
+            <button type="button" onClick={handleBiometric} disabled={bioLoading || isLoading}
+              className="h-14 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-white/80 transition-colors disabled:opacity-50 hover:bg-white/10 hover:border-white/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              style={btnBase} title="Usa impronta digitale">
+              {bioLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Fingerprint className="w-6 h-6" />}
+            </button>
           ) : (
             <div className="h-14 rounded-2xl" style={btnBase} />
           )}
