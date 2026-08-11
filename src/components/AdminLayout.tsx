@@ -116,8 +116,7 @@ export default function AdminLayout() {
  }`}
                   >
                     <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                    <span className="sm:hidden">{key === 'profili' ? 'Profili' : 'Impost.'}</span>
-                    <span className="hidden sm:inline">{label}</span>
+                    <span>{label}</span>
                   </button>
                 );
               })}
