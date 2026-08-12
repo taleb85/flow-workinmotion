@@ -2037,7 +2037,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           // Fix #2: fetchGlobalSettingsBundleFromSupabase ritorna sempre null, quindi i feature flags
           // non venivano mai applicati. Ora li applichiamo direttamente da sbFlags.
           const localFlags = getLocalFeatureFlags();
-          const mergedFlags = sbFlags ? { ...sbFlags, ...localFlags } : localFlags;
+          // Remoto vince: le impostazioni salvate dall'admin devono prevalere sul cache locale.
+          const mergedFlags = sbFlags ? { ...localFlags, ...sbFlags } : localFlags;
           setFeatureFlagsState(mergedFlags);
           writeFeatureFlagsToStorage(mergedFlags);
 
@@ -2079,7 +2080,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           setSettingsCloudLastSyncedAt(new Date().toISOString());
         } else {
           const localFlags = getLocalFeatureFlags();
-          const mergedFlags = sbFlags ? { ...sbFlags, ...localFlags } : localFlags;
+          // Remoto vince: il valore salvato su cloud prevale sul cache locale.
+          const mergedFlags = sbFlags ? { ...localFlags, ...sbFlags } : localFlags;
           setFeatureFlagsState(mergedFlags);
           writeFeatureFlagsToStorage(mergedFlags);
           const rtRemote = await loadRoleFeatureTemplatesFromSupabase().catch(() => null);
