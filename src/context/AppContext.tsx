@@ -2034,16 +2034,17 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           // Ramo "sync completo": carica anche work rules, break rules, template ruoli, moduli admin.
           // Fix: il segnale Realtime app_settings_sync_signal chiamava questo ramo ma caricava solo
           // feature flags, periodo, geofence e dipartimenti — le altre impostazioni rimanevano vecchie sul telefono.
+          // Fix #2: fetchGlobalSettingsBundleFromSupabase ritorna sempre null, quindi i feature flags
+          // non venivano mai applicati. Ora li applichiamo direttamente da sbFlags.
+          const localFlags = getLocalFeatureFlags();
+          const mergedFlags = sbFlags ? { ...sbFlags, ...localFlags } : localFlags;
+          setFeatureFlagsState(mergedFlags);
+          writeFeatureFlagsToStorage(mergedFlags);
+
           const bundle = await fetchGlobalSettingsBundleFromSupabase({
             force: iterationOpts.forceSettingsBundle === true,
           }).catch(() => null);
           if (bundle) {
-            if (!bundle.featureFlags) {
-              const localFlags = getLocalFeatureFlags();
-              const mergedFlags = sbFlags ? { ...sbFlags, ...localFlags } : localFlags;
-              setFeatureFlagsState(mergedFlags);
-              writeFeatureFlagsToStorage(mergedFlags);
-            }
             applyAppSettingsBundle(bundle);
           }
           await refreshGeofenceEffectiveConfig();
