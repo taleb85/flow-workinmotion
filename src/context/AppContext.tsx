@@ -1,3 +1,4 @@
+import { sendForceReloadPush } from '../utils/sendForceReloadPush';
 import { useState, useRef, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { persistStoredUiLanguage, readStoredUiLanguage, clearStoredUiLanguage, getDeviceUiLanguage } from '../utils/uiLanguagePreference';
 import {
@@ -2385,8 +2386,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           setSettingsCloudLastSyncedAt(new Date().toISOString());
           markManagementDataTouched();
           showSuccess(getTranslations(effectiveLanguage).settings_cloud_save_all_success);
-          // La sync avviene automaticamente via Realtime (immediato) o polling (30s).
-          // La push force_reload è rimossa perché ridondante e intrusiva (overlay fullscreen 3.5s).
+          // Notifica push: mostra overlay di conferma su tutti gli altri dispositivi (nessun PIN richiesto)
+          void sendForceReloadPush(currentUser?.id);
         })(),
         PUSH_SETTINGS_CLOUD_MAX_MS,
         'pushSettingsToCloud'
