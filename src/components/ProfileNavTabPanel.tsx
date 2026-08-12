@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppUser, useAppOverlay } from '../context/AppContext';
 import { useProfileLeaveGuardRef } from '../context/ProfileLeaveGuardContext';
 import { useT } from '../hooks/useT';
-import { getDeviceUiLanguage, readStoredUiLanguage } from '../utils/uiLanguagePreference';
+import { getDeviceUiLanguage, persistStoredUiLanguage, readStoredUiLanguage } from '../utils/uiLanguagePreference';
 import { NotificationPermissionButton } from './NotificationPermissionButton';
 
 import { isManagementRole, isAdminOnly } from '../utils/permissions';
@@ -147,7 +147,7 @@ export default function ProfileNavTabPanel({
     const timer = setTimeout(() => {
       if (serializeProfileForm(formData) !== savedSnapshotRef.current) {
         void performProfileSave().then(() => {
-          setToastField(field);
+          _setToastField(field);
           // Calcola posizione del campo
           if (field) {
             const el = document.querySelector(`[data-save-field="${field}"]`);
