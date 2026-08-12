@@ -107,7 +107,6 @@ import { loadTimesheetPeriodFromSupabase, applyRemoteTimesheetPeriod } from '../
 import { userRowToSessionUser, defaultPermissionFieldsForNewUser } from '../utils/staffPermissionDefaults';
 import { APP_SESSION_STORAGE_KEY } from '../constants/appSession';
 import { PATH_PROFILO } from '../config/appPaths';
-import { sendForceReloadPush } from '../utils/sendForceReloadPush';
 import {
   bumpClientSyncRevisionOnSupabase,
   fetchClientSyncRevisionFromSupabase,
@@ -2386,8 +2385,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           setSettingsCloudLastSyncedAt(new Date().toISOString());
           markManagementDataTouched();
           showSuccess(getTranslations(effectiveLanguage).settings_cloud_save_all_success);
-          // Invia notifica push force_reload a tutti gli altri dispositivi
-          void sendForceReloadPush(currentUser?.id);
+          // La sync avviene automaticamente via Realtime (immediato) o polling (30s).
+          // La push force_reload è rimossa perché ridondante e intrusiva (overlay fullscreen 3.5s).
         })(),
         PUSH_SETTINGS_CLOUD_MAX_MS,
         'pushSettingsToCloud'
