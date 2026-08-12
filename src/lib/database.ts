@@ -1346,27 +1346,63 @@ export const database = {
     },
     /** Dopo push del bundle impostazioni su Storage: altri client eseguono pull config. */
     subscribeToAppSettingsSyncSignal(onSignal: () => void) {
-      if (!supabase || !isAppCloudSyncEnabled() || isAppSettingsSyncSignalRestSkipped()) return () => {};
+      if (!supabase || !isAppCloudSyncEnabled()) return () => {};
+      if (isAppSettingsSyncSignalRestSkipped()) {
+        // Il flag può essere rimasto da un errore transitorio (es. 404 di rete).
+        // Proviamo comunque a sottoscrivere: se funziona, il flag verrà pulito da bumpAppSettingsSyncSignal.
+        console.warn('[realtime app_settings_sync_signal] flag skip attivo — riprovo la sottoscrizione');
+      }
       let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+      let retries = 0;
+      const MAX_RETRIES = 5;
       const topic = `app-settings-sync:${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`}`;
-      const channel = supabase!
-        .channel(topic)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'app_settings_sync_signal' },
-          () => {
-            if (debounceTimer) clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-              debounceTimer = null;
-              onSignal();
-            }, 900);
-          }
-        )
-        .subscribe((status) => {
-          if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && import.meta.env.DEV) {
-            console.warn('[realtime app_settings_sync_signal]', status, topic);
-          }
-        });
+
+      const attemptSubscribe = () => {
+        const channel = supabase!
+          .channel(topic)
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'app_settings_sync_signal' },
+            () => {
+              if (debounceTimer) clearTimeout(debounceTimer);
+              debounceTimer = setTimeout(() => {
+                debounceTimer = null;
+                onSignal();
+              }, 900);
+            }
+          )
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              retries = 0;
+              // Sottoscrizione riuscita: pulisci eventuale flag bloccante
+              try { localStorage.removeItem('osteria_app_settings_sync_signal_unavailable'); } catch { /* ignore */ }
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+              console.warn('[realtime app_settings_sync_signal]', status, topic, `tentativo ${retries + 1}/${MAX_RETRIES}`);
+              retries += 1;
+              if (retries < MAX_RETRIES) {
+                const delay = Math.min(1000 * Math.pow(2, retries), 30000);
+                setTimeout(() => {
+                  supabase!.removeChannel(channel);
+                  attemptSubscribe();
+                }, delay);
+              } else {
+                console.error('[realtime app_settings_sync_signal] Sottoscrizione fallita dopo', MAX_RETRIES, 'tentativi. Sync impostazioni disabilitata.');
+                try { localStorage.setItem('osteria_app_settings_sync_signal_unavailable', '1'); } catch { /* ignore */ }
+              }
+            } else if (status === 'CLOSED') {
+              // Channel chiuso dal server: riprova dopo un po'
+              console.warn('[realtime app_settings_sync_signal] Channel chiuso dal server, riprovo tra 10s');
+              setTimeout(() => {
+                supabase!.removeChannel(channel);
+                attemptSubscribe();
+              }, 10000);
+            }
+          });
+        return channel;
+      };
+
+      const channel = attemptSubscribe();
+
       return () => {
         if (debounceTimer) clearTimeout(debounceTimer);
         supabase!.removeChannel(channel);

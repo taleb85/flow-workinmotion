@@ -91,13 +91,16 @@ function isMissingAppSettingsSyncTable(err: unknown): boolean {
     raw = '';
   }
   const mentionsTable = /app_settings_sync_signal/i.test(blob) || /app_settings_sync_signal/i.test(raw);
+  // Solo PGRST205 o errori che menzionano esplicitamente la tabella + "schema cache"/"does not exist".
+  // Un 404 generico (es. errore di rete) NON deve bloccare permanentemente la sync.
   const looksMissing =
     code === 'PGRST205' ||
-    /schema cache|could not find|does not exist|not found|\b404\b/i.test(blob) ||
-    /PGRST205|schema cache|"status":\s*404/i.test(raw);
-  /* Solo `bumpAppSettingsSyncSignal` interroga questa tabella: 404 = tabella/route assente. */
-  if (status === 404) return true;
-  return mentionsTable && looksMissing;
+    (mentionsTable && /schema cache|does not exist/i.test(blob)) ||
+    (mentionsTable && /"status":\s*404/i.test(raw));
+  /* 404 solo se l'errore menziona la tabella e il pattern "does not exist" o "schema cache".
+     Un 404 generico da rete non deve disabilitare la sync. */
+  if (status === 404 && mentionsTable && looksMissing) return true;
+  return false;
 }
 
 /** Un solo `Promise` all’avvio (Strict Mode / doppie chiamate). */

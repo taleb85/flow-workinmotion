@@ -763,6 +763,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           localStorage.removeItem('osteria_features_storage_disabled');
           localStorage.removeItem('osteria_role_templates_storage_skip');
           localStorage.removeItem('osteria_admin_modules_storage_skip');
+          localStorage.removeItem('osteria_app_settings_sync_signal_unavailable');
         } catch {
           /* ignore */
         }
