@@ -637,12 +637,47 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           });
         })
       : () => {};
+
+    // Polling fallback: ogni 30s controlla se la revisione del segnale è cambiata.
+    // Garantisce la sync anche se il Realtime WebSocket fallisce (es. rete instabile, firewall).
+    let pollTimer: ReturnType<typeof setInterval> | null = null;
+    if (isAppCloudSyncEnabled()) {
+      const POLL_INTERVAL_MS = 30000;
+      let lastKnownRevision = -1;
+      pollTimer = setInterval(async () => {
+        try {
+          const { supabase } = await import('../lib/supabase');
+          if (!supabase) return;
+          const { data, error } = await supabase
+            .from('app_settings_sync_signal')
+            .select('revision')
+            .eq('id', 1)
+            .maybeSingle();
+          if (error || !data) return;
+          const remoteRev = data.revision;
+          if (lastKnownRevision < 0) {
+            lastKnownRevision = remoteRev;
+            return;
+          }
+          if (remoteRev !== lastKnownRevision) {
+            lastKnownRevision = remoteRev;
+            void silentRefreshDataRef.current({
+              pullRemoteConfig: true,
+              skipRemoteRevisionCheck: true,
+              forceSettingsBundle: true,
+            });
+          }
+        } catch { /* ignore poll errors */ }
+      }, POLL_INTERVAL_MS);
+    }
+
     return () => {
       unsubPunches();
       unsubShifts();
       unsubUsers();
       unsubHolidaysAvail();
       unsubSettingsSync();
+      if (pollTimer) clearInterval(pollTimer);
     };
   }, []);
 
