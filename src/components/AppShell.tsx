@@ -19,7 +19,7 @@ import MobileProfileHeader from '../components/MobileProfileHeader';
 import FlowWaveIcon from '../components/ui/FlowWaveIcon';
 import RefreshLockOverlay from '../components/RefreshLockOverlay';
 import PostUnlockRestartOverlay from '../components/PostUnlockRestartOverlay';
-import BodyPullToRefresh from '../components/BodyPullToRefresh';
+
 import HomePage from '../components/HomePage';
 import LoginPage from '../components/LoginPage';
 import InviteRedirect from '../components/InviteRedirect';
@@ -666,10 +666,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       >
         Vai al contenuto principale
       </a>
-      <BodyPullToRefresh
-        onRefresh={() => silentRefreshData({ pullRemoteConfig: true })}
-        disabled={!!(isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending)}
-      />
+
 
       {/* ── Banner Impersonazione (Cambio Rapido Admin) ── */}
       {impersonatingAs && originalAdminUser && (
