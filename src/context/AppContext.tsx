@@ -2019,64 +2019,93 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         }
 
         const pullRemoteConfig = Boolean(iterationOpts.pullRemoteConfig && isAppCloudSyncEnabled());
-        if (pullRemoteConfig) {
-          const [sbFlags, periodRemote] = await Promise.all([
-            loadFeatureFlagsFromSupabase().catch(() => null),
-            loadTimesheetPeriodFromSupabase().catch(() => null),
-          ]);
-          if (periodRemote) {
-            applyRemoteTimesheetPeriod(periodRemote);
-          }
 
+        // Carica sempre feature flags e periodo da Storage (entrambi i rami).
+        const [sbFlags, periodRemote] = await Promise.all([
+          loadFeatureFlagsFromSupabase().catch(() => null),
+          loadTimesheetPeriodFromSupabase().catch(() => null),
+        ]);
+        if (periodRemote) {
+          applyRemoteTimesheetPeriod(periodRemote);
+        }
+
+        if (pullRemoteConfig) {
+          // Ramo "sync completo": carica anche work rules, break rules, template ruoli, moduli admin.
+          // Fix: il segnale Realtime app_settings_sync_signal chiamava questo ramo ma caricava solo
+          // feature flags, periodo, geofence e dipartimenti — le altre impostazioni rimanevano vecchie sul telefono.
           const bundle = await fetchGlobalSettingsBundleFromSupabase({
             force: iterationOpts.forceSettingsBundle === true,
           }).catch(() => null);
           if (bundle) {
             if (!bundle.featureFlags) {
               const localFlags = getLocalFeatureFlags();
-            const mergedFlags = sbFlags ? { ...sbFlags, ...localFlags } : localFlags;
-            setFeatureFlagsState(mergedFlags);
-            writeFeatureFlagsToStorage(mergedFlags);
+              const mergedFlags = sbFlags ? { ...sbFlags, ...localFlags } : localFlags;
+              setFeatureFlagsState(mergedFlags);
+              writeFeatureFlagsToStorage(mergedFlags);
+            }
+            applyAppSettingsBundle(bundle);
           }
-          applyAppSettingsBundle(bundle);
           await refreshGeofenceEffectiveConfig();
-          if (!bundle.presenceVerification) {
+          if (!bundle?.presenceVerification) {
             await refreshPresenceVerificationConfig();
           }
           const deptRemoteSr = await loadDepartmentsFromSupabase().catch(() => null);
           mergeDepartmentsRemoteAfterPull(deptRemoteSr);
+
+          // Carica anche template ruoli, moduli admin, regole lavoro e pause
+          const rtRemote = await loadRoleFeatureTemplatesFromSupabase().catch(() => null);
+          const rtLocal = getLocalRoleFeatureTemplates();
+          const rtMerged = loadAndMergeRoleTemplates(rtRemote, rtLocal);
+          setRoleFeatureTemplatesCache(rtMerged);
+          if (rtMerged) writeRoleFeatureTemplatesLocal(rtMerged);
+          setRoleTemplatesRevision((n) => n + 1);
+          const amRemote = await loadAdminModulesGlobalFromSupabase().catch(() => null);
+          const amLocal = getLocalAdminModulesGlobal();
+          const amMerged = loadAndMergeAdminModulesGlobal(amRemote, amLocal);
+          setAdminModulesGlobalCache(amMerged);
+          if (amMerged) writeAdminModulesGlobalLocal(amMerged);
+          setAdminModulesRevision((n) => n + 1);
+          const [wrSb, brSb] = await Promise.all([
+            loadWorkRulesFromSupabase().catch(() => null),
+            loadBreakRulesFromSupabase().catch(() => null),
+          ]);
+          if (wrSb) {
+            setWorkRulesState(wrSb);
+            saveWorkRules(wrSb);
+          }
+          if (brSb) setBreakRulesState(brSb);
+          setSettingsCloudLastSyncedAt(new Date().toISOString());
         } else {
           const localFlags = getLocalFeatureFlags();
           const mergedFlags = sbFlags ? { ...sbFlags, ...localFlags } : localFlags;
-            setFeatureFlagsState(mergedFlags);
-            writeFeatureFlagsToStorage(mergedFlags);
-            const rtRemote = await loadRoleFeatureTemplatesFromSupabase().catch(() => null);
-            const rtLocal = getLocalRoleFeatureTemplates();
-            const rtMerged = loadAndMergeRoleTemplates(rtRemote, rtLocal);
-            setRoleFeatureTemplatesCache(rtMerged);
-            if (rtMerged) writeRoleFeatureTemplatesLocal(rtMerged);
-            setRoleTemplatesRevision((n) => n + 1);
-            const amRemote = await loadAdminModulesGlobalFromSupabase().catch(() => null);
-            const amLocal = getLocalAdminModulesGlobal();
-            const amMerged = loadAndMergeAdminModulesGlobal(amRemote, amLocal);
-            setAdminModulesGlobalCache(amMerged);
-            if (amMerged) writeAdminModulesGlobalLocal(amMerged);
-            setAdminModulesRevision((n) => n + 1);
-            await refreshGeofenceEffectiveConfig();
-            await refreshPresenceVerificationConfig();
-            const [wrSb, brSb] = await Promise.all([
-              loadWorkRulesFromSupabase().catch(() => null),
-              loadBreakRulesFromSupabase().catch(() => null),
-            ]);
-            if (wrSb) {
-              setWorkRulesState(wrSb);
-              saveWorkRules(wrSb);
-            }
-            if (brSb) setBreakRulesState(brSb);
-            const deptRemoteSrElse = await loadDepartmentsFromSupabase().catch(() => null);
-            mergeDepartmentsRemoteAfterPull(deptRemoteSrElse);
-            setSettingsCloudLastSyncedAt(new Date().toISOString());
+          setFeatureFlagsState(mergedFlags);
+          writeFeatureFlagsToStorage(mergedFlags);
+          const rtRemote = await loadRoleFeatureTemplatesFromSupabase().catch(() => null);
+          const rtLocal = getLocalRoleFeatureTemplates();
+          const rtMerged = loadAndMergeRoleTemplates(rtRemote, rtLocal);
+          setRoleFeatureTemplatesCache(rtMerged);
+          if (rtMerged) writeRoleFeatureTemplatesLocal(rtMerged);
+          setRoleTemplatesRevision((n) => n + 1);
+          const amRemote = await loadAdminModulesGlobalFromSupabase().catch(() => null);
+          const amLocal = getLocalAdminModulesGlobal();
+          const amMerged = loadAndMergeAdminModulesGlobal(amRemote, amLocal);
+          setAdminModulesGlobalCache(amMerged);
+          if (amMerged) writeAdminModulesGlobalLocal(amMerged);
+          setAdminModulesRevision((n) => n + 1);
+          await refreshGeofenceEffectiveConfig();
+          await refreshPresenceVerificationConfig();
+          const [wrSb, brSb] = await Promise.all([
+            loadWorkRulesFromSupabase().catch(() => null),
+            loadBreakRulesFromSupabase().catch(() => null),
+          ]);
+          if (wrSb) {
+            setWorkRulesState(wrSb);
+            saveWorkRules(wrSb);
           }
+          if (brSb) setBreakRulesState(brSb);
+          const deptRemoteSrElse = await loadDepartmentsFromSupabase().catch(() => null);
+          mergeDepartmentsRemoteAfterPull(deptRemoteSrElse);
+          setSettingsCloudLastSyncedAt(new Date().toISOString());
         }
 
         /* Cross-device: la revisione va controllata a ogni sync DB, non solo con pullRemoteConfig
