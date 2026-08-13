@@ -9,6 +9,10 @@ on:
 jobs:
   lint-typecheck-build:
     runs-on: ubuntu-latest
+    env:
+      # Le icone PWA sono già committate in public/: in CI non serve rigenerarle (evita dipendenza da sharp)
+      SKIP_ICON_GEN: '1'
+      NODE_OPTIONS: '--max-old-space-size=4096'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
