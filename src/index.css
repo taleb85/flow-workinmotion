@@ -2138,9 +2138,12 @@ a.border-neutral-500 {
   border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
-/* ── Riduci padding top tabella turni ── */
+/* ── Riduci padding top tabella turni ──
+   NB: il padding-bottom resta gestito da @layer utilities (spazio per la
+   barra di navigazione fissa in basso): azzerandolo qui l'ultima card
+   delle pagine (.pb-content = Home, Turni, Impostazioni, …) restava
+   nascosta dietro la bottom bar. */
 .pb-content {
-  padding-bottom: 1.5rem !important;
   padding-top: 0 !important;
 }
 
@@ -2308,12 +2311,12 @@ select:focus {
 
 /* ── Toolbar chips / groups ── */
 .ui-toolbar-group {
-  background: rgba(255, 255, 255, 0.07) !important;
+  background: transparent !important;
   border: 1px solid rgba(255, 255, 255, 0.10) !important;
 }
 .ui-toolbar-chip:not(.bg-accent),
 .ui-toolbar-tab:not(.bg-accent) {
-  background: rgba(255, 255, 255, 0.07) !important;
+  background: transparent !important;
   border: 1px solid rgba(255, 255, 255, 0.10) !important;
   color: rgba(255, 255, 255, 0.70) !important;
 }

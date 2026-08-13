@@ -1156,7 +1156,7 @@ export default memo(function Statistics() {
               </div>
             )}
             {showManagementStatsChrome && (
-              <div className="rounded-xl border border-neutral-500 border-l-4 border-l-white/30 border border-neutral-500 bg-white/7 p-5 md:p-6">
+              <div className="rounded-xl border border-neutral-500 border-l-4 border-l-white/30 border border-neutral-500 p-5 md:p-6">
                 <p className="mb-2 text-xs font-bold uppercase tracking-widest text-white/80">
                   {deptFilter === 'all' ? (tv.stats_team_hours_period ?? t.stats_total) : `TOTALE ${translateDepartmentValue(deptFilter, effectiveLanguage).toUpperCase()}`}
                 </p>
@@ -1255,7 +1255,7 @@ export default memo(function Statistics() {
                       })}
                       {/* Footer totali giornalieri su mobile */}
                       {showManagementStatsChrome && weekTotal > 0 && (
-                        <div className="flex items-center gap-1 pt-1 border-t border-white/12 mt-1 bg-white/7 rounded-lg">
+                        <div className="flex items-center gap-1 pt-1 border-t border-white/12 mt-1 rounded-lg">
                           <div className="w-[72px] shrink-0 pl-1 text-[11px] font-bold uppercase tracking-wide text-white/80">
                             {t.stats_total}
                           </div>

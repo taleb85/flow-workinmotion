@@ -32,8 +32,6 @@ import {
 } from '../utils/timesheetGridPrivacy';
 import type { User } from '../types';
 
-const ACCENT = 'var(--brand)';
-
 export type RoleFeatureTemplatesPanelVariant = 'page' | 'embedded';
 
 type Props = { variant?: RoleFeatureTemplatesPanelVariant };
@@ -796,8 +794,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
           type="button"
           disabled={saving}
           onClick={() => void handleSave()}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-md disabled:opacity-60 transition-opacity"
-          style={{ backgroundColor: ACCENT }}
+          className="bg-accent inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-md disabled:opacity-60 transition-opacity"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {t.role_templates_save_all}
@@ -1065,8 +1062,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
           type="button"
           disabled={saving}
           onClick={() => void handleSave()}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-md disabled:opacity-60 transition-opacity"
-          style={{ backgroundColor: ACCENT }}
+          className="bg-accent inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-md disabled:opacity-60 transition-opacity"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {t.role_templates_save_all}

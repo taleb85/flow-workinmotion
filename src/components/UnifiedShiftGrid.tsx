@@ -1197,7 +1197,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
             onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
-            className={`w-full flex items-center justify-center rounded-md border-l-[3px] ${accent} bg-white/[0.07] transition-colors ${g.isAbsent ? 'opacity-70' : ''} ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''}`}
+            className={`w-full flex items-center justify-center rounded-md border-l-[3px] ${accent} transition-colors ${g.isAbsent ? 'opacity-70' : ''} ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''}`}
             style={{ height: mainRowHeight, minHeight: mainRowHeight }}
           >
             {timeLabel}

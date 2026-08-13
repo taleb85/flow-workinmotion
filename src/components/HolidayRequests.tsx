@@ -465,7 +465,7 @@ export default function HolidayRequests() {
               <div className="px-5 py-4">
                 <h3 className="text-white font-semibold text-xl">{(t as Record<string, string>).my_holiday_requests ?? 'Le mie richieste'}</h3>
               </div>
-              <div className="divide-y divide-neutral-500/20 max-h-80 overflow-y-auto">
+              <div className="max-h-80 overflow-y-auto">
                 {myHolidays.length === 0 ? (
                   <p className="text-white/70 text-sm text-center py-10">{t.no_holidays_yet}</p>
                 ) : myHolidays
@@ -516,7 +516,7 @@ export default function HolidayRequests() {
                 <h3 className="text-white font-semibold text-xl">{t.pending}</h3>
                 <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/80">{pendingAll.length}</span>
               </div>
-              <div className="divide-y divide-neutral-500/20">
+              <div>
                 {pendingAll.map((h) => {
                   const u = users.find((u) => u.id === h.user_id);
                   return (
@@ -574,10 +574,10 @@ export default function HolidayRequests() {
           {/* Upcoming approved */}
           {isAdmin && uiW('ferie.list') && approvedFuture.length > 0 && (
             <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden">
-              <div className="px-4 py-3 border-b border-neutral-500">
+              <div className="px-4 py-3">
                 <h3 className="text-white font-semibold text-xl">{t.home_upcoming_holidays}</h3>
               </div>
-              <div className="divide-y divide-neutral-500/20 max-h-80 overflow-y-auto">
+              <div className="max-h-80 overflow-y-auto">
                 {approvedFuture
                   .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
                   .map((h) => {
@@ -606,11 +606,11 @@ export default function HolidayRequests() {
           {/* Rejected (admin) */}
           {isAdmin && uiW('ferie.list') && rejectedAll.length > 0 && (
             <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden">
-              <div className="px-5 py-4 border-b border-neutral-500 flex items-center justify-between">
+              <div className="px-5 py-4 flex items-center justify-between">
                 <h3 className="text-white font-semibold text-xl">{t.rejected}</h3>
                 <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-bold border border-red-200/80">{rejectedAll.length}</span>
               </div>
-              <div className="divide-y divide-neutral-500/20">
+              <div>
                 {rejectedAll
                   .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                   .map((h) => {
@@ -649,10 +649,10 @@ export default function HolidayRequests() {
           {/* Staff: my upcoming approved */}
           {!isAdmin && uiW('ferie.list') && myHolidays.filter(h => h.status === 'approved' && new Date(h.end_date) >= new Date()).length > 0 && (
             <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden">
-              <div className="px-5 py-4 border-b border-neutral-500">
+              <div className="px-5 py-4">
                 <h3 className="text-white font-semibold text-xl">{t.home_upcoming_holidays}</h3>
               </div>
-              <div className="divide-y divide-neutral-500/20">
+              <div>
                 {myHolidays
                   .filter(h => h.status === 'approved' && new Date(h.end_date) >= new Date())
                   .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())

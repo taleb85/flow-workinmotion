@@ -44,6 +44,20 @@ function fmtHM(mins: number): string {
   return h > 0 ? `${sign}${h}h${m > 0 ? m + 'm' : ''}` : `${sign}${m}m`;
 }
 
+/** Bordo sinistro = colore dello stato del turno, mappato dalle classi `border-l-*` di getCardStyle. */
+const STATUS_BORDER_COLORS: Array<[RegExp, string]> = [
+  [/emerald/, '#10b981'],        // approvato
+  [/\[#00C896\]/, '#00C896'],    // confermato (brand electric)
+  [/rose/, '#f43f5e'],           // assente
+  [/red/, '#ef4444'],            // anomalia
+  [/amber/, '#f59e0b'],          // senza timbratura / da chiudere
+  [/slate/, '#94a3b8'],          // bozza
+  [/white/, 'rgba(255,255,255,0.45)'], // in turno / da approvare / completato
+];
+function statusBorderColor(borderClass: string): string {
+  return STATUS_BORDER_COLORS.find(([re]) => re.test(borderClass))?.[1] ?? 'rgba(255,255,255,0.45)';
+}
+
 /** Esportato per anteprima admin (Cosa vede chi) — stessa UI dei turni in Home gestionale. */
 export function HomeManagementShiftCard({ e, style, isManager, onClose, onApprove, approvingId, t }: HomeManagementShiftCardProps) {
   const dateStr = e.shift.date
@@ -61,15 +75,10 @@ export function HomeManagementShiftCard({ e, style, isManager, onClose, onApprov
     <div
       className={`rounded-xl border-l-4 ${style.border}`}
       style={{
-        background: 'rgba(255, 255, 255, 0.07)',
+        background: 'transparent',
         border: '1px solid rgba(255, 255, 255, 0.10)',
-        borderLeft: `4px solid`,
-        borderLeftColor: style.border.includes('emerald') ? '#10b981'
-          : style.border.includes('[#00C896]') ? '#00C896'
-          : style.border.includes('amber') ? '#f59e0b'
-          : style.border.includes('red') ? '#ef4444'
-          : style.border.includes('rose') ? '#f43f5e'
-          : 'rgba(255,255,255,0.3)',
+        borderLeft: '4px solid',
+        borderLeftColor: statusBorderColor(style.border),
         borderRadius: 10,
         padding: '11px 12px',
         marginBottom: 7,
