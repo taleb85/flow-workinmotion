@@ -133,7 +133,7 @@ export function ProfileFormSelf({
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); if (!readOnly) onSave(e); }} className="space-y-4">
-      <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-4">
+      <div className="fluid-grid fluid-grid-2 gap-4">
         <div>
           <label className={labelClass}>
             <User className={`w-3.5 h-3.5 inline mr-1.5 ${iconMuted}`} aria-hidden />
@@ -180,7 +180,7 @@ export function ProfileFormSelf({
         />
       </div>
 
-      <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-4">
+      <div className="fluid-grid fluid-grid-2 gap-4">
         <div>
           <label className={labelClass}>
             <Shield className={`w-4 h-4 inline mr-2 ${iconMuted}`} aria-hidden />
@@ -289,7 +289,7 @@ export function ProfileFormSelf({
         )}
       </div>
 
-      <div className="grid grid-cols-1 min-[400px]:grid-cols-[7.25rem_1fr] gap-3 min-[400px]:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[7.25rem_1fr] gap-3 md:gap-4">
         <div className="min-w-0">
           <label className={labelClass}>{t.phone_prefix}</label>
           <select
@@ -734,7 +734,7 @@ export function ProfileFormAdmin({
           <AdminTimesheetGridPrivacyEditor user={user} />
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="fluid-grid fluid-grid-2 gap-4">
           <div>
             <label className={labelClass}>
               <Calendar className="w-3.5 h-3.5 inline mr-1.5 text-white/45" />
@@ -783,7 +783,7 @@ export function ProfileFormAdmin({
               ) : null}
             </div>
           ) : (
-            <div className="hidden sm:block" aria-hidden />
+            <div className="hidden md:block" aria-hidden />
           )}
         </div>
 

@@ -392,9 +392,9 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                 className="w-full flex items-center justify-center gap-2.5 rounded-2xl py-4 text-sm font-bold tracking-wide uppercase text-white transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{
                   background: isFormValid
-                    ? 'linear-gradient(135deg, rgb(0, 26, 128) 0%, #001266 100%)'
+                    ? 'rgba(255,255,255,0.12)'
                     : 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
-                  boxShadow: isFormValid ? '0 4px 20px rgba(0,26,128,0.35)' : 'none',
+                  boxShadow: isFormValid ? '0 4px 20px rgba(255,255,255,0.35)' : 'none',
                 }}
               >
                 {saving ? (

@@ -1241,10 +1241,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 .wst-employee-row td { border-top: 1px solid rgba(255,255,255,0.10) !important; }
 /* Header tabella opaco su scroll: solo vetro satinato senza colore, offusca il contenuto sottostante */
 .wst-header-scrolled { background: transparent !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
-.wst-header-scrolled th { color: rgba(255,255,255,0.75) !important; border-bottom-color: rgba(255,255,255,0.12) !important; }
+.wst-header-scrolled th { color: #ffffff !important; border-bottom-color: rgba(255,255,255,0.12) !important; }
 .wst-header-scrolled th.border-b-white { border-bottom-color: white !important; }
-.wst-header-scrolled th div { color: rgba(255,255,255,0.75) !important; }
-.wst-header-scrolled .text-accent { color: rgba(255,255,255,0.75) !important; }`}</style>
+.wst-header-scrolled th div { color: #ffffff !important; }
+.wst-header-scrolled .text-accent { color: #ffffff !important; }`}</style>
       {mode === 'planning' && (
         <style>{`
           [data-theme="dark"][data-toolbar-mode="planning"] button[class*="uppercase"][class*="tracking-wider"] {
@@ -1261,21 +1261,21 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* Toolbar sticky in tutte le viewport */}
        <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mb-3 w-full min-w-0 md:sticky md:top-[50px] md:z-50 py-2"
         data-toolbar-mode={mode}>
-        <div className="ui-toolbar-row-tight flex min-w-0 flex-1 flex-wrap items-center gap-1.5 sm:gap-2">
+        <div className="ui-toolbar-row-tight flex min-w-0 flex-1 flex-wrap items-center gap-1.5 md:gap-2">
           <div className="flex shrink-0 items-center gap-1">
             <button type="button" onClick={prevWeek} aria-label="Settimana precedente"
-              className="rounded-lg bg-white/10 px-2 py-2 sm:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-5 w-5 sm:h-4 sm:w-4" /></button>
+              className="rounded-lg bg-white/10 px-2 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-5 w-5 md:h-4 md:w-4" /></button>
             <button type="button" onClick={goToday}
-              className="rounded-lg bg-white/10 px-2.5 py-2 sm:py-1.5 text-white/60 hover:text-white transition-colors text-xs sm:text-xs font-bold uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">{t.today_btn ?? 'Oggi'}</button>
+              className="rounded-lg bg-white/10 px-2.5 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors text-xs md:text-xs font-bold uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">{t.today_btn ?? 'Oggi'}</button>
             <button type="button" onClick={nextWeek} aria-label="Settimana successiva"
-              className="rounded-lg bg-white/10 px-2 py-2 sm:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5 sm:h-4 sm:w-4" /></button>
+              className="rounded-lg bg-white/10 px-2 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5 md:h-4 md:w-4" /></button>
           </div>
           <span
-            className="flex-1 sm:flex-none min-w-0 max-w-full truncate text-sm sm:text-[11px] md:text-sm font-semibold text-white/50 tabular-nums"
+            className="flex-1 md:flex-none min-w-0 max-w-full truncate text-sm font-semibold text-white/50 tabular-nums"
             title={`${(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()} — ${(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()}`}
           >
             {(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
-            <span className="hidden min-[420px]:inline"> — {(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}</span>
+            <span className="hidden md:inline"> — {(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}</span>
           </span>
           {selectedShiftIds.size > 0 && (
             <div className="flex items-center gap-1.5 ml-auto">
@@ -1300,11 +1300,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           )}
         </div>
 
-        <div className="ui-toolbar-row-tight flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2 lg:ml-auto lg:justify-end">
+        <div className="ui-toolbar-row-tight flex min-w-0 flex-wrap items-center gap-1.5 md:gap-2 md:ml-auto md:justify-end">
           {departments.length > 1 && (
-            <div className="flex-1 sm:flex-none relative">
+            <div className="flex-1 md:flex-none relative">
               <button ref={deptTriggerRef} type="button" onClick={toggleDeptDropdown}
-                className="relative flex max-w-none sm:max-w-[min(100%,7.5rem)] items-center gap-1 truncate rounded-lg bg-white/10 py-1.5 pl-2 pr-6 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-white/60 transition-colors hover:text-white sm:px-2.5 sm:pr-7 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+                className="relative flex max-w-none md:max-w-[min(100%,7.5rem)] items-center gap-1 truncate rounded-lg bg-white/10 py-1.5 pl-2 pr-6 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-white/60 transition-colors hover:text-white md:px-2.5 md:pr-7 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                 <Filter className="h-3 w-3 shrink-0 text-white/40" aria-hidden />
                 <span className="truncate">{deptFilter ?? (t.department_filter_all ?? 'Tutti')}</span>
                 <ChevronDown className={`pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-white/40 transition-transform ${deptDropdownOpen ? 'rotate-180' : ''}`} aria-hidden />
@@ -1328,11 +1328,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               )}
             </div>
           )}
-          <div className="flex flex-1 sm:flex-none shrink-0 items-center gap-1 rounded-lg bg-white/5 p-0.5">
+          <div className="flex flex-1 md:flex-none shrink-0 items-center gap-1 rounded-lg bg-white/5 p-0.5">
             <button type="button" onClick={() => setViewMode('week')}
               className={`rounded-md px-1.5 md:px-2.5 py-1.5 text-[10px] md:text-[10px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
-              <span className="sm:hidden">{t.view_week_short ?? 'Sett.'}</span>
-              <span className="hidden sm:inline">{t.view_week ?? 'Settimana'}</span>
+              <span className="md:hidden">{t.view_week_short ?? 'Sett.'}</span>
+              <span className="hidden md:inline">{t.view_week ?? 'Settimana'}</span>
             </button>
             <button type="button" onClick={() => setViewMode('period')}
               className={`rounded-md px-1.5 md:px-2.5 py-1.5 text-[10px] md:text-[10px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'period' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
@@ -1341,12 +1341,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           </div>
 
           <button ref={periodTriggerRef} type="button" onClick={togglePeriodPopover}
-            className="flex flex-1 sm:flex-none max-w-none sm:max-w-[min(100%,11rem)] min-w-0 items-center gap-1 truncate rounded-lg bg-white/5 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/50 transition-colors hover:text-white hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+            className="flex flex-1 md:flex-none max-w-none md:max-w-[min(100%,11rem)] min-w-0 items-center gap-1 truncate rounded-lg bg-white/5 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/50 transition-colors hover:text-white hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
             <CalendarDays className="h-3 w-3 shrink-0" />
-            <span className="truncate sm:hidden">
+            <span className="truncate md:hidden">
               {format(periodStart, 'd/M', { locale })}–{format(periodEnd, 'd/M', { locale })}
             </span>
-            <span className="hidden truncate sm:inline">
+            <span className="hidden truncate md:inline">
               {format(periodStart, 'd MMM', { locale })} — {format(periodEnd, 'd MMM', { locale })}
             </span>
             <ChevronDown className="ml-0.5 h-3 w-3 shrink-0" />
@@ -1357,11 +1357,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               type="button"
               onClick={() => void handlePublishWeek()}
               aria-label={t.publish_week ?? 'Pubblica settimana'}
-              className="hidden md:flex shrink-0 items-center gap-1 rounded-lg bg-emerald-600/20 px-2 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-300 transition-colors hover:bg-emerald-600/30 sm:px-2.5"
+              className="hidden md:flex shrink-0 items-center gap-1 rounded-lg bg-emerald-600/20 px-2 py-1.5 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-emerald-300 transition-colors hover:bg-emerald-600/30 md:px-2.5"
             >
               <Send className="h-3 w-3 shrink-0" />
-              <span className="hidden min-[520px]:inline lg:hidden">Pubblica</span>
-              <span className="hidden lg:inline">{t.publish_week ?? 'Pubblica settimana'}</span>
+              <span className="hidden md:inline">{t.publish_week ?? 'Pubblica settimana'}</span>
             </button>
           )}
           {isMgmt && canFreezeWeek && (
@@ -1369,11 +1368,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               type="button"
               onClick={() => void handleFreezeWeek()}
               aria-label={t.freeze_week ?? 'Congela settimana'}
-              className="flex shrink-0 items-center gap-1 rounded-lg bg-amber-600/20 px-2 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-300 transition-colors hover:bg-amber-600/30 sm:px-2.5"
+              className="flex shrink-0 items-center gap-1 rounded-lg bg-amber-600/20 px-2 py-1.5 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-amber-300 transition-colors hover:bg-amber-600/30 md:px-2.5"
             >
               <Lock className="h-3 w-3 shrink-0" />
-              <span className="hidden min-[520px]:inline lg:hidden">Congela</span>
-              <span className="hidden lg:inline">{t.freeze_week ?? 'Congela settimana'}</span>
+              <span className="hidden md:inline">{t.freeze_week ?? 'Congela settimana'}</span>
             </button>
           )}
 
@@ -1381,10 +1379,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             type="button"
             onClick={() => void handleExportPdf()}
             aria-label="Esporta PDF"
-            className="hidden sm:flex shrink-0 items-center gap-1 rounded-lg bg-white/10 px-2 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-white/60 transition-colors hover:text-white sm:px-2.5"
+            className="hidden md:flex shrink-0 items-center gap-1 rounded-lg bg-white/10 px-2 py-1.5 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-white/60 transition-colors hover:text-white md:px-2.5"
           >
             <FileDown className="h-3 w-3 shrink-0" />
-            <span className="hidden min-[400px]:inline">PDF</span>
+            <span className="hidden md:inline">PDF</span>
           </button>
 
           {(isMgmt || canEdit) && (
@@ -1393,7 +1391,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             <button
               type="button"
               onClick={() => setActionsDrawerOpen((open) => !open)}
-              className={`hidden sm:flex shrink-0 items-center gap-1 rounded-lg bg-white/10 px-2 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-colors sm:px-2.5 ${
+              className={`hidden md:flex shrink-0 items-center gap-1 rounded-lg bg-white/10 px-2 py-1.5 text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-colors md:px-2.5 ${
  actionsDrawerOpen ? 'text-white' : 'text-white/60 hover:text-white'
  }`}
               aria-expanded={actionsDrawerOpen}
@@ -1402,7 +1400,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               title={t.actions ?? 'Azioni'}
             >
               <Menu className="h-3 w-3 shrink-0" strokeWidth={2.25} aria-hidden />
-              <span className="hidden min-[400px]:inline">{t.actions ?? 'Azioni'}</span>
+              <span className="hidden md:inline">{t.actions ?? 'Azioni'}</span>
             </button>
           </div>
 
@@ -1574,7 +1572,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* ── Period Popover ── */}
       {showPeriodPopover && createPortal(
           <div ref={periodPopoverRef}
-            className="fixed z-[10050] mt-1 rounded-2xl border border-white/10 p-3 sm:p-4 w-[calc(100vw-32px)] max-w-[340px] max-h-[85vh] overflow-y-auto"
+            className="fixed z-[10050] mt-1 rounded-2xl border border-white/10 p-3 md:p-4 w-[calc(100vw-32px)] max-w-[340px] max-h-[85vh] overflow-y-auto"
             style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', top: periodPopoverStyle.top, left: periodPopoverStyle.left, transform: 'translateX(-50%)' }}>
           <div className="flex items-center justify-between mb-3">
             <button type="button" onClick={() => setPeriodPopoverYear(y => y - 1)}
@@ -1583,7 +1581,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             <button type="button" onClick={() => setPeriodPopoverYear(y => y + 1)}
               className="rounded-lg bg-white/10 px-2 py-1 text-white/60 hover:text-white transition-colors"><ChevronRight className="h-3.5 w-3.5" /></button>
           </div>
-          <div className="grid grid-cols-3 gap-1 sm:gap-2">
+          <div className="grid grid-cols-3 gap-1 md:gap-2">
             {Array.from({ length: 12 }, (_, i) => {
               const refDate = new Date(periodPopoverYear, i, 15);
               const cfg = periodConfigForMonth(refDate);

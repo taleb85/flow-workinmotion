@@ -214,7 +214,7 @@ export default memo(function HomeManagerView({
 
           {/* ── Stats Bar ─────────────────────────────────────────────────── */}
           {uiW('home_mgmt.stats_bar') && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="fluid-grid fluid-grid-4 gap-3 mb-6">
             {[
               {
                 label: t.home_stat_in_shift,
@@ -275,7 +275,7 @@ export default memo(function HomeManagerView({
                   {dinnerNeedsClose.length}
                 </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="fluid-grid fluid-grid-2 gap-3">
                 {dinnerNeedsClose.map((e) => (
                   <div
                     key={e.shift.id}
@@ -324,7 +324,7 @@ export default memo(function HomeManagerView({
                 <h2 className="text-sm font-bold text-white">{t.home_requires_attention}</h2>
                 <span className="ml-auto text-[11px] font-bold text-red-300 bg-red-500/15 px-2 py-0.5 rounded-full border border-red-400/30">{criticalShifts.length}</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="fluid-grid fluid-grid-2 gap-3">
                 {criticalShifts.map((e) => {
                   const style = getCardStyle(e);
                   return (
@@ -351,7 +351,7 @@ export default memo(function HomeManagerView({
                   {t.home_see_all_shifts} <ArrowRight className="w-3 h-3" />
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="fluid-grid fluid-grid-2 gap-3">
                 {todayShiftsEnriched.map((e) => {
                   const style = getCardStyle(e);
                   return (
@@ -368,7 +368,7 @@ export default memo(function HomeManagerView({
           )}
 
           {/* ── Bottom grid: Reports + Holidays + KPI ─────────────────────── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="fluid-grid fluid-grid-2 gap-4">
             {/* Reports */}
             {uiW('home_mgmt.card_presenze') && (
             <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 cursor-pointer" onClick={() => onNavigateToReports?.()}>

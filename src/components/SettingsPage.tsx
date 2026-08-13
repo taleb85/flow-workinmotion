@@ -534,7 +534,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   return (
                     <div
                       key={user.id}
-                      className={`flex flex-wrap items-center justify-between gap-2 px-3 py-3 sm:px-4 ${!isActiveRow ? 'opacity-70' : ''}`}
+                      className={`flex flex-wrap items-center justify-between gap-2 px-3 py-3 md:px-4 ${!isActiveRow ? 'opacity-70' : ''}`}
                     >
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold uppercase text-white" title={user.first_name}>{user.first_name} {user.last_name ?? ''}
@@ -685,12 +685,12 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
         <div style={view === 'regole' ? { display: 'none' } : undefined}>
         <section className="mb-6">
           <div className="mb-3">
-            <div className="flex flex-row items-center gap-1.5 sm:gap-2 shrink-0 mb-2">
+            <div className="flex w-full flex-row items-stretch gap-1.5 md:gap-2 mb-2">
               {canEdit && (
                 <button
                   type="button"
                   onClick={() => setShowCreateStaff(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
                 >
                   <UserPlus className="w-3.5 h-3.5" aria-hidden />
                   {t.admin_add_employee}
@@ -700,7 +700,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 <button
                   type="button"
                   onClick={() => setShowSuspended(!showSuspended)}
-                  className="rounded-xl border border-white/30 px-2 py-1 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
+                  className="flex-1 rounded-xl border border-white/30 px-2 py-1 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
                 >
                   {showSuspended ? t.hide_suspended : t.show_suspended}
                 </button>
@@ -742,7 +742,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 return (
                   <div key={user.id} className={user.status !== 'active' ? 'opacity-60' : ''}>
                     {/* ── User row ── */}
-                    <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 gap-2">
+                    <div className="flex items-center justify-between px-3 md:px-4 py-2.5 gap-2">
                       <button
                         type="button"
                         onClick={() => canEdit && setEditingUser(user)}
@@ -1064,7 +1064,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 {teamNotifyLoading ? '…' : t.admin_notify_team_button}
               </button>
             </div>
-            <p className="text-[11px] sm:text-xs text-white/70 leading-relaxed">
+            <p className="text-[11px] md:text-xs text-white/70 leading-relaxed">
               {t.admin_notify_team_desc}
             </p>
           </div>
@@ -1208,7 +1208,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       {builtinValues.has(editingDeptValue) && (
                         <p className="text-[11px] text-white/55 leading-snug">{t.settings_dept_builtin_edit_hint}</p>
                       )}
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:flex-wrap">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-end md:flex-wrap">
                         <DepartmentColorPicker
                           value={editDeptColor}
                           onChange={setEditDeptColor}
@@ -1234,7 +1234,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                               void notifyDepartmentsChanged();
                             }
                           }}
-                          className="min-w-0 flex-1 rounded-xl border border-neutral-500 px-3 py-2 text-base text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 sm:min-w-[12rem]"
+                          className="min-w-0 flex-1 rounded-xl border border-neutral-500 px-3 py-2 text-base text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 md:min-w-[12rem]"
                         />
                         {!builtinValues.has(editingDeptValue) && (
                           <div>
@@ -1254,7 +1254,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                             </select>
                           </div>
                         )}
-                        <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+                        <div className="flex flex-wrap items-center gap-2 md:ml-auto">
                           <button
                             type="button"
                             disabled={!editDeptLabel.trim()}
@@ -1340,8 +1340,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     {t.settings_add_dept}
                   </button>
                 </div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4">
-                  <div className="shrink-0 sm:w-56">
+                <div className="flex flex-col gap-2 md:flex-row md:items-start md:gap-4">
+                  <div className="shrink-0 md:w-56">
                     <label className="block text-[11px] font-bold uppercase tracking-wider text-white/40 mb-1">
                       {t.settings_dept_permission_group}
                     </label>
@@ -1356,7 +1356,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       <option value="bar">{t.department_bar}</option>
                     </select>
                   </div>
-                  <p className="text-[11px] text-white/60 leading-snug flex-1 pt-0 sm:pt-5">
+                  <p className="text-[11px] text-white/60 leading-snug flex-1 pt-0 md:pt-5">
                     {t.settings_dept_permission_group_hint}
                   </p>
                 </div>
@@ -1374,7 +1374,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             subtitle={t.settings_violation_rules_subtitle}
             defaultOpen={false}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="fluid-grid fluid-grid-2 gap-3">
               {/* Critico */}
               <div className="rounded-xl border border-neutral-500 depth-card flex flex-col gap-3 p-4">
                 <div className="flex items-center gap-2">
@@ -1515,7 +1515,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             }
             defaultOpen={false}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="fluid-grid fluid-grid-2 gap-3">
               {breakRules.map((rule) => {
                 const isEnabled = rule.enabled !== false;
                 const toggle = () => {
@@ -1632,7 +1632,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
               {/* Template cards */}
               {shiftTemplates.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="fluid-grid fluid-grid-2 gap-2.5">
                   {shiftTemplates.map((tmpl) => {
                     const DAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
                     const isDeletingThis = shiftTemplateDeleting === tmpl.name;
@@ -1705,7 +1705,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     ? 'border-accent/25 border-l-accent'
                     : 'border-brand-deep/25 border-l-brand-deep';
                   return (
-                    <div className={`rounded-xl border-2 border-l-4 ${borderColor} bg-white/10 px-3 py-2.5`}>
+                    <div className={`rounded-xl border-2 border-l-4 ${borderColor} bg-transparent px-3 py-2.5`}>
                       <div className="flex items-center gap-1.5 mb-1">
                         <p className="text-[11px] font-bold uppercase tracking-wider text-white/40">
                           Periodo attivo
@@ -1741,7 +1741,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     </p>
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-white/10 bg-white/50 px-3 py-2.5 flex items-center justify-center">
+                  <div className="rounded-xl border border-white/10 bg-transparent px-3 py-2.5 flex items-center justify-center">
                     <p className="text-[11px] text-white/60 text-center leading-snug">
                       Nessuna modifica in bozza
                     </p>
@@ -1853,8 +1853,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
  : 'hover:opacity-90 '
  }`}
                 style={!periodDraftDirty || periodSavingCloud
-                  ? { background: 'rgba(15, 35, 90, 0.82)', color: 'rgba(255,255,255,0.35)' }
-                  : { background: '#3b82f6', color: '#ffffff', opacity: 1 }
+                  ? { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' }
+                  : { background: 'transparent', color: '#ffffff', border: '1px solid rgba(255,255,255,0.50)' }
                 }
               >
                 {periodSavingCloud ? 'Sincronizzazione…' : t.ts_save_period}
@@ -1984,14 +1984,14 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-mid/60 pointer-events-none" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white pointer-events-none" />
                   <input
                     type="email"
                     value={holidayEmailDraft}
                     onChange={(e) => setHolidayEmailDraft(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') saveHolidayEmail(); }}
                     placeholder="es. direzione@azienda.it"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-brand-mid/25 bg-white/8 text-base text-white placeholder:text-white/40 outline-none transition-colors focus:border-brand-mid focus:ring-2 focus:ring-brand-mid/20 focus:shadow-[0_0_0_3px_rgb(51_102_204/0.10)]"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-transparent bg-transparent text-base text-white placeholder:text-white/60 outline-none transition-colors focus:border-transparent focus:ring-0 focus:shadow-none"
                   />
                 </div>
                 <button
@@ -2038,7 +2038,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             defaultOpen={false}
           >
             {/* Feature flag cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <div className="fluid-grid fluid-grid-2 gap-3 mb-4">
               {FEATURE_DEFINITIONS.filter((f) => !['kiosk_active', 'staff_requests', 'unlock_with_pin'].includes(f.slug)).map((feature) => {
                 const { label: featureLabel, description: featureDescription, detailLines } = getFeatureStrings(t, feature.slug);
                 const enabled = featureFlags[feature.slug] !== false;
@@ -2061,7 +2061,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 return (
                   <div
                     key={feature.slug}
-                    className={`rounded-xl border border-neutral-500 flex h-full flex-col p-3.5 transition-colors surface-ghost-interactive hover:border-white/20 sm:p-4 active:brightness-95 ${
+                    className={`rounded-xl border border-neutral-500 flex h-full flex-col p-3.5 transition-colors surface-ghost-interactive hover:border-white/20 md:p-4 active:brightness-95 ${
                       isMaintenance && enabled ? 'border-red-500/40 bg-red-500/15' : ''
                     }`}
                   >
@@ -2077,7 +2077,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                             <p className={`text-sm font-semibold leading-tight ${
                               isMaintenance && enabled ? 'text-red-400' : 'text-white/90'
                             }`}>{featureLabel}</p>
-                            <p className="text-[11px] sm:text-xs text-white/60 mt-1 leading-snug">{featureDescription}</p>
+                            <p className="text-[11px] md:text-xs text-white mt-1 leading-snug">{featureDescription}</p>
                           </div>
                           <button
                             type="button"
@@ -2097,7 +2097,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         </div>
                         {detailLines.length > 0 && (
                           <>
-                            <button type="button" aria-expanded={detailsOpen} onClick={() => setDetailsOpen(!detailsOpen)} className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-white/70 transition-colors">
+                            <button type="button" aria-expanded={detailsOpen} onClick={() => setDetailsOpen(!detailsOpen)} className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-white transition-colors">
                               <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${detailsOpen ? 'rotate-180' : ''}`} />
                               {t.impostazioni_detail_label || 'Dettagli'}
                             </button>
@@ -2140,7 +2140,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   </p>
                 </div>
               )}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
+              <div className="fluid-grid fluid-grid-3 gap-2 mb-3">
                 <label className="flex flex-col gap-1 text-[11px] font-medium text-white/70">
                   {t.settings_geofence_lat}
                   <input
@@ -2354,7 +2354,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
 
         {/* ── Sincronizzazione cloud — in fondo alla scheda ─────────────────── */}
         {adminOnly && (
-          <div className="rounded-2xl border border-accent/25 bg-accent/[0.04] p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="rounded-2xl border border-accent/25 bg-accent/[0.04] p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex gap-3 min-w-0">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15">
                 <UploadCloud className="h-5 w-5 text-white" style={{ color: '#fff' }} aria-hidden />
@@ -2679,7 +2679,7 @@ function BreakRuleModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-4 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-4 backdrop-blur-sm md:items-center"
       onClick={onClose}
     >
       <motion.form

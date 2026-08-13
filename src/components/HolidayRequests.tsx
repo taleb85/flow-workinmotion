@@ -339,7 +339,7 @@ export default function HolidayRequests() {
                   <>
                     <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 mb-4 p-4">
                       <p className="text-white font-semibold text-sm">{u?.first_name} {u?.last_name}</p>
-                      <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                      <p className="text-xs mt-1" style={{ color: '#ffffff' }}>
                         {safeFormatDate(selectedH.start_date, 'd MMM', { locale: it })} – {safeFormatDate(selectedH.end_date, 'd MMM yyyy', { locale: it })}
                       </p>
                       {'reason' in selectedH && selectedH.reason && (
@@ -407,7 +407,7 @@ export default function HolidayRequests() {
 
             <div className="grid grid-cols-7 gap-px mb-0.5">
               {weekDays.map((d, i) => (
-                <div key={i} className="text-center text-xs font-semibold uppercase" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>{d}</div>
+                <div key={i} className="text-center text-xs font-semibold uppercase" style={{ color: '#ffffff' }}>{d}</div>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-px">

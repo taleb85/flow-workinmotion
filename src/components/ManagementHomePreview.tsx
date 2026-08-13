@@ -159,7 +159,7 @@ export default function ManagementHomePreview({
           onUiToggle={onUiToggle}
           hiddenBadge={hiddenBadge}
         >
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="fluid-grid fluid-grid-4 gap-3">
             {[
               {
                 label: t.home_stat_in_shift,
@@ -253,7 +253,7 @@ export default function ManagementHomePreview({
                 {t.home_see_all_shifts} <ArrowRight className="h-3 w-3" />
               </span>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="fluid-grid fluid-grid-2 gap-3">
               <HomeManagementShiftCard
                 e={demoJean}
                 style={styleApproved}
@@ -276,7 +276,7 @@ export default function ManagementHomePreview({
           </div>
         </WidgetChrome>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="fluid-grid fluid-grid-2 gap-4">
           <WidgetChrome
             widgetKey="home_mgmt.card_presenze"
             previewUser={previewUser}
@@ -368,7 +368,7 @@ export default function ManagementHomePreview({
   if (embedded) return body;
 
   return (
-    <div className="w-full max-w-3xl rounded-[1.75rem] border-[3px] border-slate-800 bg-transparent p-3 shadow-2xl sm:p-4)]">
+    <div className="w-full max-w-3xl rounded-[1.75rem] border-[3px] border-slate-800 bg-transparent p-3 shadow-2xl md:p-4)]">
       <p className="mb-3 text-center text-[11px] font-bold uppercase tracking-wider text-white/60">
         {tv.profile_visibility_mock_realistic_label ?? 'Anteprima — Home gestionale (dati dimostrativi)'}
       </p>

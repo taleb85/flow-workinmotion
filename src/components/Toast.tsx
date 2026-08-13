@@ -22,7 +22,7 @@ export default function Toast({ message, type = 'error', onClose }: ToastProps) 
   const isSuccess = type === 'success';
   const isError = type === 'error';
 
-  const accentColor = isSuccess ? '#22c55e' : isError ? '#ef4444' : '#3b82f6';
+  const accentColor = isSuccess ? '#22c55e' : isError ? '#ef4444' : '#ffffff';
   const Icon = isSuccess ? CheckCircle : isError ? AlertTriangle : Info;
 
   const el = (

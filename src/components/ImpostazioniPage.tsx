@@ -79,7 +79,7 @@ const FeatureCard = memo(function FeatureCard({
   const Icon = SLUG_ICONS[slug] ?? Zap;
   const hasDetails = detailLines.length > 0;
   return (
-    <div className="rounded-xl border border-neutral-500 flex h-full flex-col p-3.5 transition-colors surface-ghost-interactive hover:border-white/20 sm:p-4 active:brightness-95">
+    <div className="rounded-xl border border-neutral-500 flex h-full flex-col p-3.5 transition-colors surface-ghost-interactive hover:border-white/20 md:p-4 active:brightness-95">
       <div className="flex items-start gap-3 min-w-0">
         <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
           <Icon className="w-[18px] h-[18px] text-accent" />
@@ -88,7 +88,7 @@ const FeatureCard = memo(function FeatureCard({
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <p className="text-sm font-semibold leading-tight text-white/90">{label}</p>
-              <p className="text-[11px] sm:text-xs text-white/60 mt-1 leading-snug">{description}</p>
+              <p className="text-[11px] md:text-xs text-white mt-1 leading-snug">{description}</p>
             </div>
             <button
               type="button"
@@ -109,7 +109,7 @@ const FeatureCard = memo(function FeatureCard({
                 type="button"
                 aria-expanded={detailsExpanded}
                 onClick={onToggleDetail}
-className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-white/70 transition-colors"
+className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-white transition-colors"
               >
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${detailsExpanded ? 'rotate-180' : ''}`} />
                 {toggleDetailLabel}

@@ -79,14 +79,14 @@ function NavPreviewBar({
   const fs = size === 'fullscreen';
   const hub = size === 'hub';
   const interactive = !!onSelectTab && activeTab != null;
-  const pad = fs ? 'py-4 px-3 sm:px-5' : hub ? 'py-2 px-2 sm:px-3' : 'py-2 px-2';
-  const rowMin = fs ? 'min-h-[72px] sm:min-h-[88px]' : hub ? 'min-h-[48px] sm:min-h-[52px]' : 'min-h-[44px]';
+  const pad = fs ? 'py-4 px-3 md:px-5' : hub ? 'py-2 px-2 md:px-3' : 'py-2 px-2';
+  const rowMin = fs ? 'min-h-[72px] md:min-h-[88px]' : hub ? 'min-h-[48px] md:min-h-[52px]' : 'min-h-[44px]';
   const gap = fs ? 'gap-1.5 px-1' : hub ? 'gap-1 px-0.5' : 'gap-0.5 px-1';
-  const iconSz = fs ? 'w-7 h-7 sm:w-8 sm:h-8' : hub ? 'w-[18px] h-[18px] sm:w-5 sm:h-5' : 'w-4 h-4';
-  const labelSz = fs ? 'text-[11px] sm:text-xs' : hub ? 'text-[11px] sm:text-[11px]' : 'text-[11px]';
+  const iconSz = fs ? 'w-7 h-7 md:w-8 md:h-8' : hub ? 'w-[18px] h-[18px] md:w-5 md:h-5' : 'w-4 h-4';
+  const labelSz = fs ? 'text-[11px] md:text-xs' : hub ? 'text-[11px] md:text-[11px]' : 'text-[11px]';
   return (
     <div className={`rounded-[1.25rem] border border-neutral-500 shadow-inner ${pad}`} style={{ backgroundColor: ACCENT }}>
-      <div className={`flex justify-between items-stretch gap-1 sm:gap-2 ${rowMin}`}>
+      <div className={`flex justify-between items-stretch gap-1 md:gap-2 ${rowMin}`}>
         {tabs.map((id) => {
           const Icon = PREVIEW_TAB_ICONS[id];
           const selected = interactive && activeTab === id;
@@ -432,9 +432,9 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
         </p>
       </div>
 
-      <div className={`grid grid-cols-1 gap-6 lg:gap-8 ${previewUser ? '' : 'lg:grid-cols-12'}`}>
+      <div className={`grid grid-cols-1 gap-6 md:gap-8 ${previewUser ? '' : 'md:grid-cols-12'}`}>
         {/* Lista profili */}
-        <div className={`space-y-3 ${previewUser ? 'lg:max-w-2xl' : 'lg:col-span-4'}`}>
+        <div className={`space-y-3 ${previewUser ? 'md:max-w-2xl' : 'md:col-span-4'}`}>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
             <input
@@ -522,7 +522,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
         </div>
 
         {!previewUser && (
-        <div className="lg:col-span-8 space-y-6">
+        <div className="md:col-span-8 space-y-6">
             <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-16 text-center">
               <LayoutList className="mx-auto mb-3 h-10 w-10 text-slate-300" />
               <p className="text-sm font-medium text-white/70">
@@ -541,7 +541,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
           aria-modal="true"
           aria-labelledby="profile-visibility-fs-title"
         >
-          <header className="sticky top-0 z-[10070] safe-area-pad flex min-h-[72px] shrink-0 items-center gap-3 border-b border-slate-200/90 bg-white/90 px-4 py-3 pt-[max(12px,env(safe-area-inset-top,0px))] shadow-sm backdrop-blur-lg sm:px-5">
+          <header className="sticky top-0 z-[10070] safe-area-pad flex min-h-[72px] shrink-0 items-center gap-3 border-b border-slate-200/90 bg-white/90 px-4 py-3 pt-[max(12px,env(safe-area-inset-top,0px))] shadow-sm backdrop-blur-lg md:px-5">
             <button
               type="button"
               onClick={closePreview}
@@ -593,7 +593,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                     {tv.profile_visibility_preview_banner ?? 'Anteprima navigazione'}
                   </p>
                 </div>
-                <div className="p-3 sm:p-4 space-y-2">
+                <div className="p-3 md:p-4 space-y-2">
                   {isSelectedAdmin && (
                     <p className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] leading-snug text-amber-800">
                       {tv.profile_visibility_admin_note ??

@@ -438,7 +438,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
   const unmatched = [...new Set(rows.filter((r) => !r.userId).map((r) => r.rawName))];
 
   return (
-    <div className="rounded-2xl border border-amber-400/30 bg-amber-50 p-4 sm:p-5 space-y-4">
+    <div className="rounded-2xl border border-amber-400/30 bg-amber-50 p-4 md:p-5 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-bold text-amber-700">Importa turni storici</h2>

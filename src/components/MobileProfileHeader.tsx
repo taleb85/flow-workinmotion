@@ -142,7 +142,7 @@ export default function MobileProfileHeader({
       <div className="hidden md:flex shrink-0 items-center gap-2.5">
         {/* Status: live dot + data */}
         <span
-          className="hidden sm:inline text-[13px] font-medium whitespace-nowrap capitalize tabular-nums"
+          className="hidden md:inline text-[13px] font-medium whitespace-nowrap capitalize tabular-nums"
           style={{ color: 'rgba(255,255,255,0.60)', letterSpacing: '0.01em' }}
         >
           {dateLabel}

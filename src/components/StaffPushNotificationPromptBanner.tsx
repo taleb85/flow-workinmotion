@@ -62,7 +62,7 @@ export function StaffPushNotificationPromptBanner({ userId, effectiveLanguage: _
         </p>
         <p
           className="mt-0.5 text-[11px] leading-snug"
-          style={{ color: 'rgba(255,255,255,0.75)' }}
+          style={{ color: '#ffffff' }}
         >
           {isDenied ? t.staff_push_banner_body_denied : t.staff_push_banner_body_default}
         </p>

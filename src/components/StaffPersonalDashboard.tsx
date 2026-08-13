@@ -87,7 +87,7 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
   }
 
   return (
-    <div className="flex flex-col gap-11 pb-8 px-4 sm:px-6 max-w-5xl mx-auto">
+    <div className="flex flex-col gap-11 pb-8 px-4 md:px-6 max-w-5xl mx-auto">
       {weeks.map((week, wIdx) => {
         const weekDays = eachDayOfInterval({ start: week.start, end: week.end });
         const byDay = new Map<string, Shift[]>();
@@ -253,7 +253,7 @@ function StaffDesktopTimesheet({
   });
 
   return (
-    <div className="flex flex-col gap-11 pb-8 px-4 sm:px-6 max-w-5xl mx-auto">
+    <div className="flex flex-col gap-11 pb-8 px-4 md:px-6 max-w-5xl mx-auto">
       {weeks.map((week, wIdx) => {
         // Total hours
         let totalMins = 0;
@@ -783,7 +783,7 @@ export default function StaffPersonalDashboard({
             className="!items-start"
             label={t.language}
             action={
-              <div className="min-w-0 max-w-full sm:max-w-xs">
+              <div className="min-w-0 max-w-full md:max-w-xs">
                 <LanguageToggleGrid effectiveLanguage={effectiveLanguage} setLanguage={setLanguage} />
               </div>
             }

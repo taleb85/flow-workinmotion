@@ -88,12 +88,12 @@ function SuperAdminPinGate({ onUnlocked }: { onUnlocked: () => void }) {
           alt="FLOW"
           width={84}
           height={84}
-          style={{ objectFit: 'contain', filter: 'drop-shadow(0 0 24px rgba(0,82,255,0.65)) drop-shadow(0 0 8px rgba(0,180,255,0.40))' }}
+          style={{ objectFit: 'contain', filter: 'drop-shadow(0 0 24px rgba(255,255,255,0.65)) drop-shadow(0 0 8px rgba(255,255,255,0.40))' }}
           draggable={false}
         />
         <div className="text-center">
           <h1 className="text-lg font-bold text-white tracking-tight">Super Admin</h1>
-          <p className="text-sm mt-0.5" style={{ color: 'rgba(51,102,204,0.65)' }}>Inserisci il PIN per accedere</p>
+          <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.65)' }}>Inserisci il PIN per accedere</p>
         </div>
       </div>
 
@@ -226,7 +226,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
       name: name.trim(),
       slug: slug.trim(),
       // Branding sempre FLOW — colore e font non configurabili per sede
-      accent_color: '#6b6b6b',
+      accent_color: '#ffffff',
       plan: 'basic',
       is_active: initial?.is_active ?? true,
       logo_url: null,
@@ -330,9 +330,9 @@ export default function SuperAdminPanel() {
     const root = document.documentElement;
     const prev: Record<string, string> = {};
     const neutralVars: Record<string, string> = {
-      '--brand': '#6b6b6b',
+      '--brand': '#ffffff',
       '--brand-hover': '#003ACC',
-      '--accent': '#6b6b6b',
+      '--accent': '#ffffff',
       '--accent-hover':'#003ACC',
     };
     Object.entries(neutralVars).forEach(([k, v]) => {
@@ -610,38 +610,38 @@ function SuperAdminPanelInner() {
       <header className="sticky top-0 z-30 backdrop-blur-md border-b border-white/10"
         style={{ background: 'rgba(8, 18, 52, 0.82)', paddingTop: 'env(safe-area-inset-top)' }}
       >
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 md:px-6 md:py-4">
           <div className="flex items-center gap-2.5 min-w-0">
             <img
               src="/icon-192.png?v=3"
               alt="FLOW"
               width={36}
               height={36}
-              style={{ objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 0 8px rgba(0,82,255,0.50))' }}
+              style={{ objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.50))' }}
               draggable={false}
             />
             <div className="min-w-0">
               <h1 className="text-base font-bold text-white leading-tight truncate">Super Admin</h1>
-              <p className="text-[11px] text-[#2255BB] leading-tight hidden sm:block">Gestione sedi</p>
+              <p className="text-[11px] text-[#2255BB] leading-tight hidden md:block">Gestione sedi</p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => { setShowImport(!showImport); setShowForm(false); setEditingTenant(null); }}
-              className={`flex items-center gap-1.5 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-sm font-bold transition ${showImport ? 'bg-amber-100 text-amber-700' : 'bg-white/10 text-white/55 hover:bg-white/14 hover:text-white/90'}`}
+              className={`flex items-center gap-1.5 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-sm font-bold transition ${showImport ? 'bg-amber-100 text-amber-700' : 'bg-white/10 text-white/55 hover:bg-white/14 hover:text-white/90'}`}
             >
               <ChevronRight className="w-4 h-4 rotate-90" />
-              <span className="hidden sm:inline">Importa storico</span>
-              <span className="sm:hidden">Import</span>
+              <span className="hidden md:inline">Importa storico</span>
+              <span className="md:hidden">Import</span>
             </button>
             <button
               onClick={() => { setShowForm(true); setEditingTenant(null); setShowImport(false); }}
-              className="flex items-center gap-1.5 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-sm font-bold text-white transition"
+              className="flex items-center gap-1.5 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-sm font-bold text-white transition"
               style={{ background: '#0a0a0c' }}
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Nuova sede</span>
-              <span className="sm:hidden">Nuova</span>
+              <span className="hidden md:inline">Nuova sede</span>
+              <span className="md:hidden">Nuova</span>
             </button>
             <button
               onClick={handleLogout}
@@ -655,7 +655,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-4 sm:py-6 space-y-4"
+      <main className="mx-auto w-full max-w-7xl px-4 md:px-6 py-4 md:py-6 space-y-4"
         style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}
       >
 

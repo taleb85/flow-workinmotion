@@ -65,7 +65,7 @@ export default function TimesheetTabPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="fluid-grid fluid-grid-4 gap-2">
           {[
             { v: '4', l: t.home_stat_in_shift, b: 'border-slate-100' },
             { v: '1', l: t.home_stat_delays, b: 'border-slate-100' },
@@ -89,7 +89,7 @@ export default function TimesheetTabPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="fluid-grid fluid-grid-3 gap-2">
           <div className="rounded-xl border border-neutral-500 p-3 shadow-sm border border-slate-100" >
             <p className="text-[10px] font-bold uppercase text-white/50">{t.stats_approved_hours}</p>
             <p className="text-xl font-bold text-white">128:30</p>

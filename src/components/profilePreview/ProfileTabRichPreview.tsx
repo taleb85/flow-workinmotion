@@ -187,13 +187,13 @@ export default function ProfileTabRichPreview({
   return (
     <div className="w-full">
       <div className="rounded-xl border border-neutral-500 overflow-hidden ring-1 ring-slate-900/[0.04]">
-        <div className="border-b border-slate-200 bg-slate-50/90 px-4 py-3 sm:px-5 sm:py-3.5">
-          <h3 className="text-base font-bold tracking-tight text-white sm:text-lg">{navLabel}</h3>
-          <p className="mt-1.5 text-xs leading-relaxed text-white/70 sm:text-sm">
+        <div className="border-b border-slate-200 bg-slate-50/90 px-4 py-3 md:px-5 md:py-3.5">
+          <h3 className="text-base font-bold tracking-tight text-white md:text-lg">{navLabel}</h3>
+          <p className="mt-1.5 text-xs leading-relaxed text-white/70 md:text-sm">
             {tv.profile_visibility_mock_hint_realistic ?? tv.profile_visibility_mock_hint ?? ''}
           </p>
         </div>
-        <div className="bg-transparent app-horizontal-pad py-4 sm:py-6">
+        <div className="bg-transparent app-horizontal-pad py-4 md:py-6">
           <div className="mx-auto w-full max-w-6xl space-y-5">
             {blocks}
             <GlobalPopupsPreview 

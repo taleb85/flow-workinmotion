@@ -491,7 +491,7 @@ export default memo(function Statistics() {
               <div className="relative z-[1001] flex min-h-0 w-full min-w-0 flex-1 flex-row flex-nowrap items-center justify-start gap-2 overflow-x-auto overscroll-x-contain [scrollbar-gutter:stable]">
                 <div className="ui-toolbar-row-tight min-w-0 flex-1 md:gap-2">
                   {/* ── MOBILE: stile semplificato (PERIODO pill + ← date →) ── */}
-                  <div className="flex sm:hidden shrink-0 flex-nowrap items-center gap-2">
+                  <div className="flex md:hidden shrink-0 flex-nowrap items-center gap-2">
                     <button type="button" onClick={() => { setStatsTab('period'); setNavOffset(0); }}
                       className="h-9 inline-flex items-center px-3 rounded-2xl bg-white/20 text-white text-xs font-extrabold uppercase tracking-wider shrink-0 shadow-sm active:bg-white/30 transition-colors">
                       {t.today}
@@ -524,7 +524,7 @@ export default memo(function Statistics() {
                   </div>
 
                   {/* ── DESKTOP: toolbar originale ── */}
-                  <div className="hidden sm:flex shrink-0 flex-nowrap items-center gap-2">
+                  <div className="hidden md:flex shrink-0 flex-nowrap items-center gap-2">
                   <div className="ui-toolbar-group">
                     <button
                       type="button"
@@ -533,7 +533,7 @@ export default memo(function Statistics() {
                       style={{ color: 'rgba(255,255,255,0.80)' }}
                       aria-label={statsTab === 'current_week' ? 'Settimana precedente' : 'Periodo precedente'}
                     >
-                      <ChevronLeft className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden />
+                      <ChevronLeft className="h-3.5 w-3.5 md:h-4 md:w-4" aria-hidden />
                       <span>{t.nav_prev_abbr ?? 'Prec.'}</span>
                     </button>
                     <button
@@ -568,14 +568,14 @@ export default memo(function Statistics() {
                       aria-label={statsTab === 'current_week' ? 'Settimana successiva' : 'Periodo successivo'}
                     >
                       <span>{t.nav_next_abbr ?? 'Pros.'}</span>
-                      <ChevronRight className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden />
+                      <ChevronRight className="h-3.5 w-3.5 md:h-4 md:w-4" aria-hidden />
                     </button>
                   </div>
                   <div
-                    className="ui-toolbar-chip shrink-0 max-w-full min-w-0 cursor-default select-none font-bold !px-3 !h-9 lg:!h-10 !text-xs lg:!text-sm"
+                    className="ui-toolbar-chip shrink-0 max-w-full min-w-0 cursor-default select-none font-bold !px-3 !h-9 md:!h-10 !text-xs md:!text-sm"
                     role="status"
                   >
-                    <Calendar className="h-3.5 w-3.5 lg:h-4 lg:w-4 shrink-0 text-white/50" aria-hidden />
+                    <Calendar className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0 text-white/50" aria-hidden />
                     <span className="min-w-0 truncate tabular-nums">
                       {statsTab === 'current_week' ? (
                         <>
@@ -599,8 +599,8 @@ export default memo(function Statistics() {
 
               {/* PDF + Filtro reparto — lato destro (renderizzato solo se c'è almeno un'azione disponibile) */}
               {((showManagementStatsChrome && isFeatureEnabled(currentUser, 'export_pdf')) || (isAdmin && departments.length > 0)) && (
-              <div className="flex w-full min-w-0 shrink-0 flex-wrap items-center justify-end sm:w-auto sm:flex-nowrap md:contents">
-                <div className="relative flex min-h-9 w-full min-w-0 items-center justify-end gap-1 sm:w-auto md:ml-auto lg:min-h-10">
+              <div className="flex w-full min-w-0 shrink-0 flex-wrap items-center justify-end md:w-auto md:flex-nowrap md:contents">
+                <div className="relative flex min-h-9 w-full min-w-0 items-center justify-end gap-1 md:w-auto md:ml-auto md:min-h-10">
                   {showManagementStatsChrome && isFeatureEnabled(currentUser, 'export_pdf') && (
                     <div className="ui-toolbar-group">
                       <button
@@ -611,8 +611,8 @@ export default memo(function Statistics() {
                         title={t.download_pdf}
                         aria-label={t.download_pdf}
                       >
-                        <FileDown className="h-3 w-3 lg:h-3.5 lg:w-3.5 shrink-0" aria-hidden />
-                        <span className="hidden sm:inline">{t.download_pdf}</span>
+                        <FileDown className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" aria-hidden />
+                        <span className="hidden md:inline">{t.download_pdf}</span>
                       </button>
                     </div>
                   )}
@@ -627,11 +627,11 @@ export default memo(function Statistics() {
  } ${deptFilter !== 'all' ? 'font-extrabold' : ''} active:bg-white/15`}
                       style={!showDeptMenu ? { color: 'rgba(255,255,255,0.80)' } : {}}
                     >
-                      <Filter className="h-3 w-3 lg:h-3.5 lg:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
+                      <Filter className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
                       <span className="max-w-[80px] truncate">
                         {deptFilter === 'all' ? 'Reparti' : translateDepartmentValue(deptFilter, effectiveLanguage)}
                       </span>
-                      <ChevronDown className={`h-3 w-3 lg:h-3.5 lg:w-3.5 text-white/45 transition-transform ${showDeptMenu ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`h-3 w-3 md:h-3.5 md:w-3.5 text-white/45 transition-transform ${showDeptMenu ? 'rotate-180' : ''}`} />
                     </button>
                     </div>
 
@@ -644,7 +644,7 @@ export default memo(function Statistics() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 4, scale: 0.95 }}
                             transition={{ duration: 0.1 }}
-                            className="hidden lg:block absolute right-0 top-full z-[300] mt-1 w-48 rounded-xl p-1 shadow-xl"
+                            className="hidden md:block absolute right-0 top-full z-[300] mt-1 w-48 rounded-xl p-1 shadow-xl"
                             style={{
                               background: 'var(--bg-popover-solid, rgb(21, 40, 72))',
                               color: '#f1f5f9',
@@ -678,7 +678,7 @@ export default memo(function Statistics() {
                           </motion.div>
 
                           {/* Mobile Modal */}
-                          <div className="lg:hidden">
+                          <div className="md:hidden">
                             <CenteredModalPortal
                               open={showDeptMenu}
                               onClose={() => setShowDeptMenu(false)}
@@ -745,7 +745,7 @@ export default memo(function Statistics() {
                 {tv.stats_export_csv ?? 'Export CSV'}
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div className="fluid-grid fluid-grid-4 gap-3">
               <div
                 className="rounded-2xl border border-white/12 px-3 py-3"
                 style={{ background: 'rgba(255,255,255,0.06)' }}
@@ -881,7 +881,7 @@ export default memo(function Statistics() {
           <div className="mb-8 md:mb-6">
 
             {/* ── MOBILE: header totale + scheda per ogni settimana ── */}
-            <div className="sm:hidden flex flex-col gap-3">
+            <div className="md:hidden flex flex-col gap-3">
               {/* Totale periodo */}
               <div className="rounded-xl border border-neutral-500 overflow-hidden border-l-4 border-l-white/30 border border-neutral-500 flex items-center justify-between px-5 py-4">
                 <p className="text-xs font-bold uppercase tracking-widest text-white/80">
@@ -948,8 +948,8 @@ export default memo(function Statistics() {
             </div>
 
             {/* ── DESKTOP: card unica con tabella (invariato) ── */}
-            <div className="hidden sm:block rounded-xl border border-neutral-500 overflow-hidden border-l-4 border-l-white/30 border border-neutral-500">
-              <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6">
+            <div className="hidden md:block rounded-xl border border-neutral-500 overflow-hidden border-l-4 border-l-white/30 border border-neutral-500">
+              <div className="flex items-center justify-between gap-3 px-5 py-4 md:px-6">
                 <p className="text-xs font-bold uppercase tracking-widest text-white/80">
                   {t.stats_your_hours_in_range}
                 </p>
@@ -1038,7 +1038,7 @@ export default memo(function Statistics() {
             {showManagementStatsChrome && (
               <div className="rounded-xl border border-neutral-500 overflow-hidden border-l-4 border-l-white/30 border border-neutral-500">
                 {/* Intestazione totale */}
-                <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6">
+                <div className="flex items-center justify-between gap-3 px-5 py-4 md:px-6">
                   <p className="text-xs font-bold uppercase tracking-widest text-white/80">
                     {tv.stats_mgmt_personal_hours_period ?? t.stats_your_hours_in_range}
                   </p>
@@ -1057,7 +1057,7 @@ export default memo(function Statistics() {
                       return (
                         <div key={`self-${w.key}`} className="border-b border-white/10 last:border-0">
                           {/* ── Mobile: layout fisso senza scroll ── */}
-                          <div className="sm:hidden px-3 py-2">
+                          <div className="md:hidden px-3 py-2">
                             <div className="flex items-center justify-between mb-1.5">
                               <span className="text-[11px] font-bold uppercase tracking-wide text-white/70">
                                 {format(clampedStart, 'dd/MM')} → {format(clampedEnd, 'dd/MM')}
@@ -1091,7 +1091,7 @@ export default memo(function Statistics() {
                             </div>
                           </div>
                           {/* ── Desktop: tabella scrollabile ── */}
-                          <div className="hidden sm:block overflow-x-auto [-webkit-overflow-scrolling:touch]">
+                          <div className="hidden md:block overflow-x-auto [-webkit-overflow-scrolling:touch]">
                             <table className="w-full border-collapse table-fixed" style={{ minWidth: `${weekDays.length * 72 + 130}px` }}>
                               <colgroup>
                                 <col style={{ width: '120px' }} />
@@ -1156,7 +1156,7 @@ export default memo(function Statistics() {
               </div>
             )}
             {showManagementStatsChrome && (
-              <div className="rounded-xl border border-neutral-500 border-l-4 border-l-white/30 border border-neutral-500 bg-white/7 p-5 sm:p-6">
+              <div className="rounded-xl border border-neutral-500 border-l-4 border-l-white/30 border border-neutral-500 bg-white/7 p-5 md:p-6">
                 <p className="mb-2 text-xs font-bold uppercase tracking-widest text-white/80">
                   {deptFilter === 'all' ? (tv.stats_team_hours_period ?? t.stats_total) : `TOTALE ${translateDepartmentValue(deptFilter, effectiveLanguage).toUpperCase()}`}
                 </p>
@@ -1166,7 +1166,7 @@ export default memo(function Statistics() {
               </div>
             )}
             {!hasDataInRange ? (
-              <div className="rounded-xl border border-neutral-500 flex flex-col items-center gap-3 p-8 text-center sm:p-10">
+              <div className="rounded-xl border border-neutral-500 flex flex-col items-center gap-3 p-8 text-center md:p-10">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
                   <Calendar className="h-6 w-6 text-white/25" />
                 </div>
@@ -1186,7 +1186,7 @@ export default memo(function Statistics() {
                 return (
                   <div key={w.key} className="overflow-hidden rounded-2xl" style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 4px 16px -4px rgba(0,0,0,0.35)' }}>
                     {/* Intestazione settimana */}
-                    <div className="px-4 py-2.5 sm:px-5 border-b border-white/12 bg-white/5 flex items-center justify-between gap-3">
+                    <div className="px-4 py-2.5 md:px-5 border-b border-white/12 bg-white/5 flex items-center justify-between gap-3">
                       <p className="text-xs font-bold uppercase tracking-[0.15em] text-white/80">{w.label}</p>
                       {showManagementStatsChrome && weekTotal > 0 && (
                         <span className="tabular-nums text-sm font-extrabold text-white/80">
@@ -1195,7 +1195,7 @@ export default memo(function Statistics() {
                       )}
                     </div>
                     {/* ── Mobile: layout compatto senza scroll ── */}
-                    <div className="sm:hidden px-3 pb-3 pt-1 space-y-1.5">
+                    <div className="md:hidden px-3 pb-3 pt-1 space-y-1.5">
                       {/* Header giorni (fisso per tutte le righe) */}
                       <div className="flex items-center gap-1">
                         <div className="w-[72px] shrink-0" />
@@ -1288,7 +1288,7 @@ export default memo(function Statistics() {
                       )}
                     </div>
                     {/* ── Desktop: tabella scrollabile ── */}
-                    <div className="hidden sm:block overflow-x-auto [-webkit-overflow-scrolling:touch]">
+                    <div className="hidden md:block overflow-x-auto [-webkit-overflow-scrolling:touch]">
                       <table className="w-full border-collapse table-fixed" style={{ minWidth: `${weekDays.length * 72 + 140}px` }}>
                         <colgroup>
                           <col style={{ width: '130px' }} />

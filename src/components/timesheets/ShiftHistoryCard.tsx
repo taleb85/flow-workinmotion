@@ -71,7 +71,7 @@ export function ShiftHistoryCard({
   };
 
   return (
-    <div className="border-b border-white/10 p-3 sm:p-5">
+    <div className="border-b border-white/10 p-3 md:p-5">
       <div className="overflow-hidden rounded-xl border-2 border-amber-400/50 bg-amber-500/10 shadow-sm">
         <button
           type="button"

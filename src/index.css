@@ -11,6 +11,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── GRIGLIE FLUIDE ────────────────────────────────────────────────
+   Un solo breakpoint (md: 768px). Dentro i layout: flex + % + clamp()
+   così le card si ridimensionano e vanno a capo senza salti di colonne.
+   `.fluid-grid-N` imposta la base fluida sui figli diretti (`> *`). */
+@layer components {
+  .fluid-grid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .fluid-grid-2 > * { flex: 1 1 clamp(14rem, 48%, 100%); }
+  .fluid-grid-3 > * { flex: 1 1 clamp(12rem, 31%, 100%); }
+  .fluid-grid-4 > * { flex: 1 1 clamp(9rem, 23%, 100%); }
+}
+
 /* Fix iOS: disabilita highlight nativo, abilita cursor */
 button,
 [role="button"] {
@@ -97,11 +111,11 @@ body {
 @layer base {
   :root {
     --gray-dark: #1a1a1a;
-    --gray-medium: #525252;
-    --gray-light: #6b6b6b;
+    --gray-medium: #ffffff;
+    --gray-light: #ffffff;
     --gray-lighter: #f1f5f9;
-    --flow-blue:     #6b6b6b;
-    --flow-slate:    #6b6b6b;
+    --flow-blue:     #ffffff;
+    --flow-slate:    #ffffff;
     --flow-border:   rgba(255, 255, 255, 0.15);
     --flow-bg-light: rgba(255, 255, 255, 0.06);
     --brand: #10b981;
@@ -139,16 +153,16 @@ body {
     --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05);
     --shadow-card-accent: 0 4px 16px -4px rgb(107 107 107 / 0.14), 0 2px 8px -4px rgb(15 23 42 / 0.08);
     --text-dark: #1a1a1a;
-    --text-secondary: #525252;
-    --text-muted: #6b6b6b;
+    --text-secondary: #ffffff;
+    --text-muted: #ffffff;
     --text-on-dark-bg: #e2e8f0;
     --text-on-glass: #ffffff;
     --text-on-glass-secondary: rgba(255, 255, 255, 0.65);
     --text-shift-time: #ffffff;
-    --deep-blue: #525252;
-    --deep-blue-hover: #6b6b6b;
-    --cyan-action: #9c9c9c;
-    --slate-neutral: #6b6b6b;
+    --deep-blue: #ffffff;
+    --deep-blue-hover: #ffffff;
+    --cyan-action: #ffffff;
+    --slate-neutral: #ffffff;
     
     /* ═══ DARK THEME GLOBAL TOKENS ═══ */
     --bg-primary: #0a0a0a;
@@ -158,11 +172,11 @@ body {
     /** Menu/popover su `body` (portal): stessa tinta senza alpha così testo e righe restano leggibili sulla griglia sotto. */
     --bg-popover-solid: rgb(10, 10, 10);
     --bg-surface-secondary: transparent;
-    --border-color: #525252;
+    --border-color: rgba(255, 255, 255, 0.15);
     --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.75);
-    --text-muted: rgba(255, 255, 255, 0.50);
-    --accent-blue: #6b6b6b;
+    --text-secondary: #ffffff;
+    --text-muted: #ffffff;
+    --accent-blue: #ffffff;
     --accent-green: #10b981;
     --accent-red: #ef4444;
     --accent-yellow: #f59e0b;
@@ -188,7 +202,7 @@ body {
   }
 
   /**
-   * Telefono (larghezza &lt; 640px, come Tailwind `sm:`): in modalità "comodo" non
+   * Telefono (larghezza &lt; 640px, come Tailwind `md:`): in modalità "comodo" non
    * allargare i margini orizzontali (tablet/desktop restano a 1.5rem).
    */
   html[data-layout-effective='comfortable'][data-viewport-class='phone'] {
@@ -282,7 +296,7 @@ body {
   .panel input,
   .panel textarea,
   .panel select {
-    background: rgba(15, 35, 90, 0.82);
+    background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.22);
     color: #ffffff;
   }
@@ -316,7 +330,7 @@ body {
    * Per contenuto in pagina usare `.surface-ghost` (+ `.surface-ghost-interactive` se cliccabile).
    */
   .card-factorial {
-    @apply bg-white rounded-2xl border border-slate-100 p-5 sm:p-6 transition-all duration-200;
+    @apply bg-white rounded-2xl border border-slate-100 p-5 md:p-6 transition-all duration-200;
     box-shadow:
       inset 0 1.5px 0 rgba(255,255,255,0.90),
       inset 0 -2px 8px rgba(0,0,0,0.04),
@@ -432,7 +446,7 @@ body {
     z-index: 0;
   }
   .liquid-glass:hover {
-    background: rgba(15, 35, 90, 0.82);
+    background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.22);
   }
   .liquid-glass-green {
@@ -519,7 +533,7 @@ body {
   .ui-toolbar-group {
     @apply flex h-[22px] items-center gap-0 overflow-hidden rounded-lg shadow-sm;
     @apply divide-x divide-white/15;
-    background: rgba(15, 35, 90, 0.82);
+    background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.18);
     box-shadow: none;
   }
@@ -563,7 +577,7 @@ body {
   /** Chip toolbar (filtri turni, ecc.) — dark glass */
   .ui-toolbar-chip {
     @apply inline-flex h-[22px] items-center justify-center gap-1 rounded-lg px-2 text-center text-[13px] font-medium leading-none transition-colors;
-    background: rgba(15, 35, 90, 0.82);
+    background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.18);
     color: rgba(255, 255, 255, 0.85);
     box-shadow: none;
@@ -591,7 +605,7 @@ body {
     @apply inline-flex h-[22px] items-center justify-center gap-1.5 rounded-lg px-2.5 text-center text-[13px] font-semibold leading-none shadow-none transition-colors;
     background: transparent !important;
     border: 1.5px solid rgba(255, 255, 255, 0.50) !important;
-    color: rgba(255, 255, 255, 0.75);
+    color: #ffffff;
   }
   .ui-toolbar-outline:hover {
     background: rgba(255, 255, 255, 0.04) !important;
@@ -603,27 +617,27 @@ body {
    */
   .ui-toolbar-row {
     @apply box-border flex min-h-[22px] max-w-full items-center gap-2;
-    @apply max-sm:flex-wrap max-sm:gap-y-2.5;
-    @apply sm:h-[22px] sm:max-h-[22px] sm:flex-nowrap sm:overflow-x-auto-safe;
+    @apply max-md:flex-wrap max-md:gap-y-2.5;
+    @apply md:h-[22px] md:max-h-[22px] md:flex-nowrap md:overflow-x-auto-safe;
   }
 
   /** Gruppo compatto (sinistra/destra Turni, preset affiancati) */
   .ui-toolbar-row-tight {
     @apply box-border flex min-h-[22px] items-center gap-1.5;
-    @apply max-sm:flex-wrap max-sm:gap-y-2.5;
-    @apply sm:h-[22px] sm:max-h-[22px] sm:flex-nowrap;
+    @apply max-md:flex-wrap max-md:gap-y-2.5;
+    @apply md:h-[22px] md:max-h-[22px] md:flex-nowrap;
   }
 
   /** Intestazione pagina (Presenze, Ore gestione) — gap ridotto per evitare “buchi” laterali tra blocchi */
   .ui-toolbar-page-band {
     @apply mb-5 box-border flex w-full min-h-[22px] max-w-full flex-col flex-wrap gap-2;
-    @apply sm:h-[22px] sm:max-h-[22px] sm:flex-row sm:flex-nowrap sm:items-center sm:gap-2 sm:overflow-x-auto-safe;
+    @apply md:h-[22px] md:max-h-[22px] md:flex-row md:flex-nowrap md:items-center md:gap-2 md:overflow-x-auto-safe;
   }
 
   /** Colonna interna preset + date */
   .ui-toolbar-page-band-inner {
     @apply flex min-h-[22px] min-w-0 flex-1 flex-col gap-2;
-    @apply sm:h-[22px] sm:max-h-[22px] sm:flex-row sm:flex-nowrap sm:items-center sm:gap-2 sm:overflow-x-auto-safe;
+    @apply md:h-[22px] md:max-h-[22px] md:flex-row md:flex-nowrap md:items-center md:gap-2 md:overflow-x-auto-safe;
   }
 
   /**
@@ -640,24 +654,24 @@ body {
   .ui-toolbar-page-band-presences {
     @apply mb-5 box-border flex w-full min-h-0 max-w-full flex-col flex-wrap gap-2.5;
     /* lg+ : due colonne affiancate; sm–md tablet resta colonna → niente sovrapposizione con “DA / Salva” */
-    @apply lg:flex-row lg:flex-nowrap lg:items-center lg:gap-3 lg:overflow-x-auto-safe;
+    @apply md:flex-row md:flex-nowrap md:items-center md:gap-3 md:overflow-x-auto-safe;
   }
 
   .ui-toolbar-page-band-presences .ui-toolbar-row-tight {
     @apply min-h-9 items-center justify-start gap-1;
-    /* Sotto lg: può andare a capo (tablet/phone); desktop compatto su una riga */
-    @apply max-lg:flex-wrap max-lg:gap-y-1.5;
-    @apply lg:h-10 lg:max-h-10 lg:flex-nowrap;
+    /* Sotto md: può andare a capo (tablet/phone); desktop compatto su una riga */
+    @apply max-md:flex-wrap max-md:gap-y-1.5;
+    @apply md:h-10 md:max-h-10 md:flex-nowrap;
   }
 
   .ui-toolbar-page-band-presences .ui-toolbar-group {
-    @apply flex h-9 lg:h-10 items-stretch gap-0 overflow-hidden rounded-xl shadow-sm;
+    @apply flex h-9 md:h-10 items-stretch gap-0 overflow-hidden rounded-xl shadow-sm;
     @apply divide-x divide-white/20;
     background: rgba(255, 255, 255, 0.20);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.28);
-    box-shadow: 0 1px 4px -1px rgba(0, 82, 255, 0.08);
+    box-shadow: 0 1px 4px -1px rgba(255, 255, 255, 0.08);
   }
   /**
    * I tab globali sono h-20px: senza override lo sfondo attivo non riempie il gruppo h-9.
@@ -676,8 +690,8 @@ body {
   }
 
   .ui-toolbar-page-band-presences .ui-toolbar-chip {
-    @apply inline-flex h-9 lg:h-10 items-center justify-center gap-1.5 rounded-xl px-3 lg:px-3.5 text-sm font-medium leading-none transition-colors;
-    background: rgba(15, 35, 90, 0.82);
+    @apply inline-flex h-9 md:h-10 items-center justify-center gap-1.5 rounded-xl px-3 md:px-3.5 text-sm font-medium leading-none transition-colors;
+    background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.18);
@@ -685,7 +699,7 @@ body {
     box-shadow: none;
   }
   .ui-toolbar-page-band-presences .ui-toolbar-accent {
-    @apply inline-flex h-9 lg:h-10 items-center justify-center gap-1.5 rounded-xl px-3 lg:px-3.5 text-sm font-semibold leading-none text-white shadow-sm transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex h-9 md:h-10 items-center justify-center gap-1.5 rounded-xl px-3 md:px-3.5 text-sm font-semibold leading-none text-white shadow-sm transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60;
     background: transparent !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
@@ -699,7 +713,7 @@ body {
   /** Riga tabella con separatore profondo (bordo + specular sotto) */
   .depth-row {
     border-bottom: 1px solid rgba(203, 213, 225, 0.70);
-    box-shadow: 0 1px 0 rgba(255,255,255,0.75);
+    box-shadow: 0 1px 0 #ffffff;
   }
   /** Sfondo pagina — trasparente per mostrare il gradiente dark globale */
   .page-depth-bg {
@@ -742,7 +756,7 @@ body {
 }
 
 /* ── Accent solido su tutti i bottoni primari ─────────────────────────── */
-[class~="bg-accent"]:not([role="switch"]):not([class*="bg-accent/"]):not([class*="bg-accent-"]) {
+[class~="bg-accent"]:not([role="switch"]) {
   background: transparent !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
@@ -755,7 +769,7 @@ body {
   -webkit-backdrop-filter: blur(16px) !important;
   border: 1.5px solid rgba(255, 255, 255, 0.50) !important;
 }
-[class~="bg-accent"]:hover:not([role="switch"]):not([class*="bg-accent/"]):not([class*="bg-accent-"]),
+[class~="bg-accent"]:hover:not([role="switch"]),
 [class~="hover:bg-accent-hover"]:hover {
   background: rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(16px) !important;
@@ -819,7 +833,7 @@ button[role="switch"][class~="bg-accent"] {
     );
   }
 
-  @media (min-width: 640px) {
+  @media (min-width: 768px) {
     .pb-content {
       padding-bottom: max(
         calc(var(--app-bottom-nav-offset, 68px) + 0.75rem),
@@ -908,9 +922,9 @@ button[role="switch"][class~="bg-accent"] {
 
 /* react-day-picker — calendario custom dark theme */
 .rdp-modern.rdp-root {
-  --rdp-accent-color: #6b6b6b;
+  --rdp-accent-color: #ffffff;
     --rdp-accent-background-color: rgba(107, 107, 107, 0.25);
-    --rdp-selected-border: 2px solid #6b6b6b;
+    --rdp-selected-border: 2px solid #ffffff;
   --rdp-day_button-border-radius: 0.5rem;
   --rdp-day-height: 2rem;
   --rdp-day-width: 2rem;
@@ -957,7 +971,7 @@ button[role="switch"][class~="bg-accent"] {
 }
 
 .rdp-modern.rdp-root .rdp-day_button:hover {
-  background: rgba(59, 130, 246, 0.25);
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
 }
 
@@ -987,9 +1001,9 @@ button[role="switch"][class~="bg-accent"] {
 }
 
 .rdp-modern.rdp-root .rdp-today:not(.rdp-selected) .rdp-day_button {
-  color: #3b82f6;
+  color: #ffffff;
   font-weight: 700;
-  box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.5);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
 }
 
 .rdp-modern.rdp-root .rdp-day_button:focus-visible {
@@ -1102,7 +1116,7 @@ html.no-motion *::after {
   white-space: nowrap;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
   .shift-time-ultra {
     font-size: 1.875rem; /* 30px mobile */
     font-weight: 700;
@@ -1135,7 +1149,7 @@ html.no-motion *::after {
 
 /* Bozza: grigio scuro leggero */
 .shift-status-draft {
-  color: #6b6b6b;
+  color: #ffffff;
   font-weight: 400;
 }
 
@@ -1359,7 +1373,7 @@ td, th {
 /* Footer text "Oh rispetto al pianificato" */
 .shift-card-ultra .text-slate-500,
 .shift-card-ultra .text-slate-600 {
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: #ffffff !important;
 }
 
 /* Approvato badge */
@@ -1393,7 +1407,7 @@ button[class*="ui-toolbar"].text-slate-600 {
 .ui-toolbar-tab.bg-accent,
 button[class*="ui-toolbar"].bg-accent,
 button[class*="bg-accent"][class*="ui-toolbar"] {
-  background: #6b6b6b !important;
+  background: rgba(255, 255, 255, 0.15) !important;
   color: #ffffff !important;
 }
 
@@ -1430,7 +1444,7 @@ button[class*="bg-accent"][class*="ui-toolbar"] {
 .surface-glass.surface-ghost-interactive,
 div.rounded-2xl.border.px-4.py-3\.5,
 .rounded-2xl.border.px-4 {
-  background: rgba(15, 35, 90, 0.82) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
   border: 1px solid rgba(255, 255, 255, 0.20) !important;
 }
 
@@ -1460,7 +1474,7 @@ div[class*="rounded-2xl"] .text-\[10px\] {
 /* KPI icon */
 .surface-glass svg,
 div[class*="rounded-2xl"] svg {
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: #ffffff !important;
 }
 
 /* ORE APPROVATE bar and secondary surfaces */
@@ -1502,7 +1516,7 @@ div[class*="rounded-2xl"] .text-slate-600 {
 /* Calendar day hover */
 .calendar-day:hover,
 [class*="calendar"] td button:hover {
-  background: rgba(59, 130, 246, 0.3) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
   color: #ffffff !important;
 }
 
@@ -1524,7 +1538,7 @@ div[class*="rounded-2xl"] .text-slate-600 {
 
 /* Today */
 .calendar-day.today {
-  background: #6b6b6b !important;
+  background: rgba(255, 255, 255, 0.15) !important;
   color: #ffffff !important;
   font-weight: 700 !important;
 }
@@ -1532,7 +1546,7 @@ div[class*="rounded-2xl"] .text-slate-600 {
 /* Week day headers */
 .calendar-header th,
 [class*="calendar"] thead th {
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: #ffffff !important;
 }
 
 /* Calendar container */
@@ -1859,7 +1873,7 @@ thead th {
 
 /* ── PATTERN SPECIFICI SELEZIONATI: bordo bianco + sfondo trasparente ── */
 [data-theme="dark"] .bg-white\/95 { background-color: rgba(13, 31, 60, 0.97) !important; }
-[data-theme="dark"] .bg-white\/90 { background-color: rgba(15, 35, 90, 0.82) !important; }
+[data-theme="dark"] .bg-white\/90 { background-color: rgba(255, 255, 255, 0.06) !important; }
 
 [data-theme="dark"] [class*="bg-white/"]:where([class*="0.04"], [class*="0.08"]) {
   background: transparent !important;
@@ -1928,8 +1942,8 @@ thead th {
 [data-theme="dark"] .divide-\[#F1F5F9\] > * + * { border-color: rgba(255, 255, 255, 0.15) !important; }
 
 /* Progress bar tracks */
-[data-theme="dark"] .bg-gray-200  { background-color: rgba(15, 35, 90, 0.82) !important; }
-[data-theme="dark"] .bg-slate-200 { background-color: rgba(15, 35, 90, 0.82) !important; }
+[data-theme="dark"] .bg-gray-200  { background-color: rgba(255, 255, 255, 0.06) !important; }
+[data-theme="dark"] .bg-slate-200 { background-color: rgba(255, 255, 255, 0.06) !important; }
 
 /* Mock / superfici light: ripristina colori Tailwind sotto [data-theme="light"] (discendente di html[data-theme="dark"]) */
 [data-theme="light"] .text-slate-900,
@@ -1977,12 +1991,12 @@ thead th {
 .ui-toolbar-pill {
   border-color: rgba(255, 255, 255, 0.22) !important;
   color: rgba(255, 255, 255, 0.85) !important;
-  background: rgba(15, 35, 90, 0.82) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
 }
 
 /* ui-toolbar-group-muted dark */
 .ui-toolbar-group-muted {
-  background: rgba(15, 35, 90, 0.82) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
   border-color: rgba(255, 255, 255, 0.22) !important;
 }
 .ui-toolbar-group-muted > * + * {
@@ -2023,7 +2037,7 @@ thead th {
 }
 
 /* Safe area mobile ultra */
-@media (max-width: 640px) {
+@media (max-width: 767px) {
   .shift-mobile-ultra {
     padding-left: max(1.5rem, env(safe-area-inset-left));
     padding-right: max(1.5rem, env(safe-area-inset-right));
@@ -2036,7 +2050,7 @@ html[data-theme="dark"] body {
 }
 
 /* Desktop: superfici vetro meno trasparenti (leggibilità su wave) */
-@media (min-width: 1000px) {
+@media (min-width: 768px) {
   .surface-glass,
   [class*='surface-glass'] {
     background: rgba(50, 90, 170, 0.45) !important;
@@ -2050,7 +2064,7 @@ html[data-theme="dark"] body {
   }
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 768px) {
   [class*='kpi'],
   [class*='stat-card'] {
     background: rgba(255, 255, 255, 0.16);
@@ -2058,12 +2072,12 @@ html[data-theme="dark"] body {
 
   [class*='shift-card'],
   [class*='ShiftCard'] {
-    background: rgba(15, 35, 90, 0.82);
+    background: rgba(255, 255, 255, 0.06);
   }
 
   [class*='grid-cell'],
   [class*='GridCell'] {
-    background: rgba(15, 35, 90, 0.82);
+    background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
 }
@@ -2082,7 +2096,7 @@ html[data-theme="dark"] body {
   --bg-surface-secondary:  rgba(20, 20, 20, 0.45);
   --surface:               rgba(20, 20, 20, 0.55);
   --surface-card:          rgba(20, 20, 20, 0.60);
-  --border-color:          #525252;
+  --border-color:          rgba(255, 255, 255, 0.15);
   --app-bg:                #0a0a0a;
 
   --text-primary:         rgba(255, 255, 255, 0.97);
@@ -2133,7 +2147,7 @@ a.border-neutral-500 {
 /* ── Bordi slate → bianco semi-trasparente ── */
 .border-slate-50, .border-slate-100, .border-slate-200, .border-slate-300, .border-slate-400,
 .divide-slate-50 > * + *, .divide-slate-100 > * + *, .divide-slate-200 > * + * {
-  border-color: #525252 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 /* ── scrollbar nascosta ── */
@@ -2169,7 +2183,7 @@ a.border-neutral-500 {
 .modal-glass-panel .bg-slate-50,
 .modal-glass-panel [class*="bg-slate-"] {
   background: rgba(255, 255, 255, 0.09) !important;
-  border-color: #525252 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
   color: rgba(255, 255, 255, 0.90) !important;
 }
 .modal-glass-panel .bg-slate-100:hover,
@@ -2191,13 +2205,13 @@ a.border-neutral-500 {
 
 .liquid-glass {
   background: rgba(10, 10, 10, 0.60) !important;
-  border: 1px solid #525252 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
 }
 
 .surface-ghost-sm {
-  border: 1px solid #525252 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 
 .surface-ghost-interactive:hover {
@@ -2227,7 +2241,7 @@ body .bg-gray-300:not(input):not(textarea):not(select) {
 input.bg-slate-100, input.bg-slate-200,
 select.bg-slate-100, select.bg-slate-200 {
   background: rgba(255, 255, 255, 0.09) !important;
-  border-color: #525252 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
   color: #fff !important;
 }
 
@@ -2272,15 +2286,15 @@ input[type="url"],
 textarea,
 select {
   background: rgba(255, 255, 255, 0.16) !important;
-  border: 1px solid #525252 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   color: rgba(255, 255, 255, 0.9) !important;
 }
 input:focus,
 textarea:focus,
 select:focus {
-  background: rgba(10, 10, 10, 0.82) !important;
-  border-color: rgba(107, 107, 107, 0.6) !important;
-  box-shadow: 0 0 0 3px rgba(107, 107, 107, 0.15) !important;
+  background: transparent !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.10) !important;
 }
 
 /* ── Section labels ── */

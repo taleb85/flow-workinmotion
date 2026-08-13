@@ -111,7 +111,7 @@ export default function AdminPanel() {
           )}
         </AnimatePresence>
 
-        <div className={`grid gap-4 mb-8 ${adminOnly ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-1'}`}>
+        <div className={`fluid-grid gap-4 mb-8 ${adminOnly ? 'fluid-grid-4' : ''}`}>
           {adminOnly && (
             <>
               <button onClick={handleImportClick} className="bg-black/15 backdrop-blur-xl rounded-[24px] p-5 border-2 border-white/30 hover:bg-black/25 transition-colors active:bg-black/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">

@@ -41,6 +41,7 @@ const baseEn: Record<string, string> = {
   settings_delegated_view_title: 'Employee profile',
   settings_delegated_empty_list: 'No operational staff to show.',
   settings_title: 'Settings',
+  admin_tab_profiles: 'Profiles',
   hide_suspended: 'Hide suspended',
   show_suspended: 'Show suspended',
   status_active: 'Active',

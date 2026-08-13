@@ -46,7 +46,7 @@ export function LayoutPresetProvider({ children }: { children: ReactNode }) {
   }, [effective, viewportClass]);
 
   /** Quando il viewport è "phone" in orizzontale, disabilita i media query Tailwind
-   *  che attiverebbero layout da tablet/desktop (md: e lg:). In questo modo la
+   *  che attiverebbero layout da tablet/desktop (md: e md:). In questo modo la
    *  grafica rimane quella mobile ma si adatta a tutta la larghezza disponibile. */
   useEffect(() => {
     const isLandscapePhone = viewportClass === 'phone' && isLandscape;

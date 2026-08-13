@@ -88,6 +88,7 @@ const baseFr: Record<string, string> = {
     'Revue terminée sans congélation. Vous pouvez congeler depuis la fiche de chaque shift.',
   // Override key French strings from baseIt
   settings_title: 'Paramètres',
+  admin_tab_profiles: 'Profils',
   settings_delegated_intro:
     'Gérez le personnel opérationnel : fiches, ajout, suspension ou réactivation (« Afficher suspendus »). Pour le reste, contactez un administrateur.',
   settings_delegated_view_profile: 'Fiche',

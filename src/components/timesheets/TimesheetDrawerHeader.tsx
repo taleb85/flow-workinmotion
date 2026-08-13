@@ -154,14 +154,14 @@ export function TimesheetDrawerHeader({
 
   return (
     <div className={`border-l-4 ${border} ${bg} ${ring} shrink-0`}>
-      <div className="px-4 pt-2.5 pb-2 sm:px-5 sm:pt-3 sm:pb-2.5">
-        {/* Riga 1: nome + (sm: azioni) + nav/close */}
+      <div className="px-4 pt-2.5 pb-2 md:px-5 md:pt-3 md:pb-2.5">
+        {/* Riga 1: nome + (md: azioni) + nav/close */}
         <div className="flex items-center gap-2">
-          <h3 className="min-w-0 flex-1 truncate text-[13px] sm:text-base font-bold leading-tight text-white" title={employeeName.toUpperCase()}>{employeeName.toUpperCase()}
+          <h3 className="min-w-0 flex-1 truncate text-[13px] md:text-base font-bold leading-tight text-white" title={employeeName.toUpperCase()}>{employeeName.toUpperCase()}
           </h3>
           
           {/* Bottoni azione: visibili su sm+, su mobile nella riga 3 */}
-          <div className="hidden sm:flex shrink-0 items-center gap-2">
+          <div className="hidden md:flex shrink-0 items-center gap-2">
             {/* Segna: non ha lavorato */}
             {canMarkAbsent && (
               <button
@@ -176,7 +176,7 @@ export function TimesheetDrawerHeader({
                 ) : (
                   <UserX className="w-3.5 h-3.5" />
                 )}
-                <span className="hidden sm:inline">{t.shift_mark_absent}</span>
+                <span className="hidden md:inline">{t.shift_mark_absent}</span>
               </button>
             )}
             
@@ -207,7 +207,7 @@ export function TimesheetDrawerHeader({
           </div>
           
           {/* Nav + Close — sempre visibili, ridotti su mobile */}
-          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+          <div className="flex shrink-0 items-center gap-0.5 md:gap-1">
             {/* Navigazione review day (↑↓) o contestuale (←→) */}
             {(!drawerReviewQueue || drawerReviewQueue.reviewScope === 'day') && (
               <>
@@ -218,7 +218,7 @@ export function TimesheetDrawerHeader({
                       type="button"
                       disabled={!navigationReviewDay.canPrev}
                       onClick={() => navigationReviewDay.onNavigate(-1)}
-                      className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl p-0 transition-colors hover:bg-accent/10 disabled:opacity-30 active:bg-accent/80"
+                      className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-xl p-0 transition-colors hover:bg-accent/10 disabled:opacity-30 active:bg-accent/80"
                       aria-label={t.nav_up || t.prev}
                     >
                       <ChevronUp className="h-4 w-4 text-white/70" />
@@ -227,7 +227,7 @@ export function TimesheetDrawerHeader({
                       type="button"
                       disabled={!navigationReviewDay.canNext}
                       onClick={() => navigationReviewDay.onNavigate(1)}
-                      className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl p-0 transition-colors hover:bg-accent/10 disabled:opacity-30 active:bg-accent/80"
+                      className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-xl p-0 transition-colors hover:bg-accent/10 disabled:opacity-30 active:bg-accent/80"
                       aria-label={t.nav_down || t.next}
                     >
                       <ChevronDown className="h-4 w-4 text-white/70" />
@@ -242,7 +242,7 @@ export function TimesheetDrawerHeader({
                       type="button"
                       disabled={!navigation.canPrev}
                       onClick={() => navigation.onNavigate(-1)}
-                      className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl p-0 transition-colors hover:bg-accent/10 disabled:opacity-30 active:bg-accent/80"
+                      className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-xl p-0 transition-colors hover:bg-accent/10 disabled:opacity-30 active:bg-accent/80"
                       aria-label={t.nav_prev || t.prev}
                     >
                       <ChevronLeft className="h-4 w-4 text-white/70" />
@@ -251,7 +251,7 @@ export function TimesheetDrawerHeader({
                       type="button"
                       disabled={!navigation.canNext}
                       onClick={() => navigation.onNavigate(1)}
-                      className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl p-0 transition-colors hover:bg-accent/10 disabled:opacity-30 active:bg-accent/80"
+                      className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-xl p-0 transition-colors hover:bg-accent/10 disabled:opacity-30 active:bg-accent/80"
                       aria-label={t.nav_next || t.next}
                     >
                       <ChevronRight className="h-4 w-4 text-white/70" />
@@ -264,7 +264,7 @@ export function TimesheetDrawerHeader({
             <button
               type="button"
               onClick={handleClose}
-              className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl p-0 transition-colors hover:bg-accent/10 active:bg-accent/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-xl p-0 transition-colors hover:bg-accent/10 active:bg-accent/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               aria-label={t.close}
             >
               <X className="h-4 w-4 text-white/70" />
@@ -273,11 +273,11 @@ export function TimesheetDrawerHeader({
         </div>
         
         {/* Riga 2: metadati — no wrap, scroll orizzontale su mobile */}
-        <div className="mt-1 flex flex-nowrap items-center gap-x-1.5 overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:gap-x-2 sm:gap-y-1">
+        <div className="mt-1 flex flex-nowrap items-center gap-x-1.5 overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:flex-wrap md:gap-x-2 md:gap-y-1">
           <span className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-white/55">
             <Calendar className="h-3 w-3 shrink-0" />
-            <span className="sm:hidden">{safeFormatDate(dateStr, 'EEE d MMM', { locale })}</span>
-            <span className="hidden sm:inline">{safeFormatDate(dateStr, 'EEE d MMM yyyy', { locale })}</span>
+            <span className="md:hidden">{safeFormatDate(dateStr, 'EEE d MMM', { locale })}</span>
+            <span className="hidden md:inline">{safeFormatDate(dateStr, 'EEE d MMM yyyy', { locale })}</span>
           </span>
           <span className="shrink-0 text-white/30">·</span>
           <span className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-white/55">
@@ -302,7 +302,7 @@ export function TimesheetDrawerHeader({
         
         {/* Riga 3 (solo mobile): bottoni azione visibili su sm+ nella Riga 1 */}
         {(canMarkAbsent || canTimesheetApprove) && (
-          <div className="mt-1.5 flex sm:hidden items-center gap-2 flex-wrap">
+          <div className="mt-1.5 flex md:hidden items-center gap-2 flex-wrap">
             {canMarkAbsent && (
               <button
                 type="button"

@@ -145,7 +145,7 @@ export default function UserAvatarMenu({
           onClick={() => setIsOpen(!isOpen)}
           title={titleHint}
           aria-label={`${t.sidebar_profile}: ${titleHint}`}
-          className="relative flex h-9 w-9 sm:h-10 sm:w-10 flex-col items-center justify-center gap-0.5 rounded-xl border border-neutral-500 px-1.5 text-white/80 surface-ghost-interactive hover:text-white touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-accent/25 active:text-white"
+          className="relative flex h-9 w-9 md:h-10 md:w-10 flex-col items-center justify-center gap-0.5 rounded-xl border border-neutral-500 px-1.5 text-white/80 surface-ghost-interactive hover:text-white touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-accent/25 active:text-white"
         >
           <span className="text-[14px] font-bold leading-none select-none" aria-hidden>
             {profileInitial}
@@ -189,12 +189,12 @@ export default function UserAvatarMenu({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           aria-label={titleHint}
-          className="flex items-center gap-1.5 sm:gap-2 min-w-0 rounded-xl border border-accent/30 bg-accent hover:bg-accent-hover transition-colors outline-none focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2 min-h-[44px] touch-manipulation pl-3 pr-3"
+          className="flex items-center gap-1.5 md:gap-2 min-w-0 rounded-xl border border-accent/30 bg-accent hover:bg-accent-hover transition-colors outline-none focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2 min-h-[44px] touch-manipulation pl-3 pr-3"
         >
           <div className="flex flex-col items-start min-w-0 overflow-hidden text-left">
             <span className="text-xs font-semibold text-white truncate w-full uppercase tracking-wide leading-tight" title={displayName}>{displayName}
             </span>
-            <span className="text-xs text-white/90 truncate w-full uppercase tracking-widest leading-tight hidden sm:block" title={displayRole}>{displayRole}
+            <span className="text-xs text-white/90 truncate w-full uppercase tracking-widest leading-tight hidden md:block" title={displayRole}>{displayRole}
             </span>
           </div>
         </button>

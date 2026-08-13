@@ -40,6 +40,7 @@ const baseIt = {
   settings_delegated_view_title: 'Profilo dipendente',
   settings_delegated_empty_list: 'Nessun dipendente operativo in elenco.',
   settings_title: 'Impostazioni',
+  admin_tab_profiles: 'Profili',
   version: 'Versione',
   hide_suspended: 'Nascondi sospesi',
   show_suspended: 'Mostra sospesi',

@@ -288,8 +288,8 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
     >
       <div className="w-full max-w-screen-xl mx-auto pointer-events-auto pb-safe">
         {/* Barra flottante vetro sul brand — `.bottom-nav-glass` in index.css */}
-        <div className="bottom-nav-glass w-full rounded-2xl px-1 py-2 sm:px-2.5 sm:py-2.5">
-          <div className="flex items-center justify-around gap-1 sm:gap-1.5">
+        <div className="bottom-nav-glass w-full rounded-2xl px-1 py-2 md:px-2.5 md:py-2.5">
+          <div className="flex items-center justify-around gap-1 md:gap-1.5">
             {tabs.map(({ id, icon: Icon, label }) => {
               const isActive = activeTab === id;
               const displayLabel =
@@ -330,10 +330,10 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                   onTouchMove={handleLongPressEnd}
                   title={buttonTitle}
                   aria-label={ariaLabel}
-                  className={`keep-white-glass flex ${id === 'profile' ? 'h-[46px] sm:h-[52px] px-2 sm:px-2.5 min-w-[46px] sm:min-w-[52px] lg:px-3 gap-2' : 'h-[46px] w-[46px] sm:h-[52px] sm:w-[52px]'} shrink-0 rounded-xl sm:rounded-2xl transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 items-center justify-center ${
+                  className={`keep-white-glass flex ${id === 'profile' ? 'h-[46px] md:h-[52px] px-2 md:px-2.5 min-w-[46px] md:min-w-[52px] gap-2' : 'h-[46px] w-[46px] md:h-[52px] md:w-[52px]'} shrink-0 rounded-xl md:rounded-2xl transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 items-center justify-center ${
  over
  ? isActive
- ? 'bg-white shadow-[0_0_6px_1px_rgba(0,26,128,0.22),0_0_14px_3px_rgba(51,102,204,0.12)] text-accent focus-visible:ring-accent/45 focus-visible:ring-offset-transparent'
+ ? 'bg-white shadow-[0_0_6px_1px_rgba(255,255,255,0.22),0_0_14px_3px_rgba(255,255,255,0.12)] text-accent focus-visible:ring-accent/45 focus-visible:ring-offset-transparent'
  : 'bg-white/60 text-accent/55 hover:bg-white hover:text-accent focus-visible:ring-accent/45 focus-visible:ring-offset-transparent'
  : isActive
  ? 'bg-white/22 text-white focus-visible:ring-white/35 focus-visible:ring-offset-transparent'
@@ -342,7 +342,7 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                 >
                   {showProfilePic ? (
                     <span
-                      className={`flex h-[22px] w-[22px] sm:h-6 sm:w-6 shrink-0 items-center justify-center overflow-hidden rounded-md transition-colors duration-200 ${
+                      className={`flex h-[22px] w-[22px] md:h-6 md:w-6 shrink-0 items-center justify-center overflow-hidden rounded-md transition-colors duration-200 ${
  isActive ? 'opacity-100' : 'opacity-65'
  }`}
                     >
@@ -357,7 +357,7 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                     </span>
                   ) : showProfileInitial ? (
                     <span
-                      className={`flex h-[22px] w-[22px] sm:h-6 sm:w-6 shrink-0 items-center justify-center overflow-hidden rounded-md text-[11px] sm:text-xs font-bold transition-colors duration-200 ${
+                      className={`flex h-[22px] w-[22px] md:h-6 md:w-6 shrink-0 items-center justify-center overflow-hidden rounded-md text-[11px] md:text-xs font-bold transition-colors duration-200 ${
  over
  ?`bg-accent/10 ${isActive ? 'text-accent' : 'text-accent/65'}`
                           : `bg-white/15 ${isActive ? 'text-white' : 'text-white/45'}`
@@ -368,7 +368,7 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                     </span>
                   ) : (
                     <Icon
-                      className={`h-[22px] w-[22px] sm:h-6 sm:w-6 flex-shrink-0 transition-[color,filter] duration-200 ${
+                      className={`h-[22px] w-[22px] md:h-6 md:w-6 flex-shrink-0 transition-[color,filter] duration-200 ${
  !over ? (isActive ? 'nav-icon-3d-active' : 'nav-icon-3d') : ''
  } ${
  over
@@ -380,7 +380,7 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                     />
                   )}
                   {id === 'profile' && (
-                    <span className="hidden lg:block text-xs font-semibold truncate max-w-[80px] transition-[color,opacity] duration-200" style={{ color: '#ffffff' }} title={profileDisplayName}>{profileDisplayName}
+                    <span className="hidden md:block text-xs font-semibold truncate max-w-[80px] transition-[color,opacity] duration-200" style={{ color: '#ffffff' }} title={profileDisplayName}>{profileDisplayName}
                     </span>
                   )}
                 </button>
@@ -392,14 +392,14 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
                 onClick={() => { triggerHapticFeedback('click'); onTabChange('settings'); }}
                 title="Admin"
                 aria-label="Scheda Admin"
-                className={`keep-white-glass flex h-[46px] w-[46px] sm:h-[52px] sm:w-[52px] shrink-0 rounded-xl sm:rounded-2xl transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent items-center justify-center ${
+                className={`keep-white-glass flex h-[46px] w-[46px] md:h-[52px] md:w-[52px] shrink-0 rounded-xl md:rounded-2xl transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent items-center justify-center ${
  activeTab === 'settings'
  ? 'bg-white/22 text-white'
  : 'bg-white/8 text-white/45 hover:bg-white/18 hover:text-white'
  }`}
               >
                 <ShieldCheck
-                  className={`h-[22px] w-[22px] sm:h-6 sm:w-6 flex-shrink-0 transition-[color,filter] duration-200 ${
+                  className={`h-[22px] w-[22px] md:h-6 md:w-6 flex-shrink-0 transition-[color,filter] duration-200 ${
  activeTab === 'settings' ? 'nav-icon-3d-active text-white' : 'nav-icon-3d text-white/45'
  }`}
                   strokeWidth={activeTab === 'settings' ? 1.75 : 1.2}
@@ -473,7 +473,7 @@ export default function BottomNav({ activeTab, onTabChange, visibleTabs, navClas
  ? 'border border-accent/40 bg-accent/15 text-accent ring-1 ring-accent/30'
  : 'border border-neutral-500'
  }`}
-                  style={currentUser?.id !== u.id ? { background: 'rgba(15, 35, 90, 0.82)', color: 'rgba(255,255,255,0.7)' } : undefined}
+                  style={currentUser?.id !== u.id ? { background: 'rgba(255, 255, 255, 0.06)', color: 'rgba(255,255,255,0.7)' } : undefined}
                   >
                     {uThumb ? (
                       <img

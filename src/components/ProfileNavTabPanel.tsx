@@ -647,7 +647,7 @@ export default function ProfileNavTabPanel({
             <button
               type="button"
               onClick={() => setShowMgmtPinPad(true)}
-              className="w-full flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-colors"
+              className="w-full md:hidden flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-colors"
               style={{
                 background: 'rgba(99, 102, 241, 0.15)',
                 border: '1px solid rgba(99, 102, 241, 0.35)',

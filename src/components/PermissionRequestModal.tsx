@@ -187,7 +187,7 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
   const missingCount = [notifGranted, locGranted, pushActive].filter((ok) => !ok).length;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+    <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-4 bg-black/70 backdrop-blur-md">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}

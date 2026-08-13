@@ -70,11 +70,11 @@ export default function AdminSyncOverlay({ onDone, onReload }: Props) {
         viewBox="0 0 120 120"
       >
         <circle cx="60" cy="60" r="54"
-          fill="none" stroke="rgba(51,102,204,0.12)" strokeWidth="3"
+          fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="3"
         />
         <motion.circle
           cx="60" cy="60" r="54"
-          fill="none" stroke="rgb(51, 102, 204)" strokeWidth="3"
+          fill="none" stroke="rgb(255, 255, 255)" strokeWidth="3"
           strokeLinecap="round"
           pathLength={1}
           initial={{ pathLength: 0 }}

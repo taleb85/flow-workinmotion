@@ -149,7 +149,7 @@ export function ShiftHoursCards({
     (deductBreakLineItems?.some((it) => Boolean(it.ruleId)) ?? false)
   );
   return (
-    <div className="border-b border-white/10 px-5 py-7 sm:px-6 sm:py-8 shrink-0">
+    <div className="border-b border-white/10 px-5 py-7 md:px-6 md:py-8 shrink-0">
       <div className="mb-6 grid grid-cols-2 gap-6 items-stretch">
         {/* Card Pianificato (GLASSMORPHISM PREMIUM) */}
         <div className="rounded-2xl min-h-[130px] px-4 py-4"

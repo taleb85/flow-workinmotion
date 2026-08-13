@@ -247,7 +247,7 @@ function MyShiftsSection({
                   type="button"
                   onClick={() => toggleWeek(wIdx)}
                   className="flex items-center gap-1 px-2 h-7 rounded-lg border transition-colors text-[11px] font-black uppercase tracking-widest border-white/20 text-white/80"
-                  style={{ background: 'rgba(15, 35, 90, 0.82)' }}
+                  style={{ background: 'rgba(255, 255, 255, 0.06)' }}
                 >
                   <span>{isOpen ? (t.collapse ?? 'Comprimi') : (t.ts_period_week ?? 'Espandi')}</span>
                   <svg viewBox="0 0 16 16" fill="none" className={`w-3 h-3 transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

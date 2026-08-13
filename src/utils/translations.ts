@@ -53,6 +53,7 @@ const baseIt = {
   settings_delegated_view_title: 'Profilo dipendente',
   settings_delegated_empty_list: 'Nessun dipendente operativo in elenco.',
   settings_title: 'Impostazioni',
+  admin_tab_profiles: 'Profili',
   version: 'Versione',
   hide_suspended: 'Nascondi sospesi',
   show_suspended: 'Mostra sospesi',
@@ -1717,6 +1718,7 @@ const baseEn: Record<string, string> = {
   settings_delegated_view_title: 'Employee profile',
   settings_delegated_empty_list: 'No operational staff to show.',
   settings_title: 'Settings',
+  admin_tab_profiles: 'Profiles',
   hide_suspended: 'Hide suspended',
   show_suspended: 'Show suspended',
   status_active: 'Active',
@@ -3329,6 +3331,7 @@ const baseEs: Record<string, string> = {
   settings_delegated_view_title: 'Perfil del empleado',
   settings_delegated_empty_list: 'No hay personal operativo en la lista.',
   settings_title: 'Configuración',
+  admin_tab_profiles: 'Perfiles',
   hide_suspended: 'Ocultar suspendidos',
   show_suspended: 'Mostrar suspendidos',
   status_active: 'Activo',
@@ -4977,6 +4980,7 @@ const baseFr: Record<string, string> = {
     'Revue terminée sans congélation. Vous pouvez congeler depuis la fiche de chaque shift.',
   // Override key French strings from baseIt
   settings_title: 'Paramètres',
+  admin_tab_profiles: 'Profils',
   settings_delegated_intro:
     'Gérez le personnel opérationnel : fiches, ajout, suspension ou réactivation (« Afficher suspendus »). Pour le reste, contactez un administrateur.',
   settings_delegated_view_profile: 'Fiche',

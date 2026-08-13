@@ -4,6 +4,10 @@ export default {
   /** `class` = allinea a `document.documentElement.classList.toggle('dark')` nell’app (non `media`). */
   darkMode: 'class',
   theme: {
+    /** Unico breakpoint: `md:` = min-width 768px. Rimossi sm/lg/xl/2xl. */
+    screens: {
+      md: '768px',
+    },
     extend: {
       colors: {
         'app-bg': '#0a0a0c',
@@ -52,9 +56,9 @@ export default {
         },
         /** Hex brand legacy centralizzati (ex hardcoded in UI) */
         'brand-deep': '#1a1a1a',
-        'brand-mid': '#525252',
+        'brand-mid': '#ffffff',
         'brand-navy': '#404040',
-        'brand-electric': '#6b6b6b',
+        'brand-electric': '#ffffff',
       },
       fontSize: {
         caption: ['0.75rem', { lineHeight: '1.25rem' }],

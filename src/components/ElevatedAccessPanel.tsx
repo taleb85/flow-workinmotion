@@ -53,7 +53,7 @@ export default function ElevatedAccessPanel() {
             className="flex items-center justify-between rounded-xl border px-3 py-2.5 transition-colors"
             style={{
               background: 'transparent',
-              borderColor: enabled ? 'rgba(51,102,204,0.35)' : 'rgba(255,255,255,0.12)',
+              borderColor: enabled ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.12)',
             }}
           >
             <div className="flex items-center gap-2 min-w-0">

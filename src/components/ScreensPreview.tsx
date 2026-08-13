@@ -1481,7 +1481,7 @@ export default function ScreensPreview() {
       {/* Sezione 1: Schermate di sistema */}
       <div className="flex flex-col gap-3 max-w-6xl mx-auto w-full">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/20 pl-1">Schermate di sistema</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-5">
+        <div className="fluid-grid fluid-grid-3 gap-5">
           {SYSTEM_TABS.map(t => (
             <motion.button
               key={t.id}
@@ -1509,7 +1509,7 @@ export default function ScreensPreview() {
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/20 pl-1">Anteprime UI (Nuove)</p>
         
         {/* Pulsante Anteprima Completa */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div className="fluid-grid fluid-grid-2 gap-4 mb-4">
           <motion.button
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
@@ -1531,7 +1531,7 @@ export default function ScreensPreview() {
           </motion.button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="fluid-grid fluid-grid-2 gap-6">
           {['home-mgmt', 'turni-mgmt', 'ts-mgmt', 'staff-home', 'staff-shifts', 'staff-ferie', 'staff-ts', 'stats-preview', 'settings-preview'].map(id => {
             const t = APP_TABS.find(x => x.id === id);
             if (!t) return null;
@@ -1561,7 +1561,7 @@ export default function ScreensPreview() {
       {/* Sezione 3: Schede principali */}
       <div className="flex flex-col gap-3 max-w-6xl mx-auto w-full">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/20 pl-1">Schede principali</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+        <div className="fluid-grid fluid-grid-2 gap-5">
           {(['tab-panoramica', 'tab-turni', 'tab-presenze', 'tab-ferie', 'tab-profilo'] as ScreenId[]).map(tabId => {
             const deskId = tabId.replace('tab-', 'dtab-') as ScreenId;
             const label = APP_TABS.find(t => t.id === tabId)?.label ?? '';

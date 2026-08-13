@@ -10,7 +10,7 @@ import { readProfileAvatarFromStorage } from '../utils/profilePhotoStorage';
 import { getIntlLocale } from '../utils/translations';
 import { generateNotifications, syncNotificationFeed, getSeenIds, markAllSeen } from '../utils/notifications';
 
-const BRAND = '#525252';
+const BRAND = '#0a0a0c';
 
 function formatTime(iso: string, locale?: string) {
   return new Date(iso).toLocaleTimeString(locale ?? 'it-IT', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -18,7 +18,7 @@ function formatTime(iso: string, locale?: string) {
 
 function UserAvatar({ user, size = 40 }: { user?: User; size?: number }) {
   const initial = (user?.first_name?.charAt(0) ?? '?').toUpperCase();
-  const colors = ['#6b6b6b', '#7C3AED', '#059669', '#D97706', '#DC2626', '#0891B2'];
+  const colors = ['#3B82F6', '#7C3AED', '#059669', '#D97706', '#DC2626', '#0891B2'];
   const colorIndex = user ? (user.first_name?.charCodeAt(0) ?? 0) : 0;
   const bg = colors[colorIndex % colors.length];
   const radius = Math.round(size * 0.28);
@@ -81,7 +81,7 @@ function BroadcastList({
       <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-contain p-3 [-webkit-overflow-scrolling:touch]">
         {sorted.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 px-6 py-10 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'rgba(0, 82, 255, 0.20)' }}>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'rgba(255, 255, 255, 0.10)' }}>
               <MessageCircle className="w-8 h-8" style={{ color: BRAND }} />
             </div>
             <p className="text-sm font-semibold text-white">Nessuna comunicazione</p>
@@ -372,7 +372,7 @@ export function DirectMessagesPanel({ onClose }: { onClose?: () => void } = {}) 
     currentUser?.role === 'admin'
   );
 
-  const [activeTab, setActiveTab] = useState<'messages' | 'notifications'>('messages');
+  const [activeTab, setActiveTab] = useState<'messages' | 'notifications'>('notifications');
 
   const handleTabChange = (tab: 'messages' | 'notifications') => {
     setActiveTab(tab);
@@ -385,16 +385,6 @@ export function DirectMessagesPanel({ onClose }: { onClose?: () => void } = {}) 
       {/* Tab bar — sempre visibile in cima, in tutte le viste */}
       <div className="relative flex shrink-0 border-b border-white/10" style={{ background: BRAND }}>
         <button
-          onClick={() => handleTabChange('messages')}
-          className={`flex-1 py-3 text-sm font-bold transition-colors border-b-2 ${
-            activeTab === 'messages'
-              ? 'text-white border-white'
-              : 'text-white/50 border-transparent hover:text-white/80'
-          }`}
-        >
-          Messaggi
-        </button>
-        <button
           onClick={() => handleTabChange('notifications')}
           className={`flex-1 py-3 text-sm font-bold transition-colors border-b-2 ${
             activeTab === 'notifications'
@@ -403,6 +393,16 @@ export function DirectMessagesPanel({ onClose }: { onClose?: () => void } = {}) 
           }`}
         >
           Notifiche
+        </button>
+        <button
+          onClick={() => handleTabChange('messages')}
+          className={`flex-1 py-3 text-sm font-bold transition-colors border-b-2 ${
+            activeTab === 'messages'
+              ? 'text-white border-white'
+              : 'text-white/50 border-transparent hover:text-white/80'
+          }`}
+        >
+          Messaggi
         </button>
         {/* Pulsante chiudi — overlay assoluto a destra */}
         {onClose && (

@@ -60,7 +60,7 @@ export default function AnimPreview() {
       <p className="text-white/60 text-xs mb-6 uppercase tracking-wider">
         Vai su <span className="text-white font-semibold">/anim-preview</span> · scegli un numero e dimmelo
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 w-full max-w-3xl">
+      <div className="fluid-grid fluid-grid-4 gap-6 w-full max-w-3xl">
         {ANIMATIONS.map((anim) => (
           <div
             key={anim.id}

@@ -39,8 +39,8 @@ export type RoleFeatureTemplatesPanelVariant = 'page' | 'embedded';
 type Props = { variant?: RoleFeatureTemplatesPanelVariant };
 
 function roleColor(role: string): string {
-  if (role === 'manager') return '#6b6b6b';
-  if (role === 'assistant_manager') return '#0284C7';
+  if (role === 'manager') return '#10b981';
+  if (role === 'assistant_manager') return '#D97706';
   return '#059669';
 }
 
@@ -697,7 +697,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   );
 
   const renderMobileView = () => (
-    <div className="sm:hidden rounded-xl border border-neutral-500 overflow-hidden rounded-2xl">
+    <div className="md:hidden rounded-xl border border-neutral-500 overflow-hidden rounded-2xl">
       {/* User chips */}
       <div className="overflow-x-auto flex gap-2 px-3 py-3 border-b" style={{ borderColor: 'rgba(255,255,255,0.14)' }}>
         {nonAdminUsers.map(u => {
@@ -807,7 +807,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   );
 
   const renderMatrix = () => (
-    <div className="hidden sm:block rounded-xl border border-neutral-500 overflow-hidden rounded-2xl">
+    <div className="hidden md:block rounded-xl border border-neutral-500 overflow-hidden rounded-2xl">
       <div className="overflow-x-auto">
         <table className="border-collapse text-sm" style={{ minWidth: `${Math.max(640, 200 + nonAdminUsers.length * 90)}px`, width: '100%' }}>
 

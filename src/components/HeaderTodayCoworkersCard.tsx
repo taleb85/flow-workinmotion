@@ -126,7 +126,7 @@ export default function HeaderTodayCoworkersCard() {
   const cambioL = tv.header_coworkers_cambio_guardia ?? 'Cambio guardia';
 
   return (
-    <section className="w-full px-3 py-2 sm:px-4 sm:py-3" aria-label={title}>
+    <section className="w-full px-3 py-2 md:px-4 md:py-3" aria-label={title}>
       {rows.length === 0 ? (
         <div className="flex items-start gap-1.5 px-1">
           <Users className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/60" strokeWidth={2} aria-hidden />

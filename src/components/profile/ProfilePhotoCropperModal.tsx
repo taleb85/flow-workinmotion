@@ -163,7 +163,7 @@ export default function ProfilePhotoCropperModal({ imageSrc, labels, onClose, on
       aria-modal="true"
       aria-labelledby="profile-crop-title"
     >
-      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-white/10 px-2 py-2 sm:px-4">
+      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-white/10 px-2 py-2 md:px-4">
         <button
           type="button"
           onClick={onClose}

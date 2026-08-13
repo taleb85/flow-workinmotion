@@ -9,7 +9,7 @@ const BG_OVERLAYS = [
   { id: 'app-bg', label: 'bg-app-bg', color: '#0a0a0c' },
   { id: 'admin-card', label: 'Admin card', gradient: 'linear-gradient(110deg, rgb(82, 82, 82), rgb(55, 65, 81))' },
   { id: 'kiosk-btn', label: 'Kiosk button', gradient: 'linear-gradient(135deg, rgb(107, 107, 107), rgb(55, 65, 81))' },
-  { id: 'mobile-home', label: 'MobileHome card', gradient: 'linear-gradient(120deg, #9c9c9c, #6b6b6b, #525252)' },
+  { id: 'mobile-home', label: 'MobileHome card', gradient: 'linear-gradient(120deg, #9c9c9c, #ffffff, #525252)' },
   { id: 'table-header', label: 'Tabella header', gradient: 'linear-gradient(135deg, #525252, #374151)' },
   { id: 'table-green', label: 'Riga approvata', gradient: 'linear-gradient(90deg, #e8f4e8, #f0faf0)' },
   { id: 'surface-glass', label: 'surface-glass', css: 'rgba(5,14,60,0.45)' },
@@ -59,7 +59,7 @@ export default function DesignAuditPreview() {
 
       {/* Loghi */}
       <h2 className="text-base font-bold text-white/80 mb-3 uppercase tracking-wider">Loghi / Icone</h2>
-      <div className="grid sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+      <div className="fluid-grid fluid-grid-3 gap-4 mb-8">
         {LOGOS.map(logo => {
           const kept = selectedLogos.has(logo.id);
           return (
@@ -86,7 +86,7 @@ export default function DesignAuditPreview() {
 
       {/* Sfondi */}
       <h2 className="text-base font-bold text-white/80 mb-3 uppercase tracking-wider">Sfondi / Gradient</h2>
-      <div className="grid sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+      <div className="fluid-grid fluid-grid-3 gap-4 mb-8">
         {BG_OVERLAYS.map(bg => {
           const kept = selectedBgs.has(bg.id);
           return (

@@ -62,7 +62,7 @@ export default function AppHeader({ onLogout }: AppHeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 w-full border-b border-white/10 bg-[rgba(58,95,160,0.75)] backdrop-blur-md safe-area-pad pt-0">
-      <div className="w-full px-3 sm:px-6 py-1.5 sm:py-2.5 flex items-center justify-between gap-2">
+      <div className="w-full px-3 md:px-6 py-1.5 md:py-2.5 flex items-center justify-between gap-2">
         {/* Logo — nascosto su desktop (gestito dalla Sidebar) */}
         <h1
           className="text-[35px] text-accent tracking-tight min-w-0 flex-1 truncate pr-2 leading-[33px] md:hidden"
@@ -84,7 +84,7 @@ export default function AppHeader({ onLogout }: AppHeaderProps) {
         </div>
 
         {/* Destra: avatar + campanella + lingua + orario + logout mobile */}
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
           <UserAvatarMenu />
           <NotificationCenter />
 
@@ -96,7 +96,7 @@ export default function AppHeader({ onLogout }: AppHeaderProps) {
               className="flex min-h-[36px] items-center gap-0.5 rounded-xl border border-neutral-500 px-2 py-1 text-xs font-semibold text-white/70 surface-ghost-interactive"
             >
               <span>{langFlags[effectiveLanguage]}</span>
-              <span className="hidden sm:inline ml-0.5">{langLabels[effectiveLanguage]}</span>
+              <span className="hidden md:inline ml-0.5">{langLabels[effectiveLanguage]}</span>
               <ChevronDown className="w-3 h-3 text-white/50" />
             </button>
             {langOpen && (
@@ -144,7 +144,7 @@ className="flex min-h-[44px] min-w-[44px] flex-shrink-0 items-center justify-cen
             </button>
           )}
 
-          <span className="hidden sm:block text-white/50 text-xs font-medium tabular-nums">
+          <span className="hidden md:block text-white/50 text-xs font-medium tabular-nums">
             <ClockDisplay />
           </span>
         </div>

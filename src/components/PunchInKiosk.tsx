@@ -104,7 +104,7 @@ function filterShiftsToClosestUnpunched(
 /** Logo FLOW con ring neon — centrato, grande, per la testata del kiosk */
 function StraightLogo() {
   return (
-    <div className="flex flex-col items-center justify-center mt-4 sm:mt-6 gap-3">
+    <div className="flex flex-col items-center justify-center mt-4 md:mt-6 gap-3">
       <FlowNeonIcon
         size={112}
         progress={1}
@@ -118,14 +118,14 @@ function StraightLogo() {
 /** Header centrato: FlowLogo + data/ora + eventuale azione sotto la data */
 function GiantBrandHeader({ now, locale, children }: { now: Date; locale: ReturnType<typeof getDateLocale>; children?: React.ReactNode }) {
   return (
-    <header className="flex flex-col items-center justify-center py-4 sm:py-6 flex-shrink-0">
+    <header className="flex flex-col items-center justify-center py-4 md:py-6 flex-shrink-0">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1, transition: { duration: 0.5, ease: 'easeOut' } }}
         className="flex flex-col items-center w-full"
       >
         <StraightLogo />
-        <p className="text-sm sm:text-base text-white/70 font-sans font-semibold tracking-tight mt-3">
+        <p className="text-sm md:text-base text-white/70 font-sans font-semibold tracking-tight mt-3">
           {format(now, 'EEEE d MMMM · HH:mm', { locale })}
         </p>
         {children && <div className="mt-3 flex justify-center">{children}</div>}
@@ -516,14 +516,14 @@ export default function PunchInKiosk({ onGoToLogin }: PunchInKioskProps) {
 
   return (
     <div
-      className="min-h-screen overflow-hidden text-neutral-100 flex flex-col p-6 sm:p-8 relative"
+      className="min-h-screen overflow-hidden text-neutral-100 flex flex-col p-6 md:p-8 relative"
       style={{ background: 'transparent' }}
     >
       <GiantBrandHeader now={now} locale={dateLocale}>
         <button
           type="button"
           onClick={onGoToLogin}
-className="group flex items-center gap-2 rounded-xl border-2 border-brand-deep/30 bg-brand-deep/8 px-4 py-2.5 text-xs font-semibold text-brand-deep shadow-[0_2px_8px_-2px_rgba(0,26,128,0.12)] transition-[color,background-color,border-color,box-shadow,transform] hover:border-brand-deep/60 hover:bg-brand-deep/15 hover:shadow-[0_4px_12px_-3px_rgba(0,26,128,0.2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="group flex items-center gap-2 rounded-xl border-2 border-brand-deep/30 bg-brand-deep/8 px-4 py-2.5 text-xs font-semibold text-brand-deep shadow-[0_2px_8px_-2px_rgba(255,255,255,0.12)] transition-[color,background-color,border-color,box-shadow,transform] hover:border-brand-deep/60 hover:bg-brand-deep/15 hover:shadow-[0_4px_12px_-3px_rgba(255,255,255,0.2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
         >
           <User className="h-4 w-4 shrink-0 text-brand-deep" strokeWidth={2} />
           {t.area_personale}
@@ -531,7 +531,7 @@ className="group flex items-center gap-2 rounded-xl border-2 border-brand-deep/3
       </GiantBrandHeader>
 
       <motion.div
-        className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto flex flex-col items-stretch justify-center px-2 sm:px-4"
+        className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto flex flex-col items-stretch justify-center px-2 md:px-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.2 }}

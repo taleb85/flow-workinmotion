@@ -204,7 +204,7 @@ export default function LoadingPreview() {
       <h1 className="text-white/70 text-lg font-bold tracking-widest uppercase">
         Anteprima schermate di caricamento
       </h1>
-      <div className="flex flex-col sm:flex-row gap-6 w-full max-w-3xl">
+      <div className="flex flex-col md:flex-row gap-6 w-full max-w-3xl">
         <BootScreen />
         <SyncScreen />
       </div>

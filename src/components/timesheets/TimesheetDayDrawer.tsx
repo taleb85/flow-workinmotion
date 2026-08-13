@@ -234,8 +234,8 @@ export default function TimesheetDayDrawer({ ctx, updateShift }: TimesheetDayDra
       open={!!drawerData}
       onClose={closeTimesheetShiftDrawer}
       panelRef={timesheetShiftDetailPanelRef}
-      maxWidthClass={drawerReviewQueue?.reviewScope === "employee_week" ? "max-w-sm md:max-w-xl lg:max-w-2xl" : "max-w-sm md:max-w-2xl lg:max-w-4xl"}
-      maxHeightClass="max-h-[92dvh] lg:max-h-[630px]"
+      maxWidthClass={drawerReviewQueue?.reviewScope === "employee_week" ? "max-w-sm md:max-w-xl" : "max-w-sm md:max-w-2xl"}
+      maxHeightClass="max-h-[92dvh] md:max-h-[630px]"
       overlayZClass="z-[10050]"
       ariaLabel={drawerData ? `${drawerData.employeeName} · ${drawerData.dateStr}` : t.ts_shift_detail_modal_aria}
       panelClassName="!overflow-hidden flex flex-col p-0"
@@ -364,11 +364,11 @@ export default function TimesheetDayDrawer({ ctx, updateShift }: TimesheetDayDra
                       <div className="grid grid-cols-2 gap-2">
                         <div className="rounded-lg px-2.5 py-1.5 ring-1 transition-colors bg-white/8 ring-amber-400/40">
                           <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-300/80">{t.ts_drawer_manual_punch_in}</p>
-                          <p className="text-xs sm:text-sm font-bold tabular-nums text-white">{s.actualStart ?? s.plannedStart ?? '—'}</p>
+                          <p className="text-xs md:text-sm font-bold tabular-nums text-white">{s.actualStart ?? s.plannedStart ?? '—'}</p>
                         </div>
                         <div className="rounded-lg px-2.5 py-1.5 ring-1 transition-colors bg-white/8 ring-amber-400/40">
                           <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-300/80">{t.ts_drawer_manual_punch_out}</p>
-                          <p className="text-xs sm:text-sm font-bold tabular-nums text-white">{s.actualEnd ?? s.plannedEnd ?? '—'}</p>
+                          <p className="text-xs md:text-sm font-bold tabular-nums text-white">{s.actualEnd ?? s.plannedEnd ?? '—'}</p>
                         </div>
                       </div>
                     )}
@@ -430,7 +430,7 @@ export default function TimesheetDayDrawer({ ctx, updateShift }: TimesheetDayDra
                     {isEmployeeWeekReviewSheet && (
                       <div className="space-y-2">
                         <button type="button" disabled={isDisabled} onClick={() => { void (async () => { if (needsSave) { const ok = await handleDrawerSaveTimbratures({ silentToast: false }); if (!ok) return; } closeTimesheetShiftDrawer(); })(); }}
-                          className="w-full rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold bg-accent text-white hover:bg-accent-hover disabled:opacity-50">
+                          className="w-full rounded-xl px-3 py-2.5 text-xs md:text-sm font-bold bg-accent text-white hover:bg-accent-hover disabled:opacity-50">
                           CHIUDI
                         </button>
                       </div>
@@ -438,12 +438,12 @@ export default function TimesheetDayDrawer({ ctx, updateShift }: TimesheetDayDra
                     {!isEmployeeWeekReviewSheet && (
                       <div className="flex gap-2">
                         <button type="button" disabled={isDisabled} onClick={() => { void (async () => { if (needsSave) { const ok = await handleDrawerSaveTimbratures({ silentToast: false }); if (!ok) return; } closeTimesheetShiftDrawer(); })(); }}
-                          className="flex-1 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold transition-colors duration-200 bg-accent text-white hover:bg-accent-hover disabled:opacity-50">
+                          className="flex-1 rounded-xl px-3 py-2.5 text-xs md:text-sm font-bold transition-colors duration-200 bg-accent text-white hover:bg-accent-hover disabled:opacity-50">
                           {t.ts_btn_save_changes ?? 'Salva modifiche'}
                         </button>
                         {canTimesheetApprove && needsSave && !drawerReviewQueue && (
                           <button type="button" disabled={isDisabled} onClick={() => void handleSaveAndFreeze()}
-                            className="flex-1 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold transition-colors duration-200 bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50">
+                            className="flex-1 rounded-xl px-3 py-2.5 text-xs md:text-sm font-bold transition-colors duration-200 bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50">
                             {t.wst_save_freeze_btn ?? 'Salva, approva e congela'}
                           </button>
                         )}

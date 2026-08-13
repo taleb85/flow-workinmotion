@@ -153,7 +153,7 @@ export function PinPadModal({
   const content = (
     <>
       {/* Header */}
-      <div className="flex flex-col items-center text-center pt-12 sm:pt-6 pb-4">
+      <div className="flex flex-col items-center text-center pt-12 md:pt-6 pb-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4" style={{ background: 'rgba(255,255,255,0.06)', border, boxShadow: '0 0 20px rgba(255,255,255,0.06)' }}>
           <Lock className="w-6 h-6 text-white" strokeWidth={2.5} />
         </div>
@@ -196,7 +196,7 @@ export function PinPadModal({
       </div>
 
       {/* Numpad */}
-      <div className="flex-1 flex flex-col justify-center px-8 mt-4 sm:flex-none">
+      <div className="flex-1 flex flex-col justify-center px-8 mt-4 md:flex-none">
         <div className="grid grid-cols-3 gap-3">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
             <button key={n} type="button" onClick={() => handleKey(n)}
@@ -226,7 +226,7 @@ export function PinPadModal({
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-3 px-8 pb-10 sm:pb-6 mt-4">
+      <div className="flex gap-3 px-8 pb-10 md:pb-6 mt-4">
         <button type="button" onClick={onCancel}
           className="flex-1 h-14 rounded-2xl font-bold text-sm text-white/80 hover:text-white transition-colors hover:bg-white/10 hover:border-white/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           style={btnBase}>{cancelText}</button>

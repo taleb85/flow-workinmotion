@@ -14,7 +14,7 @@ import { withTimeout, TimeoutError } from '../utils/promiseTimeout';
 /** Slug di fallback — usato solo se VITE_TENANT_SLUG è impostato o se c'è sottodominio/path.
  *  In modalità Option B (single-URL) rimane null finché LoginPage chiama loadTenantBySlug. */
 const DEFAULT_SLUG: string | null = null;
-const DEFAULT_ACCENT = '#6b6b6b';
+const DEFAULT_ACCENT = '#ffffff';
 
 /**
  * Legge lo slug dal env var, sottodominio, o path URL.
@@ -51,7 +51,7 @@ function hexToHsl(hex: string): [number, number, number] {
 }
 
 /** Override FLOW: forza il brand grigio neutro indipendentemente dal colore del tenant. */
-const FLOW_BRAND_COLOR = '#6b6b6b';
+const FLOW_BRAND_COLOR = '#ffffff';
 
 /**
  * Shell PWA: colore scuro neutro per safe area.
@@ -61,9 +61,9 @@ const FLOW_PWA_SURFACE_COLOR = '#0a0a0c';
 /**
  * Variante brand per dark mode: grigio chiaro neutro per garantire contrasto su sfondo scuro.
  */
-const FLOW_BRAND_DARK = '#9c9c9c';
-const FLOW_BRAND_DARK_RGB = '156 156 156';
-const FLOW_BRAND_DARK_HOVER = '#b0b0b0';
+const FLOW_BRAND_DARK = '#ffffff';
+const FLOW_BRAND_DARK_RGB = '255 255 255';
+const FLOW_BRAND_DARK_HOVER = '#ffffff';
 
 /** Riferimento al MutationObserver per il tema — istanziato una sola volta. */
 let _themeObserver: MutationObserver | null = null;

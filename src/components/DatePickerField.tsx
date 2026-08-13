@@ -264,7 +264,7 @@ const DatePickerField = forwardRef<HTMLButtonElement, DatePickerFieldProps>(func
       {open && !disabled && createPortal(
         <div
           ref={popRef}
-          className="fixed z-[10050] rounded-2xl border border-white/10 bg-neutral-800/70 p-3 sm:p-3.5 shadow-2xl"
+          className="fixed z-[10050] rounded-2xl border border-white/10 bg-neutral-800/70 p-3 md:p-3.5 shadow-2xl"
           style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', top: menuStyle.top, left: menuStyle.left }}
         >
           {panelInner}
