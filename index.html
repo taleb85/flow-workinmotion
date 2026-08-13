@@ -186,20 +186,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
     <!-- Favicon + PWA (logo Flow — barre arancioni su #1a2744) -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=%VITE_TENANT_SLUG%-v9" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png?v=%VITE_TENANT_SLUG%-v9" />
-    <link rel="shortcut icon" href="/favicon.ico?v=%VITE_TENANT_SLUG%-v9" />
-    <link rel="icon" href="/favicon.ico?v=%VITE_TENANT_SLUG%-v9" sizes="any" />
-    <link rel="icon" type="image/png" sizes="48x48" href="/icons/icon-48.png?v=%VITE_TENANT_SLUG%-v9" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=%VITE_TENANT_SLUG%-v9" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=%VITE_TENANT_SLUG%-v9" />
+    <!-- Cache-buster statico: nessuna dipendenza da env (un %VITE_% non definito
+         in CI faceva fallire la build con "URI malformed" nel plugin PWA). -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=v9" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png?v=v9" />
+    <link rel="shortcut icon" href="/favicon.ico?v=v9" />
+    <link rel="icon" href="/favicon.ico?v=v9" sizes="any" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/icons/icon-48.png?v=v9" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=v9" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=v9" />
 
     <!-- Apple touch icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=%VITE_TENANT_SLUG%-v9" />
-    <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=%VITE_TENANT_SLUG%-v9" />
-    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=%VITE_TENANT_SLUG%-v9" />
-    <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/icons/icon-180.png?v=%VITE_TENANT_SLUG%-v9" />
-    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png?v=%VITE_TENANT_SLUG%-v9" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=v9" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=v9" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=v9" />
+    <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/icons/icon-180.png?v=v9" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png?v=v9" />
 
     <!-- iOS splash (richiede file PNG sotto /splash/ — genera con public/splash/generate-splashes.html) -->
     <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/splash/splash-750x1334.png">
