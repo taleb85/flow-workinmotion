@@ -33,10 +33,19 @@ jobs:
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             tail -60 /tmp/build.log >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
-            MSG=$(tail -40 /tmp/build.log | tr '\n' ' ' | sed 's/[^[:print:]]/ /g' | cut -c1-1400)
+            echo "--- dist:" >> "$GITHUB_STEP_SUMMARY"
+            ls -la dist dist/assets 2>&1 >> "$GITHUB_STEP_SUMMARY"
+            MSG=$(tail -60 /tmp/build.log | tr '\n' ' ' | sed 's/[^[:print:]]/ /g' | cut -c1-3500)
             echo "::error title=Build fallita (ultime righe)::$MSG"
             exit $EXIT
           fi
+      - name: Upload build log (diagnostica)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: /tmp/build.log
+          if-no-files-found: ignore
 
   test:
     runs-on: ubuntu-latest
