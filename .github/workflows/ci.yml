@@ -69,9 +69,23 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build
-      - name: Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v11
+      - name: Lighthouse collect
+        id: collect
+        run: |
+          set +e
+          npx lhci collect --config=.lighthouserc.json 2>&1 | tee /tmp/lhci-collect.log
+          EXIT=${PIPESTATUS[0]}
+          if [ $EXIT -ne 0 ]; then
+            MSG=$(tail -30 /tmp/lhci-collect.log | tr '\n' ' ' | sed 's/[^[:print:]]/ /g' | cut -c1-2500)
+            echo "::error title=Lighthouse collect fallita::$MSG"
+            exit $EXIT
+          fi
+      - name: Lighthouse assert
+        run: npx lhci assert --config=.lighthouserc.json
+      - name: Upload LHCI log (diagnostica)
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-          configPath: '.lighthouserc.json'
+          name: lhci-log
+          path: /tmp/lhci-collect.log
+          if-no-files-found: ignore
