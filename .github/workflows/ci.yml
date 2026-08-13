@@ -33,6 +33,8 @@ jobs:
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             tail -60 /tmp/build.log >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
+            MSG=$(tail -40 /tmp/build.log | tr '\n' ' ' | sed 's/[^[:print:]]/ /g' | cut -c1-1400)
+            echo "::error title=Build fallita (ultime righe)::$MSG"
             exit $EXIT
           fi
 
