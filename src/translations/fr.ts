@@ -610,6 +610,8 @@ const baseFr: Record<string, string> = {
   shift_edit_history: 'Historique des modifications',
   audit_from: 'de',
   audit_to: 'à',
+  break_settings_saved: 'Paramètres de pause mis à jour',
+  saved_label: 'Enregistré',
   audit_col_change: 'Modification',
   audit_col_detail: 'Détail',
   audit_col_author: 'Auteur',

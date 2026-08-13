@@ -1107,6 +1107,12 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         action: next === 'confirmed' ? 'publish' : 'update',
       });
     }
+    if (updates.deduct_break !== undefined && updates.deduct_break !== existing.deduct_break) {
+      auditChanges.push({ field: 'deduct_break', oldValue: existing.deduct_break === false ? 'No' : 'Sì', newValue: updates.deduct_break === false ? 'No' : 'Sì', desc: 'detrazione pausa modificata', action: 'shift_edit' });
+    }
+    if (updates.is_auto_break !== undefined && updates.is_auto_break !== existing.is_auto_break) {
+      auditChanges.push({ field: 'is_auto_break', oldValue: existing.is_auto_break === false ? 'No' : 'Sì', newValue: updates.is_auto_break === false ? 'No' : 'Sì', desc: 'pausa automatica modificata', action: 'shift_edit' });
+    }
     await Promise.all(
       auditChanges.map((ch) =>
         logShiftAudit({

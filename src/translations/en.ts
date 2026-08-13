@@ -1200,6 +1200,8 @@ const baseEn: Record<string, string> = {
   shift_edit_history: 'Shift history',
   audit_from: 'from',
   audit_to: 'to',
+  break_settings_saved: 'Break settings updated',
+  saved_label: 'Saved',
   audit_col_change: 'Change',
   audit_col_detail: 'Detail',
   audit_col_author: 'Author',

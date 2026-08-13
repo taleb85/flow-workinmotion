@@ -1303,6 +1303,8 @@ const baseIt = {
   shift_edit_history: 'Storico modifiche',
   audit_from: 'da',
   audit_to: 'a',
+  break_settings_saved: 'Impostazioni pausa aggiornate',
+  saved_label: 'Salvato',
   audit_col_change: 'Modifica',
   audit_col_detail: 'Dettaglio',
   audit_col_author: 'Autore',

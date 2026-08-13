@@ -6,6 +6,7 @@ import {
   Trash2, Save, X, ChevronDown, Unlock, Menu, ChevronUp, Pencil,
   History,
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { CenteredModalPortal } from './ui/CenteredModalPortal';
 import type { Shift, PunchRecord, User, ShiftAuditEntry } from '../types';
 // import type { BreakRule } from '../utils/breakRules';
@@ -939,12 +940,35 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setCreateModal({ userId, date, hasExisting: existing.length === 1 });
   }, [weekShifts, showError, t]);
 
+  // ── Fumetto "Salvato" (come nella sezione Profilo) ──
+  const [savedBubble, setSavedBubble] = useState(false);
+  const [savedBubblePos, setSavedBubblePos] = useState<{ top: number; left: number } | null>(null);
+  const savedBubbleTimeoutRef = useRef<number | null>(null);
+  const deductBreakLabelRef = useRef<HTMLLabelElement>(null);
+  const autoBreakLabelRef = useRef<HTMLLabelElement>(null);
+
+  useEffect(() => () => {
+    if (savedBubbleTimeoutRef.current) window.clearTimeout(savedBubbleTimeoutRef.current);
+  }, []);
+
+  const showSavedBubble = useCallback((el: HTMLElement | null) => {
+    if (!el) return;
+    if (savedBubbleTimeoutRef.current) window.clearTimeout(savedBubbleTimeoutRef.current);
+    const rect = el.getBoundingClientRect();
+    setSavedBubblePos({ top: rect.bottom - 2, left: rect.right - 100 });
+    setSavedBubble(true);
+    savedBubbleTimeoutRef.current = window.setTimeout(() => setSavedBubble(false), 2000);
+  }, []);
+
   const handleDeductBreakToggle = useCallback(async () => {
     if (!selectedShift) return;
     setDeductBreak(prev => !prev);
-    try { await updateShift(selectedShift.id, { deduct_break: !deductBreak }); }
+    try {
+      await updateShift(selectedShift.id, { deduct_break: !deductBreak });
+      showSavedBubble(deductBreakLabelRef.current);
+    }
     catch { showError(t.error_generic ?? 'Errore.'); }
-  }, [selectedShift, deductBreak, updateShift, showError, t]);
+  }, [selectedShift, deductBreak, updateShift, showSavedBubble, showError, t]);
 
   const handleAutoBreakToggle = useCallback(async () => {
     if (!selectedShift) return;
@@ -954,8 +978,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       const _gross = calculateShiftMinutesGross(selectedShift.start_time ?? '', selectedShift.end_time ?? '');
       if (next) await updateShift(selectedShift.id, { is_auto_break: true, break_minutes: 30 });
       else await updateShift(selectedShift.id, { is_auto_break: false, break_minutes: 0 });
+      showSavedBubble(autoBreakLabelRef.current);
     } catch { showError(t.error_generic ?? 'Errore.'); }
-  }, [selectedShift, isAutoBreak, updateShift, showError, t]);
+  }, [selectedShift, isAutoBreak, updateShift, showSavedBubble, showError, t]);
 
   const handleSaveTemplate = useCallback(async () => {
     if (!saveTemplateName.trim() || !database.shiftTemplates?.save) return;
@@ -2149,7 +2174,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       </div>
                       {!isFrozen(selectedShift) && (
                       <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-pink-600/10 p-3 space-y-2">
-                        <label className="flex items-center gap-3 cursor-pointer" aria-label={t.deduct_break_label ?? 'Detrae pausa'}>
+                        <label ref={deductBreakLabelRef} className="flex items-center gap-3 cursor-pointer" aria-label={t.deduct_break_label ?? 'Detrae pausa'}>
                             <input type="checkbox" checked={deductBreak} onChange={handleDeductBreakToggle}
                               className="w-4 h-4 rounded border-white/30 bg-white/10 accent-accent" />
                             <div>
@@ -2158,7 +2183,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             </div>
                           </label>
                           {deductBreak && _hasAutoBreak && (
-                            <label className="flex items-center gap-3 cursor-pointer ml-4 mt-1" aria-label={t.auto_break_label ?? 'Pausa automatica (≥6h)'}>
+                            <label ref={autoBreakLabelRef} className="flex items-center gap-3 cursor-pointer ml-4 mt-1" aria-label={t.auto_break_label ?? 'Pausa automatica (≥6h)'}>
                               <input type="checkbox" checked={isAutoBreak} onChange={handleAutoBreakToggle}
                                 className="w-4 h-4 rounded border-white/30 bg-white/10 accent-accent" />
                               <div>
@@ -2526,6 +2551,33 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             void handlePinConfirm();
           }}
         />
+      )}
+
+      {/* Fumetto "Salvato" — sopra il campo modificato (come nella sezione Profilo) */}
+      {createPortal(
+        <AnimatePresence>
+          {savedBubble && savedBubblePos && (
+            <motion.div
+              initial={{ opacity: 0, y: 6, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -4, scale: 0.92 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="fixed z-[10060] pointer-events-none"
+              style={{
+                top: `${savedBubblePos.top}px`,
+                left: `${savedBubblePos.left}px`,
+                transform: 'translate(-100%, 0)',
+              }}
+            >
+              <span className="relative inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-xl shadow-emerald-500/30" style={{ marginTop: 6 }}>
+                <span className="absolute -top-[5px] right-3 w-0 h-0 border-l-[5px] border-r-[5px] border-b-[6px] border-l-transparent border-r-transparent border-b-emerald-500" />
+                <Check className="h-3 w-3" strokeWidth={3} />
+                {(t as Record<string, string>).saved_label ?? 'Salvato'}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
     </div>
   );
