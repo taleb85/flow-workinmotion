@@ -1,8 +1,9 @@
 {
   "ci": {
     "collect": {
-      "staticDistDir": "./dist",
-      "url": ["http://localhost:4173/app.html"]
+      "startServerCommand": "node scripts/serve-dist.mjs",
+      "startServerReadyPattern": "listening on",
+      "url": ["http://127.0.0.1:4173/app.html"]
     },
     "assert": {
       "preset": "lighthouse:recommended",
