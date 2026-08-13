@@ -228,3 +228,30 @@ export interface PunchAuditEntry {
   /** Descrizione della modifica (es. "orario modificato da 09:00 a 09:15") */
   change_description?: string;
 }
+
+/**
+ * Traccia le conferme e modifiche ai turni: chi ha eseguito l'azione,
+ * quando e che modifiche sono state apportate (old → new).
+ * Visibilità riservata all'admin (isAdminOnly).
+ */
+export interface ShiftAuditEntry {
+  id: string;
+  tenant_id?: string;
+  /** ID del turno interessato (null per operazioni bulk). */
+  shift_id?: string | null;
+  /** ID dell'utente che ha eseguito l'azione. */
+  actor_user_id?: string | null;
+  /** Nome visualizzato di chi ha eseguito l'azione. */
+  actor_name?: string | null;
+  /** Tipo di azione: create | update | shift_edit | delete | bulk_delete | publish | bulk_approve */
+  action: string;
+  /** Campo modificato (es. start_time, approval_status, punch_confirm). */
+  field?: string | null;
+  /** Valore precedente. */
+  old_value?: string | null;
+  /** Nuovo valore. */
+  new_value?: string | null;
+  /** Descrizione leggibile dell'evento. */
+  description?: string | null;
+  created_at: string;
+}

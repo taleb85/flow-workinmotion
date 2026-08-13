@@ -20,6 +20,7 @@ import { usePunchPresenceVerification } from '../../hooks/usePunchPresenceVerifi
 import { TimeInputField } from '../ui/TimeInputField';
 import { safeFormatDate } from '../../utils/safeDateFormat';
 import MobileHome from './MobileHome';
+import MobileStaffShifts from './MobileStaffShifts';
 import { calculateUserStats } from '../../utils/stats';
 import { hapticLight as lightHaptic, hapticHeavy as heavyHaptic } from '../../utils/haptics';
 import { useSmartPunchAction } from '../../hooks/useSmartPunchAction';
@@ -27,7 +28,6 @@ import { useSmartPunchAction } from '../../hooks/useSmartPunchAction';
 const HolidayRequests = lazy(() => import('../HolidayRequests'));
 const Statistics = lazy(() => import('../Statistics'));
 const SettingsPage = lazy(() => import('../SettingsPage'));
-const WeeklyShiftsTable = lazy(() => import('../WeeklyShiftsTable'));
 const ManagementMobileTimesheet = lazy(() => import('./ManagementMobileTimesheet'));
 
 
@@ -252,9 +252,7 @@ export default function MobileStaffDashboard({
         );
       case 'turni':
         return (
-          <Suspense fallback={tabSpinner}>
-            <WeeklyShiftsTable filterUserId={user.id} />
-          </Suspense>
+          <MobileStaffShifts user={user} myShifts={myShifts} language={language} todayStr={todayStr} />
         );
       case 'ferie':
         return (

@@ -4,15 +4,16 @@ import {
   CalendarDays, AlertTriangle, Check, Lock, Plus, Clock,
   ChevronLeft, ChevronRight, Copy, Send, Filter, FileDown,
   Trash2, Save, X, ChevronDown, Unlock, Menu, ChevronUp, Pencil,
+  History,
 } from 'lucide-react';
 import { CenteredModalPortal } from './ui/CenteredModalPortal';
-import type { Shift, PunchRecord, User } from '../types';
+import type { Shift, PunchRecord, User, ShiftAuditEntry } from '../types';
 // import type { BreakRule } from '../utils/breakRules';
 import {
   format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday, parseISO,
 } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { getTranslations, getDateLocale } from '../utils/translations';
+import { getTranslations, getDateLocale, getIntlLocale } from '../utils/translations';
 import { formatMinutesToHoursAndMinutes, calculateShiftMinutesGross, getBreakLabels, hasShiftConflictSameDay } from '../utils/timeCalculations';
 import { getBreakMinutesForShift, DEFAULT_AUTO_BREAK_MINUTES, AUTO_BREAK_THRESHOLD_MINUTES } from '../utils/breakRules';
 import { shiftPastPlannedEndWithoutClockIn, punchTimeHHMM, getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
@@ -21,9 +22,10 @@ import { TimeInputField } from './ui/TimeInputField';
 import { ShiftSlotPresetsSection } from './shifts/ShiftSlotPresetsSection';
 import { database } from '../lib/database';
 import { useAppUser, useAppData, useAppConfig, useAppOverlay, authorizeFrozenDelete } from '../context/AppContext';
-import { isManagementRole, isPurelyManagementRole, canEditTeamShifts, canPublishScheduleDrafts, canApproveShiftActions, findFreezeVerifierByPin, findFreezeVerifierById } from '../utils/permissions';
+import { isManagementRole, canEditTeamShifts, canPublishScheduleDrafts, canApproveShiftActions, findFreezeVerifierByPin, findFreezeVerifierById, isUserVisibleOnTeamSchedule, isAdminOnly } from '../utils/permissions';
 import { getShiftViolations, DEFAULT_WORK_RULES } from '../utils/workRules';
 import { isShiftPayrollFrozen } from '../utils/timesheetFreezeCriteria';
+import { logShiftAudit, formatAuditDate } from '../utils/shiftAuditLog';
 import { PinPadModal } from './ui/PinPadModal';
 import {
   loadPeriodConfig, savePeriodConfig, getPeriodStartDate, getPeriodEndDate,
@@ -468,6 +470,32 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setActionsDrawerSection(null);
   }, []);
 
+  // ── Storico modifiche del turno aperto (solo admin) ──
+  /** Eventi di audit del turno selezionato; null = nessuno o da caricare. */
+  const [shiftAuditEntries, setShiftAuditEntries] = useState<ShiftAuditEntry[] | null>(null);
+  /** Apre lo storico in una modale separata (non modifica la modale principale). */
+  const [showShiftAuditModal, setShowShiftAuditModal] = useState(false);
+
+  useEffect(() => {
+    if (!drawerOpen || !selectedShift) {
+      setShiftAuditEntries(null);
+      setShowShiftAuditModal(false);
+      return;
+    }
+    let cancelled = false;
+    setShiftAuditEntries(null);
+    database.auditLog
+      .getByShiftId(selectedShift.id)
+      .then((entries) => {
+        if (cancelled) return;
+        setShiftAuditEntries(entries && entries.length > 0 ? entries : null);
+      })
+      .catch(() => {
+        if (!cancelled) setShiftAuditEntries(null);
+      });
+    return () => { cancelled = true; };
+  }, [drawerOpen, selectedShift]);
+
   useEffect(() => {
     if (!actionsDrawerOpen) return;
     const handler = (e: MouseEvent) => {
@@ -512,8 +540,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
   const visibleUsers = filterUserId
     ? users.filter(u => u.id === filterUserId)
-    : users.filter(u => u.status === 'active')
-      .filter(u => !isPurelyManagementRole(u.role))
+    : users
+      .filter(u => isUserVisibleOnTeamSchedule(u, allShifts))
       .filter(u => !deptFilter || u.department === deptFilter);
 
   const weekDateStrings = weekDays.map(d => format(d, 'yyyy-MM-dd'));
@@ -723,6 +751,19 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         }
       }
       await updateShift(shift.id, { approval_status: 'approved' } as any);
+      const actorFull = currentUser;
+      await logShiftAudit({
+        shiftId: shift.id,
+        action: 'update',
+        field: 'punch_confirm',
+        oldValue: existingIn && existingOut
+          ? `${new Date(existingIn.timestamp ?? '').toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })} / ${new Date(existingOut.timestamp ?? '').toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`
+          : 'assente',
+        newValue: `${editIn} / ${editOut}`,
+        description: `${formatAuditDate(shift.date)} — timbrature confermate manualmente (in ${editIn}, out ${editOut}); turno approvato`,
+        actorUserId: actorFull?.id ?? null,
+        actorName: actorFull ? `${actorFull.first_name} ${actorFull.last_name ?? ''}`.trim() : 'Sistema',
+      });
       setSelectedShift(prev => prev && prev.id === shift.id ? { ...prev, approval_status: 'approved' as const } : prev);
       showSuccess(t.shift_approved ?? 'Turno approvato.');
       // Advance to next shift in review queue if available
@@ -735,7 +776,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       }
     } catch { showError(t.error_generic ?? 'Errore.'); }
     finally { setSaving(false); }
-  }, [selectedShift, editIn, editOut, allPunchRecords, addPunchRecord, updatePunchRecord, updateShift, setSelectedShift, showSuccess, showError, t, reviewQueue, reviewIdx]);
+  }, [selectedShift, editIn, editOut, allPunchRecords, addPunchRecord, updatePunchRecord, updateShift, setSelectedShift, showSuccess, showError, t, reviewQueue, reviewIdx, currentUser]);
 
   const handleFreezeShift = useCallback(async (shift: Shift) => {
     if (sessionActive) {
@@ -1969,6 +2010,14 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     <Unlock className="h-4 w-4" />
                   </button>
                 )}
+                {isAdminOnly(currentUser) && shiftAuditEntries && shiftAuditEntries.length > 0 && (
+                  <button type="button" onClick={() => setShowShiftAuditModal(true)}
+                    className="rounded-lg bg-white/10 p-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+                    title={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
+                    aria-label={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}>
+                    <History className="h-4 w-4" />
+                  </button>
+                )}
                 <button type="button" onClick={handleCloseDrawer} className="ml-2 rounded-lg bg-white/10 p-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><X className="h-4 w-4" /></button>
               </div>
             </div>
@@ -2052,7 +2101,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   const _hasAutoBreak = grossMins >= AUTO_BREAK_THRESHOLD_MINUTES && isAutoBreak;
                   return (
                     <div className="space-y-3">
-                      <div className={`flex items-center gap-2 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-600/10 p-3 ${(!hasIn && !hasOut) ? 'ring-2 ring-amber-500/40 animate-pulse' : ''}`}>
+                      <div className={`flex items-center gap-2 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-600/10 p-3 ${(!hasIn && !hasOut) ? 'border-2 border-amber-500/60 animate-pulse' : ''}`}>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">{t.status ?? 'Stato'}:</span>
                         {!hasIn && !hasOut ? (
                           <span className="flex items-center gap-1 text-[11px] font-bold text-amber-400"><AlertTriangle className="h-3 w-3" />{t.not_clocked ?? 'Non timbrato'}</span>
@@ -2135,6 +2184,116 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               </div>
             </div>
             </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Modale Storico modifiche (solo admin, separata dalla modale del turno) ── */}
+      {showShiftAuditModal && shiftAuditEntries && createPortal(
+        <div className="fixed inset-0 z-[10051] flex items-center justify-center px-4" onClick={() => setShowShiftAuditModal(false)}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div
+            className="relative z-10 flex max-h-[82vh] w-full max-w-xl flex-col rounded-2xl p-4 shadow-2xl"
+            style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <History className="h-4 w-4 text-white/70" aria-hidden />
+                <h3 className="text-sm font-bold text-white">
+                  {(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowShiftAuditModal(false)}
+                className="rounded-lg bg-white/10 p-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors"
+                aria-label={t.close ?? 'Chiudi'}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="max-h-[calc(82vh-64px)] space-y-1.5 overflow-y-auto pr-1">
+              {/* Intestazione tabella: Modifica | Dettaglio | Autore */}
+              <div className="grid grid-cols-[minmax(110px,auto)_1fr_auto] items-center gap-2.5 px-3 text-[10px] font-bold uppercase tracking-wider text-white/60">
+                <span>{(t as Record<string, string>).audit_col_change ?? 'Modifica'}</span>
+                <span>{(t as Record<string, string>).audit_col_detail ?? 'Dettaglio'}</span>
+                <span className="justify-self-end">{(t as Record<string, string>).audit_col_author ?? 'Autore'}</span>
+              </div>
+              {(() => {
+                const tv = t as Record<string, string>;
+                const actionLabel: Record<string, string> = {
+                  create: t.hist_action_create ?? 'Creato',
+                  update: t.hist_action_update ?? 'Modificato',
+                  shift_edit: tv.hist_action_shift_edit ?? 'Modifica',
+                  delete: t.hist_action_delete ?? 'Eliminato',
+                  publish: t.hist_action_publish ?? 'Pubblicato',
+                  bulk_delete: t.hist_action_bulk_delete ?? 'Eliminazione multipla',
+                  bulk_approve: t.hist_action_bulk_approve ?? 'Approvazione multipla',
+                };
+                const actionColor: Record<string, string> = {
+                  create: 'bg-accent/25 text-accent',
+                  update: 'bg-amber-500/25 text-amber-300',
+                  shift_edit: 'bg-sky-500/25 text-sky-300',
+                  delete: 'bg-red-500/25 text-red-300',
+                  publish: 'bg-accent/20 text-accent',
+                  bulk_delete: 'bg-red-500/25 text-red-300',
+                  bulk_approve: 'bg-accent/25 text-accent',
+                };
+                const fieldLabels: Record<string, string> = {
+                  start_time: tv.field_start_time ?? 'Ora inizio',
+                  end_time: tv.field_end_time ?? 'Ora fine',
+                  date: tv.field_date ?? 'Data',
+                  user_id: tv.field_user_id ?? 'Dipendente',
+                  approval_status: tv.field_approval_status ?? 'Stato',
+                  punch_confirm: tv.field_punch_confirm ?? 'Timbrature',
+                  deduct_break: tv.field_deduct_break ?? 'Pausa',
+                  is_auto_break: tv.field_is_auto_break ?? 'Pausa automatica',
+                  type: tv.field_type ?? 'Tipo turno',
+                };
+                // Descrizione leggibile: date ISO → GG/MM/AAAA (ovunque) e orari senza secondi
+                const prettyDesc = (d?: string | null) =>
+                  (d ?? '')
+                    .replace(/(\d{4})-(\d{2})-(\d{2})/g, '$3/$2/$1')
+                    .replace(/(\d{2}:\d{2}):00/g, '$1');
+                // Rimuove il prefisso ridondante ("Turno creato: …") già espresso dal chip di azione
+                const cleanDesc = (d?: string | null) =>
+                  prettyDesc(d)
+                    .replace(/^(Turno (?:creato|eliminato|confermato):\s*)/i, '')
+                    .replace(/^(\d+)\s*turni eliminati$/i, '$1 turni');
+                const fieldLabel = (f?: string | null) => (f ? fieldLabels[f] ?? f : '');
+                const fmtWhen = (iso?: string | null) =>
+                  iso
+                    ? new Date(iso).toLocaleString(getIntlLocale(effectiveLanguage), { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })
+                    : '';
+                return shiftAuditEntries.map((entry) => {
+                  const hasField = !!entry.field && entry.old_value !== undefined && entry.new_value !== undefined && entry.old_value !== entry.new_value;
+                  return (
+                    <div key={entry.id} className="grid grid-cols-[minmax(110px,auto)_1fr_auto] items-center gap-2.5 rounded-lg border border-white/15 px-3 py-2 uppercase">
+                      {/* Col 1: la modifica effettuata (es. "Ora inizio"); senza campo, l'azione (es. "Creato") */}
+                      <span className={`justify-self-start rounded-full px-2 py-1 text-[11px] font-bold ${hasField ? 'bg-sky-500/25 text-sky-300' : (actionColor[entry.action] ?? 'bg-white/15 text-white/85')}`}>
+                        {hasField ? fieldLabel(entry.field) : (actionLabel[entry.action] ?? entry.action)}
+                      </span>
+                      {/* Col 2: dettaglio del cambio (il campo è già nel chip in col 1) */}
+                      {hasField ? (
+                        <p className="min-w-0 truncate text-xs text-white/70" title={`${tv.audit_from ?? 'da'} ${prettyDesc(entry.old_value)} ${tv.audit_to ?? 'a'} ${prettyDesc(entry.new_value)}`}>
+                          {tv.audit_from ?? 'da'} {prettyDesc(entry.old_value)} {tv.audit_to ?? 'a'} {prettyDesc(entry.new_value)}
+                        </p>
+                      ) : (
+                        <p className="min-w-0 truncate text-[13px] font-semibold text-white" title={cleanDesc(entry.description)}>
+                          {cleanDesc(entry.description)}
+                        </p>
+                      )}
+                      {/* Col 3: chi e quando */}
+                      <p className="justify-self-end whitespace-nowrap text-xs text-white/55">
+                        {entry.actor_name ?? 'Sistema'} · {fmtWhen(entry.created_at)}
+                      </p>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
         </div>,
         document.body
       )}

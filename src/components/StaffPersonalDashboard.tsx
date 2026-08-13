@@ -30,7 +30,6 @@ import { useIsMobileViewport } from '../hooks/useIsMobileViewport';
 // const Timesheets = lazy(() => import('./Timesheets')); // unused here
 const HolidayRequests = lazy(() => import('./HolidayRequests'));
 const Statistics = lazy(() => import('./Statistics'));
-// const WeeklyShiftsTable = lazy(() => import('./WeeklyShiftsTable')); // unused here
 const SettingsPage = lazy(() => import('./SettingsPage'));
 
 import { CheckCircle2, AlertCircle, XCircle } from 'lucide-react';

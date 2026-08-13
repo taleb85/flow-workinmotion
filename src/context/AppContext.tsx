@@ -40,6 +40,7 @@ import { formatTrans, getTranslations } from '../utils/translations';
 import { countUnreadNotifications } from '../utils/notifications';
 import { setAppLauncherBadgeUnreadCountAsync } from '../utils/appIconBadge';
 import { logHistory, logShiftEdit } from '../utils/scheduleHistory';
+import { logShiftAudit, formatAuditDate } from '../utils/shiftAuditLog';
 import { useTenant } from './TenantContext';
 import { ToastProvider, useToast } from './ToastContext';
 import { SessionProvider, useSession } from './SessionContext';
@@ -964,6 +965,14 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       recentlyAddedShiftIdsRef.current.add(res.id);
       const actor = currentUserRef.current?.first_name ?? 'Sistema';
       logHistory('create', actor, `Turno creato: ${shift.date} ${shift.start_time}–${endTime || '?'}`);
+      const actorFull = currentUserRef.current;
+      void logShiftAudit({
+        shiftId: res.id,
+        action: 'create',
+        actorUserId: actorFull?.id ?? null,
+        actorName: actorFull ? `${actorFull.first_name} ${actorFull.last_name ?? ''}`.trim() : 'Sistema',
+        description: `Turno creato: ${formatAuditDate(shift.date)} ${shift.start_time}–${endTime || '?'}`,
+      });
       markManagementDataTouched();
     } else {
       console.warn('[addShift] insert returned null (supabase non disponibile o inserimento fallito)', shift);
@@ -1068,6 +1077,50 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       }
     }
 
+    // ── Audit server-side (storico admin): chi ha confermato/modificato e cosa è cambiato ──
+    const auditActor = currentUserRef.current;
+    const actorAudit = {
+      actorUserId: auditActor?.id ?? null,
+      actorName: auditActor ? `${auditActor.first_name} ${auditActor.last_name ?? ''}`.trim() : 'Sistema',
+    };
+    const auditChanges: { field: string; oldValue: string; newValue: string; desc: string; action: string }[] = [];
+    if (updates.start_time !== undefined && updates.start_time !== existing.start_time) {
+      auditChanges.push({ field: 'start_time', oldValue: (existing.start_time || '').slice(0, 5), newValue: (updates.start_time || '').slice(0, 5), desc: 'orario inizio modificato', action: 'shift_edit' });
+    }
+    if (updates.end_time !== undefined && updates.end_time !== existing.end_time) {
+      auditChanges.push({ field: 'end_time', oldValue: (existing.end_time || '').slice(0, 5), newValue: (updates.end_time || '').slice(0, 5), desc: 'orario fine modificato', action: 'shift_edit' });
+    }
+    if (updates.user_id !== undefined && updates.user_id !== existing.user_id) {
+      auditChanges.push({ field: 'user_id', oldValue: existing.user_id, newValue: updates.user_id, desc: 'turno spostato a diverso dipendente', action: 'shift_edit' });
+    }
+    if (updates.date !== undefined && updates.date !== existing.date) {
+      auditChanges.push({ field: 'date', oldValue: existing.date, newValue: updates.date, desc: `turno spostato da ${formatAuditDate(existing.date)} a ${formatAuditDate(updates.date)}`, action: 'shift_edit' });
+    }
+    if (updates.approval_status !== undefined && updates.approval_status !== existing.approval_status) {
+      const sLabel: Record<string, string> = { draft: 'Bozza', confirmed: 'Pubblicato', approved: 'Approvato', absent: 'Non ha lavorato', frozen: 'Congelato' };
+      const next = updates.approval_status;
+      auditChanges.push({
+        field: 'approval_status',
+        oldValue: sLabel[existing.approval_status] ?? existing.approval_status,
+        newValue: sLabel[next] ?? next,
+        desc: next === 'confirmed' ? 'turno confermato' : next === 'frozen' ? 'turno congelato' : next === 'absent' ? 'turno segnato "non ha lavorato"' : 'stato turno modificato',
+        action: next === 'confirmed' ? 'publish' : 'update',
+      });
+    }
+    await Promise.all(
+      auditChanges.map((ch) =>
+        logShiftAudit({
+          shiftId: id,
+          action: ch.action,
+          field: ch.field,
+          oldValue: ch.oldValue,
+          newValue: ch.newValue,
+          description: `${formatAuditDate(existing.date)} — ${ch.desc}`,
+          ...actorAudit,
+        })
+      )
+    );
+
     try {
       const res = isAbsentUpdate ? await database.shifts.markAbsent(id) : await database.shifts.update(id, updates);
       if (isAbsentUpdate) {
@@ -1170,6 +1223,14 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       if (existing) {
         const actor = currentUserRef.current?.first_name ?? 'Sistema';
         logHistory('delete', actor, `Turno eliminato: ${existing.date} ${existing.start_time}–${existing.end_time}`);
+        const actorFull = currentUserRef.current;
+        void logShiftAudit({
+          shiftId: existing.id,
+          action: 'delete',
+          actorUserId: actorFull?.id ?? null,
+          actorName: actorFull ? `${actorFull.first_name} ${actorFull.last_name ?? ''}`.trim() : 'Sistema',
+          description: `Turno eliminato: ${formatAuditDate(existing.date)} ${existing.start_time}–${existing.end_time}`,
+        });
       }
     } catch (err) {
       console.error('[deleteShift]', id, err);
@@ -1226,6 +1287,13 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     }
     const actor = currentUserRef.current?.first_name ?? 'Sistema';
     logHistory('bulk_delete', actor, `${ids.length} turni eliminati`);
+    const actorFull = currentUserRef.current;
+    void logShiftAudit({
+      action: 'bulk_delete',
+      actorUserId: actorFull?.id ?? null,
+      actorName: actorFull ? `${actorFull.first_name} ${actorFull.last_name ?? ''}`.trim() : 'Sistema',
+      description: `${ids.length} turni eliminati`,
+    });
     // Salva snapshot per rollback in caso di errore
     const removedShifts = shifts.filter(s => ids.includes(s.id));
     const removedPunchRecords = punchRecords.filter(pr => pr.shift_id && ids.includes(pr.shift_id));
@@ -1302,6 +1370,17 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       for (const shift of draftShifts) {
         const res = await database.shifts.update(shift.id, { approval_status: 'confirmed' });
         if (res) setShifts((prev) => prev.map((s) => (s.id === shift.id ? res : s)));
+        const actorFull = currentUserRef.current;
+        void logShiftAudit({
+          shiftId: shift.id,
+          action: 'publish',
+          actorUserId: actorFull?.id ?? null,
+          actorName: actorFull ? `${actorFull.first_name} ${actorFull.last_name ?? ''}`.trim() : 'Sistema',
+          field: 'approval_status',
+          oldValue: 'Bozza',
+          newValue: 'Pubblicato',
+          description: `Turno confermato: ${formatAuditDate(shift.date)} ${shift.start_time}–${shift.end_time ?? ''}`,
+        });
       }
       if (draftShifts.length > 0) {
         const actor = currentUserRef.current?.first_name ?? 'Sistema';
@@ -1324,6 +1403,17 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       for (const shift of draftShifts) {
         const res = await database.shifts.update(shift.id, { approval_status: 'confirmed' });
         if (res) setShifts((prev) => prev.map((s) => (s.id === shift.id ? res : s)));
+        const actorFull = currentUserRef.current;
+        void logShiftAudit({
+          shiftId: shift.id,
+          action: 'publish',
+          actorUserId: actorFull?.id ?? null,
+          actorName: actorFull ? `${actorFull.first_name} ${actorFull.last_name ?? ''}`.trim() : 'Sistema',
+          field: 'approval_status',
+          oldValue: 'Bozza',
+          newValue: 'Pubblicato',
+          description: `Turno confermato: ${formatAuditDate(shift.date)} ${shift.start_time}–${shift.end_time ?? ''}`,
+        });
       }
       if (draftShifts.length > 0) markManagementDataTouched();
     } catch (error) {
@@ -2569,6 +2659,17 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           );
           for (const shift of draftShifts) {
             await database.shifts.update(shift.id, { approval_status: 'confirmed' });
+            const actorFull = currentUserRef.current;
+            void logShiftAudit({
+              shiftId: shift.id,
+              action: 'publish',
+              actorUserId: actorFull?.id ?? null,
+              actorName: actorFull ? `${actorFull.first_name} ${actorFull.last_name ?? ''}`.trim() : 'Sistema',
+              field: 'approval_status',
+              oldValue: 'Bozza',
+              newValue: 'Pubblicato',
+              description: `Turno confermato: ${formatAuditDate(shift.date)} ${shift.start_time}–${shift.end_time ?? ''}`,
+            });
           }
         }
         setPendingPublishWeekStart(null);

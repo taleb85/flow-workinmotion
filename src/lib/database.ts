@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { User, Shift, HolidayRequest, PunchRecord, PunchAuditEntry } from '../types';
+import { User, Shift, HolidayRequest, PunchRecord, PunchAuditEntry, ShiftAuditEntry } from '../types';
 
 // ---------------------------------------------------------------------------
 // Multi-tenant: tenant_id corrente (impostato da TenantContext al bootstrap)
@@ -897,6 +897,49 @@ export const database = {
           .order('changed_at', { ascending: true });
         if (error) { console.warn('punch_audit_log.getByPunchIds error:', error.message); return []; }
         return (data || []) as PunchAuditEntry[];
+      } catch (_e) { return []; }
+    },
+  },
+
+  /** Audit delle conferme/modifiche ai turni (visibile solo all'admin). */
+  auditLog: {
+    async insert(entry: Omit<ShiftAuditEntry, 'id' | 'created_at'>) {
+      if (!supabase) return null;
+      try {
+        const { data, error } = await supabase!
+          .from('shift_audit_log')
+          .insert(withTenantPayload({ ...entry }))
+          .select()
+          .maybeSingle();
+        if (error) {
+          console.warn('shift_audit_log.insert error (tabella assente?):', error.message);
+          return null;
+        }
+        return data as ShiftAuditEntry | null;
+      } catch (_e) { return null; }
+    },
+
+    /** Ultimi eventi di audit, dal più recente (per la vista admin). */
+    async getAll(limit = 300): Promise<ShiftAuditEntry[]> {
+      if (!supabase) return [];
+      try {
+        const base = supabase.from('shift_audit_log').select('*').limit(limit);
+        const ordered = withTenant(base).order('created_at', { ascending: false });
+        const { data, error } = await ordered;
+        if (error) { console.warn('shift_audit_log.getAll error:', error.message); return []; }
+        return (data || []) as ShiftAuditEntry[];
+      } catch (_e) { return []; }
+    },
+
+    /** Eventi di audit di un singolo turno, dal più recente. */
+    async getByShiftId(shiftId: string): Promise<ShiftAuditEntry[]> {
+      if (!supabase) return [];
+      try {
+        const base = supabase.from('shift_audit_log').select('*').eq('shift_id', shiftId);
+        const scoped = withTenant(base);
+        const { data, error } = await scoped.order('created_at', { ascending: false });
+        if (error) { console.warn('shift_audit_log.getByShiftId error:', error.message); return []; }
+        return (data || []) as ShiftAuditEntry[];
       } catch (_e) { return []; }
     },
   },

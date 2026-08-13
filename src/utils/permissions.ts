@@ -108,14 +108,19 @@ export function isOperationalStaffRole(role: string): boolean {
 
 /**
  * Dipendente attivo da mostrare nel tabellone turni, presenze collettive e riepiloghi ore di gruppo.
- * L'admin è un profilo di controllo puro: non compare MAI nelle viste operative, indipendentemente
- * da turni assegnati o override di visibilità.
+ * L'admin è un profilo di controllo puro: di default non compare nelle viste operative, ma
+ * diventa visibile se ha turni assegnati nel periodo mostrato (o se abilitato esplicitamente).
  */
 export function isUserVisibleOnTeamSchedule(user: User, shifts?: { user_id: string }[]): boolean {
   if (user.status !== 'active') return false;
 
-  // Admin = profilo impostazioni puro: sempre escluso dalle viste operative.
-  if (isPurelyManagementRole(user.role)) return false;
+  // Admin = profilo di controllo puro: visibile nelle viste operative SOLO se
+  // ha turni assegnati nel periodo mostrato, oppure se esplicitamente
+  // abilitato (team_schedule_visible === true). Default: nascosto.
+  if (isPurelyManagementRole(user.role)) {
+    if (user.team_schedule_visible === true) return true;
+    return Array.isArray(shifts) && shifts.some((s) => s.user_id === user.id);
+  }
 
   const explicitVisible = user.team_schedule_visible;
   if (explicitVisible === true) return true;
