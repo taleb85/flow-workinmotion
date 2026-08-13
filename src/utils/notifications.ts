@@ -1,4 +1,4 @@
-import { format, parseISO, subDays, startOfWeek, endOfWeek, isValid } from 'date-fns';
+import { format, parseISO, subDays, isValid } from 'date-fns';
 import type { Language, User, Shift, HolidayRequest } from '../types';
 import { isManagementRole } from './permissions';
 import { formatTrans, getDateLocale } from './translations';

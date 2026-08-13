@@ -53,8 +53,8 @@ export function PinPadModal({
   leftActionButton,
   backdropClass: _backdropClass,
   userId,
-  userDisplayName,
-  userEmail,
+  userDisplayName: _userDisplayName,
+  userEmail: _userEmail,
   onBiometricSuccess,
 }: PinPadModalProps) {
   const t = useT();
@@ -71,7 +71,7 @@ export function PinPadModal({
   }, [leftActionButton]);
   const webAuthnOk = !leftActionButton && hasBiometric;
   // Mostra impronta se l'utente corrente ha una credenziale OPPURE se ce n'è una qualsiasi sul dispositivo
-  const credRegistered = webAuthnOk && (!!userId ? hasPinUnlockCredential(userId) : hasAnyPinUnlockCredentialOnDevice());
+  const credRegistered = webAuthnOk && (userId ? hasPinUnlockCredential(userId) : hasAnyPinUnlockCredentialOnDevice());
   const [bioLoading, setBioLoading] = useState(false);
 
   const handleBiometric = useCallback(async () => {

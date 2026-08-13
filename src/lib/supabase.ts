@@ -11,12 +11,6 @@ const supabaseKey = cleanEnv(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? im
 // WRITE (insert/update/delete) → sempre fresche (no-store).
 // READ (select) → usa cache default del browser per ridurre richieste ridondanti.
 // Il Service Worker (CacheFirst su JS/CSS) non interferisce con le fetch API.
-const isWritePath = (url: string | URL | Request): boolean => {
-  if (typeof url === 'string') return url === '' || false;
-  const u = typeof url === 'object' && 'url' in url ? (url as Request).url : String(url);
-  // Le richieste REST di supabase-js POST/PATCH/DELETE sono write
-  return false; // supabase-js usa POST per select, quindi controlliamo il metodo
-};
 
 /**
  * Fetch con cache condizionale:

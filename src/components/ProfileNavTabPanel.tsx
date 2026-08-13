@@ -66,7 +66,7 @@ export default function ProfileNavTabPanel({
   });
   const [isSaving, setIsSaving] = useState(false);
   const [showSavedToast, setShowSavedToast] = useState(false);
-  const [toastField, _setToastField] = useState<string | null>(null);
+  const [_toastField, _setToastField] = useState<string | null>(null);
   const [toastPos, setToastPos] = useState<{ top: number; left: number } | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
 
@@ -341,8 +341,8 @@ export default function ProfileNavTabPanel({
 
   const [savedLang, setSavedLang] = useState<import('../types').Language | null>(() => readStoredUiLanguage());
   const [pendingLang, setPendingLang] = useState<import('../types').Language | null>(() => readStoredUiLanguage());
-  const [langSaving, _setLangSaving] = useState(false);
-  const [langSaved, _setLangSaved] = useState(false);
+  const [_langSaving, _setLangSaving] = useState(false);
+  const [_langSaved, _setLangSaved] = useState(false);
 
   // ── Auto-salvataggio lingua con debounce ──────────────────────────────
   const langMountedRef = useRef(false);
@@ -395,7 +395,7 @@ export default function ProfileNavTabPanel({
 
   const _hasLangChanges = pendingLang !== savedLang;
 
-  const saveLang = async () => {
+  const _saveLang = async () => {
     _setLangSaving(true);
     if (pendingLang !== savedLang) {
       if (pendingLang === null) {

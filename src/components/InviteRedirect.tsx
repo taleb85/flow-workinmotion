@@ -9,10 +9,6 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { buildUserInviteSlug, buildProfiloAccessLink, PATH_PROFILO } from '../config/appPaths';
 
-function isAppleDevice(): boolean {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window as { MSStream?: unknown }).MSStream;
-}
-
 function cleanSlug(s: string | null | undefined): string {
   return (s ?? '')
     .toLowerCase()

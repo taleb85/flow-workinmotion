@@ -479,7 +479,6 @@ export function ProfileFormAdmin({
   const layoutRole = variant === 'create' ? formData.role : user.role;
   const isSuspended =
     variant === 'edit' && (user.status === 'suspended' || user.status === 'inactive');
-  const invitePinComplete = formData.pin.replace(/\D/g, '').length === 4;
 
   // Link breve leggibile: /i/<slug-utente> sull’origine in produzione (VITE_PUBLIC_APP_ORIGIN, default Pages)
   // Option B: InviteRedirect risolve lo slug globalmente, trova il tenant e codifica

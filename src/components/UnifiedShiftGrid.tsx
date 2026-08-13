@@ -459,7 +459,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const [saveTemplateName, setSaveTemplateName] = useState('');
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [actionsDrawerOpen, setActionsDrawerOpen] = useState(false);
-  const [actionsDrawerSection, setActionsDrawerSection] = useState<'templates' | null>(null);
+  const [actionsDrawerSection, setActionsDrawerSection] = useState<'templates' | 'reorder' | null>(null);
   const actionsDrawerTriggerRef = useRef<HTMLDivElement>(null);
   const actionsDrawerPanelRef = useRef<HTMLDivElement>(null);
 

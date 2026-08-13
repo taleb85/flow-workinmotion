@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, X, ChevronRight, ChevronLeft, LogOut, Shield, Calendar } from 'lucide-react';
+import { Clock, ChevronRight, ChevronLeft, LogOut, Shield, Calendar } from 'lucide-react';
 import { database } from '../lib/database';
 import { useAppUser, useAppData, useAppConfig, useAppOverlay } from '../context/AppContext';
 import { useT } from '../hooks/useT';

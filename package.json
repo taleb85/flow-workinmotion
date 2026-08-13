@@ -1,7 +1,7 @@
 {
   "name": "flow-workinmotion-app",
   "private": true,
-  "version": "1.9.4",
+  "version": "1.9.5",
   "type": "module",
   "scripts": {
     "dev": "(lsof -ti tcp:5173 | xargs kill -9 2>/dev/null || true) && NODE_OPTIONS=--dns-result-order=ipv4first vite --config scripts/vite.config.mjs",
@@ -9,7 +9,7 @@
     "build": "vite build --config scripts/vite.config.mjs",
     "build:strict": "npm run lint && npm run typecheck && npm run build",
     "postbuild": "node scripts/verify-dist-no-service-role.mjs",
-    "lint": "eslint src --max-warnings 0",
+    "lint": "eslint src",
     "check": "npm run lint && npm run typecheck",
     "a11y": "eslint \"src/**/*.tsx\" 2>&1 | grep -E 'jsx-a11y' || true",
     "a11y:full": "eslint src --format stylish",

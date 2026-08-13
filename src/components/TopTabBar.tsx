@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useT } from '../hooks/useT';
 import type { AppNavTab } from '../utils/enabledModules';
-import { LayoutDashboard, CalendarDays, Clock, Palmtree, User, Settings } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Clock, Palmtree, User, Settings, type LucideIcon } from 'lucide-react';
 
 interface TopTabBarProps {
   activeTab: AppNavTab;
@@ -9,7 +9,7 @@ interface TopTabBarProps {
   visibleTabs: AppNavTab[];
 }
 
-const tabIcons: Record<AppNavTab, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
+const tabIcons: Record<AppNavTab, LucideIcon> = {
   home: LayoutDashboard,
   turni: CalendarDays,
   timesheet: Clock,
