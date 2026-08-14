@@ -379,6 +379,11 @@ function StaffDesktopTimesheet({
                                   {hoursLabel}
                                 </p>
                                 <span className={`mt-0.5 inline-block rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wider ${badgeCls}`}>{badgeLabel}</span>
+                                {!isAbsent && !punchRecords.some(pr => pr.shift_id === shift.id) && (
+                                  <span className="mt-0.5 inline-block rounded-full bg-amber-500/20 px-1.5 py-px text-[9px] font-bold uppercase tracking-wider text-amber-300">
+                                    {t.home_status_not_punched ?? 'Non timbrato'}
+                                  </span>
+                                )}
                               </>
                             )}
                           </div>
@@ -692,14 +697,19 @@ export default function StaffPersonalDashboard({
     [getMobileRange, presenceWeekOffset]
   );
 
-  // Turni della settimana selezionata — TUTTI gli stati (bozza, pubblicato, approvato, assente)
+  // Turni della settimana — lo staff NON vede le bozze, ma vede i turni
+  // pubblicati/approvati/assenti E quelli dove non ha ancora effettuato la timbratura
   const presenceShiftsFiltered = useMemo(
     () => shifts.filter(s => {
       const d = parseISO(s.date);
       if (!isWithinInterval(d, { start: presenceWeekRange.start, end: presenceWeekRange.end })) return false;
-      return ['confirmed', 'absent', 'approved', 'draft'].includes(s.approval_status ?? '');
+      // Regola esistente: lo staff non vede le bozze
+      if (s.approval_status === 'draft') return false;
+      if (['confirmed', 'absent', 'approved'].includes(s.approval_status ?? '')) return true;
+      // Turno senza timbratura effettuata → visibile (lo staff deve sapere che deve timbrare)
+      return !punchRecords.some(pr => pr.shift_id === s.id);
     }),
-    [shifts, presenceWeekRange]
+    [shifts, presenceWeekRange, punchRecords]
   );
 
   /** Ancoraggio Statistiche: lunedì della settimana selezionata (stringa stabile per memo). */

@@ -103,7 +103,7 @@ function ShiftStatusBadge({ shift, t }: { shift: Shift; t: Record<string, string
       ? (t.status_draft ?? 'Bozza')
       : isApproved
         ? (t.ts_status_approved ?? 'Approvato')
-        : (t.shifts_confirmed ?? 'Pubblicato');
+        : (t.ts_status_confirmed ?? 'Pubblicato');
   return (
     <span className={`text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border shrink-0 ${cls}`}>
       {label}
@@ -367,6 +367,13 @@ function MyTimesheetSection({
                                 <p className="text-[11px] tabular-nums text-white/55 mt-0.5 flex items-center gap-1">
                                   <Clock className="w-2.5 h-2.5 shrink-0" />
                                   {pIn ? punchLabel(pIn) : '–'} → {pOut ? punchLabel(pOut) : '–'}
+                                </p>
+                              )}
+                              {/* Turno pubblicato ma non ancora timbrato (verifica per shift_id) */}
+                              {!plannedOnly && !isAbsent && !myPunches.some(p => p.shift_id === shift.id) && (
+                                <p className="text-[11px] font-bold text-amber-400/90 mt-0.5 flex items-center gap-1 uppercase tracking-wider">
+                                  <Clock className="w-2.5 h-2.5 shrink-0" />
+                                  {t.home_status_not_punched ?? 'Non timbrato'}
                                 </p>
                               )}
                               {shift.department && (
