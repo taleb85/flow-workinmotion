@@ -598,8 +598,8 @@ function SuperAdminPanelInner() {
   };
 
   return (
-    <div className="min-h-screen min-h-dvh font-sans text-white"
-      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)', background: 'transparent' }}
+    <div className="min-h-full font-sans text-white"
+      style={{ background: 'transparent' }}
     >
       {/* Modal credenziali admin create automaticamente */}
       {newAdminCreds && (
@@ -608,7 +608,7 @@ function SuperAdminPanelInner() {
 
       {/* Sticky header */}
       <header className="sticky top-0 z-30 backdrop-blur-md border-b border-white/10"
-        style={{ background: 'rgba(8, 18, 52, 0.82)', paddingTop: 'env(safe-area-inset-top)' }}
+        style={{ background: 'rgba(8, 18, 52, 0.82)' }}
       >
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 md:px-6 md:py-4">
           <div className="flex items-center gap-2.5 min-w-0">

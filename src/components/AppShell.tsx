@@ -93,7 +93,7 @@ function LoginRoute() {
 
   return (
     <RouteErrorBoundary sectionName="Login">
-      <div role="region" aria-label="Accesso" className="relative min-h-screen min-h-[100dvh] w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
+      <div role="region" aria-label="Accesso" className="relative min-h-full w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
         <DeepAuroraShell theme={bgTheme} />
         <AnimatePresence mode="wait">
           <LoginPage key="login" onLogin={handleLogin} onBack={handleBack} />
@@ -654,7 +654,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     </AnimatePresence>
     <div
       role="region" aria-label="Applicazione"
-      className="relative w-full min-h-dvh text-white font-sans antialiased safe-area-pad pt-0 flex flex-col"
+      className="relative w-full min-h-full text-white font-sans antialiased safe-area-pad pt-0 flex flex-col"
       style={{ background: bgTheme.appBg }}
     >
       <DeepAuroraShell theme={bgTheme} />
