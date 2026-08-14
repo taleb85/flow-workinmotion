@@ -25,6 +25,15 @@
   .fluid-grid-4 > * { flex: 1 1 clamp(9rem, 23%, 100%); }
 }
 
+/* Glow pulsante: anello pulsante che segue il colore del pulsante (--glow) */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--glow, currentColor); }
+  50% { box-shadow: 0 0 0 8px transparent; }
+}
+.glow-pulse {
+  animation: glow-pulse 1.1s ease-out infinite;
+}
+
 /* Fix iOS: disabilita highlight nativo, abilita cursor */
 button,
 [role="button"] {

@@ -710,19 +710,26 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     if (!selectedShift) return;
     setSaving(true);
     try {
-      await updateShift(selectedShift.id, { start_time: editStartTime + ':00', end_time: editEndTime + ':00' });
+      await updateShift(selectedShift.id, {
+        start_time: editStartTime + ':00',
+        end_time: editEndTime + ':00',
+        deduct_break: deductBreak,
+        is_auto_break: isAutoBreak,
+      });
       // Aggiorna i valori iniziali così hasUnsavedChanges torna false
       initialValuesRef.current = {
         ...initialValuesRef.current,
         editStartTime,
         editEndTime,
+        deductBreak,
+        isAutoBreak,
       };
       showSuccess(t.shift_updated ?? 'Turno aggiornato.');
       // Chiudi automaticamente il drawer dopo salvataggio riuscito
       setDrawerOpen(false);
     } catch { showError(t.error_generic ?? 'Errore.'); }
     finally { setSaving(false); }
-  }, [selectedShift, editStartTime, editEndTime, updateShift, showSuccess, showError, t]);
+  }, [selectedShift, editStartTime, editEndTime, deductBreak, isAutoBreak, updateShift, showSuccess, showError, t]);
 
   const handleConfirmPunches = useCallback(async () => {
     if (!selectedShift) return;
@@ -940,58 +947,34 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setCreateModal({ userId, date, hasExisting: existing.length === 1 });
   }, [weekShifts, showError, t]);
 
-  // ── Fumetto "Salvato" (come nella sezione Profilo) ──
-  const [savedBubble, setSavedBubble] = useState(false);
-  const [savedBubblePos, setSavedBubblePos] = useState<{ top: number; left: number } | null>(null);
-  const savedBubbleTimeoutRef = useRef<number | null>(null);
-  const deductBreakLabelRef = useRef<HTMLLabelElement>(null);
-  const autoBreakLabelRef = useRef<HTMLLabelElement>(null);
-
-  useEffect(() => () => {
-    if (savedBubbleTimeoutRef.current) window.clearTimeout(savedBubbleTimeoutRef.current);
+  // Toggle pausa: aggiornano solo lo stato locale; il salvataggio avviene con "Salva modifiche"
+  const handleDeductBreakToggle = useCallback(() => {
+    setDeductBreak((prev) => !prev);
   }, []);
 
-  const showSavedBubble = useCallback((el: HTMLElement | null) => {
-    if (!el) return;
-    if (savedBubbleTimeoutRef.current) window.clearTimeout(savedBubbleTimeoutRef.current);
-    const rect = el.getBoundingClientRect();
-    setSavedBubblePos({ top: rect.bottom - 2, left: rect.right - 100 });
-    setSavedBubble(true);
-    savedBubbleTimeoutRef.current = window.setTimeout(() => setSavedBubble(false), 2000);
+  const handleAutoBreakToggle = useCallback(() => {
+    setIsAutoBreak((prev) => !prev);
   }, []);
 
-  const handleDeductBreakToggle = useCallback(async () => {
-    if (!selectedShift) return;
-    const next = !deductBreak;
-    setDeductBreak(next);
-    try {
-      await updateShift(selectedShift.id, { deduct_break: next });
-      initialValuesRef.current = { ...initialValuesRef.current, deductBreak: next };
-      showSavedBubble(deductBreakLabelRef.current);
-    }
-    catch {
-      // Rollback: se il salvataggio fallisce la spunta torna com'era e la modale resta chiudibile
-      setDeductBreak(!next);
-      showError(t.error_generic ?? 'Errore.');
-    }
-  }, [selectedShift, deductBreak, updateShift, showSavedBubble, showError, t]);
+  // Modifica pausa non ancora salvata → mostra il pulsante "Salva" accanto alla spunta
+  const breakUnsaved = useMemo(() => {
+    if (!drawerOpen) return false;
+    const iv = initialValuesRef.current;
+    return iv.deductBreak !== deductBreak || iv.isAutoBreak !== isAutoBreak;
+  }, [drawerOpen, deductBreak, isAutoBreak]);
 
-  const handleAutoBreakToggle = useCallback(async () => {
+  const handleSaveBreakSettings = useCallback(async () => {
     if (!selectedShift) return;
-    const next = !isAutoBreak;
-    setIsAutoBreak(next);
+    setSaving(true);
     try {
-      const _gross = calculateShiftMinutesGross(selectedShift.start_time ?? '', selectedShift.end_time ?? '');
-      if (next) await updateShift(selectedShift.id, { is_auto_break: true, break_minutes: 30 });
-      else await updateShift(selectedShift.id, { is_auto_break: false, break_minutes: 0 });
-      initialValuesRef.current = { ...initialValuesRef.current, isAutoBreak: next };
-      showSavedBubble(autoBreakLabelRef.current);
-    } catch {
-      // Rollback: se il salvataggio fallisce la spunta torna com'era e la modale resta chiudibile
-      setIsAutoBreak(!next);
-      showError(t.error_generic ?? 'Errore.');
-    }
-  }, [selectedShift, isAutoBreak, updateShift, showSavedBubble, showError, t]);
+      await updateShift(selectedShift.id, { deduct_break: deductBreak, is_auto_break: isAutoBreak });
+      initialValuesRef.current = { ...initialValuesRef.current, deductBreak, isAutoBreak };
+      showSuccess((t as Record<string, string>).break_settings_saved ?? 'Impostazioni pausa aggiornate');
+      // Chiudi la modale: nessuna modifica pendente, il pulsante Salva scompare
+      setDrawerOpen(false);
+    } catch { showError(t.error_generic ?? 'Errore.'); }
+    finally { setSaving(false); }
+  }, [selectedShift, deductBreak, isAutoBreak, updateShift, showSuccess, showError, t]);
 
   const handleSaveTemplate = useCallback(async () => {
     if (!saveTemplateName.trim() || !database.shiftTemplates?.save) return;
@@ -1981,40 +1964,71 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {drawerOpen && selectedShift && createPortal(
         <div className="fixed inset-0 z-[10050] flex items-center justify-center px-4" onClick={handleCloseDrawer}>
           <div className="absolute inset-0 bg-black/40" />
-          <div className="relative w-full max-w-3xl rounded-2xl border border-white/15 p-5 shadow-2xl max-h-[85vh] z-10 flex flex-col" style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: `2px solid ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}40`, boxShadow: `0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08), 0 0 24px ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}20` }} onClick={e => e.stopPropagation()}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="relative w-full max-w-3xl rounded-2xl border border-white/15 p-5 shadow-2xl max-h-[90vh] z-10 flex flex-col"
+            style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: `2px solid ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}40`, boxShadow: `0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08), 0 0 24px ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}20` }}
+            onClick={e => e.stopPropagation()}
+          >
             <div className="shrink-0">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-sm font-bold text-white">{selectedUser?.first_name ?? ''} {selectedUser?.last_name ?? ''}</h3>
+            {/* Mobile: pulsanti in alto, a tutta larghezza */}
+            <div className="mb-2 flex items-stretch gap-2 md:hidden">
+              {reviewQueue && (
+                <>
+                  <span className="flex items-center text-[10px] font-bold text-white/50 tabular-nums">{reviewIdx + 1}/{reviewQueue.length}</span>
+                  <button type="button" disabled={reviewIdx <= 0} onClick={() => { const next = reviewIdx - 1; if (next >= 0) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="flex-1 flex items-center justify-center rounded-lg bg-white/10 px-2 py-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30"><ChevronLeft className="h-4 w-4" /></button>
+                  <button type="button" disabled={reviewIdx >= reviewQueue.length - 1} onClick={() => { const next = reviewIdx + 1; if (next < reviewQueue.length) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="flex-1 flex items-center justify-center rounded-lg bg-white/10 px-2 py-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button>
+                </>
+              )}
+              {canDeleteShift(selectedShift) && !drawerDeleteConfirm && (
+                <button type="button" onClick={() => setDrawerDeleteConfirm(true)}
+                  className="flex-1 flex items-center justify-center rounded-lg bg-rose-600/20 px-2 py-2 text-rose-300 hover:bg-rose-600/30 transition-colors" title={t.delete ?? 'Elimina'}>
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+              {canDeleteShift(selectedShift) && drawerDeleteConfirm && (
+                <div className="flex-1 flex items-center justify-center gap-1.5">
+                  <button type="button" onClick={() => setDrawerDeleteConfirm(false)}
+                    className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] font-bold text-white/70 hover:bg-white/20 transition-colors whitespace-nowrap">
+                    {t.cancel ?? 'Annulla'}
+                  </button>
+                  <button type="button" onClick={() => void handleDeleteShift(selectedShift, { skipConfirm: true })}
+                    className="rounded-lg bg-rose-600 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-rose-700 transition-colors whitespace-nowrap">
+                    {t.wst_confirm_delete_btn ?? 'Conferma elimina'}
+                  </button>
+                </div>
+              )}
+              {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
+                <button type="button" onClick={() => handleFreezeShift(selectedShift)}
+                  className="flex-1 flex items-center justify-center rounded-lg bg-emerald-600/20 px-2 py-2 text-emerald-300 hover:bg-emerald-600/30 transition-colors" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
+                  <Unlock className="h-4 w-4" />
+                </button>
+              )}
+              {isAdminOnly(currentUser) && shiftAuditEntries && shiftAuditEntries.length > 0 && (
+                <button type="button" onClick={() => setShowShiftAuditModal(true)}
+                  className="flex-1 flex items-center justify-center rounded-lg bg-white/10 px-2 py-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors"
+                  title={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
+                  aria-label={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}>
+                  <History className="h-4 w-4" />
+                </button>
+              )}
+              <button type="button" onClick={handleCloseDrawer} className="flex-1 flex items-center justify-center rounded-lg bg-white/10 px-2 py-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors"><X className="h-4 w-4" /></button>
+            </div>
+
+            {/* Riga principale: nome/data (mobile: sotto i pulsanti) */}
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="min-w-0 flex flex-wrap items-baseline gap-x-1.5">
+                <h3 className="text-base md:text-sm font-bold text-white">{selectedUser?.first_name ?? ''} {selectedUser?.last_name ?? ''}</h3>
                 {drawerIsExtraShift && (
                   <span className="inline-block mt-0.5 rounded-md bg-accent/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent">
                     {t.extra_shift ?? 'Turno aggiuntivo'}
                   </span>
                 )}
-                <p className="text-[11px] text-white font-semibold mt-1 uppercase">{format(parseISO(selectedShift.date), 'EEEE d MMMM', { locale })} — {selectedShift.start_time?.slice(0, 5)}-{selectedShift.end_time?.slice(0, 5)}</p>
+                <p className="text-xs md:text-[11px] text-white font-semibold uppercase">· {format(parseISO(selectedShift.date), 'EEEE d MMMM', { locale })} — {selectedShift.start_time?.slice(0, 5)}-{selectedShift.end_time?.slice(0, 5)}</p>
               </div>
-              <div className="flex items-center gap-2">
-                {(() => {
-                  const dayShifts = weekShifts
-                    .filter(s => s.user_id === selectedShift.user_id && s.date === selectedShift.date)
-                    .sort((a, b) => (a.start_time ?? '').localeCompare(b.start_time ?? ''));
-                  if (dayShifts.length <= 1) return null;
-                  return (
-                    <div className="flex flex-wrap gap-1">
-                      {dayShifts.map(s => {
-                        const isActive = s.id === selectedShift.id;
-                        return (
-                          <div
-                            key={s.id}
-                            className={`rounded-md px-2 py-1 text-[10px] font-bold tabular-nums ${isActive ? 'bg-accent text-white' : 'bg-white/10 text-white/60'}`}
-                          >
-                            {formatShiftTimeRangeFull(s.start_time, s.end_time)}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })()}
+              <div className="hidden md:flex shrink-0 items-center gap-2">
                 {reviewQueue && (
                   <>
                     <span className="text-[10px] font-bold text-white/50 tabular-nums">{reviewIdx + 1}/{reviewQueue.length}</span>
@@ -2022,57 +2036,96 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     <button type="button" disabled={reviewIdx >= reviewQueue.length - 1} onClick={() => { const next = reviewIdx + 1; if (next < reviewQueue.length) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-4 w-4" /></button>
                   </>
                 )}
-                {canDeleteShift(selectedShift) && !drawerDeleteConfirm && (
-                  <button type="button" onClick={() => setDrawerDeleteConfirm(true)}
-                    className="rounded-lg bg-rose-600/20 p-2 text-rose-300 hover:bg-rose-600/30 transition-colors" title={t.delete ?? 'Elimina'}>
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
-                {canDeleteShift(selectedShift) && drawerDeleteConfirm && (
-                  <div className="flex items-center gap-1.5">
-                    <button type="button" onClick={() => setDrawerDeleteConfirm(false)}
-                      className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] font-bold text-white/70 hover:bg-white/20 transition-colors whitespace-nowrap">
-                      {t.cancel ?? 'Annulla'}
+                {/* Desktop: chip turni + azioni a icona */}
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const dayShifts = weekShifts
+                      .filter(s => s.user_id === selectedShift.user_id && s.date === selectedShift.date)
+                      .sort((a, b) => (a.start_time ?? '').localeCompare(b.start_time ?? ''));
+                    if (dayShifts.length <= 1) return null;
+                    return (
+                      <div className="flex flex-wrap gap-1">
+                        {dayShifts.map(s => {
+                          const isActive = s.id === selectedShift.id;
+                          return (
+                            <div
+                              key={s.id}
+                              className={`rounded-md px-2 py-1 text-[10px] font-bold tabular-nums ${isActive ? 'bg-accent text-white' : 'bg-white/10 text-white/60'}`}
+                            >
+                              {formatShiftTimeRangeFull(s.start_time, s.end_time)}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+                  {canDeleteShift(selectedShift) && !drawerDeleteConfirm && (
+                    <button type="button" onClick={() => setDrawerDeleteConfirm(true)}
+                      className="rounded-lg bg-rose-600/20 p-2 text-rose-300 hover:bg-rose-600/30 transition-colors" title={t.delete ?? 'Elimina'}>
+                      <Trash2 className="h-4 w-4" />
                     </button>
-                    <button type="button" onClick={() => void handleDeleteShift(selectedShift, { skipConfirm: true })}
-                      className="rounded-lg bg-rose-600 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-rose-700 transition-colors whitespace-nowrap">
-                      {t.wst_confirm_delete_btn ?? 'Conferma elimina'}
+                  )}
+                  {canDeleteShift(selectedShift) && drawerDeleteConfirm && (
+                    <div className="flex items-center gap-1.5">
+                      <button type="button" onClick={() => setDrawerDeleteConfirm(false)}
+                        className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] font-bold text-white/70 hover:bg-white/20 transition-colors whitespace-nowrap">
+                        {t.cancel ?? 'Annulla'}
+                      </button>
+                      <button type="button" onClick={() => void handleDeleteShift(selectedShift, { skipConfirm: true })}
+                        className="rounded-lg bg-rose-600 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-rose-700 transition-colors whitespace-nowrap">
+                        {t.wst_confirm_delete_btn ?? 'Conferma elimina'}
+                      </button>
+                    </div>
+                  )}
+                  {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
+                    <button type="button" onClick={() => handleFreezeShift(selectedShift)}
+                      className="rounded-lg bg-emerald-600/20 p-2 text-emerald-300 hover:bg-emerald-600/30 transition-colors" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
+                      <Unlock className="h-4 w-4" />
                     </button>
-                  </div>
-                )}
-                {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
-                  <button type="button" onClick={() => handleFreezeShift(selectedShift)}
-                    className="rounded-lg bg-emerald-600/20 p-2 text-emerald-300 hover:bg-emerald-600/30 transition-colors" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
-                    <Unlock className="h-4 w-4" />
-                  </button>
-                )}
-                {isAdminOnly(currentUser) && shiftAuditEntries && shiftAuditEntries.length > 0 && (
-                  <button type="button" onClick={() => setShowShiftAuditModal(true)}
-                    className="rounded-lg bg-white/10 p-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-                    title={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
-                    aria-label={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}>
-                    <History className="h-4 w-4" />
-                  </button>
-                )}
-                <button type="button" onClick={handleCloseDrawer} className="ml-2 rounded-lg bg-white/10 p-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><X className="h-4 w-4" /></button>
+                  )}
+                  {isAdminOnly(currentUser) && shiftAuditEntries && shiftAuditEntries.length > 0 && (
+                    <button type="button" onClick={() => setShowShiftAuditModal(true)}
+                      className="rounded-lg bg-white/10 p-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+                      title={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
+                      aria-label={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}>
+                      <History className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <button type="button" onClick={handleCloseDrawer} className="rounded-lg bg-white/10 p-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><X className="h-4 w-4" /></button>
               </div>
             </div>
             </div>
-            <div className="flex-1 grid grid-cols-2 gap-3 min-h-0 overflow-y-auto">
+            <div className="flex-1 grid min-w-0 grid-cols-1 md:grid-cols-2 gap-3 min-h-0 overflow-y-auto md:overflow-visible">
               {/* Left column: Time editing, Status (no dept), Breaks */}
-              <div className="space-y-3">
-                <div className={`rounded-xl p-3 space-y-2 ${isFrozen(selectedShift) ? 'bg-gradient-to-br from-emerald-500/15 to-teal-600/10' : selectedShift.approval_status === 'approved' ? 'bg-gradient-to-br from-emerald-500/15 to-teal-600/10' : selectedShift.approval_status === 'confirmed' ? 'bg-gradient-to-br from-cyan-500/15 to-blue-600/10' : 'bg-gradient-to-br from-neutral-500/15 to-slate-600/10'}`}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider">{t.status ?? 'Stato'}</span>
-                    <span className={`text-[11px] font-bold uppercase tracking-wider ${selectedShift.approval_status === 'approved' ? 'text-emerald-400' : selectedShift.approval_status === 'frozen' ? 'text-amber-400' : selectedShift.approval_status === 'confirmed' ? 'text-cyan-300' : 'text-white/70'}`}>
-                      {selectedShift.approval_status === 'approved' ? (t.status_approved ?? 'Approvato') : 
-                        selectedShift.approval_status === 'frozen' ? (t.wst_frozen_badge ?? 'Congelato') :
-                        selectedShift.approval_status === 'confirmed' ? (t.status_confirmed ?? 'Pubblicato') :
-                        selectedShift.approval_status === 'draft' ? (t.status_draft ?? 'Bozza') :
-                        selectedShift.approval_status}
-                    </span>
-                  </div>
-                </div>
+              <div className="min-w-0 space-y-3">
+                {(() => {
+                  // Stessa colorazione della cella nella tabella turni
+                  const sFrozen = isFrozen(selectedShift);
+                  const status = selectedShift.approval_status;
+                  let borderColor = 'border-cyan-400/50';
+                  let bgColor = 'bg-white/[0.06]';
+                  let textColor = 'text-cyan-300';
+                  if (status === 'draft') { borderColor = 'border-blue-400/60'; bgColor = 'bg-white/[0.08]'; textColor = 'text-blue-300'; }
+                  else if (status === 'approved') { borderColor = 'border-emerald-400/60'; bgColor = 'bg-emerald-500/10'; textColor = 'text-emerald-300'; }
+                  else if (status === 'absent') { borderColor = 'border-rose-400/60'; bgColor = 'bg-rose-500/10'; textColor = 'text-rose-300'; }
+                  if (sFrozen) { borderColor = 'border-emerald-400/80'; bgColor = 'bg-emerald-600/25'; textColor = 'text-emerald-300'; }
+                  return (
+                    <div className={`rounded-xl border p-3 space-y-2 ${borderColor} ${bgColor} ${status !== 'approved' && !sFrozen ? 'border-dashed' : ''}`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider">{t.status ?? 'Stato'}</span>
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${textColor}`}>
+                          {status === 'approved' ? (t.status_approved ?? 'Approvato') :
+                            sFrozen ? (t.wst_frozen_badge ?? 'Congelato') :
+                            status === 'confirmed' ? (t.status_confirmed ?? 'Pubblicato') :
+                            status === 'draft' ? (t.status_draft ?? 'Bozza') :
+                            status === 'absent' ? 'Non ha lavorato' :
+                            status}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
                 {canEdit && (selectedShift.approval_status === 'draft' || selectedShift.approval_status === 'confirmed') && (
                   <div className="rounded-xl bg-gradient-to-br from-sky-500/10 to-blue-600/10 p-3 space-y-3">
                     <div>
@@ -2084,57 +2137,19 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       <TimeInputField value={editEndTime} onChange={setEditEndTime} size="md" className="w-full" disabled={selectedShift.approval_status === 'confirmed'} />
                     </div>
                     <button type="button" onClick={handleSaveShiftEdit} disabled={saving || selectedShift.approval_status === 'confirmed'}
-                      className="w-full rounded-lg bg-accent px-4 py-2.5 text-[11px] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                      style={{ ['--glow' as string]: 'var(--brand)' }}
+                      className="glow-pulse w-full rounded-lg bg-accent px-4 py-2.5 text-[11px] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                       {saving ? (t.saving ?? 'Salvataggio...') : <><Save className="h-3.5 w-3.5 inline-block mr-1.5" />{t.save_changes ?? 'Salva modifiche'}</>}
                     </button>
                   </div>
                 )}
-                {selectedShift && (() => {
-                  const { in: punchIn, out: punchOut } = getPunchForShift(selectedShift);
-                  const hasActual = !!(punchIn?.calculated_time || punchIn?.timestamp) && !!(punchOut?.calculated_time || punchOut?.timestamp);
-                  const actualStart = hasActual ? (punchIn!.calculated_time || punchIn!.timestamp) : null;
-                  const actualEnd = hasActual ? (punchOut!.calculated_time || punchOut!.timestamp) : null;
-                  const grossMins = actualStart && actualEnd
-                    ? (() => {
-                        const startMs = new Date(actualStart).getTime();
-                        let endMs = new Date(actualEnd).getTime();
-                        if (endMs <= startMs) endMs += 24 * 60 * 60 * 1000;
-                        return (endMs - startMs) / 60000;
-                      })()
-                    : calculateShiftMinutesGross(selectedShift.start_time ?? '', selectedShift.end_time ?? '');
-                  const shiftUser = users.find((u) => u.id === selectedShift.user_id);
-                  const breakMins = getBreakMinutesForShift({ ...selectedShift, deduct_break: deductBreak }, grossMins, shiftUser ?? null, breakRules,
-                    editIn && editOut ? { breakRuleWindow: { start: editIn, end: editOut } } : undefined);
-                  const netMins = Math.max(0, grossMins - breakMins);
-                  const _hasAutoBreak = grossMins >= AUTO_BREAK_THRESHOLD_MINUTES && isAutoBreak;
-                  return (
-                    <div className="space-y-3">
-                      <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-pink-600/10 p-3 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider">{t.gross_hours ?? 'Ore lorde'}</span>
-                          <span className="text-[11px] font-bold text-white tabular-nums">{formatMinutesToHoursAndMinutes(grossMins)}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider">{t.break_deduction ?? 'Detrazione pausa'}</span>
-                          <span className="text-[11px] font-bold text-amber-400 tabular-nums">-{breakMins}'</span>
-                        </div>
-                        <div className="border-t border-white/10 pt-2 flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-white/70 uppercase tracking-wider">{t.net_hours ?? 'Ore nette'}</span>
-                          <span className="text-sm font-black text-emerald-400 tabular-nums">{formatMinutesToHoursAndMinutes(netMins)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
               </div>
               {/* Right column: Punches — hidden for draft shifts */}
-              <div className="space-y-3">
+              <div className="min-w-0 flex flex-col space-y-3">
                 {selectedShift && selectedShift.approval_status !== 'draft' && (() => {
                   const { in: punchIn, out: punchOut } = getPunchForShift(selectedShift);
                   const hasIn = !!punchIn; const hasOut = !!punchOut;
                   const showEditFields = canEdit && !isFrozen(selectedShift);
-                  const grossMins = calculateShiftMinutesGross(selectedShift.start_time ?? '', selectedShift.end_time ?? '');
-                  const _hasAutoBreak = grossMins >= AUTO_BREAK_THRESHOLD_MINUTES && isAutoBreak;
                   return (
                     <div className="space-y-3">
                       <div className={`flex items-center gap-2 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-600/10 p-3 ${(!hasIn && !hasOut) ? 'border-2 border-amber-500/60 animate-pulse' : ''}`}>
@@ -2163,7 +2178,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                               <TimeInputField value={editOut} onChange={setEditOut} size="md" hourInputRef={editOutHourRef} className={`w-full ${editOut ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
                             </div>
                             <button type="button" onClick={() => void handleConfirmPunches()} disabled={saving || (!editIn && !editOut)}
-                              className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[11px] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider">
+                              style={{ ['--glow' as string]: 'rgba(16,185,129,0.45)' }}
+                              className="glow-pulse w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[11px] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider">
                               <Check className="h-3.5 w-3.5 inline-block mr-1.5" />{t.confirm_punches ?? 'Conferma timbrature'}
                             </button>
                           </>
@@ -2183,34 +2199,94 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                           </div>
                         )}
                       </div>
-                      {!isFrozen(selectedShift) && (
-                      <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-pink-600/10 p-3 space-y-2">
-                        <label ref={deductBreakLabelRef} className="flex items-center gap-3 cursor-pointer" aria-label={t.deduct_break_label ?? 'Detrae pausa'}>
-                            <input type="checkbox" checked={deductBreak} onChange={handleDeductBreakToggle}
-                              className="w-4 h-4 rounded border-white/30 bg-white/10 accent-accent" />
-                            <div>
-                              <span className="text-[11px] font-bold text-white">{t.deduct_break_label ?? 'Detrae pausa'}</span>
-                              <p className="text-[9px] text-white/40">{deductBreak ? (t.break_deducted_readout ?? 'La pausa viene detratta dalle ore nette.') : (t.break_not_deducted ?? 'Pausa non detratta.')}</p>
-                            </div>
-                          </label>
-                          {deductBreak && _hasAutoBreak && (
-                            <label ref={autoBreakLabelRef} className="flex items-center gap-3 cursor-pointer ml-4 mt-1" aria-label={t.auto_break_label ?? 'Pausa automatica (≥6h)'}>
-                              <input type="checkbox" checked={isAutoBreak} onChange={handleAutoBreakToggle}
-                                className="w-4 h-4 rounded border-white/30 bg-white/10 accent-accent" />
-                              <div>
-                                <span className="text-[10px] font-bold text-amber-400">{t.auto_break_label ?? 'Pausa automatica (≥6h)'}</span>
-                                <p className="text-[8px] text-white/40">{t.auto_break_hint ?? 'Turni di almeno 6 ore: -30 min per fascia pasto'}</p>
-                              </div>
-                            </label>
-                          )}
-                      </div>
-                      )}
                     </div>
                   );
                 })()}
               </div>
+              {/* Componente unico in basso: riepilogo ore + detrae pausa */}
+              {selectedShift && (() => {
+                const { in: punchIn, out: punchOut } = getPunchForShift(selectedShift);
+                const hasActual = !!(punchIn?.calculated_time || punchIn?.timestamp) && !!(punchOut?.calculated_time || punchOut?.timestamp);
+                const actualStart = hasActual ? (punchIn!.calculated_time || punchIn!.timestamp) : null;
+                const actualEnd = hasActual ? (punchOut!.calculated_time || punchOut!.timestamp) : null;
+                const grossMins = actualStart && actualEnd
+                  ? (() => {
+                      const startMs = new Date(actualStart).getTime();
+                      let endMs = new Date(actualEnd).getTime();
+                      if (endMs <= startMs) endMs += 24 * 60 * 60 * 1000;
+                      return (endMs - startMs) / 60000;
+                    })()
+                  : calculateShiftMinutesGross(selectedShift.start_time ?? '', selectedShift.end_time ?? '');
+                const shiftUser = users.find((u) => u.id === selectedShift.user_id);
+                const breakMins = getBreakMinutesForShift({ ...selectedShift, deduct_break: deductBreak }, grossMins, shiftUser ?? null, breakRules,
+                  editIn && editOut ? { breakRuleWindow: { start: editIn, end: editOut } } : undefined);
+                const netMins = Math.max(0, grossMins - breakMins);
+                const _hasAutoBreak = grossMins >= AUTO_BREAK_THRESHOLD_MINUTES && isAutoBreak;
+                const frozen = isFrozen(selectedShift);
+                return (
+                  <div className="col-span-1 md:col-span-2">
+                    <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-pink-600/10 px-3 py-2">
+                      <div className="flex min-h-[38px] items-center justify-between gap-3">
+                        {/* Lato sinistro: riepilogo ore */}
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="text-sm font-bold text-white tabular-nums" title={t.gross_hours ?? 'Ore lorde'}>{formatMinutesToHoursAndMinutes(grossMins)}</span>
+                          <span className="text-sm text-white/25">→</span>
+                          <span className="text-sm font-black text-emerald-400 tabular-nums" title={t.net_hours ?? 'Ore nette'}>{formatMinutesToHoursAndMinutes(netMins)}</span>
+                          {breakMins > 0 && (
+                            <span className="text-sm font-bold text-amber-400 tabular-nums" title={t.break_deduction ?? 'Detrazione pausa'}>−{breakMins}'</span>
+                          )}
+                        </div>
+                        {/* Lato destro: pulsante Salva (affianco alla spunta) + toggle pausa */}
+                        {!frozen && (
+                          <div className="flex shrink-0 items-center gap-3">
+                            <AnimatePresence>
+                              {breakUnsaved && (
+                                <motion.button
+                                  type="button" onClick={() => void handleSaveBreakSettings()} disabled={saving}
+                                  initial={{ opacity: 0, scale: 0.6, y: 6 }}
+                                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                                  exit={{ opacity: 0, scale: 0.6, y: 6 }}
+                                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                                  style={{ ['--glow' as string]: 'rgba(52,211,153,0.45)' }}
+                                  className="glow-pulse hidden md:flex shrink-0 items-center rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider disabled:opacity-40"
+                                >
+                                  {saving ? (t.saving ?? 'Salvataggio...') : <><Check className="h-3 w-3 inline-block mr-1" />{t.save ?? 'Salva'}</>}
+                                </motion.button>
+                              )}
+                            </AnimatePresence>
+                            <label className="flex items-center gap-2 cursor-pointer" aria-label={t.deduct_break_label ?? 'Detrae pausa'}>
+                              <input type="checkbox" checked={deductBreak} onChange={handleDeductBreakToggle}
+                                className="w-4 h-4 rounded border-white/30 bg-white/10 accent-accent" />
+                              {breakUnsaved ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.preventDefault(); void handleSaveBreakSettings(); }}
+                                  disabled={saving}
+                                  style={{ ['--glow' as string]: 'rgba(52,211,153,0.45)' }}
+                                  className="glow-pulse md:hidden rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider disabled:opacity-40"
+                                >
+                                  {saving ? (t.saving ?? 'Salvataggio...') : <><Check className="h-3 w-3 inline-block mr-1" />{t.save ?? 'Salva'}</>}
+                                </button>
+                              ) : (
+                                <span className="text-sm font-bold text-white whitespace-nowrap">{t.deduct_break_label ?? 'Detrae pausa'}</span>
+                              )}
+                            </label>
+                            {deductBreak && _hasAutoBreak && (
+                              <label className="flex items-center gap-2 cursor-pointer" aria-label={t.auto_break_label ?? 'Pausa automatica (≥6h)'}>
+                                <input type="checkbox" checked={isAutoBreak} onChange={handleAutoBreakToggle}
+                                  className="w-4 h-4 rounded border-white/30 bg-white/10 accent-accent" />
+                                <span className="text-[10px] font-bold text-amber-400 whitespace-nowrap">{t.auto_break_label ?? 'Pausa automatica (≥6h)'}</span>
+                              </label>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
               {/* Bottom row: Action buttons */}
-              <div className="col-span-2 flex flex-wrap gap-2">
+              <div className="col-span-1 md:col-span-2 flex flex-wrap gap-2">
                 {canEdit && isFrozen(selectedShift) && (
                   <button type="button" onClick={() => handleUnfreezeShift(selectedShift)}
                     className="ml-auto flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-2 text-[11px] font-bold text-accent hover:bg-accent/30 transition-colors border border-transparent hover:border-accent/30">
@@ -2219,7 +2295,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 )}
               </div>
             </div>
-            </div>
+            </motion.div>
         </div>,
         document.body
       )}
@@ -2229,7 +2305,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         <div className="fixed inset-0 z-[10051] flex items-center justify-center px-4" onClick={() => setShowShiftAuditModal(false)}>
           <div className="absolute inset-0 bg-black/40" />
           <div
-            className="relative z-10 flex max-h-[82vh] w-full max-w-xl flex-col rounded-2xl p-4 shadow-2xl"
+            className="relative z-10 flex h-[70vh] max-h-[82vh] w-full max-w-xl flex-col rounded-2xl p-4 shadow-2xl"
             style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08)' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -2249,13 +2325,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="max-h-[calc(82vh-64px)] space-y-1.5 overflow-y-auto pr-1">
-              {/* Intestazione tabella: Modifica | Dettaglio | Autore */}
-              <div className="grid grid-cols-[minmax(110px,auto)_1fr_auto] items-center gap-2.5 px-3 text-[10px] font-bold uppercase tracking-wider text-white/60">
-                <span>{(t as Record<string, string>).audit_col_change ?? 'Modifica'}</span>
-                <span>{(t as Record<string, string>).audit_col_detail ?? 'Dettaglio'}</span>
-                <span className="justify-self-end">{(t as Record<string, string>).audit_col_author ?? 'Autore'}</span>
-              </div>
+            {/* Intestazione tabella — sempre visibile (fuori dallo scroll) */}
+            <div className="mb-1 grid grid-cols-[minmax(110px,auto)_1fr_auto] items-center gap-2.5 px-3 text-[10px] font-bold uppercase tracking-wider text-white/60">
+              <span>{(t as Record<string, string>).audit_col_change ?? 'Modifica'}</span>
+              <span>{(t as Record<string, string>).audit_col_detail ?? 'Dettaglio'}</span>
+              <span className="justify-self-end">{(t as Record<string, string>).audit_col_author ?? 'Autore'}</span>
+            </div>
+            <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
               {(() => {
                 const tv = t as Record<string, string>;
                 const actionLabel: Record<string, string> = {
@@ -2287,6 +2363,18 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   is_auto_break: tv.field_is_auto_break ?? 'Pausa automatica',
                   type: tv.field_type ?? 'Tipo turno',
                 };
+                // Colore associato a ogni campo: stesso schema di colori della modale del turno
+                const fieldColor: Record<string, string> = {
+                  start_time: 'bg-sky-500/25 text-sky-300',
+                  end_time: 'bg-blue-500/25 text-blue-300',
+                  date: 'bg-indigo-500/25 text-indigo-300',
+                  user_id: 'bg-fuchsia-500/25 text-fuchsia-300',
+                  approval_status: 'bg-cyan-500/25 text-cyan-300',
+                  punch_confirm: 'bg-amber-500/25 text-amber-300',
+                  deduct_break: 'bg-violet-500/25 text-violet-300',
+                  is_auto_break: 'bg-pink-500/25 text-pink-300',
+                  type: 'bg-teal-500/25 text-teal-300',
+                };
                 // Descrizione leggibile: date ISO → GG/MM/AAAA (ovunque) e orari senza secondi
                 const prettyDesc = (d?: string | null) =>
                   (d ?? '')
@@ -2304,10 +2392,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     : '';
                 return shiftAuditEntries.map((entry) => {
                   const hasField = !!entry.field && entry.old_value !== undefined && entry.new_value !== undefined && entry.old_value !== entry.new_value;
+                  const chipClass = hasField && entry.field
+                    ? (fieldColor[entry.field] ?? 'bg-sky-500/25 text-sky-300')
+                    : (actionColor[entry.action] ?? 'bg-white/15 text-white/85');
                   return (
                     <div key={entry.id} className="grid grid-cols-[minmax(110px,auto)_1fr_auto] items-center gap-2.5 rounded-lg border border-white/15 px-3 py-2 uppercase">
                       {/* Col 1: la modifica effettuata (es. "Ora inizio"); senza campo, l'azione (es. "Creato") */}
-                      <span className={`justify-self-start rounded-full px-2 py-1 text-[11px] font-bold ${hasField ? 'bg-sky-500/25 text-sky-300' : (actionColor[entry.action] ?? 'bg-white/15 text-white/85')}`}>
+                      <span className={`justify-self-start rounded-full px-2 py-1 text-[11px] font-bold ${chipClass}`}>
                         {hasField ? fieldLabel(entry.field) : (actionLabel[entry.action] ?? entry.action)}
                       </span>
                       {/* Col 2: dettaglio del cambio (il campo è già nel chip in col 1) */}
@@ -2562,33 +2653,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             void handlePinConfirm();
           }}
         />
-      )}
-
-      {/* Fumetto "Salvato" — sopra il campo modificato (come nella sezione Profilo) */}
-      {createPortal(
-        <AnimatePresence>
-          {savedBubble && savedBubblePos && (
-            <motion.div
-              initial={{ opacity: 0, y: 6, scale: 0.92 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -4, scale: 0.92 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="fixed z-[10060] pointer-events-none"
-              style={{
-                top: `${savedBubblePos.top}px`,
-                left: `${savedBubblePos.left}px`,
-                transform: 'translate(-100%, 0)',
-              }}
-            >
-              <span className="relative inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-xl shadow-emerald-500/30" style={{ marginTop: 6 }}>
-                <span className="absolute -top-[5px] right-3 w-0 h-0 border-l-[5px] border-r-[5px] border-b-[6px] border-l-transparent border-r-transparent border-b-emerald-500" />
-                <Check className="h-3 w-3" strokeWidth={3} />
-                {(t as Record<string, string>).saved_label ?? 'Salvato'}
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
       )}
     </div>
   );
