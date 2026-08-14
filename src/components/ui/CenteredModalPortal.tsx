@@ -83,10 +83,10 @@ className={`absolute inset-0 bg-black/40 backdrop-blur-md ${disableBackdropClose
             role="dialog"
             aria-modal="true"
             aria-label={ariaLabel}
-            initial={{ scale: 0.85, opacity: 0, y: 40 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 28, mass: 0.8 }}
+            initial={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className={`relative z-10 ${panelWidthClass} ${maxWidthClass} ${maxHeightClass} overflow-y-auto overscroll-contain rounded-2xl modal-glass-panel ${panelClassName}`.trim()}
             style={panelStyle}
             onClick={(e) => e.stopPropagation()}

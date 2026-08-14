@@ -32,6 +32,10 @@ interface Props {
    * `standalone`: vista gestione da App (tab Timesheet) con sottovista completa.
    */
   variant?: 'standalone' | 'embedded';
+  /** `embedded` sotto StaffPersonalDashboard: nasconde la navbar interna (la navigazione è nel parent). */
+  hideNavBar?: boolean;
+  /** `embedded`: espande sempre la settimana (niente accordion collassato). */
+  forceExpanded?: boolean;
 }
 
 type NavMode = 'week' | 'period';
@@ -85,16 +89,21 @@ function punchLabel(pr: PunchRecord): string {
 function ShiftStatusBadge({ shift, t }: { shift: Shift; t: Record<string, string> }) {
   const isAbsent = shift.approval_status === 'absent';
   const isDraft  = shift.approval_status === 'draft';
+  const isApproved = shift.approval_status === 'approved';
   const cls = isAbsent
     ? 'text-red-400 border-red-500/30 bg-red-500/15'
     : isDraft
-      ? 'text-white/55 border-white/10 bg-white/8'
-      : 'text-white/70 border-white/20 bg-white/10';
+      ? 'text-amber-300 border-amber-500/30 bg-amber-500/15'
+      : isApproved
+        ? 'text-emerald-300 border-emerald-500/30 bg-emerald-500/15'
+        : 'text-cyan-300 border-cyan-500/30 bg-cyan-500/15';
   const label = isAbsent
     ? (t.status_absent ?? 'Assente')
     : isDraft
       ? (t.status_draft ?? 'Bozza')
-      : (t.shifts_confirmed ?? 'Pubblicato');
+      : isApproved
+        ? (t.ts_status_approved ?? 'Approvato')
+        : (t.shifts_confirmed ?? 'Pubblicato');
   return (
     <span className={`text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border shrink-0 ${cls}`}>
       {label}
@@ -102,9 +111,20 @@ function ShiftStatusBadge({ shift, t }: { shift: Shift; t: Record<string, string
   );
 }
 
+/** Pallino colore per stato del turno (griglia settimana mobile). */
+function statusDotColor(status: string | undefined): string {
+  switch (status) {
+    case 'approved': return 'bg-emerald-400';
+    case 'confirmed': return 'bg-cyan-400';
+    case 'draft': return 'bg-amber-400';
+    case 'absent': return 'bg-red-400';
+    default: return 'bg-white/40';
+  }
+}
+
 /* ── Sezione personale ─────────────────────────────────────────────────── */
 function MyTimesheetSection({
-  myShifts, myPunches, locale, dayLetters, language, t, plannedOnly,
+  myShifts, myPunches, locale, dayLetters, language, t, plannedOnly, forceExpanded = false,
 }: {
   myShifts: Shift[];
   myPunches: PunchRecord[];
@@ -113,6 +133,7 @@ function MyTimesheetSection({
   language: string;
   t: Record<string, string>;
   plannedOnly?: boolean;
+  forceExpanded?: boolean;
 }) {
   const cardBg = { background: 'transparent' };
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
@@ -173,8 +194,8 @@ function MyTimesheetSection({
           !(byDay[format(d, 'yyyy-MM-dd')] ?? []).some(s => s.approval_status !== 'absent')
         ).length;
         const isCurrentWeek = wIdx === currentWeekIdx;
-        // Current week expanded by default; others collapsed by default
-        const isOpen = isCurrentWeek ? !expandedWeeks.has(wIdx) : expandedWeeks.has(wIdx);
+        // Current week expanded by default; others collapsed by default (forceExpanded: sempre aperte)
+        const isOpen = forceExpanded || (isCurrentWeek ? !expandedWeeks.has(wIdx) : expandedWeeks.has(wIdx));
         const isDayInThisWeek = selectedDayKey !== null && weekDays.some(d => format(d, 'yyyy-MM-dd') === selectedDayKey);
 
         // Compact single-row for non-current collapsed weeks
@@ -260,6 +281,13 @@ function MyTimesheetSection({
                         {shiftCount > 0 && (
                           <span className="text-[13px] font-black text-white leading-none drop-shadow-sm">
                             {shiftCount}
+                          </span>
+                        )}
+                        {shiftCount > 0 && (
+                          <span className="flex gap-0.5 mt-1">
+                            {dayShifts.filter(s => s.approval_status !== 'absent').slice(0, 4).map(s => (
+                              <span key={s.id} className={`w-1.5 h-1.5 rounded-full ${statusDotColor(s.approval_status)}`} />
+                            ))}
                           </span>
                         )}
                         {isAbsent && <span className="text-[11px] font-bold text-red-500 opacity-80">—</span>}
@@ -529,6 +557,8 @@ export default function ManagementMobileTimesheet({
   language,
   plannedOnly,
   variant = 'standalone',
+  hideNavBar = false,
+  forceExpanded = false,
 }: Props) {
   const locale = getLocale(language);
   const t = getTranslations(language as 'it' | 'en' | 'es') as Record<string, string>;
@@ -542,16 +572,19 @@ export default function ManagementMobileTimesheet({
 
   // Persiste l'offset in sessionStorage per sincronizzazione con Statistics
   useEffect(() => {
+    if (hideNavBar) return;
     sessionStorage.setItem('osteria_staff_nav_offset', String(navOffset));
-  }, [navOffset]);
+  }, [navOffset, hideNavBar]);
 
   // Invia evento per sincronizzare in tempo reale con Statistics
   useEffect(() => {
+    if (hideNavBar) return;
     window.dispatchEvent(new CustomEvent('osteria-staff-nav-offset', { detail: navOffset }));
-  }, [navOffset]);
+  }, [navOffset, hideNavBar]);
 
   // Ascolta cambiamenti di periodo da Statistics
   useEffect(() => {
+    if (hideNavBar) return;
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<number>).detail;
       if (typeof detail === 'number') {
@@ -561,7 +594,7 @@ export default function ManagementMobileTimesheet({
     };
     window.addEventListener('osteria-staff-nav-offset', handler);
     return () => window.removeEventListener('osteria-staff-nav-offset', handler);
-  }, []);
+  }, [hideNavBar]);
   const [tsView, setTsView] = useState<'presence' | 'stats'>('presence');
   const embedded = variant === 'embedded';
 
@@ -680,7 +713,8 @@ export default function ManagementMobileTimesheet({
             </div>
           )}
 
-      {/* Barra navigazione periodo */}
+      {/* Barra navigazione periodo (nascosta in modalità embedded controllata) */}
+      {!hideNavBar && (
       <div className="flex items-center gap-1.5 md:gap-2 mb-5 px-4">
         <button type="button" onClick={() => setNavOffset(0)}
           className="h-8 md:h-9 inline-flex items-center px-2 md:px-3 rounded-2xl border border-white/30 text-white/70 text-[10px] md:text-[11px] font-black uppercase tracking-widest shrink-0 active:bg-white/10 transition-colors">
@@ -701,6 +735,7 @@ export default function ManagementMobileTimesheet({
           </button>
         </div>
       </div>
+      )}
 
       <div className="flex flex-col gap-8 px-4">
 
@@ -710,10 +745,11 @@ export default function ManagementMobileTimesheet({
             <span className="text-[11px] font-black uppercase tracking-widest text-white/55">{t.my_attendance_label ?? 'Le mie presenze'}</span>
             {myShifts.length > 0 && <span className="text-[11px] font-black tabular-nums text-white/70">({myShifts.length})</span>}
           </div>
-          <MyTimesheetSection myShifts={myShifts} myPunches={myPunches} locale={locale} dayLetters={dayLetters} language={language} t={t} plannedOnly={plannedOnly} />
+          <MyTimesheetSection myShifts={myShifts} myPunches={myPunches} locale={locale} dayLetters={dayLetters} language={language} t={t} plannedOnly={plannedOnly} forceExpanded={forceExpanded} />
         </section>
 
-        {/* Team */}
+        {/* Team — solo in vista gestione standalone, non nella Presenze personale */}
+        {!embedded && (
         <section>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-[11px] font-black uppercase tracking-widest text-white/55">Team</span>
@@ -721,6 +757,7 @@ export default function ManagementMobileTimesheet({
           </div>
           <TeamTimesheetSection teamShifts={teamShifts} allPunches={teamPunches} users={users} locale={locale} language={language} t={t} plannedOnly={plannedOnly} />
         </section>
+        )}
 
       </div>
         </>

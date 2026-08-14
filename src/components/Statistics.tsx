@@ -31,6 +31,7 @@ import {
   getPeriodDateRange,
   prevPeriodConfig,
   nextPeriodConfig,
+  periodConfigContainingDate,
   type PeriodConfig,
 } from '../utils/periodConfig';
 import { formatMinutesToHoursAndMinutes } from '../utils/timeCalculations';
@@ -77,7 +78,7 @@ function getInitialDatesFromOffset(): { start: string; end: string } {
   return { start: r.startDate, end: r.endDate };
 }
 
-export default memo(function Statistics() {
+export default memo(function Statistics({ anchorDate = null }: { anchorDate?: string | null }) {
   const { users, currentUser, effectiveLanguage } = useAppUser();
   const { shifts, punchRecords } = useAppData();
   const { breakRules, featureFlags, departmentsRevision } = useAppConfig();
@@ -106,24 +107,35 @@ export default memo(function Statistics() {
   );
   const lockedDept = (!isAdmin && currentUser?.department) ? currentUser.department : null;
 
+  // ── Ancora opzionale: Statistiche ancorate alla settimana scelta in Presenze ──
+  const anchor = useMemo(() => {
+    if (!anchorDate) return null;
+    const d = parseISO(anchorDate);
+    return Number.isNaN(d.getTime()) ? null : startOfDay(d);
+  }, [anchorDate]);
+  const anchored = anchor != null;
+
   const [statsTab, setStatsTab] = useState<StatsTab>('period');
   /**
    * Offset di navigazione contestuale:
-   * - tab 'current_week': offset in settimane (0 = settimana corrente)
-   * - tab 'period': offset in periodi (0 = periodo salvato)
+   * - tab 'current_week': offset in settimane (0 = settimana base)
+   * - tab 'period': offset in periodi (0 = periodo base)
    */
   const [navOffset, setNavOffset] = useState(() => {
+    if (anchored) return 0;
     const saved = sessionStorage.getItem('osteria_staff_nav_offset');
     return saved ? Number(saved) : 0;
   });
 
   // Persiste l'offset in sessionStorage per condividerlo con Presenze
   useEffect(() => {
+    if (anchored) return;
     sessionStorage.setItem('osteria_staff_nav_offset', String(navOffset));
-  }, [navOffset]);
+  }, [navOffset, anchored]);
 
   // Sincronizza l'offset con la navigazione dalla scheda Presenze (StaffPersonalDashboard)
   useEffect(() => {
+    if (anchored) return;
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<number>).detail;
       if (typeof detail === 'number') {
@@ -133,34 +145,50 @@ export default memo(function Statistics() {
     };
     window.addEventListener('osteria-staff-nav-offset', handler);
     return () => window.removeEventListener('osteria-staff-nav-offset', handler);
-  }, []);
+  }, [anchored]);
 
   // Quando l'offset cambia in Statistiche, aggiorna anche la scheda Presenze
   useEffect(() => {
+    if (anchored) return;
     window.dispatchEvent(new CustomEvent('osteria-staff-nav-offset', { detail: navOffset }));
-  }, [navOffset]);
-  const [dateStart, setDateStart] = useState<string>(() => getInitialDatesFromOffset().start);
-  const [dateEnd, setDateEnd]     = useState<string>(() => getInitialDatesFromOffset().end);
-  const [deptFilter, setDeptFilter] = useState<string>(() => currentUser?.department ?? lockedDept ?? 'all');
-  const [showDeptMenu, setShowDeptMenu] = useState(false);
+  }, [navOffset, anchored]);
 
-  /** Calcola le date in base al tab attivo e all'offset. */
+  /** Calcola le date in base al tab attivo e all'offset (base ancorata se presente). */
   const getDatesForRange = useCallback((tab: StatsTab, offset: number): { start: string; end: string } => {
     const today = new Date();
     if (tab === 'current_week') {
-      const base = addWeeks(startOfWeek(today, { weekStartsOn: 1 }), offset);
+      const base = addWeeks(startOfWeek(anchor ?? today, { weekStartsOn: 1 }), offset);
       return {
         start: toDateOnly(base),
         end: toDateOnly(endOfWeek(base, { weekStartsOn: 1 })),
       };
     }
-    // tab === 'period': naviga per periodi rispetto al periodo salvato
-    let cfg: PeriodConfig = loadPeriodConfig();
+    // tab === 'period': naviga per periodi (base = periodo che contiene l'ancora se ancorato)
+    let cfg: PeriodConfig = anchored && anchor ? periodConfigContainingDate(anchor) : loadPeriodConfig();
     if (offset > 0) for (let i = 0; i < offset; i++) cfg = nextPeriodConfig(cfg);
     else if (offset < 0) for (let i = 0; i > offset; i--) cfg = prevPeriodConfig(cfg);
     const r = getPeriodDateRange(cfg);
     return { start: r.startDate, end: r.endDate };
-  }, []);
+  }, [anchor, anchored]);
+
+  const [dateStart, setDateStart] = useState<string>(() => {
+    if (anchored) return getDatesForRange('period', 0).start;
+    return getInitialDatesFromOffset().start;
+  });
+  const [dateEnd, setDateEnd]     = useState<string>(() => {
+    if (anchored) return getDatesForRange('period', 0).end;
+    return getInitialDatesFromOffset().end;
+  });
+  const [deptFilter, setDeptFilter] = useState<string>(() => currentUser?.department ?? lockedDept ?? 'all');
+  const [showDeptMenu, setShowDeptMenu] = useState(false);
+
+  // Se l'ancora cambia con Statistics montata, torna al mese ancorato
+  useEffect(() => {
+    if (anchored) {
+      setStatsTab('period');
+      setNavOffset(0);
+    }
+  }, [anchored]);
 
   // Riallinea il filtro quando cambia il reparto del profilo o il login
   useEffect(() => {

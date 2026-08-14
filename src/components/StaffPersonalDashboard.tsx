@@ -204,7 +204,7 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
 
 // ─── Desktop grid view for staff timesheet ────────────────────────────────────
 function StaffDesktopTimesheet({
-  shifts, punchRecords, user, breakRules, breakComputeOpts, language = 'it',
+  shifts, punchRecords, user, breakRules, breakComputeOpts, language = 'it', range,
 }: {
   shifts: Shift[];
   punchRecords: PunchRecord[];
@@ -212,6 +212,8 @@ function StaffDesktopTimesheet({
   breakRules: BreakRule[];
   breakComputeOpts: BreakMinutesComputeOptions;
   language?: Language;
+  /** Se presente: mostra solo la settimana indicata (una sola card). */
+  range?: { start: Date; end: Date };
 }) {
   const locale = getDateLocale(language) ?? itLocale;
   const t = getTranslations(language);
@@ -223,11 +225,15 @@ function StaffDesktopTimesheet({
     absent: { label: t.status_absent ?? 'Assente', Icon: XCircle, pill: 'shift-badge-absent' },
   } as const;
 
-  const history = shifts
-    .filter(s => s.date <= format(new Date(), 'yyyy-MM-dd'))
-    .sort((a, b) => b.date.localeCompare(a.date));
+  const history = range
+    ? shifts
+        .filter(s => isWithinInterval(parseISO(s.date), { start: range.start, end: range.end }))
+        .sort((a, b) => a.date.localeCompare(b.date))
+    : shifts
+        .filter(s => s.date <= format(new Date(), 'yyyy-MM-dd'))
+        .sort((a, b) => b.date.localeCompare(a.date));
 
-  if (history.length === 0) {
+  if (!range && history.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border border-slate-200">
@@ -334,6 +340,7 @@ function StaffDesktopTimesheet({
                       ) : dayShifts.map((shift) => {
                         const isAbsent = shift.approval_status === 'absent';
                         const isDraft = shift.approval_status === 'draft';
+                        const isApproved = shift.approval_status === 'approved';
                         const { start, end } = getResolvedStartEndForHours(shift, punchRecords);
                         const mins = getNetShiftMinutes(shift, start, end, user, breakRules, breakComputeOpts);
                         const hh = Math.floor(mins / 60);
@@ -341,11 +348,28 @@ function StaffDesktopTimesheet({
                         const hoursLabel = isAbsent ? '' : (mm > 0 ? `${hh}h ${mm}m` : `${hh}h`);
 
                         const statusCls = isDraft ? 'text-white/40' : 'text-white';
+                        const badgeCls = isAbsent
+                          ? 'bg-red-500/20 text-red-300'
+                          : isDraft
+                            ? 'bg-amber-500/20 text-amber-300'
+                            : isApproved
+                              ? 'bg-emerald-500/20 text-emerald-300'
+                              : 'bg-cyan-500/20 text-cyan-300';
+                        const badgeLabel = isAbsent
+                          ? (t.status_absent ?? 'Assente')
+                          : isDraft
+                            ? (t.status_draft ?? 'Bozza')
+                            : isApproved
+                              ? (t.ts_status_approved ?? 'Approvato')
+                              : (t.ts_status_confirmed ?? 'Pubblicato');
 
                         return (
                           <div key={shift.id} className="text-center">
                             {isAbsent ? (
-                              <p className="text-[11px] font-normal text-white/30 uppercase tracking-widest py-1">OFF</p>
+                              <>
+                                <p className="text-[11px] font-normal text-white/30 uppercase tracking-widest py-1">OFF</p>
+                                <span className={`inline-block rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wider ${badgeCls}`}>{badgeLabel}</span>
+                              </>
                             ) : (
                               <>
                                 <p className={`text-[13px] font-bold tabular-nums leading-tight ${statusCls}`}>
@@ -354,6 +378,7 @@ function StaffDesktopTimesheet({
                                 <p className="text-[11px] font-medium text-white/40">
                                   {hoursLabel}
                                 </p>
+                                <span className={`mt-0.5 inline-block rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wider ${badgeCls}`}>{badgeLabel}</span>
                               </>
                             )}
                           </div>
@@ -651,23 +676,44 @@ export default function StaffPersonalDashboard({
     [shiftsSortedMobile, mobileRange]
   );
 
-  const mobileTimesheetFiltered = useMemo(
-    () => visibleShifts.filter(s => {
-      const d = parseISO(s.date);
-      return isWithinInterval(d, { start: mobileRange.start, end: mobileRange.end });
-    }),
-    [visibleShifts, mobileRange]
+  // ── Scheda Presenze: una settimana alla volta (navigazione dedicata) ────────
+  const [presenceWeekOffset, setPresenceWeekOffset] = useState(() => {
+    const saved = sessionStorage.getItem('osteria_staff_presence_week_offset');
+    return saved ? Number(saved) : 0;
+  });
+
+  // Persiste l'offset settimana (chiave separata dal bus periodo condiviso)
+  useEffect(() => {
+    sessionStorage.setItem('osteria_staff_presence_week_offset', String(presenceWeekOffset));
+  }, [presenceWeekOffset]);
+
+  const presenceWeekRange = useMemo(
+    () => getMobileRange('week', presenceWeekOffset),
+    [getMobileRange, presenceWeekOffset]
   );
+
+  // Turni della settimana selezionata — TUTTI gli stati (bozza, pubblicato, approvato, assente)
+  const presenceShiftsFiltered = useMemo(
+    () => shifts.filter(s => {
+      const d = parseISO(s.date);
+      if (!isWithinInterval(d, { start: presenceWeekRange.start, end: presenceWeekRange.end })) return false;
+      return ['confirmed', 'absent', 'approved', 'draft'].includes(s.approval_status ?? '');
+    }),
+    [shifts, presenceWeekRange]
+  );
+
+  /** Ancoraggio Statistiche: lunedì della settimana selezionata (stringa stabile per memo). */
+  const presenceWeekStart = format(presenceWeekRange.start, 'yyyy-MM-dd');
 
   const mobileLocale = dateLocale ?? itLocale;
 
-  // ── Statistiche per MobileStatsCards ──────────────────────────────────────
+  // ── Statistiche per MobileStatsCards (seguono la settimana selezionata) ────
   const mobileStatsData = useMemo(() => {
-    const now = new Date();
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const weekEnd   = endOfWeek(now,   { weekStartsOn: 1 });
-    const monthStart = startOfMonth(now);
-    const monthEnd   = endOfMonth(now);
+    const weekStart = presenceWeekRange.start;
+    const weekEnd   = presenceWeekRange.end;
+    const monthRef = presenceWeekRange.start;
+    const monthStart = startOfMonth(monthRef);
+    const monthEnd   = endOfMonth(monthRef);
 
     const workedStatuses = new Set(['approved', 'confirmed']);
     const calcMins = (s: Shift) => {
@@ -694,12 +740,20 @@ export default function StaffPersonalDashboard({
       ((displayUser as UserType & { hours_per_week?: number }).hours_per_week ?? 40) * 60;
 
     return { weekWorkedMins, weekCapMins, monthWorkedMins, monthDaysWorked: monthWorkedDays.size };
-  }, [visibleShifts, punchRecords, displayUser, breakRules, breakComputeOpts]);
+  }, [visibleShifts, punchRecords, displayUser, breakRules, breakComputeOpts, presenceWeekRange]);
 
-  const MobileNavBar = () => (
+  const MobileNavBar = ({
+    mode = mobileNavTab,
+    onOffsetChange = setMobileNavOffset,
+    range = mobileRange,
+  }: {
+    mode?: MobileNavTab;
+    onOffsetChange?: (updater: (o: number) => number) => void;
+    range?: { start: Date; end: Date };
+  }) => (
     <div className="flex items-center gap-2 mb-4 px-4">
       {/* Etichetta "Oggi" a sinistra — cliccabile per tornare al periodo corrente */}
-      <button type="button" onClick={() => setMobileNavOffset(0)}
+      <button type="button" onClick={() => onOffsetChange(() => 0)}
         className="h-9 inline-flex items-center px-3 rounded-2xl bg-accent text-white text-[11px] font-extrabold uppercase tracking-wider shrink-0 shadow-sm active:bg-accent/80 transition-colors">
         {t.today}
       </button>
@@ -708,7 +762,7 @@ export default function StaffPersonalDashboard({
       <div className="flex items-center border border-slate-100 rounded-2xl overflow-hidden flex-1" style={{ background: 'transparent', boxShadow: 'none' }}>
         <button
           type="button"
-          onClick={() => setMobileNavOffset(o => o - 1)}
+          onClick={() => onOffsetChange(o => o - 1)}
           className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-r border-slate-100 active:bg-slate-50/80"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -717,16 +771,16 @@ export default function StaffPersonalDashboard({
         <div className="flex-1 flex items-center justify-center gap-1.5 px-2 min-w-0">
           <Calendar className="h-3 w-3 text-white/50 shrink-0" />
           <span className="text-[11px] font-bold text-white/80 tabular-nums truncate">
-            {mobileNavTab === 'week'
-              ? `S.${getISOWeek(mobileRange.start)} · ${format(mobileRange.start, 'd MMM', { locale: mobileLocale })} – ${format(mobileRange.end, 'd MMM', { locale: mobileLocale })}`
-              : `${format(mobileRange.start, 'd MMM', { locale: mobileLocale })} – ${format(mobileRange.end, 'd MMM yy', { locale: mobileLocale })}`
+            {mode === 'week'
+              ? `S.${getISOWeek(range.start)} · ${format(range.start, 'd MMM', { locale: mobileLocale })} – ${format(range.end, 'd MMM', { locale: mobileLocale })}`
+              : `${format(range.start, 'd MMM', { locale: mobileLocale })} – ${format(range.end, 'd MMM yy', { locale: mobileLocale })}`
             }
           </span>
         </div>
 
         <button
           type="button"
-          onClick={() => setMobileNavOffset(o => o + 1)}
+          onClick={() => onOffsetChange(o => o + 1)}
           className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-l border-slate-100 active:bg-slate-50/80"
         >
           <ChevronRight className="h-4 w-4" />
@@ -935,7 +989,7 @@ export default function StaffPersonalDashboard({
                     {tsStaffView === 'stats' && (
                       <div className="min-h-0 overflow-y-auto overscroll-y-contain scroll-smooth [-webkit-overflow-scrolling:touch] pb-1">
                         <Suspense fallback={tabSpinner}>
-                          <Statistics />
+                          <Statistics anchorDate={presenceWeekStart} />
                         </Suspense>
                       </div>
                     )}
@@ -961,25 +1015,31 @@ export default function StaffPersonalDashboard({
                           </div>
                         )}
                         {isMobile ? (
-                          <ManagementMobileTimesheet
-                            variant="embedded"
-                            shifts={mobileTimesheetFiltered}
-                            punchRecords={punchRecords}
-                            users={users}
-                            currentUserId={displayUser.id}
-                            language={effectiveLanguage}
-                            plannedOnly={getTimesheetGridPrivacyMode(displayUser) === 'planned_only'}
-                          />
+                          <>
+                            <MobileNavBar mode="week" onOffsetChange={setPresenceWeekOffset} range={presenceWeekRange} />
+                            <ManagementMobileTimesheet
+                              variant="embedded"
+                              hideNavBar
+                              forceExpanded
+                              shifts={presenceShiftsFiltered}
+                              punchRecords={punchRecords}
+                              users={users}
+                              currentUserId={displayUser.id}
+                              language={effectiveLanguage}
+                              plannedOnly={getTimesheetGridPrivacyMode(displayUser) === 'planned_only'}
+                            />
+                          </>
                         ) : (
                           <>
-                            <MobileNavBar />
+                            <MobileNavBar mode="week" onOffsetChange={setPresenceWeekOffset} range={presenceWeekRange} />
                             <StaffDesktopTimesheet
-                              shifts={mobileTimesheetFiltered}
+                              shifts={presenceShiftsFiltered}
                               punchRecords={punchRecords}
                               user={displayUser}
                               breakRules={breakRules}
                               breakComputeOpts={breakComputeOpts}
                               language={effectiveLanguage}
+                              range={presenceWeekRange}
                             />
                           </>
                         )}

@@ -963,6 +963,22 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     return iv.deductBreak !== deductBreak || iv.isAutoBreak !== isAutoBreak;
   }, [drawerOpen, deductBreak, isAutoBreak]);
 
+  // Timbrature modificate o mancanti → il pulsante "Conferma timbrature" richiede l'azione
+  const punchActionRequired = useMemo(() => {
+    if (!drawerOpen || !selectedShift) return false;
+    const iv = initialValuesRef.current;
+    if (iv.editIn !== editIn || iv.editOut !== editOut) return true;
+    const { in: punchIn, out: punchOut } = getPunchForShift(selectedShift);
+    return !punchIn || !punchOut;
+  }, [drawerOpen, selectedShift, editIn, editOut]);
+
+  // Orario del turno modificato → "Salva modifiche" richiede l'azione
+  const timeUnsaved = useMemo(() => {
+    if (!drawerOpen) return false;
+    const iv = initialValuesRef.current;
+    return iv.editStartTime !== editStartTime || iv.editEndTime !== editEndTime;
+  }, [drawerOpen, editStartTime, editEndTime]);
+
   const handleSaveBreakSettings = useCallback(async () => {
     if (!selectedShift) return;
     setSaving(true);
@@ -1961,12 +1977,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       </div>
 
       {/* ── Detail Drawer ── */}
-      {drawerOpen && selectedShift && createPortal(
+      {createPortal(
+        <AnimatePresence>
+          {drawerOpen && selectedShift && (
         <div className="fixed inset-0 z-[10050] flex items-center justify-center px-4" onClick={handleCloseDrawer}>
-          <div className="absolute inset-0 bg-black/40" />
+          <motion.div className="absolute inset-0 bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
           <motion.div
             initial={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="relative w-full max-w-3xl rounded-2xl border border-white/15 p-5 shadow-2xl max-h-[90vh] z-10 flex flex-col"
             style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: `2px solid ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}40`, boxShadow: `0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08), 0 0 24px ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}20` }}
@@ -2137,8 +2156,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       <TimeInputField value={editEndTime} onChange={setEditEndTime} size="md" className="w-full" disabled={selectedShift.approval_status === 'confirmed'} />
                     </div>
                     <button type="button" onClick={handleSaveShiftEdit} disabled={saving || selectedShift.approval_status === 'confirmed'}
-                      style={{ ['--glow' as string]: 'var(--brand)' }}
-                      className="glow-pulse w-full rounded-lg bg-accent px-4 py-2.5 text-[11px] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                      className={`${timeUnsaved ? 'glow-pulse ' : ''}w-full rounded-lg bg-accent px-4 py-2.5 text-[11px] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
                       {saving ? (t.saving ?? 'Salvataggio...') : <><Save className="h-3.5 w-3.5 inline-block mr-1.5" />{t.save_changes ?? 'Salva modifiche'}</>}
                     </button>
                   </div>
@@ -2178,8 +2196,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                               <TimeInputField value={editOut} onChange={setEditOut} size="md" hourInputRef={editOutHourRef} className={`w-full ${editOut ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
                             </div>
                             <button type="button" onClick={() => void handleConfirmPunches()} disabled={saving || (!editIn && !editOut)}
-                              style={{ ['--glow' as string]: 'rgba(16,185,129,0.45)' }}
-                              className="glow-pulse w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[11px] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider">
+                              className={`${punchActionRequired ? 'glow-pulse ' : ''}w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[11px] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider`}>
                               <Check className="h-3.5 w-3.5 inline-block mr-1.5" />{t.confirm_punches ?? 'Conferma timbrature'}
                             </button>
                           </>
@@ -2247,7 +2264,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                                   animate={{ opacity: 1, scale: 1, y: 0 }}
                                   exit={{ opacity: 0, scale: 0.6, y: 6 }}
                                   transition={{ duration: 0.18, ease: 'easeOut' }}
-                                  style={{ ['--glow' as string]: 'rgba(52,211,153,0.45)' }}
                                   className="glow-pulse hidden md:flex shrink-0 items-center rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider disabled:opacity-40"
                                 >
                                   {saving ? (t.saving ?? 'Salvataggio...') : <><Check className="h-3 w-3 inline-block mr-1" />{t.save ?? 'Salva'}</>}
@@ -2262,7 +2278,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                                   type="button"
                                   onClick={(e) => { e.preventDefault(); void handleSaveBreakSettings(); }}
                                   disabled={saving}
-                                  style={{ ['--glow' as string]: 'rgba(52,211,153,0.45)' }}
                                   className="glow-pulse md:hidden rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider disabled:opacity-40"
                                 >
                                   {saving ? (t.saving ?? 'Salvataggio...') : <><Check className="h-3 w-3 inline-block mr-1" />{t.save ?? 'Salva'}</>}
@@ -2296,15 +2311,23 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               </div>
             </div>
             </motion.div>
-        </div>,
+        </div>
+          )}
+        </AnimatePresence>,
         document.body
       )}
 
       {/* ── Modale Storico modifiche (solo admin, separata dalla modale del turno) ── */}
-      {showShiftAuditModal && shiftAuditEntries && createPortal(
+      {createPortal(
+        <AnimatePresence>
+          {showShiftAuditModal && shiftAuditEntries && (
         <div className="fixed inset-0 z-[10051] flex items-center justify-center px-4" onClick={() => setShowShiftAuditModal(false)}>
-          <div className="absolute inset-0 bg-black/40" />
-          <div
+          <motion.div className="absolute inset-0 bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="relative z-10 flex h-[70vh] max-h-[82vh] w-full max-w-xl flex-col rounded-2xl p-4 shadow-2xl"
             style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08)' }}
             onClick={(e) => e.stopPropagation()}
@@ -2420,16 +2443,28 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 });
               })()}
             </div>
-          </div>
-        </div>,
+          </motion.div>
+        </div>
+          )}
+        </AnimatePresence>,
         document.body
       )}
 
       {/* ── Create Shift Modal ── */}
-      {createModal && createPortal(
+      {createPortal(
+        <AnimatePresence>
+          {createModal && (
         <div className="fixed inset-0 z-[10050] flex items-center justify-center" onClick={() => setCreateModal(null)}>
-          <div className="fixed inset-0 bg-black/40" />
-          <div className="relative w-full max-w-sm rounded-2xl border border-white/15 p-5 shadow-2xl z-10 bg-transparent" style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }} onClick={e => e.stopPropagation()}>
+          <motion.div className="fixed inset-0 bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="relative w-full max-w-sm rounded-2xl border border-white/15 p-5 shadow-2xl z-10 bg-transparent"
+            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+            onClick={e => e.stopPropagation()}
+          >
             <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">{t.create_shift ?? 'Nuovo turno'}</h3>
             <div className="space-y-3 mb-4">
               <div>
@@ -2492,16 +2527,27 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 )}
               </button>
             </div>
-          </div>
-        </div>,
+          </motion.div>
+        </div>
+          )}
+        </AnimatePresence>,
         document.body
       )}
 
       {/* ── Drop confirm modal ── */}
+      <AnimatePresence>
       {dropConfirm && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center" onClick={() => setDropConfirm(null)}>
-          <div className="fixed inset-0 bg-black/40" />
-          <div className="relative w-full max-w-xs rounded-2xl border border-white/15 p-5 shadow-2xl z-10 bg-white/[0.04]" style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }} onClick={e => e.stopPropagation()}>
+          <motion.div className="fixed inset-0 bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="relative w-full max-w-xs rounded-2xl border border-white/15 p-5 shadow-2xl z-10 bg-white/[0.04]"
+            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+            onClick={e => e.stopPropagation()}
+          >
             <h3 className="text-sm font-bold text-white mb-2">{t.drop_confirm_title ?? 'Turno trascinato'}</h3>
             <p className="text-[12px] text-white/60 mb-3">
               {t.drop_confirm_desc ?? 'Dove vuoi sistemarlo?'}
@@ -2578,9 +2624,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 <X className="h-4 w-4" />
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
+      </AnimatePresence>
 
       {/* ── Menu contestuale tasto destro ── */}
       {contextMenu && createPortal(

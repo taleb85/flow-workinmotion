@@ -178,6 +178,27 @@ export function currentPeriodConfig(): PeriodConfig {
 }
 
 /**
+ * Trova il PeriodConfig il cui intervallo CONTIENE `refDate`.
+ * Prova i candidati costruiti dal mese di refDate e dai mesi a ±7 giorni,
+ * così le date ai confini di mese (es. un lunedì di fine dicembre) ricadono
+ * nel periodo corretto (es. quello di gennaio).
+ */
+export function periodConfigContainingDate(refDate: Date): PeriodConfig {
+  const ref = startOfDay(refDate);
+  const candidates = [
+    periodConfigForMonth(ref),
+    periodConfigForMonth(subDays(ref, 7)),
+    periodConfigForMonth(addDays(ref, 7)),
+  ];
+  for (const cfg of candidates) {
+    const start = getPeriodStartDate(cfg);
+    const end = getPeriodEndDate(cfg);
+    if (ref >= start && ref <= end) return cfg;
+  }
+  return candidates[0];
+}
+
+/**
  * Regola "Primo giorno": costruisce il PeriodConfig partendo da una data di inizio
  * scelta dall'utente.
  * Il periodo termina sull'ultima domenica del mese che si trova a ~2 settimane
