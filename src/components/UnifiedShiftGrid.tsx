@@ -962,12 +962,18 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
   const handleDeductBreakToggle = useCallback(async () => {
     if (!selectedShift) return;
-    setDeductBreak(prev => !prev);
+    const next = !deductBreak;
+    setDeductBreak(next);
     try {
-      await updateShift(selectedShift.id, { deduct_break: !deductBreak });
+      await updateShift(selectedShift.id, { deduct_break: next });
+      initialValuesRef.current = { ...initialValuesRef.current, deductBreak: next };
       showSavedBubble(deductBreakLabelRef.current);
     }
-    catch { showError(t.error_generic ?? 'Errore.'); }
+    catch {
+      // Rollback: se il salvataggio fallisce la spunta torna com'era e la modale resta chiudibile
+      setDeductBreak(!next);
+      showError(t.error_generic ?? 'Errore.');
+    }
   }, [selectedShift, deductBreak, updateShift, showSavedBubble, showError, t]);
 
   const handleAutoBreakToggle = useCallback(async () => {
@@ -978,8 +984,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       const _gross = calculateShiftMinutesGross(selectedShift.start_time ?? '', selectedShift.end_time ?? '');
       if (next) await updateShift(selectedShift.id, { is_auto_break: true, break_minutes: 30 });
       else await updateShift(selectedShift.id, { is_auto_break: false, break_minutes: 0 });
+      initialValuesRef.current = { ...initialValuesRef.current, isAutoBreak: next };
       showSavedBubble(autoBreakLabelRef.current);
-    } catch { showError(t.error_generic ?? 'Errore.'); }
+    } catch {
+      // Rollback: se il salvataggio fallisce la spunta torna com'era e la modale resta chiudibile
+      setIsAutoBreak(!next);
+      showError(t.error_generic ?? 'Errore.');
+    }
   }, [selectedShift, isAutoBreak, updateShift, showSavedBubble, showError, t]);
 
   const handleSaveTemplate = useCallback(async () => {

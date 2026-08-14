@@ -800,6 +800,9 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           localStorage.removeItem('osteria_role_templates_storage_skip');
           localStorage.removeItem('osteria_admin_modules_storage_skip');
           localStorage.removeItem('osteria_app_settings_sync_signal_unavailable');
+          // Regole pausa/lavoro: un singolo tentativo fallito non deve bloccare per sempre la sync sui dispositivi.
+          localStorage.removeItem('osteria_break_rules_storage_skip');
+          localStorage.removeItem('osteria_work_rules_storage_skip');
         } catch {
           /* ignore */
         }
