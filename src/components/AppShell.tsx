@@ -10,7 +10,7 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-
 import { AnimatePresence, motion } from 'framer-motion';
 // AnimatePresence/motion mantenuti solo per overlay modali e PIN;
 // le animazioni cambio tab sono state sostituite con CSS transitions (performance mobile).
-import { useAppUser, useAppData, useAppConfig, useAppOverlay } from '../context/AppContext';
+import { useAppUser, useAppConfig, useAppOverlay } from '../context/AppContext';
 import { ProfileLeaveGuardRefContext, type ProfileLeaveGuard } from '../context/ProfileLeaveGuardContext';
 import { applyUnauthenticatedDocumentTheme } from '../utils/theme';
 import { useT } from '../hooks/useT';
@@ -119,10 +119,8 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     setCurrentUser: setCtxCurrentUser,
     setIsSessionElevated,
   } = useAppUser();
-  const {
-    shifts: _shifts,
-    punchRecords: _punchRecords,
-  } = useAppData();
+  // (Rimosso il subscribe a useAppData qui: _shifts/_punchRecords non venivano usati,
+  // ma facevano ri-renderizzare l'intero shell a ogni evento realtime su turni/timbrature.)
   const {
     featureFlags,
     roleTemplatesRevision,

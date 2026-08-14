@@ -47,3 +47,6 @@ Users/
 # Temp / timestamp files
 *.timestamp-*
 .env*
+
+# TRAE html share artifacts
+.trae-html-share-packages/

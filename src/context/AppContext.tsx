@@ -227,6 +227,30 @@ function mergeSilentRefreshOpts(prev: SilentRefreshOpts | null, next?: SilentRef
 }
 
 /**
+ * Confronto shallow dei campi dell'utente di sessione.
+ * Evita di restituire un nuovo riferimento quando nulla è cambiato:
+ * `userRowToSessionUser` crea SEMPRE un oggetto nuovo → senza questo confronto,
+ * ogni sync (polling 30s, realtime, pull-to-refresh) innesca un re-render globale.
+ */
+function sessionUsersEqual(a: User, b: User): boolean {
+  if (a === b) return true;
+  const aKeys = Object.keys(a) as (keyof User)[];
+  if (aKeys.length !== Object.keys(b).length) return false;
+  for (const k of aKeys) {
+    const va = a[k];
+    const vb = b[k];
+    if (va === vb) continue;
+    // Campi JSONB/nullable (enabled_modules, enabled_features, …): confronto strutturale leggero.
+    if (va && vb && typeof va === 'object' && typeof vb === 'object') {
+      if (JSON.stringify(va) !== JSON.stringify(vb)) return false;
+      continue;
+    }
+    return false;
+  }
+  return true;
+}
+
+/**
  * Dopo ogni fetch della tabella `users` (realtime, pull-to-refresh, sync in foreground):
  * stesso criterio ovunque — sessione valida solo se la riga esiste ed è `active`.
  */
@@ -241,7 +265,10 @@ function sessionUserFromLoadedUsersList(prev: User | null, loadedUsers: User[]):
     }
     return null;
   }
-  return userRowToSessionUser(row);
+  const next = userRowToSessionUser(row);
+  // Ritorna `prev` se identico: mantiene stabile l'identità dell'oggetto
+  // (niente re-render a cascata né riesecuzione degli effetti con dep [currentUser]).
+  return sessionUsersEqual(prev, next) ? prev : next;
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -357,14 +384,18 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     roleFeatureTemplates: null as RoleFeatureTemplatesOnDisk | null,
     adminModulesGlobal: null as AdminModulesGlobalOnDisk | null,
   });
-  settingsBundleSeedDepsRef.current = {
-    workRules,
-    breakRules,
-    featureFlags,
-    presenceVerificationConfig,
-    roleFeatureTemplates: getRoleFeatureTemplatesCache() ?? getLocalRoleFeatureTemplates(),
-    adminModulesGlobal: getAdminModulesGlobalCache() ?? getLocalAdminModulesGlobal(),
-  };
+  // Aggiornato in un effetto (non nel corpo del render): legge localStorage + JSON.parse
+  // su 2 file di config a ogni render del provider era lavoro inutile sul thread principale.
+  useEffect(() => {
+    settingsBundleSeedDepsRef.current = {
+      workRules,
+      breakRules,
+      featureFlags,
+      presenceVerificationConfig,
+      roleFeatureTemplates: getRoleFeatureTemplatesCache() ?? getLocalRoleFeatureTemplates(),
+      adminModulesGlobal: getAdminModulesGlobalCache() ?? getLocalAdminModulesGlobal(),
+    };
+  }, [workRules, breakRules, featureFlags, presenceVerificationConfig, roleTemplatesRevision, adminModulesRevision]);
 
   const refreshPresenceVerificationConfig = useCallback(async () => {
     const remote = await loadPresenceVerificationFromSupabase().catch(() => null);
@@ -1570,10 +1601,13 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       // Toggle intelligente: niente due IN o due OUT di seguito (solo flussi chiosco/app, non manuale)
       let effectiveType: 'in' | 'out' = type;
       if (resolvedSource !== 'manual') {
-        const forUser = punchRecordsRef.current
-          .filter((p) => p.user_id === userId)
-          .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-        const last = forUser[0];
+        // Single-pass O(n): trovare l'ultima timbratura dell'utente senza
+        // filtrare+ordinare l'intero array di punch a ogni timbratura.
+        let last: PunchRecord | undefined;
+        for (const p of punchRecordsRef.current) {
+          if (p.user_id !== userId) continue;
+          if (!last || p.timestamp > last.timestamp) last = p;
+        }
         const lastKind = last?.type;
         if (lastKind === 'in' && type === 'in') {
           effectiveType = 'out';
@@ -2323,6 +2357,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     const HARD_LIMIT_MS = 15_000;
 
     setIsGlobalRefreshing(true);
+    let slowTimer: number | null = null;
+    let hardTimeoutTimer: number | null = null;
     try {
       setSyncStage('Pulizia cache locale…');
       const shiftCacheKeys = Object.keys(localStorage).filter(
@@ -2332,14 +2368,14 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 
       setSyncStage('Caricamento dati dal server…');
 
-      const slowTimer = window.setTimeout(
+      slowTimer = window.setTimeout(
         () => setSyncStage('Connessione lenta, attendere…'),
         SLOW_WARN_MS,
       );
 
-      const hardTimeout = new Promise<never>((_, reject) =>
-        window.setTimeout(() => reject(new Error('SYNC_TIMEOUT')), HARD_LIMIT_MS),
-      );
+      const hardTimeout = new Promise<never>((_, reject) => {
+        hardTimeoutTimer = window.setTimeout(() => reject(new Error('SYNC_TIMEOUT')), HARD_LIMIT_MS);
+      });
 
       await Promise.race([
         silentRefreshData({
@@ -2350,8 +2386,6 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         }),
         hardTimeout,
       ]);
-
-      clearTimeout(slowTimer);
 
       setSyncStage('Aggiornamento revisione…');
       pendingClientSyncRevRef.current = null;
@@ -2364,6 +2398,10 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       console.error('[hardReloadFromDatabase]', err);
       showError(getTranslations(effectiveLanguage).hard_reload_error);
     } finally {
+      // Pulizia timer anche sugli errori: senza, il slowTimer "zombie" poteva
+      // mostrare 'Connessione lenta' dopo che l'UI era già stata resettata.
+      if (slowTimer) clearTimeout(slowTimer);
+      if (hardTimeoutTimer) clearTimeout(hardTimeoutTimer);
       setSyncStage('');
       setIsGlobalRefreshing(false);
     }
@@ -2553,6 +2591,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     const HARD_LIMIT_MS = 15_000;
 
     setIsGlobalRefreshing(true);
+    let slowTimer: number | null = null;
+    let hardTimeoutTimer: number | null = null;
     try {
       setSyncStage('Pulizia cache locale…');
       const shiftCacheKeys = Object.keys(localStorage).filter(
@@ -2566,14 +2606,14 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 
       setSyncStage('Connessione al server…');
 
-      const slowTimer = window.setTimeout(
+      slowTimer = window.setTimeout(
         () => setSyncStage('Connessione lenta, attendere…'),
         SLOW_WARN_MS,
       );
 
-      const hardTimeout = new Promise<never>((_, reject) =>
-        window.setTimeout(() => reject(new Error('SYNC_TIMEOUT')), HARD_LIMIT_MS),
-      );
+      const hardTimeout = new Promise<never>((_, reject) => {
+        hardTimeoutTimer = window.setTimeout(() => reject(new Error('SYNC_TIMEOUT')), HARD_LIMIT_MS);
+      });
 
       const [loadedUsers, loadedShifts, loadedPunchRecords, loadedHolidays, loadedAvailability] =
         await Promise.race([
@@ -2588,6 +2628,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         ]);
 
       clearTimeout(slowTimer);
+      slowTimer = null;
 
       setSyncStage('Applicazione aggiornamenti…');
       setUsers(loadedUsers);
@@ -2606,6 +2647,10 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       showError(getTranslations(effectiveLanguage).app_sync_failed_retry);
       setSyncStage('');
       setIsGlobalRefreshing(false);
+    } finally {
+      // Pulizia timer anche in caso di errore (slowTimer "zombie" + timeout hard mai cancellati).
+      if (slowTimer) clearTimeout(slowTimer);
+      if (hardTimeoutTimer) clearTimeout(hardTimeoutTimer);
     }
   }, [showError, effectiveLanguage]);
 
@@ -2648,7 +2693,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       })();
     }, 2000);
     return () => window.clearTimeout(timer);
-  }, [currentUser]);
+  }, [currentUser?.id]);
 
   const runPostUnlockRefreshActions = useCallback(async (): Promise<boolean> => {
     try {
@@ -2858,6 +2903,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     publishWeekShifts, publishDayShifts, approveShift,
     addHolidayRequest, updateHolidayStatus, deleteHolidayRequest,
     addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
+    seedDemoProfileForUser,
   ]);
 
   // Regole pausa effettive: vuote se flag auto_breaks è off

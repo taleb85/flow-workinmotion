@@ -399,6 +399,34 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
     return displayUsers.filter(u => deptMatchesFilterKey(u.department, deptFilter));
   }, [displayUsers, deptFilter]);
 
+  /** Totali per settimana e per giorno su TUTTI gli utenti filtrati (footer delle tabelle):
+   *  prima erano reduce inline ricalcolati a ogni render dentro il loop delle settimane. */
+  const weekTotalsByKey = useMemo(() => {
+    const totals: Record<string, number> = {};
+    for (const u of filteredUsers) {
+      const byWeek = minutesByUserByWeek[u.id];
+      if (!byWeek) continue;
+      for (const [k, v] of Object.entries(byWeek)) {
+        if (!v) continue;
+        totals[k] = (totals[k] ?? 0) + v;
+      }
+    }
+    return totals;
+  }, [filteredUsers, minutesByUserByWeek]);
+
+  const dayTotalsByDate = useMemo(() => {
+    const totals: Record<string, number> = {};
+    for (const u of filteredUsers) {
+      const byDay = minutesByUserByDay[u.id];
+      if (!byDay) continue;
+      for (const [d, v] of Object.entries(byDay)) {
+        if (!v) continue;
+        totals[d] = (totals[d] ?? 0) + v;
+      }
+    }
+    return totals;
+  }, [filteredUsers, minutesByUserByDay]);
+
   const totalMinutesFiltered = useMemo(() => {
     return filteredUsers.reduce((sum, u) => {
       const byWeek = minutesByUserByWeek[u.id] ?? {};
@@ -431,10 +459,12 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
   const kpiPresentAbsent = useMemo(() => {
     const m0 = startOfMonth(new Date());
     const m1 = endOfMonth(new Date());
+    // Set di lookup: prima ogni turno scannerizzava `filteredUsers.some(...)` → O(S×U).
+    const filteredUserIds = new Set(filteredUsers.map((u) => u.id));
     let pres = 0;
     let abs = 0;
     for (const s of shifts) {
-      if (!filteredUsers.some((u) => u.id === s.user_id)) continue;
+      if (!filteredUserIds.has(s.user_id)) continue;
       const sd = parseShiftLocalDate(s.date);
       if (Number.isNaN(sd.getTime()) || !isWithinInterval(sd, { start: m0, end: m1 })) continue;
       if (s.approval_status === 'absent') abs += 1;
@@ -450,17 +480,20 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
   }, [totalMinutesFiltered, weeksInRange.length]);
 
   const kpiActiveToday = useMemo(() => {
-    return filteredUsers.filter((u) =>
-      shifts.some(
-        (s) =>
-          s.user_id === u.id &&
-          s.date === todayStrKpi &&
-          s.approval_status !== 'absent' &&
-          (s.approval_status === 'approved' ||
-            s.approval_status === 'confirmed' ||
-            s.approval_status === 'draft')
-      )
-    ).length;
+    // Set degli utenti con turno attivo oggi: prima era `filteredUsers.filter(... shifts.some(...))` → O(U×S).
+    const activeTodayIds = new Set<string>();
+    for (const s of shifts) {
+      if (
+        s.date === todayStrKpi &&
+        s.approval_status !== 'absent' &&
+        (s.approval_status === 'approved' ||
+          s.approval_status === 'confirmed' ||
+          s.approval_status === 'draft')
+      ) {
+        activeTodayIds.add(s.user_id);
+      }
+    }
+    return filteredUsers.reduce((n, u) => n + (activeTodayIds.has(u.id) ? 1 : 0), 0);
   }, [filteredUsers, shifts, todayStrKpi]);
 
   const eightWeekTrend = useMemo(() => {
@@ -1203,10 +1236,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
               </div>
             ) : (
               weeksInRange.map((w) => {
-                const weekTotal = filteredUsers.reduce(
-                  (s, u) => s + (minutesByUserByWeek[u.id]?.[w.key] ?? 0),
-                  0
-                );
+                const weekTotal = weekTotalsByKey[w.key] ?? 0;
                 // Giorni della settimana ritagliati sul range selezionato
                 const clampedStart = w.start < rangeStart ? rangeStart : w.start;
                 const clampedEnd   = w.end   > rangeEnd   ? rangeEnd   : w.end;
@@ -1290,10 +1320,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                           <div className="grid flex-1 gap-0" style={{ gridTemplateColumns: `repeat(${weekDays.length}, 1fr)` }}>
                             {weekDays.map((day) => {
                               const dayKey = format(day, 'yyyy-MM-dd');
-                              const dayTotal = filteredUsers.reduce(
-                                (sum, u) => sum + (minutesByUserByDay[u.id]?.[dayKey] ?? 0),
-                                0
-                              );
+                              const dayTotal = dayTotalsByDate[dayKey] ?? 0;
                               return (
                                 <div key={dayKey} className="flex items-center justify-center">
                                   {dayTotal > 0 ? (
@@ -1392,10 +1419,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                               </td>
                               {weekDays.map((day) => {
                                 const dayKey = format(day, 'yyyy-MM-dd');
-                                const dayTotal = filteredUsers.reduce(
-                                  (sum, u) => sum + (minutesByUserByDay[u.id]?.[dayKey] ?? 0),
-                                  0
-                                );
+                                const dayTotal = dayTotalsByDate[dayKey] ?? 0;
                                 return (
                                   <td key={dayKey} className="py-2.5 px-1 text-center tabular-nums border-r border-white/10 last:border-r-0">
                                     {dayTotal > 0 ? (

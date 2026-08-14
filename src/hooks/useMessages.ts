@@ -71,10 +71,11 @@ export function useMessages(userId?: string, isAdmin = false) {
   const [, setSubscription] = useState<RealtimeChannel | null>(null);
 
   const loadMessages = useCallback(
-    async (uid: string) => {
+    async (uid: string, opts?: { silent?: boolean }) => {
       if (!uid) return;
       try {
-        setIsLoading(true);
+        // Ricariche "silenziosa" (eventi realtime): niente flicker dello spinner.
+        if (!opts?.silent) setIsLoading(true);
         setError(null);
 
         // Validazione di sicurezza: verifica che supabase sia disponibile
@@ -143,9 +144,18 @@ export function useMessages(userId?: string, isAdmin = false) {
   useEffect(() => {
     if (!userId || !supabase) return;
 
+    // Nome canale univoco per ISTANZA: il nome fisso "staff_messages_changes" faceva
+    // collidere le istanze multiple dell'hook (header + modale + composer) → handler
+    // duplicati e doppi fetch a ogni evento realtime.
+    const channelNameRef = `staff_messages_changes_${userId}_${Math.random().toString(36).slice(2, 10)}`;
+
+    // Debounce: una raffica di eventi (INSERT/UPDATE/DELETE ravvicinati) produce
+    // un solo reload invece di N query complete, evitando anche race tra risposte.
+    let reloadTimer: ReturnType<typeof setTimeout> | null = null;
+
     try {
       const channel = supabase
-        .channel(`staff_messages_changes`)
+        .channel(channelNameRef)
         .on(
           'postgres_changes',
           {
@@ -159,7 +169,10 @@ export function useMessages(userId?: string, isAdmin = false) {
             
             // Admin ricarica sempre; altri solo se il messaggio li riguarda
             if (isAdmin || !msg.recipient_id || msg.recipient_id === userId || msg.sender_id === userId) {
-              loadMessages(userId);
+              if (reloadTimer) clearTimeout(reloadTimer);
+              reloadTimer = setTimeout(() => {
+                void loadMessages(userId, { silent: true });
+              }, 300);
 
               // Mostra notifica browser su nuovo messaggio che non abbiamo inviato noi
               if (
@@ -193,6 +206,7 @@ export function useMessages(userId?: string, isAdmin = false) {
       setSubscription(channel);
 
       return () => {
+        if (reloadTimer) clearTimeout(reloadTimer);
         if (supabase) supabase.removeChannel(channel);
       };
     } catch (err) {

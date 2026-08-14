@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell } from 'lucide-react';
 import { database } from '../lib/database';
@@ -22,7 +22,7 @@ import { useT } from '../hooks/useT';
 import { useTenant } from '../context/TenantContext';
 import type { User, UserRole } from '../types';
 import { translateRole } from '../utils/roles';
-import { getAdminModuleLabel, formatTrans, getFeatureStrings } from '../utils/translations';
+import { formatTrans, getFeatureStrings, getTranslations } from '../utils/translations';
 import {
   canUserEdit,
   isAdminOnly,
@@ -33,8 +33,6 @@ import {
   canManageDelegatedStaff,
   isOperationalStaffRole,
 } from '../utils/permissions';
-import StaffOperationalPermissionsEditor from './StaffOperationalPermissionsEditor';
-import { AdminTimesheetGridPrivacyEditor } from './UserProfile';
 import { exportToJSON } from '../utils/exportData';
 import { importDataToSupabase, clearAllData } from '../utils/importData';
 import EditStaffModal from './EditStaffModal';
@@ -55,9 +53,7 @@ import { translateDepartmentValue } from '../utils/departmentLabels';
 import type { Department, PermissionCategory } from '../utils/departments';
 import { FEATURE_DEFINITIONS } from '../utils/featureFlags';
 import { TimeInputField } from './ui/TimeInputField';
-import { getEnabledFeatures, ADMIN_MODULE_KEYS, getAdminModuleEnabled, isAdminModuleEnabled } from '../utils/enabledFeatures';
-import RoleFeatureSectionsBlock, { PERMISSION_SUMMARY_LIST_CLASS } from './RoleFeatureSectionsBlock';
-import AdminRow from './ui/AdminRow';
+import { isAdminModuleEnabled } from '../utils/enabledFeatures';
 import { SettingsAccordionSection } from './ui/SettingsAccordionSection';
 import { CenteredModalPortal } from './ui/CenteredModalPortal';
 import { RoleFeatureTemplatesPanel } from './RoleFeatureTemplatesPage';
@@ -241,6 +237,208 @@ function FeatureFlagCard({
   );
 }
 
+/* ── Riga utente memoizzata (sezione Gestione Profili) ──────────────────────
+ * Prima ogni riga era inline nel componente: espandere il pannello "Cosa vede"
+ * o cambiare stato su UN utente ri-renderizzava TUTTE le righe della lista (e
+ * ogni keystroke nei form della pagina). La riga è React.memo: si aggiorna solo
+ * se cambiano le sue props. (Il blocco "matrice permessi" era codice morto —
+ * `expandedPermsUserId` non veniva mai impostato — ed è stato rimosso.)
+ */
+type SettingsUserRowProps = {
+  user: User;
+  canEdit: boolean;
+  isVisibilityOpen: boolean;
+  isDeleteConfirm: boolean;
+  shareMenuOpen: boolean;
+  currentUser: User;
+  t: ReturnType<typeof getTranslations>;
+  users: User[];
+  showSuccess?: (message: string) => void;
+  showError?: (message: string) => void;
+  onEdit: (user: User) => void;
+  onToggleStatus: (user: User) => void;
+  onSetDeleteConfirm: (id: string | null) => void;
+  onDeleteUser: (id: string) => void | Promise<unknown>;
+  onSetVisibility: (id: string | null) => void;
+  onSetShareMenu: (id: string | null) => void;
+};
+
+const SettingsUserRow = memo(function SettingsUserRow({
+  user, canEdit, isVisibilityOpen, isDeleteConfirm, shareMenuOpen,
+  currentUser, t, users, showSuccess, showError,
+  onEdit, onToggleStatus, onSetDeleteConfirm, onDeleteUser, onSetVisibility, onSetShareMenu,
+}: SettingsUserRowProps) {
+  return (
+    <div className={user.status !== 'active' ? 'opacity-60' : ''}>
+      {/* ── User row ── */}
+      <div className="flex items-center justify-between px-3 md:px-4 py-2.5 gap-2">
+        <button
+          type="button"
+          onClick={() => canEdit && onEdit(user)}
+          className={`flex-1 min-w-0 text-left ${canEdit ? 'cursor-pointer' : 'cursor-default'}`}
+        >
+          <span className="block truncate text-sm font-semibold uppercase text-white" title={user.first_name ?? ''}>{user.first_name ?? ''} {user.last_name ?? ''}
+          </span>
+          <span className="text-white/55 text-[11px] uppercase tracking-wider">
+            {translateRole(user.role, currentUser.language)}
+            {!isPurelyManagementRole(user.role) && user.status === 'active' && !isUserVisibleOnTeamSchedule(user) && (
+              <span className="ml-1.5 text-amber-600 font-semibold normal-case">
+                · {t.settings_off_schedule_badge}
+              </span>
+            )}
+          </span>
+        </button>
+
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Bottone condivisione unico con dropdown — nascosto */}
+          {/* eslint-disable-next-line no-constant-binary-expression */}
+          {false && canEdit && !isPurelyManagementRole(user.role) && (
+            <div className="relative">
+              <button
+                type="button"
+                title="Condividi accesso"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSetShareMenu(shareMenuOpen ? null : user.id);
+                }}
+                className={`p-1.5 rounded-md border transition-colors ${shareMenuOpen ? 'text-accent border-accent/30 bg-accent/5' : 'text-white/40 border-neutral-500 hover:text-accent hover:border-accent/30 hover:bg-accent/5'} active:text-accent`}
+              >
+                <Link2 className="w-3.5 h-3.5" />
+              </button>
+
+              <AnimatePresence>
+                {shareMenuOpen && (
+                  <>
+                    {/* backdrop invisibile per chiudere */}
+                    <div
+                      className="fixed inset-0 z-[60]"
+                      onClick={(e) => { e.stopPropagation(); onSetShareMenu(null); }}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.92, y: -4 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.92, y: -4 }}
+                      transition={{ duration: 0.13 }}
+                      className="absolute right-0 top-full mt-1.5 z-[61] w-52 rounded-xl border border-neutral-500 bg-white/10 shadow-lg overflow-hidden"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Copia link accesso */}
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const link = buildShortInviteLink(user, users);
+                          try {
+                            await navigator.clipboard.writeText(link);
+                            showSuccess?.(t.admin_employee_access_link_copied ?? 'Link copiato');
+                          } catch {
+                            showError?.(t.copy_failed ?? 'Copia non riuscita');
+                          }
+                          onSetShareMenu(null);
+                        }}
+                        className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-[12px] font-medium text-white/80 hover:bg-white/5 transition-colors active:bg-white/5/80"
+                      >
+                        <Link2 className="w-3.5 h-3.5 shrink-0 text-white/40" />
+                        Copia link accesso
+                      </button>
+                      <div className="h-px bg-white/10" />
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* Cosa vede */}
+          {canEdit && (
+            <button
+              type="button"
+              onClick={() => {
+                onSetVisibility(isVisibilityOpen ? null : user.id);
+              }}
+              className={`px-2 py-1 text-[11px] font-bold uppercase rounded-md transition-colors border ${isVisibilityOpen ? 'bg-white/15 text-accent border-accent/30 shadow-sm' : 'text-white/55 border-transparent hover:text-white/80'} active:text-white/80'}`}
+            >
+              {t.what_sees}
+            </button>
+          )}
+
+          {/* Active toggle */}
+          {canEdit && (
+            <div className="flex items-center gap-1.5">
+              {user.status !== 'active' && (
+                isDeleteConfirm ? (
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => onSetDeleteConfirm(null)}
+                      className="rounded-lg border border-neutral-500 px-2 py-1 text-[11px] font-semibold text-white/55 hover:bg-white/10 active:bg-white/80"
+                    >
+                      {t.cancel ?? 'Annulla'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        onSetDeleteConfirm(null);
+                        await onDeleteUser(user.id);
+                        showSuccess?.(t.settings_delete_user_success);
+                      }}
+                      className="rounded-lg bg-red-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-red-700 active:bg-red-700/80"
+                    >
+                      {t.settings_delete_user_title ?? 'Elimina'}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onSetDeleteConfirm(user.id)}
+                    className="flex h-6 w-6 items-center justify-center rounded-lg bg-red-500/15 text-red-400 transition-colors hover:bg-red-500/150/25 active:bg-red-500/150/80"
+                    title={t.settings_delete_user_title}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )
+              )}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={user.status === 'active'}
+                onClick={() => onToggleStatus(user)}
+                className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-all duration-200 ${
+                  user.status === 'active' ? 'bg-accent' : ''
+                }`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${user.status === 'active' ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Permissions / Visibility panel */}
+      <AnimatePresence>
+        {isVisibilityOpen && canEdit && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-white/10 px-4 py-4 space-y-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
+              {isVisibilityOpen && (
+                <ProfileVisibilityHub
+                  initialSelectedUserId={user.id}
+                  onClose={() => onSetVisibility(null)}
+                />
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+
 export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } = {}) {
   const { users, currentUser, effectiveLanguage, isSessionElevated, updateUser, deleteUser } = useAppUser();
   const { shifts, punchRecords, holidays } = useAppData();
@@ -338,7 +536,6 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showCreateStaff, setShowCreateStaff] = useState(false);
-  const [expandedPermsUserId, setExpandedPermsUserId] = useState<string | null>(null);
   const [expandedVisibilityUserId, setExpandedVisibilityUserId] = useState<string | null>(null);
   const [shareMenuUserId, setShareMenuUserId] = useState<string | null>(null);
   const [showSuspended, setShowSuspended] = useState(false);
@@ -476,27 +673,45 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
     });
   }, []);
 
-  if (!currentUser) return null;
-
-  // Tratta l'utente come admin se è in sessione elevata o ha elevated_role
-  const adminOnly = isAdminOnly(currentUser) || isSessionElevated || !!currentUser.elevated_role;
+  // Tratta l'utente come admin se è in sessione elevata o ha elevated_role (null-safe: usato dagli hook sotto)
+  const adminOnly = isAdminOnly(currentUser) || isSessionElevated || !!currentUser?.elevated_role;
   const canEdit = canUserEdit(currentUser) || adminOnly;
   const canSeeSuspended = canViewSuspended(currentUser) || adminOnly;
-  const isManager = isManagementRole(currentUser.role);
 
-  const handleToggleStatus = (user: User) => {
+  const handleToggleStatus = useCallback((user: User) => {
     const newStatus = user.status === 'active' ? 'inactive' : 'active';
     updateUser(user.id, { status: newStatus });
-  };
+  }, [updateUser]);
 
-  const displayUsers = users
-    .filter((u) => {
-      // Admin = profilo impostazioni puro: mai visibile nella lista team/dipendenti
-      if (isPurelyManagementRole(u.role)) return false;
-      if (u.status === 'active') return true;
-      return showSuspended && canSeeSuspended && (u.status === 'suspended' || u.status === 'inactive');
-    })
-    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  // Memoizzati: prima filter+sort sull'intero array utenti a OGNI render
+  // (toggle di sezioni, keystroke nei form, espansione pannelli…).
+  const displayUsers = useMemo(
+    () => users
+      .filter((u) => {
+        // Admin = profilo impostazioni puro: mai visibile nella lista team/dipendenti
+        if (isPurelyManagementRole(u.role)) return false;
+        if (u.status === 'active') return true;
+        return showSuspended && canSeeSuspended && (u.status === 'suspended' || u.status === 'inactive');
+      })
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
+    [users, showSuspended, canSeeSuspended]
+  );
+
+  /** Lista per la modalità staff delegato. */
+  const displayUsersDelegated = useMemo(
+    () => users
+      .filter((u) => {
+        if (!isOperationalStaffRole(u.role)) return false;
+        if (u.status === 'active') return true;
+        return showSuspended && (u.status === 'suspended' || u.status === 'inactive');
+      })
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
+    [users, showSuspended]
+  );
+
+  if (!currentUser) return null;
+
+  const isManager = isManagementRole(currentUser.role);
 
   const handleImportClick = () => {
     const input = document.createElement('input');
@@ -549,14 +764,6 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
   const staffDelegationMode = canManageDelegatedStaff(currentUser) && !adminOnly;
 
   if (staffDelegationMode) {
-    const displayUsersDelegated = users
-      .filter((u) => {
-        if (!isOperationalStaffRole(u.role)) return false;
-        if (u.status === 'active') return true;
-        return showSuspended && (u.status === 'suspended' || u.status === 'inactive');
-      })
-      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-
     const handleDelegateSuspend = (user: User) => {
       const name = `${user.first_name} ${user.last_name ?? ''}`.trim() || user.email;
       if (!window.confirm(formatTrans(t.settings_delegated_suspend_confirm, { name }))) return;
@@ -823,291 +1030,27 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)' }
                   }
                 >
-              {displayUsers.map((user) => {
-                const isPermsOpen = expandedPermsUserId === user.id;
-                return (
-                  <div key={user.id} className={user.status !== 'active' ? 'opacity-60' : ''}>
-                    {/* ── User row ── */}
-                    <div className="flex items-center justify-between px-3 md:px-4 py-2.5 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => canEdit && setEditingUser(user)}
-                        className={`flex-1 min-w-0 text-left ${canEdit ? 'cursor-pointer' : 'cursor-default'}`}
-                      >
-                        <span className="block truncate text-sm font-semibold uppercase text-white" title={user.first_name ?? ''}>{user.first_name ?? ''} {user.last_name ?? ''}
-                        </span>
-                        <span className="text-white/55 text-[11px] uppercase tracking-wider">
-                          {translateRole(user.role, currentUser.language)}
-                          {!isPurelyManagementRole(user.role) && user.status === 'active' && !isUserVisibleOnTeamSchedule(user) && (
-                            <span className="ml-1.5 text-amber-600 font-semibold normal-case">
-                              · {t.settings_off_schedule_badge}
-                            </span>
-                          )}
-                        </span>
-                      </button>
-
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        {/* Bottone condivisione unico con dropdown — nascosto */}
-                        {/* eslint-disable-next-line no-constant-binary-expression */}
-                        {false && canEdit && !isPurelyManagementRole(user.role) && (
-                          <div className="relative">
-                            <button
-                              type="button"
-                              title="Condividi accesso"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShareMenuUserId(shareMenuUserId === user.id ? null : user.id);
-                              }}
-                              className={`p-1.5 rounded-md border transition-colors ${shareMenuUserId === user.id ? 'text-accent border-accent/30 bg-accent/5' : 'text-white/40 border-neutral-500 hover:text-accent hover:border-accent/30 hover:bg-accent/5'} active:text-accent`}
-                            >
-                              <Link2 className="w-3.5 h-3.5" />
-                            </button>
-
-                            <AnimatePresence>
-                              {shareMenuUserId === user.id && (
-                                <>
-                                  {/* backdrop invisibile per chiudere */}
-                                  <div
-                                    className="fixed inset-0 z-[60]"
-                                    onClick={(e) => { e.stopPropagation(); setShareMenuUserId(null); }}
-                                  />
-                                  <motion.div
-                                    initial={{ opacity: 0, scale: 0.92, y: -4 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.92, y: -4 }}
-                                    transition={{ duration: 0.13 }}
-                                    className="absolute right-0 top-full mt-1.5 z-[61] w-52 rounded-xl border border-neutral-500 bg-white/10 shadow-lg overflow-hidden"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {/* Copia link accesso */}
-                                    <button
-                                      type="button"
-                                      onClick={async () => {
-                                        const link = buildShortInviteLink(user, users);
-                                        try {
-                                          await navigator.clipboard.writeText(link);
-                                          showSuccess?.(t.admin_employee_access_link_copied ?? 'Link copiato');
-                                        } catch {
-                                          showError?.(t.copy_failed ?? 'Copia non riuscita');
-                                        }
-                                        setShareMenuUserId(null);
-                                      }}
-                                      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-[12px] font-medium text-white/80 hover:bg-white/5 transition-colors active:bg-white/5/80"
-                                    >
-                                      <Link2 className="w-3.5 h-3.5 shrink-0 text-white/40" />
-                                      Copia link accesso
-                                    </button>
-                                    <div className="h-px bg-white/10" />
-                                  </motion.div>
-                                </>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        )}
-
-                        {/* Cosa vede */}
-                        {canEdit && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setExpandedVisibilityUserId(expandedVisibilityUserId === user.id ? null : user.id);
-                              setExpandedPermsUserId(null);
-                            }}
-                            className={`px-2 py-1 text-[11px] font-bold uppercase rounded-md transition-colors border ${expandedVisibilityUserId === user.id ? 'bg-white/15 text-accent border-accent/30 shadow-sm' : 'text-white/55 border-transparent hover:text-white/80'} active:text-white/80'}`}
-                          >
-                            {t.what_sees}
-                          </button>
-                        )}
-
-
-                        {/* Active toggle */}
-                        {canEdit && (
-                          <div className="flex items-center gap-1.5">
-                            {user.status !== 'active' && (
-                              deleteConfirmUserId === user.id ? (
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => setDeleteConfirmUserId(null)}
-                                    className="rounded-lg border border-neutral-500 px-2 py-1 text-[11px] font-semibold text-white/55 hover:bg-white/10 active:bg-white/80"
-                                  >
-                                    {t.cancel ?? 'Annulla'}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={async (e) => {
-                                      e.stopPropagation();
-                                      setDeleteConfirmUserId(null);
-                                      await deleteUser(user.id);
-                                      showSuccess?.(t.settings_delete_user_success);
-                                    }}
-                                    className="rounded-lg bg-red-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-red-700 active:bg-red-700/80"
-                                  >
-                                    {t.settings_delete_user_title ?? 'Elimina'}
-                                  </button>
-                                </div>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => setDeleteConfirmUserId(user.id)}
-                                  className="flex h-6 w-6 items-center justify-center rounded-lg bg-red-500/15 text-red-400 transition-colors hover:bg-red-500/150/25 active:bg-red-500/150/80"
-                                  title={t.settings_delete_user_title}
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
-                              )
-                            )}
-                            <button
-                              type="button"
-                              role="switch"
-                              aria-checked={user.status === 'active'}
-                              onClick={() => handleToggleStatus(user)}
-                              className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-all duration-200 ${
- user.status === 'active' ? 'bg-accent' : ''
- }`}
-                            >
-                              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${user.status === 'active' ? 'translate-x-5' : 'translate-x-0'}`} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Permissions / Visibility panel */}
-                    <AnimatePresence>
-                      {(isPermsOpen || expandedVisibilityUserId === user.id) && canEdit && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="border-t border-white/10 px-4 py-4 space-y-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                            {expandedVisibilityUserId === user.id && (
-                              <ProfileVisibilityHub 
-                                initialSelectedUserId={user.id} 
-                                onClose={() => setExpandedVisibilityUserId(null)} 
-                              />
-                            )}
-                            
-                            {isPermsOpen && (
-                              <>
-                                {/* Matrice permessi: solo lettura (definita dal ruolo) */}
-                            {!isPurelyManagementRole(user.role) && (
-                              <div className="space-y-4">
-                                <p className="text-[11px] text-white/55 leading-snug">
-                                  {formatTrans(t.settings_perms_effective_intro, {
-                                    name: user.first_name ?? '',
-                                    role: translateRole(user.role, currentUser.language),
-                                  })}
-                                </p>
-                                <div>
-                                  <p className="ui-section-title mb-2">
-                                    {formatTrans(t.settings_perms_tab_heading, { name: user.first_name ?? '' })}
-                                  </p>
-                                  <RoleFeatureSectionsBlock
-                                    mode="badges"
-                                    features={getEnabledFeatures(user)}
-                                    language={effectiveLanguage}
-                                  />
-                                  <div className={`mt-3 ${PERMISSION_SUMMARY_LIST_CLASS}`}>
-                                    <AdminRow
-                                      className="!py-2.5 !px-4"
-                                      label={
-                                        <span
-                                          className={
-                                            isUserVisibleOnTeamSchedule(user)
-                                              ? 'text-white'
-                                              : 'text-white/70'
-                                          }
-                                        >
-                                          {t.settings_visible_on_schedule_row}
-                                        </span>
-                                      }
-                                      action={
-                                        <span
-                                          className={`shrink-0 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${
- isUserVisibleOnTeamSchedule(user) ? 'bg-accent text-white shadow-sm' : 'bg-white/10 text-white/55'
- }`}
-                                        >
-                                          {isUserVisibleOnTeamSchedule(user) ? t.role_template_yes : t.role_template_no}
-                                        </span>
-                                      }
-                                    />
-                                  </div>
-                                  <p className="text-[11px] text-white/60 mt-2 leading-snug">
-                                    Template + pulsante Griglia in riga (override solo visibilità tabellone).
-                                  </p>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Moduli scheda Impostazioni: globali, solo Admin modifica (Permessi ruoli) */}
-                            {isManagementRole(user.role) && (
-                              <div>
-                                <p className="text-[11px] font-bold text-white/60 uppercase tracking-widest mb-2">
-                                  {formatTrans(t.settings_admin_settings_modules_heading, { name: user.first_name ?? '' })}
-                                </p>
-                                <p className="text-[11px] text-white/55 mb-2">
-                                  {t.settings_admin_settings_modules_body}
-                                </p>
-                                <div className={PERMISSION_SUMMARY_LIST_CLASS}>
-                                  {ADMIN_MODULE_KEYS.map((key) => {
-                                    const adminMods = getAdminModuleEnabled(user);
-                                    const enabled = adminMods[key] === true;
-                                    return (
-                                      <AdminRow
-                                        key={key}
-                                        className="!py-2.5 !px-4"
-                                        label={
-                                          <span className={enabled ? 'text-white' : 'text-white/55'}>
-                                            {getAdminModuleLabel(key, t as Record<string, string>)}
-                                          </span>
-                                        }
-                                        action={
-                                          <span
-                                            className={`shrink-0 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${
- enabled
- ? 'bg-accent text-white shadow-sm'
- : 'bg-white/10 text-white/55'
- }`}
-                                        >
-                                          {enabled ? t.role_template_yes : t.role_template_no}
-                                          </span>
-                                        }
-                                      />
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-
-                            {adminOnly && (
-                              <AdminTimesheetGridPrivacyEditor
-                                user={users.find((u) => u.id === user.id) ?? user}
-                              />
-                            )}
-
-                            {isPurelyManagementRole(user.role) ? (
-                              <div className="rounded-xl border border-accent/25 bg-accent/5 px-4 py-3">
-                                <p className="text-sm font-bold text-white">{t.settings_admin_perm_title}</p>
-                                <p className="mt-1.5 text-[11px] leading-relaxed text-white/70">
-                                  {t.settings_admin_perm_readonly_body}
-                                </p>
-                              </div>
-                            ) : (
-                                  <StaffOperationalPermissionsEditor user={user} currentUser={currentUser} />
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
+              {displayUsers.map((user) => (
+                <SettingsUserRow
+                  key={user.id}
+                  user={user}
+                  canEdit={canEdit}
+                  isVisibilityOpen={expandedVisibilityUserId === user.id}
+                  isDeleteConfirm={deleteConfirmUserId === user.id}
+                  shareMenuOpen={shareMenuUserId === user.id}
+                  currentUser={currentUser as User}
+                  t={t}
+                  users={users}
+                  showSuccess={showSuccess}
+                  showError={showError}
+                  onEdit={setEditingUser}
+                  onToggleStatus={handleToggleStatus}
+                  onSetDeleteConfirm={setDeleteConfirmUserId}
+                  onDeleteUser={deleteUser}
+                  onSetVisibility={setExpandedVisibilityUserId}
+                  onSetShareMenu={setShareMenuUserId}
+                />
+              ))}
                 </div>
               </motion.div>
             )}

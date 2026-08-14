@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo, useLayoutEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo, useLayoutEffect, memo } from 'react';
 import { createPortal } from 'react-dom';
 import {
   CalendarDays, AlertTriangle, Check, Lock, Plus, Clock,
@@ -13,6 +13,7 @@ import type { Shift, PunchRecord, User, ShiftAuditEntry } from '../types';
 import {
   format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday, parseISO,
 } from 'date-fns';
+import type { Locale } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { getTranslations, getDateLocale, getIntlLocale } from '../utils/translations';
 import { formatMinutesToHoursAndMinutes, calculateShiftMinutesGross, getBreakLabels, hasShiftConflictSameDay } from '../utils/timeCalculations';
@@ -70,6 +71,9 @@ function splitDayGroupsBySlot(groups: DayShiftGroup[]) {
     extraEveningGroups: eveningGroups.slice(1),
   };
 }
+
+/** Array condiviso immutabile per i giorni senza turni (evita allocazioni a ogni cella). */
+const EMPTY_GROUPS: DayShiftGroup[] = [];
 
 function isExtraShiftInDay(shift: Shift, dayShifts: Shift[]): boolean {
   const slot = getShiftSlotFromStartTime(shift.start_time ?? '10:00');
@@ -173,8 +177,288 @@ const MONTHS_IT = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET'
 
 function useT() {
   const { effectiveLanguage } = useAppUser();
-  return getTranslations(effectiveLanguage);
+  // useMemo: getTranslations restituisce lo stesso oggetto per lingua, ma questo
+  // rende esplicita la stabilità del riferimento passato ai figli memoizzati.
+  return useMemo(() => getTranslations(effectiveLanguage), [effectiveLanguage]);
 }
+
+/* ── Righe/card memoizzate ──────────────────────────────────────────────────
+ * La matrice utenti×giorni è estratta in componenti React.memo: si ri-renderizzano
+ * SOLO quando cambiano le loro props. Prima era tutto nel componente padre:
+ * ogni keystroke nel drawer di dettaglio (orari, timbrature) o nella modale di
+ * creazione ri-renderizzava l'intera griglia (centinaia di celle JSX).
+ */
+
+type GridRenderHelpers = {
+  renderGroupButton: (g: DayShiftGroup, layout: 'desktop' | 'mobile', compact?: boolean, extraGroups?: DayShiftGroup[]) => React.ReactNode;
+};
+
+const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
+  user, totals, isExpanded, hasShifts, weekDays, weekDateStrings, dayGroupsByUserDate,
+  canEdit, dropTargetKey, t, locale,
+  renderGroupButton,
+  onToggleExpanded, onCreateShift, onDragOver, onDragLeave, onDrop,
+}: ShiftGridMobileCardProps) {
+  const totalNet = totals.planned;
+  const totalActual = totals.actual;
+  return (
+    <div className="rounded-xl border border-neutral-500 overflow-hidden p-4 shadow-sm">
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        onClick={() => onToggleExpanded(user.id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggleExpanded(user.id);
+          }
+        }}
+        className="flex justify-between items-start mb-4 cursor-pointer select-none"
+      >
+        <div className="flex items-start gap-2 min-w-0">
+          <ChevronDown
+            className={`mt-1 h-4 w-4 shrink-0 text-white/40 transition-transform ${isExpanded ? '' : '-rotate-90'}`}
+            aria-hidden
+          />
+          <div className="min-w-0">
+            <h4 className="font-bold text-lg text-white truncate">{user.first_name} {user.last_name?.[0] ?? ''}</h4>
+            {user.department && (
+              <p className="text-[11px] text-white/50 font-medium uppercase tracking-wider">{user.department}</p>
+            )}
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <div className="text-[10px] font-bold text-white/40 uppercase tracking-tight">{t.total_hours ?? 'Ore'}</div>
+          <div className="text-sm font-bold text-accent tabular-nums">
+            {formatMinutesToHoursAndMinutes(totalActual)}
+          </div>
+          <div className={`text-[10px] font-bold tabular-nums ${totalActual > totalNet ? 'text-accent' : 'text-emerald-400'}`}>
+            {totalActual > totalNet ? '+' : ''}{formatMinutesToHoursAndMinutes(Math.abs(totalActual - totalNet))}
+          </div>
+        </div>
+      </div>
+
+      {isExpanded && (
+      <div className="space-y-2">
+        {!hasShifts ? (
+          <div
+            className={`py-4 text-center border-2 border-dashed border-white/10 rounded-xl ${dropTargetKey ===`${user.id}_empty` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+            onDragOver={(e) => onDragOver(e, `${user.id}_empty`)}
+            onDragLeave={onDragLeave}
+            onDrop={(e) => { const firstDay = weekDateStrings[0]; if (firstDay) onDrop(e, user.id, firstDay); }}
+          >
+            <p className="text-xs text-white/50 italic">{t.no_shifts_this_week ?? 'Nessun turno'}</p>
+          </div>
+        ) : (
+          weekDays.map(day => {
+            const dateStr = format(day, 'yyyy-MM-dd');
+            const groups = dayGroupsByUserDate.get(`${user.id}|${dateStr}`) ?? EMPTY_GROUPS;
+            if (groups.length === 0) return null;
+
+            const todayDate = isToday(day);
+            return (
+              <div key={dateStr}
+                className={`flex items-start gap-3 p-2.5 rounded-xl ${todayDate ? 'bg-accent/5 ring-1 ring-accent/20' : 'bg-white/[0.04]'} ${dropTargetKey ===`${user.id}_${dateStr}` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+                onDragOver={(e) => onDragOver(e, `${user.id}_${dateStr}`)}
+                onDragLeave={onDragLeave}
+                onDrop={(e) => onDrop(e, user.id, dateStr)}
+              >
+                <div className="w-10 shrink-0 text-center pt-0.5">
+                  <div className={`text-[10px] font-bold uppercase ${todayDate ? 'text-accent' : 'text-white/50'}`}>
+                    {format(day, 'EEE', { locale })}
+                  </div>
+                  <div className={`text-sm font-bold ${todayDate ? 'text-accent' : 'text-white/70'}`}>
+                    {format(day, 'd')}
+                  </div>
+                </div>
+
+                <div className="flex-1 flex flex-col gap-1">
+                  {(() => {
+                    const { lunch, evening, extraLunchGroups, extraEveningGroups } = splitDayGroupsBySlot(groups);
+                    const canAddSecond = canEdit && groups.length < 2;
+                    return (
+                      <>
+                        <div className="min-h-[28px]">
+                          {lunch ? renderGroupButton(lunch, 'mobile', false, extraLunchGroups) : canAddSecond ? (
+                            <button type="button" onClick={() => onCreateShift(user.id, dateStr, 'lunch')}
+                              className="w-full rounded-lg border border-dashed border-white/15 py-1.5 text-[10px] font-bold text-white/40 transition-colors hover:border-white/30 hover:text-white/70">
+                              <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_shift ?? 'Aggiungi'}
+                            </button>
+                          ) : null}
+                        </div>
+                        <div className="min-h-[28px]">
+                          {evening ? renderGroupButton(evening, 'mobile', false, extraEveningGroups) : canAddSecond ? (
+                            <button type="button" onClick={() => onCreateShift(user.id, dateStr, 'evening')}
+                              className="w-full rounded-lg border border-dashed border-white/15 py-1.5 text-[10px] font-bold text-white/40 transition-colors hover:border-white/30 hover:text-white/70">
+                              <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_second_shift ?? '2° turno'}
+                            </button>
+                          ) : null}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+      )}
+    </div>
+  );
+});
+
+type ShiftGridMobileCardProps = {
+  user: User;
+  totals: { planned: number; actual: number };
+  isExpanded: boolean;
+  hasShifts: boolean;
+  weekDays: Date[];
+  weekDateStrings: string[];
+  dayGroupsByUserDate: Map<string, DayShiftGroup[]>;
+  canEdit: boolean;
+  dropTargetKey: string | null;
+  t: ReturnType<typeof getTranslations>;
+  locale: Locale;
+} & GridRenderHelpers & {
+  onToggleExpanded: (userId: string) => void;
+  onCreateShift: (userId: string, date: string, preferredSlot?: 'lunch' | 'evening') => void;
+  onDragOver: (e: React.DragEvent, cellKey: string) => void;
+  onDragLeave: () => void;
+  onDrop: (e: React.DragEvent, targetUserId: string, targetDate: string, targetSlot?: 'lunch' | 'evening') => void;
+};
+
+const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
+  user, totals, weekDays, dayGroupsByUserDate,
+  isPeriodView, compactGrid, canEdit, slotRowHeight, slotCellHeight,
+  dropTargetKey, t,
+  renderGroupButton,
+  onCreateShift, onDragOver, onDragLeave, onDrop, onReviewClick,
+}: ShiftGridDesktopRowProps) {
+  const totalNet = totals.planned;
+  const totalActual = totals.actual;
+  return (
+    <tr className="wst-employee-row">
+      <td className={`sticky left-0 z-10 px-2 py-1.5 border-b border-r border-white/[0.06] cursor-pointer hover:bg-white/[0.08]`}
+        onClick={() => onReviewClick(user)}>
+        <div className="flex items-center gap-1 min-w-0 ml-2">
+          <span className="text-xs font-bold text-white truncate">{user.first_name} {user.last_name?.[0] ?? ''}</span>
+        </div>
+      </td>
+      {weekDays.map((day, dIdx) => {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        const groups = dayGroupsByUserDate.get(`${user.id}|${dateStr}`) ?? EMPTY_GROUPS;
+        const _weekStripe = isPeriodView && Math.floor(dIdx / 7) % 2 === 1;
+        const weekEnd = isPeriodView && day.getDay() === 0;
+        return (
+          <td key={dIdx}
+            className={`px-1 py-0.5 align-top group min-w-0 border-b border-r border-white/[0.06] ${weekEnd ? 'border-r-2 border-r-white/15' : ''} ${isToday(day) ? '!border-b-white' : ''}`}
+          >
+            {groups.length === 0 ? (
+              <div
+                className={`flex items-center justify-center h-full ${dropTargetKey ===`${user.id}_${dateStr}_lunch` ? 'ring-2 ring-inset ring-amber-400/50 rounded' : ''}`}
+                style={{ minHeight: slotCellHeight }}
+                onDragOver={(e) => onDragOver(e, `${user.id}_${dateStr}_lunch`)}
+                onDragLeave={onDragLeave}
+                onDrop={(e) => onDrop(e, user.id, dateStr, 'lunch')}
+              >
+                {canEdit ? (
+                  <button type="button" onClick={() => onCreateShift(user.id, dateStr)}
+                    className={`rounded-lg border border-dashed border-white flex items-center justify-center text-[10px] font-bold transition-colors opacity-0 group-hover:opacity-100 text-white [color:#fff_!important] ${isPeriodView ? 'w-7 h-7' : 'px-3 py-2'}`}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <Plus className="h-3 w-3 inline-block" />{!isPeriodView && <span className="ml-1">{t.add_shift ?? 'Aggiungi'}</span>}
+                  </button>
+                ) : (
+                  <span className="text-[10px] text-white/20 font-medium">&mdash;</span>
+                )}
+              </div>
+            ) : (
+              (() => {
+                const { lunch, evening, extraLunchGroups, extraEveningGroups } = splitDayGroupsBySlot(groups);
+                const canAddSecond = canEdit && groups.length < 2;
+                const emptySlot = (slot: 'lunch' | 'evening', label: string) => (
+                  canAddSecond && !(slot === 'lunch' ? lunch : evening) ? (
+                    <button type="button" onClick={() => onCreateShift(user.id, dateStr, slot)}
+                      className={`w-full rounded-md border border-dashed border-white flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 text-white [color:#fff_!important] ${isPeriodView ? '' : 'text-[10px] font-bold'}`}
+                      style={{ height: isPeriodView ? slotRowHeight - 2 : slotRowHeight }}
+                      title={label}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <Plus className={`${isPeriodView ? 'h-3 w-3' : 'inline-block h-3 w-3 mr-0.5'}`} />
+                      {!isPeriodView && label}
+                    </button>
+                  ) : (
+                    <div style={{ height: isPeriodView ? slotRowHeight - 2 : slotRowHeight }} />
+                  )
+                );
+                return (
+                  <div className={`flex flex-col ${isPeriodView ? 'gap-px' : ''}`} style={{ height: slotCellHeight }}>
+                    <div
+                      className={`flex items-center flex-1 ${dropTargetKey ===`${user.id}_${dateStr}_lunch` ? 'ring-2 ring-inset ring-amber-400/50 rounded' : ''}`}
+                      style={{ ...(isPeriodView ? {} : { borderBottom: '1px solid rgba(255,255,255,0.10)', paddingLeft: '1px', paddingRight: '1px' }) }}
+                      onDragOver={(e) => onDragOver(e, `${user.id}_${dateStr}_lunch`)}
+                      onDragLeave={onDragLeave}
+                      onDrop={(e) => onDrop(e, user.id, dateStr, 'lunch')}
+                    >
+                      {lunch ? (
+                        <div className="relative w-full min-w-0 overflow-visible">
+                          {renderGroupButton(lunch, 'desktop', compactGrid, extraLunchGroups)}
+                        </div>
+                      ) : emptySlot('lunch', t.add_shift ?? 'Aggiungi')}
+                    </div>
+                    <div
+                      className={`flex items-center flex-1 ${isPeriodView ? 'border-t border-white/[0.08]' : ''} ${dropTargetKey ===`${user.id}_${dateStr}_evening` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+                      style={{ ...(isPeriodView ? {} : { paddingLeft: '1px', paddingRight: '1px' }) }}
+                      onDragOver={(e) => onDragOver(e, `${user.id}_${dateStr}_evening`)}
+                      onDragLeave={onDragLeave}
+                      onDrop={(e) => onDrop(e, user.id, dateStr, 'evening')}
+                    >
+                      {evening ? (
+                        <div className="relative w-full min-w-0 overflow-visible">
+                          {renderGroupButton(evening, 'desktop', compactGrid, extraEveningGroups)}
+                        </div>
+                      ) : emptySlot('evening', t.add_second_shift ?? '2° turno')}
+                    </div>
+                  </div>
+                );
+              })()
+            )}
+          </td>
+        );
+      })}
+      <td className={`px-1 py-1 text-center align-middle border-b border-white/[0.06] ${compactGrid ? 'text-[10px]' : ''}`}>
+        <div className={`${compactGrid ? 'text-[10px]' : 'text-xs'} font-bold text-white tabular-nums`}>{formatMinutesToHoursAndMinutes(totalActual)}</div>
+        <div className={`${compactGrid ? 'text-[9px]' : 'text-[10px]'} font-bold tabular-nums ${totalActual > totalNet ? 'text-accent' : 'text-emerald-400'}`}>
+          {totalActual > totalNet ? '+' : ''}{formatMinutesToHoursAndMinutes(Math.abs(totalActual - totalNet))}
+        </div>
+      </td>
+    </tr>
+  );
+});
+
+type ShiftGridDesktopRowProps = {
+  user: User;
+  totals: { planned: number; actual: number };
+  weekDays: Date[];
+  dayGroupsByUserDate: Map<string, DayShiftGroup[]>;
+  isPeriodView: boolean;
+  compactGrid: boolean;
+  canEdit: boolean;
+  slotRowHeight: number;
+  slotCellHeight: number;
+  dropTargetKey: string | null;
+  t: ReturnType<typeof getTranslations>;
+} & GridRenderHelpers & {
+  onCreateShift: (userId: string, date: string, preferredSlot?: 'lunch' | 'evening') => void;
+  onDragOver: (e: React.DragEvent, cellKey: string) => void;
+  onDragLeave: () => void;
+  onDrop: (e: React.DragEvent, targetUserId: string, targetDate: string, targetSlot?: 'lunch' | 'evening') => void;
+  onReviewClick: (user: User) => void;
+};
 
 export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, filterUserId }: { mode: GridMode; onModeChange: (m: GridMode) => void; filterUserId?: string }) {
   const t = useT();
@@ -187,8 +471,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   } = useAppData();
   const { breakRules, featureFlags } = useAppConfig();
   const { showSuccess, showError } = useAppOverlay();
-  const locale = getDateLocale(effectiveLanguage) ?? it;
-  const today = new Date();
+  // Memoizzati: `today`/`locale` cambiavano riferimento a ogni render e invalidavano
+  // tutte le useCallback che li citavano tra le dipendenze (→ funzioni ricreate
+  // a ogni render → memo dei figli inutile).
+  const locale = useMemo(() => getDateLocale(effectiveLanguage) ?? it, [effectiveLanguage]);
+  const today = useMemo(() => new Date(), []);
   const canEdit = useMemo(
     () => currentUser ? canEditTeamShifts(currentUser) : false,
     [currentUser]
@@ -210,12 +497,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const effectiveWorkRules = DEFAULT_WORK_RULES;
   const violationChromeEnabled = featureFlags?.violation_rules !== false;
 
-  /** DEBUG — conta turni totali caricati */
+  /** DEBUG — conta turni totali caricati (solo quando cambia il dataset, non a ogni render) */
   useEffect(() => {
     if (import.meta.env.DEV) {
       console.log(`[🔄 Grid] totali allShifts: ${allShifts.length} | con tenant_id: ${allShifts.filter(s => (s as any).tenant_id).length}`);
     }
-  });
+  }, [allShifts]);
 
   const gridRootRef = useRef<HTMLDivElement>(null);
   const contentAboveRef = useRef<HTMLDivElement>(null);
@@ -243,7 +530,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   useLayoutEffect(() => {
     const el = tableScrollRef.current;
     if (!el) return;
-    const onScroll = () => setTableScrolled(el.scrollTop > 0);
+    // Guardia: nessun re-render se lo stato non cambia davvero (lo scroll genera molti eventi).
+    const onScroll = () => {
+      const next = el.scrollTop > 0;
+      setTableScrolled(prev => (prev === next ? prev : next));
+    };
     onScroll();
     el.addEventListener('scroll', onScroll, { passive: true });
     return () => el.removeEventListener('scroll', onScroll);
@@ -274,9 +565,19 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const periodStart = getPeriodStartDate(effectivePeriod);
   const periodEnd = getPeriodEndDate(effectivePeriod);
 
-  const weekDays = viewMode === 'period'
-    ? eachDayOfInterval({ start: periodStart, end: periodEnd })
-    : eachDayOfInterval({ start: weekStart, end: weekEnd });
+  // Memoizzato su chiavi stringa: periodStart/periodEnd/weekEnd sono NUOVI oggetti Date a ogni
+  // render → senza useMemo, weekDays cambiava identità e l'intera griglia veniva ricalcolata
+  // a ogni interazione (scroll incluso), invalidando anche il memo di weekShifts.
+  const weekStartStr = format(weekStart, 'yyyy-MM-dd');
+  const weekEndStr = format(weekEnd, 'yyyy-MM-dd');
+  const periodStartStr = format(periodStart, 'yyyy-MM-dd');
+  const periodEndStr = format(periodEnd, 'yyyy-MM-dd');
+  const weekDays = useMemo(() => {
+    if (viewMode === 'period') {
+      return eachDayOfInterval({ start: parseISO(periodStartStr), end: parseISO(periodEndStr) });
+    }
+    return eachDayOfInterval({ start: parseISO(weekStartStr), end: parseISO(weekEndStr) });
+  }, [viewMode, periodStartStr, periodEndStr, weekStartStr, weekEndStr]);
 
   const [showPeriodPopover, setShowPeriodPopover] = useState(false);
   const [periodPopoverYear, setPeriodPopoverYear] = useState(today.getFullYear());
@@ -539,18 +840,24 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setWeekStart(startOfWeek(today, { weekStartsOn: 1 }));
   };
 
-  const visibleUsers = filterUserId
-    ? users.filter(u => u.id === filterUserId)
-    : users
+  const visibleUsers = useMemo(() => {
+    if (filterUserId) return users.filter(u => u.id === filterUserId);
+    return users
       .filter(u => isUserVisibleOnTeamSchedule(u, allShifts))
       .filter(u => !deptFilter || u.department === deptFilter);
+  }, [filterUserId, users, allShifts, deptFilter]);
 
-  const weekDateStrings = weekDays.map(d => format(d, 'yyyy-MM-dd'));
+  const weekDateStrings = useMemo(() => weekDays.map(d => format(d, 'yyyy-MM-dd')), [weekDays]);
+  const weekDateSet = useMemo(() => new Set(weekDateStrings), [weekDateStrings]);
   const weekShifts = useMemo(
-    () => allShifts.filter(s => weekDateStrings.includes(s.date) && (!filterUserId || s.user_id === filterUserId)),
-    [allShifts, weekDateStrings, filterUserId]
+    () => allShifts.filter(s => weekDateSet.has(s.date) && (!filterUserId || s.user_id === filterUserId)),
+    [allShifts, weekDateSet, filterUserId]
   );
-  const weekPunchRecords = allPunchRecords.filter(pr => weekDateStrings.some(ds => pr.timestamp?.startsWith(ds)));
+  // Memoizzato con Set: prima era un filter O(P×D) a ogni render.
+  const weekPunchRecords = useMemo(
+    () => allPunchRecords.filter(pr => pr.timestamp && weekDateSet.has(pr.timestamp.slice(0, 10))),
+    [allPunchRecords, weekDateSet]
+  );
   const departments = [...new Set(users.filter(u => u.department).map(u => u.department as string))];
   const hasWeekDraftShifts = weekShifts.some(s => s.approval_status === 'draft');
   const canFreezeWeek = !hasWeekDraftShifts && weekShifts.some(s => s.approval_status === 'approved') && weekShifts.every(s => s.approval_status !== 'draft' && s.approval_status !== 'confirmed');
@@ -567,8 +874,29 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const extraRowHeight = 16;
   const compactGrid = isPeriodView || dayCount > 7;
 
-  function getPunchForShift(shift: Shift) {
-    const exact = weekPunchRecords.filter(pr => pr.shift_id === shift.id);
+  /** Indice punch della settimana (per shift_id e per user+data): elimina i filter O(P) per turno. */
+  const weekPunchIndex = useMemo(() => {
+    const byShiftId = new Map<string, PunchRecord[]>();
+    const byUserDate = new Map<string, PunchRecord[]>();
+    for (const pr of weekPunchRecords) {
+      if (pr.shift_id) {
+        const arr = byShiftId.get(pr.shift_id);
+        if (arr) arr.push(pr);
+        else byShiftId.set(pr.shift_id, [pr]);
+      }
+      const ds = pr.timestamp?.slice(0, 10);
+      if (ds) {
+        const key = `${pr.user_id}|${ds}`;
+        const arr = byUserDate.get(key);
+        if (arr) arr.push(pr);
+        else byUserDate.set(key, [pr]);
+      }
+    }
+    return { byShiftId, byUserDate };
+  }, [weekPunchRecords]);
+
+  const getPunchForShift = useCallback((shift: Shift) => {
+    const exact = weekPunchIndex.byShiftId.get(shift.id) ?? [];
     if (exact.length > 0) {
       const sorted = [...exact].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
       const pIn = sorted.find(p => p.type === 'in');
@@ -579,55 +907,114 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       return { in: pIn, out: pOut };
     }
     return { in: undefined, out: undefined };
-  }
+  }, [weekPunchIndex]);
 
-  function getDayGroup(userId: string, dateStr: string): DayShiftGroup[] {
-    return weekShifts.filter(s => s.user_id === userId && s.date === dateStr).map(shift => {
-      const { in: punchIn, out: punchOut } = getPunchForShift(shift);
-      const plannedMins = calculateShiftMinutesGross(shift.start_time ?? '', shift.end_time ?? '');
-      const actualMins = punchIn && punchOut
-        ? (() => {
-            const startMs = new Date(punchIn.calculated_time || punchIn.timestamp).getTime();
-            let endMs = new Date(punchOut.calculated_time || punchOut.timestamp).getTime();
-            if (endMs <= startMs) endMs += 24 * 60 * 60 * 1000;
-            return (endMs - startMs) / 60000;
-          })() : 0;
-      const breakMins = getBreakMinutesForShift(shift, plannedMins, null, breakRules);
-      const actualBreakMins = (() => {
-        const gross = Math.round(actualMins);
-        if (gross < AUTO_BREAK_THRESHOLD_MINUTES) return 0;
-        if (shift.deduct_break === false) return 0;
-        const st = (shift.start_time || '').slice(0, 5);
-        const en = (shift.end_time || '').slice(0, 5);
-        if (!st || !en) return 0;
-        const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-        if (toMin(en) <= toMin(st)) return 0;
-        const mealKeys = getBreakLabels(st, en);
-        return mealKeys.length > 0 ? mealKeys.length * DEFAULT_AUTO_BREAK_MINUTES : 0;
-      })();
-      const actualNet = Math.max(0, Math.round(actualMins) - actualBreakMins);
-      const plannedNet = Math.max(0, plannedMins - breakMins);
-      const violations = violationChromeEnabled ? getShiftViolations(shift, weekShifts, weekDateStrings[0] ?? '', weekDateStrings[weekDateStrings.length - 1] ?? '', effectiveWorkRules, { breakRules }) : undefined;
-      return {
-        shift, punchIn, punchOut, actualMinutes: actualNet, deltaMinutes: actualNet - plannedNet,
-        isAbsent: shift.approval_status === 'absent', isMissingPunch: !punchIn && shiftPastPlannedEndWithoutClockIn(shift, allPunchRecords),
-        breakMinutes: breakMins, actualBreakMinutes: actualBreakMins, netMinutes: plannedNet, violations,
-      };
-    }).sort((a, b) => {
-      const slotA = getShiftSlotFromStartTime(a.shift.start_time ?? '00:00') === 'lunch' ? 0 : 1;
-      const slotB = getShiftSlotFromStartTime(b.shift.start_time ?? '00:00') === 'lunch' ? 0 : 1;
-      if (slotA !== slotB) return slotA - slotB;
-      return (a.shift.start_time?.slice(0, 5) ?? '00:00').localeCompare(b.shift.start_time?.slice(0, 5) ?? '00:00');
-    });
-  }
+  /** Turni della settimana per (user, data) e per utente: niente filter O(S) per cella né per getShiftViolations. */
+  const { shiftsByUserDate, shiftsByUser } = useMemo(() => {
+    const byUserDate = new Map<string, Shift[]>();
+    const byUser = new Map<string, Shift[]>();
+    for (const s of weekShifts) {
+      const keyDate = `${s.user_id}|${s.date}`;
+      const arrD = byUserDate.get(keyDate);
+      if (arrD) arrD.push(s);
+      else byUserDate.set(keyDate, [s]);
+      const arrU = byUser.get(s.user_id);
+      if (arrU) arrU.push(s);
+      else byUser.set(s.user_id, [s]);
+    }
+    return { shiftsByUserDate: byUserDate, shiftsByUser: byUser };
+  }, [weekShifts]);
 
-  function getTotalPlanned(userId: string) {
-    return weekDateStrings.reduce((acc, ds) => acc + getDayGroup(userId, ds).reduce((s, g) => s + g.netMinutes, 0), 0);
-  }
+  /**
+   * Cache dei gruppi giorno: calcolata UNA volta per set di dati.
+   * Prima getDayGroup veniva rieseguita ~5× per (utente, giorno) a ogni render
+   * (totali pianificato/effettivo, celle mobile, celle desktop, userHasShifts),
+   * con getShiftViolations O(S²) e filter O(P) per turno: ogni scroll/keystroke
+   * dell'interfaccia ricalcolava l'intera matrice → thread bloccato su PC.
+   */
+  const dayGroupsByUserDate = useMemo(() => {
+    const cache = new Map<string, DayShiftGroup[]>();
+    const firstDateStr = weekDateStrings[0] ?? '';
+    const lastDateStr = weekDateStrings[weekDateStrings.length - 1] ?? '';
+    for (const [key, shifts] of shiftsByUserDate) {
+      const groups = shifts.map(shift => {
+        const { in: punchIn, out: punchOut } = getPunchForShift(shift);
+        const plannedMins = calculateShiftMinutesGross(shift.start_time ?? '', shift.end_time ?? '');
+        const actualMins = punchIn && punchOut
+          ? (() => {
+              const startMs = new Date(punchIn.calculated_time || punchIn.timestamp).getTime();
+              let endMs = new Date(punchOut.calculated_time || punchOut.timestamp).getTime();
+              if (endMs <= startMs) endMs += 24 * 60 * 60 * 1000;
+              return (endMs - startMs) / 60000;
+            })() : 0;
+        const breakMins = getBreakMinutesForShift(shift, plannedMins, null, breakRules);
+        const actualBreakMins = (() => {
+          const gross = Math.round(actualMins);
+          if (gross < AUTO_BREAK_THRESHOLD_MINUTES) return 0;
+          if (shift.deduct_break === false) return 0;
+          const st = (shift.start_time || '').slice(0, 5);
+          const en = (shift.end_time || '').slice(0, 5);
+          if (!st || !en) return 0;
+          const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+          if (toMin(en) <= toMin(st)) return 0;
+          const mealKeys = getBreakLabels(st, en);
+          return mealKeys.length > 0 ? mealKeys.length * DEFAULT_AUTO_BREAK_MINUTES : 0;
+        })();
+        const actualNet = Math.max(0, Math.round(actualMins) - actualBreakMins);
+        const plannedNet = Math.max(0, plannedMins - breakMins);
+        // getShiftViolations limitata ai turni dello stesso utente: prima filtrava l'intera settimana O(S).
+        const violations = violationChromeEnabled
+          ? getShiftViolations(shift, shiftsByUser.get(shift.user_id) ?? [], firstDateStr, lastDateStr, effectiveWorkRules, { breakRules })
+          : undefined;
+        return {
+          shift, punchIn, punchOut, actualMinutes: actualNet, deltaMinutes: actualNet - plannedNet,
+          isAbsent: shift.approval_status === 'absent',
+          isMissingPunch: !punchIn && shiftPastPlannedEndWithoutClockIn(shift, weekPunchIndex.byShiftId.get(shift.id) ?? []),
+          breakMinutes: breakMins, actualBreakMinutes: actualBreakMins, netMinutes: plannedNet, violations,
+        };
+      }).sort((a, b) => {
+        const slotA = getShiftSlotFromStartTime(a.shift.start_time ?? '00:00') === 'lunch' ? 0 : 1;
+        const slotB = getShiftSlotFromStartTime(b.shift.start_time ?? '00:00') === 'lunch' ? 0 : 1;
+        if (slotA !== slotB) return slotA - slotB;
+        return (a.shift.start_time?.slice(0, 5) ?? '00:00').localeCompare(b.shift.start_time?.slice(0, 5) ?? '00:00');
+      });
+      cache.set(key, groups);
+    }
+    return cache;
+  }, [shiftsByUserDate, shiftsByUser, weekPunchIndex, weekDateStrings, breakRules, violationChromeEnabled, effectiveWorkRules, getPunchForShift]);
 
-  function getTotalActual(userId: string) {
-    return weekDateStrings.reduce((acc, ds) => acc + getDayGroup(userId, ds).reduce((s, g) => s + (g.actualMinutes > 0 ? g.actualMinutes : g.netMinutes), 0), 0);
-  }
+  /**
+   * Totali (pianificato/effettivo) per utente, calcolati UNA volta per dataset.
+   * Prima venivano ricalcolati ~2× per utente a ogni render (vista mobile E desktop
+   * sono entrambe montate) → 2 loop O(U×D) inutili a ogni interazione.
+   */
+  const totalsByUser = useMemo(() => {
+    const totals: Record<string, { planned: number; actual: number }> = {};
+    for (const user of visibleUsers) {
+      let planned = 0;
+      let actual = 0;
+      for (const ds of weekDateStrings) {
+        const groups = dayGroupsByUserDate.get(`${user.id}|${ds}`);
+        if (!groups || groups.length === 0) continue;
+        for (const g of groups) {
+          planned += g.netMinutes;
+          actual += g.actualMinutes > 0 ? g.actualMinutes : g.netMinutes;
+        }
+      }
+      totals[user.id] = { planned, actual };
+    }
+    return totals;
+  }, [visibleUsers, weekDateStrings, dayGroupsByUserDate]);
+
+  /** Utenti con almeno un turno nella settimana (per la card mobile "Nessun turno"). */
+  const usersWithShifts = useMemo(() => {
+    const set = new Set<string>();
+    for (const key of dayGroupsByUserDate.keys()) {
+      const idx = key.indexOf('|');
+      if (idx > 0) set.add(key.slice(0, idx));
+    }
+    return set;
+  }, [dayGroupsByUserDate]);
 
   const handlePublishWeek = useCallback(async () => {
     if (!confirm(t.confirm_publish_week ?? 'Pubblicare tutti i turni della settimana?')) return;
@@ -784,7 +1171,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       }
     } catch { showError(t.error_generic ?? 'Errore.'); }
     finally { setSaving(false); }
-  }, [selectedShift, editIn, editOut, allPunchRecords, addPunchRecord, updatePunchRecord, updateShift, setSelectedShift, showSuccess, showError, t, reviewQueue, reviewIdx, currentUser]);
+  }, [selectedShift, editIn, editOut, allPunchRecords, addPunchRecord, updatePunchRecord, updateShift, setSelectedShift, showSuccess, showError, t, reviewQueue, reviewIdx, currentUser, today]);
 
   const handleFreezeShift = useCallback(async (shift: Shift) => {
     if (sessionActive) {
@@ -888,7 +1275,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       showSuccess(t.punch_saved ?? 'Timbratura salvata.');
     } catch { showError(t.error_generic ?? 'Errore.'); }
     finally { setSaving(false); }
-  }, [selectedShift, editIn, editOut, allPunchRecords, addPunchRecord, updatePunchRecord, updateShift, setSelectedShift, showSuccess, showError, t]);
+  }, [selectedShift, editIn, editOut, allPunchRecords, addPunchRecord, updatePunchRecord, updateShift, setSelectedShift, showSuccess, showError, t, today]);
 
   const handleCreateShift = useCallback(async (overrideStart?: string, overrideEnd?: string) => {
     if (!createModal) return;
@@ -970,7 +1357,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     if (iv.editIn !== editIn || iv.editOut !== editOut) return true;
     const { in: punchIn, out: punchOut } = getPunchForShift(selectedShift);
     return !punchIn || !punchOut;
-  }, [drawerOpen, selectedShift, editIn, editOut]);
+  }, [drawerOpen, selectedShift, editIn, editOut, getPunchForShift]);
 
   // Orario del turno modificato → "Salva modifiche" richiede l'azione
   const timeUnsaved = useMemo(() => {
@@ -1050,7 +1437,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setDeductBreak(db); setIsAutoBreak(ab);
     initialValuesRef.current = { editStartTime: sv, editEndTime: ev, editIn: iv, editOut: ov, deductBreak: db, isAutoBreak: ab };
     setDrawerOpen(true);
-  }, [users, weekPunchRecords, weekShifts, featureFlags]);
+  }, [users, getPunchForShift, weekShifts]);
 
   // ── Drag & Drop handlers ──
   const handleDragStart = useCallback((e: React.DragEvent, shiftId: string) => {
@@ -1140,7 +1527,38 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setDropConfirm({ shiftIds: filtered, targetUserId, targetDate, targetLabel, targetSlot: slot, targetTimeRange, presets, selectedPresetIdx: effectiveIdx });
   }, [handleDropOnCell, handleDropCopyOnCell, allShifts, users, selectedShiftIds]);
 
-  const renderExtraShiftRows = (extraGroups: DayShiftGroup[], layout: 'desktop' | 'mobile') => {
+  /** Deseleziona/seleziona un turno (Shift+click o checkbox) con identità stabile. */
+  const toggleSelectShift = useCallback((id: string) => {
+    setSelectedShiftIds(prev => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  }, []);
+
+  /** Reset stato drag&drop: identità stabile (prima era una closure inline ricreata a ogni render). */
+  const handleDragEnd = useCallback(() => {
+    draggedShiftIdRef.current = null;
+    setDraggedShiftId(null);
+    setDropTargetKey(null);
+    setDragCopyMode(false);
+  }, []);
+
+  /** Apre la coda di revisione del dipendente dal nome colonna (identità stabile). */
+  const handleReviewQueueClick = useCallback((user: User) => {
+    const shifts = weekShifts
+      .filter(s => s.user_id === user.id && s.approval_status !== 'approved' && !isShiftPayrollFrozen(s))
+      .sort((a, b) => a.date.localeCompare(b.date) || (a.start_time ?? '').localeCompare(b.start_time ?? ''));
+    if (shifts.length === 0) {
+      showError(t.no_shifts_to_review ?? 'Nessun turno da revisionare.');
+      return;
+    }
+    setReviewQueue(shifts);
+    setReviewIdx(0);
+    handleOpenDrawer(shifts[0]);
+  }, [weekShifts, showError, t, handleOpenDrawer]);
+
+  const renderExtraShiftRows = useCallback((extraGroups: DayShiftGroup[], layout: 'desktop' | 'mobile') => {
     if (extraGroups.length === 0) return null;
     const stacked = layout === 'desktop';
     return extraGroups.map((ex) => {
@@ -1150,7 +1568,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       const isChecked = selectedShiftIds.has(ex.shift.id);
       const handleClick = (e: React.MouseEvent) => {
         if (e.shiftKey) {
-          setSelectedShiftIds(prev => { const n = new Set(prev); if (n.has(ex.shift.id)) n.delete(ex.shift.id); else n.add(ex.shift.id); return n; });
+          toggleSelectShift(ex.shift.id);
         } else {
           handleOpenDrawer(ex.shift, { isExtra: true });
         }
@@ -1165,7 +1583,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
           draggable={canEdit}
           onDragStart={(e) => handleDragStart(e, ex.shift.id)}
-          onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
+          onDragEnd={handleDragEnd}
           className={
             stacked
               ? `w-full relative flex shrink-0 items-center justify-center gap-0.5 rounded-md border-2 border-dashed px-1 text-[10px] font-extrabold tabular-nums leading-none text-white shadow-[0_1px_4px_rgba(0,0,0,0.35)] ${isChecked ? 'border-white/80 bg-white/20' : 'border-accent bg-accent'}`
@@ -1186,9 +1604,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         </button>
       );
     });
-  };
+  }, [t, selectedShiftIds, toggleSelectShift, handleOpenDrawer, handleDragStart, handleDragEnd, canEdit, extraRowHeight]);
 
-  const renderGroupButton = (g: DayShiftGroup, layout: 'desktop' | 'mobile', compact = false, extraGroups: DayShiftGroup[] = []) => {
+  const renderGroupButton = useCallback((g: DayShiftGroup, layout: 'desktop' | 'mobile', compact = false, extraGroups: DayShiftGroup[] = []) => {
     const isDraft = g.shift.approval_status === 'draft';
     const isApproved = g.shift.approval_status === 'approved';
     const _isConfirmed = g.shift.approval_status === 'confirmed';
@@ -1224,7 +1642,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
     const handleShiftClick = (e: React.MouseEvent) => {
       if (e.shiftKey) {
-        setSelectedShiftIds(prev => { const n = new Set(prev); if (n.has(g.shift.id)) n.delete(g.shift.id); else n.add(g.shift.id); return n; });
+        toggleSelectShift(g.shift.id);
       } else {
         handleOpenDrawer(g.shift);
       }
@@ -1237,7 +1655,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
-            onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
+            onDragEnd={handleDragEnd}
               className={`w-full text-left rounded-lg border-l-4 ${borderColor} ${bgColor} ${glow} px-2.5 py-2 transition-colors ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''}`}>
               <div className="flex items-center justify-between gap-1">
               {timeLabel}
@@ -1272,7 +1690,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
-            onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
+            onDragEnd={handleDragEnd}
             className={`w-full flex items-center justify-center rounded-md border-l-[3px] ${accent} transition-colors ${g.isAbsent ? 'opacity-70' : ''} ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''}`}
             style={{ height: mainRowHeight, minHeight: mainRowHeight }}
           >
@@ -1288,9 +1706,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
           draggable={canEdit}
           onDragStart={(e) => handleDragStart(e, g.shift.id)}
-          onDragEnd={() => { draggedShiftIdRef.current = null; setDraggedShiftId(null); setDropTargetKey(null); setDragCopyMode(false); }}
+          onDragEnd={handleDragEnd}
           className={`relative w-full min-w-0 text-left rounded-lg border ${borderColor} ${bgColor} ${glow} transition-colors ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''} px-0.5 py-0.5`}>
-          <input type="checkbox" checked={selectedShiftIds.has(g.shift.id)} onChange={() => setSelectedShiftIds(prev => { const n = new Set(prev); if (n.has(g.shift.id)) n.delete(g.shift.id); else n.add(g.shift.id); return n; })}
+          <input type="checkbox" checked={selectedShiftIds.has(g.shift.id)} onChange={() => toggleSelectShift(g.shift.id)}
             className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-colors ${selectedShiftIds.has(g.shift.id) ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} onClick={e => e.stopPropagation()} />
           <div
             className="flex items-end justify-center w-full gap-1 px-2 whitespace-nowrap overflow-hidden"
@@ -1308,7 +1726,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         {renderExtraShiftRows(extraGroups, 'desktop')}
       </div>
     );
-  };
+  }, [t, mode, weekPunchRecords, isPeriodView, selectedShiftIds, toggleSelectShift, handleOpenDrawer, handleShiftContextMenu, handleDragStart, handleDragEnd, canEdit, extraRowHeight, slotRowHeight, renderExtraShiftRows]);
 
   return (
     <div ref={gridRootRef} className="w-full flex-1 min-h-0 flex flex-col font-sans">
@@ -1680,122 +2098,30 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         document.body
       )}
 
-      {/* ── Mobile Card View ── */}
+      {/* ── Mobile Card View (card memoizzate: si ri-renderizzano solo se le loro props cambiano) ── */}
       <div className="md:hidden space-y-4 px-1 pb-4">
-        {visibleUsers.map((user) => {
-          const totalNet = getTotalPlanned(user.id);
-          const totalActual = getTotalActual(user.id);
-          const userHasShifts = weekDays.some(day => {
-            const dateStr = format(day, 'yyyy-MM-dd');
-            return getDayGroup(user.id, dateStr).length > 0;
-          });
-          return (
-            <div key={user.id} className="rounded-xl border border-neutral-500 overflow-hidden p-4 shadow-sm">
-              <div
-                role="button"
-                tabIndex={0}
-                aria-expanded={expandedUserIds.has(user.id)}
-                onClick={() => toggleUserExpanded(user.id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    toggleUserExpanded(user.id);
-                  }
-                }}
-                className="flex justify-between items-start mb-4 cursor-pointer select-none"
-              >
-                <div className="flex items-start gap-2 min-w-0">
-                  <ChevronDown
-                    className={`mt-1 h-4 w-4 shrink-0 text-white/40 transition-transform ${expandedUserIds.has(user.id) ? '' : '-rotate-90'}`}
-                    aria-hidden
-                  />
-                  <div className="min-w-0">
-                    <h4 className="font-bold text-lg text-white truncate">{user.first_name} {user.last_name?.[0] ?? ''}</h4>
-                    {user.department && (
-                      <p className="text-[11px] text-white/50 font-medium uppercase tracking-wider">{user.department}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="text-[10px] font-bold text-white/40 uppercase tracking-tight">{t.total_hours ?? 'Ore'}</div>
-                  <div className="text-sm font-bold text-accent tabular-nums">
-                    {formatMinutesToHoursAndMinutes(totalActual)}
-                  </div>
-                  <div className={`text-[10px] font-bold tabular-nums ${totalActual > totalNet ? 'text-accent' : 'text-emerald-400'}`}>
-                    {totalActual > totalNet ? '+' : ''}{formatMinutesToHoursAndMinutes(Math.abs(totalActual - totalNet))}
-                  </div>
-                </div>
-              </div>
-
-              {expandedUserIds.has(user.id) && (
-              <div className="space-y-2">
-                {!userHasShifts ? (
-                  <div
-                    className={`py-4 text-center border-2 border-dashed border-white/10 rounded-xl ${dropTargetKey ===`${user.id}_empty` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
-                    onDragOver={(e) => handleDragOver(e, `${user.id}_empty`)}
-                    onDragLeave={handleDragLeave}
-                    onDrop={(e) => { const firstDay = weekDateStrings[0]; if (firstDay) handleDrop(e, user.id, firstDay); }}
-                  >
-                    <p className="text-xs text-white/50 italic">{t.no_shifts_this_week ?? 'Nessun turno'}</p>
-                  </div>
-                ) : (
-                  weekDays.map(day => {
-                    const dateStr = format(day, 'yyyy-MM-dd');
-                    const groups = getDayGroup(user.id, dateStr);
-                    if (groups.length === 0) return null;
-
-                    const todayDate = isToday(day);
-                    return (
-                      <div key={dateStr}
-                        className={`flex items-start gap-3 p-2.5 rounded-xl ${todayDate ? 'bg-accent/5 ring-1 ring-accent/20' : 'bg-white/[0.04]'} ${dropTargetKey ===`${user.id}_${dateStr}` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
-                        onDragOver={(e) => handleDragOver(e, `${user.id}_${dateStr}`)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, user.id, dateStr)}
-                      >
-                        <div className="w-10 shrink-0 text-center pt-0.5">
-                          <div className={`text-[10px] font-bold uppercase ${todayDate ? 'text-accent' : 'text-white/50'}`}>
-                            {format(day, 'EEE', { locale })}
-                          </div>
-                          <div className={`text-sm font-bold ${todayDate ? 'text-accent' : 'text-white/70'}`}>
-                            {format(day, 'd')}
-                          </div>
-                        </div>
-
-                        <div className="flex-1 flex flex-col gap-1">
-                          {(() => {
-                            const { lunch, evening, extraLunchGroups, extraEveningGroups } = splitDayGroupsBySlot(groups);
-                            const canAddSecond = canEdit && groups.length < 2;
-                            return (
-                              <>
-                                <div className="min-h-[28px]">
-                                  {lunch ? renderGroupButton(lunch, 'mobile', false, extraLunchGroups) : canAddSecond ? (
-                                    <button type="button" onClick={() => openCreateShiftModal(user.id, dateStr, 'lunch')}
-                                      className="w-full rounded-lg border border-dashed border-white/15 py-1.5 text-[10px] font-bold text-white/40 transition-colors hover:border-white/30 hover:text-white/70">
-                                      <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_shift ?? 'Aggiungi'}
-                                    </button>
-                                  ) : null}
-                                </div>
-                                <div className="min-h-[28px]">
-                                  {evening ? renderGroupButton(evening, 'mobile', false, extraEveningGroups) : canAddSecond ? (
-                                    <button type="button" onClick={() => openCreateShiftModal(user.id, dateStr, 'evening')}
-                                      className="w-full rounded-lg border border-dashed border-white/15 py-1.5 text-[10px] font-bold text-white/40 transition-colors hover:border-white/30 hover:text-white/70">
-                                      <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_second_shift ?? '2° turno'}
-                                    </button>
-                                  ) : null}
-                                </div>
-                              </>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-              )}
-            </div>
-          );
-        })}
+        {visibleUsers.map((user) => (
+          <ShiftGridMobileCard
+            key={user.id}
+            user={user}
+            totals={totalsByUser[user.id] ?? { planned: 0, actual: 0 }}
+            isExpanded={expandedUserIds.has(user.id)}
+            hasShifts={usersWithShifts.has(user.id)}
+            weekDays={weekDays}
+            weekDateStrings={weekDateStrings}
+            dayGroupsByUserDate={dayGroupsByUserDate}
+            canEdit={canEdit}
+            dropTargetKey={dropTargetKey}
+            t={t}
+            locale={locale}
+            renderGroupButton={renderGroupButton}
+            onToggleExpanded={toggleUserExpanded}
+            onCreateShift={openCreateShiftModal}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          />
+        ))}
       </div>
       </div>
 
@@ -1856,121 +2182,28 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             </tr>
           </thead>
           <tbody>
-            {visibleUsers.map((user, _uIdx) => {
-              const totalNet = getTotalPlanned(user.id);
-              const totalActual = getTotalActual(user.id);
-              return (
-                <tr key={user.id} className="wst-employee-row">
-                  <td className={`sticky left-0 z-10 px-2 py-1.5 border-b border-r border-white/[0.06] cursor-pointer hover:bg-white/[0.08]`}
-                    onClick={() => {
-                      const shifts = weekShifts
-                        .filter(s => s.user_id === user.id && s.approval_status !== 'approved' && !isShiftPayrollFrozen(s))
-                        .sort((a, b) => a.date.localeCompare(b.date) || (a.start_time ?? '').localeCompare(b.start_time ?? ''));
-                      if (shifts.length === 0) {
-                        showError(t.no_shifts_to_review ?? 'Nessun turno da revisionare.');
-                        return;
-                      }
-                      setReviewQueue(shifts);
-                      setReviewIdx(0);
-                      handleOpenDrawer(shifts[0]);
-                    }}>
-                    <div className="flex items-center gap-1 min-w-0 ml-2">
-                      <span className="text-xs font-bold text-white truncate">{user.first_name} {user.last_name?.[0] ?? ''}</span>
-                    </div>
-                  </td>
-                  {weekDays.map((day, dIdx) => {
-                    const dateStr = format(day, 'yyyy-MM-dd');
-                    const groups = getDayGroup(user.id, dateStr);
-                    const _weekStripe = isPeriodView && Math.floor(dIdx / 7) % 2 === 1;
-                    const weekEnd = isPeriodView && day.getDay() === 0;
-                    return (
-                      <td key={dIdx}
-                        className={`px-1 py-0.5 align-top group min-w-0 border-b border-r border-white/[0.06] ${weekEnd ? 'border-r-2 border-r-white/15' : ''} ${isToday(day) ? '!border-b-white' : ''}`}
-                      >
-                        {groups.length === 0 ? (
-                          <div
-                            className={`flex items-center justify-center h-full ${dropTargetKey ===`${user.id}_${dateStr}_lunch` ? 'ring-2 ring-inset ring-amber-400/50 rounded' : ''}`}
-                            style={{ minHeight: slotCellHeight }}
-                            onDragOver={(e) => handleDragOver(e, `${user.id}_${dateStr}_lunch`)}
-                            onDragLeave={handleDragLeave}
-                            onDrop={(e) => handleDrop(e, user.id, dateStr, 'lunch')}
-                          >
-                            {canEdit ? (
-                              <button type="button" onClick={() => openCreateShiftModal(user.id, dateStr)}
-                                className={`rounded-lg border border-dashed border-white flex items-center justify-center text-[10px] font-bold transition-colors opacity-0 group-hover:opacity-100 text-white [color:#fff_!important] ${isPeriodView ? 'w-7 h-7' : 'px-3 py-2'}`}
-                                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                              >
-                                <Plus className="h-3 w-3 inline-block" />{!isPeriodView && <span className="ml-1">{t.add_shift ?? 'Aggiungi'}</span>}
-                              </button>
-                            ) : (
-                              <span className="text-[10px] text-white/20 font-medium">&mdash;</span>
-                            )}
-                          </div>
-                        ) : (
-                          (() => {
-                            const { lunch, evening, extraLunchGroups, extraEveningGroups } = splitDayGroupsBySlot(groups);
-                            const canAddSecond = canEdit && groups.length < 2;
-                            const emptySlot = (slot: 'lunch' | 'evening', label: string) => (
-                              canAddSecond && !(slot === 'lunch' ? lunch : evening) ? (
-                                <button type="button" onClick={() => openCreateShiftModal(user.id, dateStr, slot)}
-                                  className={`w-full rounded-md border border-dashed border-white flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 text-white [color:#fff_!important] ${isPeriodView ? '' : 'text-[10px] font-bold'}`}
-                                  style={{ height: isPeriodView ? slotRowHeight - 2 : slotRowHeight }}
-                                  title={label}
-                                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                                >
-                                  <Plus className={`${isPeriodView ? 'h-3 w-3' : 'inline-block h-3 w-3 mr-0.5'}`} />
-                                  {!isPeriodView && label}
-                                </button>
-                              ) : (
-                                <div style={{ height: isPeriodView ? slotRowHeight - 2 : slotRowHeight }} />
-                              )
-                            );
-                            return (
-                              <div className={`flex flex-col ${isPeriodView ? 'gap-px' : ''}`} style={{ height: slotCellHeight }}>
-                                <div
-                                  className={`flex items-center flex-1 ${dropTargetKey ===`${user.id}_${dateStr}_lunch` ? 'ring-2 ring-inset ring-amber-400/50 rounded' : ''}`}
-                                  style={{ ...(isPeriodView ? {} : { borderBottom: '1px solid rgba(255,255,255,0.10)', paddingLeft: '1px', paddingRight: '1px' }) }}
-                                  onDragOver={(e) => handleDragOver(e, `${user.id}_${dateStr}_lunch`)}
-                                  onDragLeave={handleDragLeave}
-                                  onDrop={(e) => handleDrop(e, user.id, dateStr, 'lunch')}
-                                >
-                                  {lunch ? (
-                                    <div className="relative w-full min-w-0 overflow-visible">
-                                      {renderGroupButton(lunch, 'desktop', compactGrid, extraLunchGroups)}
-                                    </div>
-                                  ) : emptySlot('lunch', t.add_shift ?? 'Aggiungi')}
-                                </div>
-                                <div
-                                  className={`flex items-center flex-1 ${isPeriodView ? 'border-t border-white/[0.08]' : ''} ${dropTargetKey ===`${user.id}_${dateStr}_evening` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
-                                  style={{ ...(isPeriodView ? {} : { paddingLeft: '1px', paddingRight: '1px' }) }}
-                                  onDragOver={(e) => handleDragOver(e, `${user.id}_${dateStr}_evening`)}
-                                  onDragLeave={handleDragLeave}
-                                  onDrop={(e) => handleDrop(e, user.id, dateStr, 'evening')}
-                                >
-                                  {evening ? (
-                                    <div className="relative w-full min-w-0 overflow-visible">
-                                      {renderGroupButton(evening, 'desktop', compactGrid, extraEveningGroups)}
-                                    </div>
-                                  ) : emptySlot('evening', t.add_second_shift ?? '2° turno')}
-                                </div>
-                              </div>
-                            );
-                          })()
-                        )}
-                      </td>
-                    );
-                  })}
-                  <td className={`px-1 py-1 text-center align-middle border-b border-white/[0.06] ${compactGrid ? 'text-[10px]' : ''}`}>
-                    <div className={`${compactGrid ? 'text-[10px]' : 'text-xs'} font-bold text-white tabular-nums`}>{formatMinutesToHoursAndMinutes(totalActual)}</div>
-                    <div className={`${compactGrid ? 'text-[9px]' : 'text-[10px]'} font-bold tabular-nums ${totalActual > totalNet ? 'text-accent' : 'text-emerald-400'}`}>
-                      {totalActual > totalNet ? '+' : ''}{formatMinutesToHoursAndMinutes(Math.abs(totalActual - totalNet))}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+            {visibleUsers.map((user) => (
+              <ShiftGridDesktopRow
+                key={user.id}
+                user={user}
+                totals={totalsByUser[user.id] ?? { planned: 0, actual: 0 }}
+                weekDays={weekDays}
+                dayGroupsByUserDate={dayGroupsByUserDate}
+                isPeriodView={isPeriodView}
+                compactGrid={compactGrid}
+                canEdit={canEdit}
+                slotRowHeight={slotRowHeight}
+                slotCellHeight={slotCellHeight}
+                dropTargetKey={dropTargetKey}
+                t={t}
+                renderGroupButton={renderGroupButton}
+                onCreateShift={openCreateShiftModal}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onReviewClick={handleReviewQueueClick}
+              />
+            ))}
           </tbody>
         </table>
         <div className="h-12 shrink-0" />

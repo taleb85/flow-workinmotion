@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { format, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,7 +7,7 @@ import { useAppUser } from '../context/appSliceContexts';
 import { useAppData } from '../context/appSliceContexts';
 import { useAppConfig } from '../context/appSliceContexts';
 import { useT } from '../hooks/useT';
-import type { Language } from '../types';
+import type { Language, PunchRecord } from '../types';
 import { formatMinutesToHoursAndMinutes } from '../utils/timeCalculations';
 import { getNetShiftMinutes } from '../utils/breakRules';
 import { getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
@@ -32,7 +32,7 @@ type Props = {
  * Riepilogo ore approvate / costo / turni in attesa nel periodo visibile in Presenze (settimana o periodo in vista mese).
  * Stessa logica che era in Ore; i pannelli espandibili sono opzionali (`stats.detail_panels`).
  */
-export default function TimesheetManagementKpiBlock({ visibleWeekDays, showDetailPanels }: Props) {
+export default memo(function TimesheetManagementKpiBlock({ visibleWeekDays, showDetailPanels }: Props) {
   const { users, currentUser, effectiveLanguage } = useAppUser();
   const { shifts, punchRecords } = useAppData();
   const { breakRules, featureFlags } = useAppConfig();
@@ -58,6 +58,38 @@ export default function TimesheetManagementKpiBlock({ visibleWeekDays, showDetai
     return { rangeStart: startOfDay(first), rangeEnd: endOfDay(last) };
   }, [visibleWeekDays]);
 
+  /** Indice timbrature (per shift_id e per user+data): i memo sotto passavano l'intero
+   *  array di punch a getResolvedStartEndForHours → 2 scansioni O(P) per ogni turno. */
+  const punchIndex = useMemo(() => {
+    const byShiftId = new Map<string, PunchRecord[]>();
+    const byUserDate = new Map<string, PunchRecord[]>();
+    for (const p of punchRecords) {
+      if (p.shift_id) {
+        const arr = byShiftId.get(p.shift_id);
+        if (arr) arr.push(p);
+        else byShiftId.set(p.shift_id, [p]);
+      }
+      const ds = p.timestamp?.slice(0, 10);
+      if (ds) {
+        const key = `${p.user_id}|${ds}`;
+        const arr = byUserDate.get(key);
+        if (arr) arr.push(p);
+        else byUserDate.set(key, [p]);
+      }
+    }
+    return { byShiftId, byUserDate };
+  }, [punchRecords]);
+
+  const punchesForShift = useCallback(
+    (shift: { id?: string; user_id: string; date: string }): PunchRecord[] => {
+      const withShiftId = shift.id ? (punchIndex.byShiftId.get(shift.id) ?? []) : [];
+      const byUserDate = punchIndex.byUserDate.get(`${shift.user_id}|${shift.date}`);
+      if (!byUserDate || byUserDate.length === 0) return withShiftId;
+      return withShiftId.concat(byUserDate.filter((p) => !p.shift_id));
+    },
+    [punchIndex]
+  );
+
   const approvedMins = useMemo(() => {
     return shifts
       .filter(
@@ -66,14 +98,17 @@ export default function TimesheetManagementKpiBlock({ visibleWeekDays, showDetai
           isWithinInterval(new Date(s.date), { start: rangeStart, end: rangeEnd })
       )
       .reduce((sum, s) => {
-        const { start, end } = getResolvedStartEndForHours(s, punchRecords);
+        const { start, end } = getResolvedStartEndForHours(s, punchesForShift(s));
         if (!start || !end || start === end) return sum;
         const u = users.find((x) => x.id === s.user_id);
         return sum + getNetShiftMinutes(s, start, end, u ?? undefined, breakRules, breakComputeOpts);
       }, 0);
-  }, [shifts, punchRecords, rangeStart, rangeEnd, users, breakRules, breakComputeOpts]);
+  }, [shifts, rangeStart, rangeEnd, users, breakRules, breakComputeOpts, punchesForShift]);
 
-  const pendingShifts = useMemo(() => {
+  // Un'unica passata per i "turni confermati nel periodo": prima il filtro+sort identico
+  // era duplicato in `pendingShifts` E `approvedShifts` → doppio lavoro O(S log S) a ogni
+  // cambio dati (ed erano calcolati due volte per render quando il parent ri-renderizzava).
+  const confirmedInRange = useMemo(() => {
     return shifts
       .filter(
         (s) =>
@@ -82,24 +117,16 @@ export default function TimesheetManagementKpiBlock({ visibleWeekDays, showDetai
       )
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [shifts, rangeStart, rangeEnd]);
-  const pendingCount = pendingShifts.length;
-
-  const approvedShifts = useMemo(() => {
-    return shifts
-      .filter(
-        (s) =>
-          s.approval_status === 'confirmed' &&
-          isWithinInterval(new Date(s.date), { start: rangeStart, end: rangeEnd })
-      )
-      .sort((a, b) => a.date.localeCompare(b.date));
-  }, [shifts, rangeStart, rangeEnd]);
+  const pendingShifts = confirmedInRange;
+  const pendingCount = confirmedInRange.length;
+  const approvedShifts = confirmedInRange;
 
   const estimatedCostStats = useMemo(() => {
     let totalEur = 0;
     let shiftsWithRate = 0;
     let shiftsWithoutRate = 0;
     for (const s of approvedShifts) {
-      const { start, end } = getResolvedStartEndForHours(s, punchRecords);
+      const { start, end } = getResolvedStartEndForHours(s, punchesForShift(s));
       if (!start || !end || start === end) continue;
       const u = users.find((x) => x.id === s.user_id);
       if (!u || u.status !== 'active') continue;
@@ -114,7 +141,7 @@ export default function TimesheetManagementKpiBlock({ visibleWeekDays, showDetai
       }
     }
     return { totalEur, shiftsWithRate, shiftsWithoutRate };
-  }, [approvedShifts, punchRecords, users, breakRules, breakComputeOpts]);
+  }, [approvedShifts, punchesForShift, users, breakRules, breakComputeOpts]);
 
   if (!currentUser) return null;
 
@@ -269,4 +296,4 @@ export default function TimesheetManagementKpiBlock({ visibleWeekDays, showDetai
       )}
     </>
   );
-}
+});

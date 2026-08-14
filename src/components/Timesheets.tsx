@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useLayoutEffect, useCallback, useRef, lazy, Suspense, type CSSProperties } from 'react';
+import { useState, useMemo, useEffect, useLayoutEffect, useCallback, useRef, lazy, Suspense, memo, type CSSProperties } from 'react';
 
 const StatisticsLazy = lazy(() => import('./Statistics'));
 import {
@@ -11,6 +11,7 @@ import {
   endOfWeek,
   isValid,
 } from 'date-fns';
+import type { Locale } from 'date-fns';
 import { it } from 'date-fns/locale';
 import {
   ChevronRight, ChevronLeft, Check, X,
@@ -476,6 +477,408 @@ function shiftRowCompleteForToolbarApprove(row: ShiftRow): boolean {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
+/* ── Righe/card memoizzate della griglia Presenze ───────────────────────────
+ * La matrice utenti×giorni era tutta nel componente padre: ogni cambio di stato
+ * (scroll dell'header sticky, filtro KPI, keystroke nel drawer) ricostruiva ogni
+ * cella. Questi componenti si ri-renderizzano SOLO quando cambiano le loro props.
+ */
+
+type ShiftCardStyleResult = { border: string; bg: string; ring: string; dot: string; label: string; labelCls: string };
+type UserTotalsRow = { plannedMins: number; actualMins: number; deltaMins: number; frozenOfficialMins: number };
+type OpenDrawerFn = (
+  shift: ShiftRow,
+  user: { id: string; first_name: string; department?: string },
+  dateStr: string,
+  reviewQueue?: DrawerReviewQueue | null,
+  openSource?: 'name' | 'date' | 'turno' | null
+) => void;
+
+const TimesheetGridRow = memo(function TimesheetGridRow({
+  user, userIdx, totals, dayDataByDate, weekDays, viewMode, isDayInConfiguredPeriod,
+  weekViewPayrollDayStr, shiftsById, punchAudits, highlightedShiftIds, statFilter,
+  showFullTimesheetGrid, plannedOnlyTimesheetGrid, t,
+  getShiftCardStyle, onOpenDrawer, onEmployeeWeekReview,
+}: TimesheetGridRowProps) {
+  return (
+    <tr
+      className={`depth-row last:border-b-0`}
+      style={{ background: userIdx % 2 === 0 ? 'rgba(20,45,110,0.60)' : 'rgba(20,45,110,0.70)' }}
+    >
+      {/* Nome dipendente — click → revisione settimana (coda turni) */}
+      <td className="sticky left-0 pl-4 pr-3 py-2 border-r border-r-white/10 z-10 md:py-1.5 md:pl-3 md:pr-2 align-middle" style={{ background: 'transparent', boxShadow: 'none' }}>
+        <div className="flex flex-col gap-1 justify-center">
+          <button
+            type="button"
+            className="w-full max-w-full rounded-lg py-0.5 text-right transition-colors hover:bg-white/[0.04] hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+            aria-label={formatTrans(t.ts_employee_week_review_open_aria, { name: user.first_name })}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEmployeeWeekReview(user);
+            }}
+          >
+            <div className="font-semibold text-sm text-white md:text-xs">{user.first_name}</div>
+            {user.department && (
+              <div className="text-[11px] text-white/40 mt-0.5 md:text-[11px] uppercase">{user.department}</div>
+            )}
+          </button>
+        </div>
+      </td>
+
+      {/* Celle giornaliere */}
+      {weekDays.map((day, dayIdx) => {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        const dayData = dayDataByDate?.[dateStr];
+        const todayDate = isToday(day);
+        const inP = viewMode === 'month' ? isDayInConfiguredPeriod(day) : true;
+        const isPayrollDay = dateStr === weekViewPayrollDayStr;
+        const payrollHighlight = isPayrollDay && (viewMode === 'week' || inP);
+        const weekEndCol = viewMode === 'month' && (dayIdx + 1) % 7 === 0;
+        const tdBorder = weekEndCol ? 'border-r-2 border-r-white/15' : 'border-r border-r-white/10';
+        const tdMuted = viewMode === 'month' && !inP;
+        const tdStyle: React.CSSProperties = payrollHighlight
+          ? { background: 'rgba(51,102,204,0.12)' }
+          : todayDate && inP
+            ? { background: 'rgba(0,82,255,0.08)' }
+            : tdMuted
+              ? { background: 'transparent', opacity: 0.35 }
+              : { background: userIdx % 2 === 0 ? 'rgba(20,45,110,0.60)' : 'rgba(20,45,110,0.70)' };
+
+        if (!dayData || dayData.shifts.length === 0) {
+          return (
+            <td key={dateStr} className={`px-2 py-2 text-center ${tdBorder} md:px-1.5 md:py-1.5`} style={tdStyle}>
+              <span className="text-sm md:text-xs text-white/45">–</span>
+            </td>
+          );
+        }
+
+        const { before16, from16 } = partitionShiftsByPlannedHour16(dayData.shifts);
+        const renderShiftButton = (s: ShiftRow) => {
+          const punchAuditCount = s.punchInId ? (punchAudits[s.punchInId]?.length ?? 0) : 0;
+          const boardShift = shiftsById.get(s.id) ?? null;
+          const { border, bg, ring, dot } = getShiftCardStyle(s, punchAuditCount, dateStr, boardShift);
+          const publishedCell = s.status === 'confirmed' || s.status === 'approved';
+          const showPlannedTimesInCell =
+            showFullTimesheetGrid || (plannedOnlyTimesheetGrid && publishedCell);
+          const deltaColor =
+            s.deltaMins > 5 ? 'text-accent' : s.deltaMins < -5 ? 'text-red-400' : 'text-white/50';
+
+          // Logica per determinare se mostrare l'orario pianificato come "effettivo" in assenza di timbrature
+          const showPlannedAsActual = !s.punched && publishedCell;
+          const displayActualMins = showPlannedAsActual ? s.plannedMins : s.actualMins;
+          const displayDeltaMins = showPlannedAsActual ? 0 : s.deltaMins;
+
+          const isHighlighted = highlightedShiftIds.has(s.id);
+          const isDimmed = statFilter !== null && !isHighlighted;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={plannedOnlyTimesheetGrid ? undefined : () => {
+                onOpenDrawer(s, user, dateStr, null, 'turno');
+              }}
+              className={`relative flex w-full items-stretch text-left rounded-lg border-l-[3px] ${border} ${bg} ${ring} py-1 pl-2 pr-2 shadow-sm transition-colors group md:rounded-md md:py-0.5 md:pl-1.5 md:pr-1.5 md:border-l-2 ${plannedOnlyTimesheetGrid ? 'cursor-default' : 'hover:shadow-md'} ${isHighlighted ? 'ts-shift-highlighted' : ''} ${isDimmed ? 'opacity-20 pointer-events-none' : ''}`}
+            >
+              {/* Spunta / lucchetto subito dopo la barra verticale, poi orari */}
+              {(s.status === 'confirmed' || s.status === 'approved') && (
+                <span className="mr-1.5 flex shrink-0 flex-col items-center justify-center gap-0.5 self-stretch md:mr-1">
+                  {s.status === 'confirmed' && (
+                    <Check
+                      className="h-2.5 w-2.5 shrink-0 text-brand-mid md:h-2 md:w-2"
+                      strokeWidth={2.5}
+                      aria-hidden
+                    />
+                  )}
+                  {s.status === 'approved' && (
+                    <Lock
+                      className="h-2.5 w-2.5 shrink-0 text-emerald-600 md:h-2 md:w-2"
+                      strokeWidth={2.5}
+                      aria-hidden
+                    />
+                  )}
+                </span>
+              )}
+              <div className="flex min-w-0 flex-1 flex-col gap-1 md:gap-0.5">
+                <div className="mb-0.5 flex items-center justify-between gap-1 md:mb-0">
+                  <span
+                    className="text-[11px] font-semibold text-white/70 tabular-nums md:text-[11px]"
+                    aria-label={
+                      showPlannedTimesInCell
+                        ? undefined
+                        : t.ts_times_grid_times_masked_aria
+                    }
+                  >
+                    {showPlannedTimesInCell
+                      ? `${s.plannedStart}–${s.plannedEnd || '?'}`
+                      : t.ts_times_masked_range}
+                  </span>
+                  <span className={`h-2 w-2 flex-shrink-0 rounded-full ${dot} md:h-1.5 md:w-1.5`} />
+                </div>
+                {/* Effettivo: mostra solo orari timbratura reali; se non timbrato → "–". */}
+                {showFullTimesheetGrid ? (
+                  s.punched ? (
+                    s.actualEnd ? (
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-[11px] font-bold text-white tabular-nums md:text-[11px]">
+                          {`${s.actualStart}–${s.actualEnd}`}
+                        </span>
+                        <span
+                          className={`max-w-[min(100%,5.5rem)] shrink-0 text-right text-[11px] font-semibold leading-tight tabular-nums md:max-w-[4.75rem] md:text-[11px] ${
+                            s.breakMinutesActual > 0 ? 'text-white/50' : deltaColor
+                          }`}
+                          title={
+                            s.breakMinutesActual > 0
+                              ? `${t.ts_net_hours}: ${fmtHM(displayActualMins)}`
+                              : undefined
+                          }
+                        >
+                          {s.breakMinutesActual > 0
+                            ? `−${fmtBreakDeductionShort(s.breakMinutesActual)}`
+                            : `${displayDeltaMins >= 0 ? '+' : ''}${fmtHM(displayDeltaMins)}`}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-start justify-between gap-1 md:gap-0.5">
+                        <div className="min-w-0 flex flex-1 flex-wrap items-center gap-x-0.5 text-[11px] font-semibold text-red-400 md:text-[11px]">
+                          <span>{s.actualStart}</span>
+                          <span className="text-red-500">{t.ts_missing_exit}</span>
+                        </div>
+                        {s.breakMinutes > 0 && (
+                          <span
+                            className="max-w-[min(100%,5.5rem)] shrink-0 text-right text-[11px] font-semibold leading-tight tabular-nums text-white/50 md:max-w-[4.75rem] md:text-[11px]"
+                            title={`${t.ts_kpi_planned}: ${fmtHM(s.plannedMins)}`}
+                          >
+                            {`−${fmtBreakDeductionShort(s.breakMinutes)}`}
+                          </span>
+                        )}
+                      </div>
+                    )
+                  ) : (
+                    <span className="text-[11px] font-semibold text-white/45 md:text-[11px]">–</span>
+                  )
+                ) : plannedOnlyTimesheetGrid &&
+                  publishedCell &&
+                  s.displayFromFrozenApprovedTimes &&
+                  s.actualStart &&
+                  s.actualEnd ? (
+                  <div className="flex items-center justify-between gap-1">
+                    <span
+                      className="text-[11px] font-bold text-white tabular-nums md:text-[11px]"
+                      title={t.ts_kpi_frozen_official}
+                    >
+                      {`${s.actualStart}–${s.actualEnd}`}
+                    </span>
+                  </div>
+                ) : null}
+                {/* Badge icone — assoluti in alto a destra */}
+                {showFullTimesheetGrid && (punchAuditCount > 0 || getShiftHistory(s.id).length > 0) && (
+                  <div className="absolute top-0.5 right-1 flex items-center gap-0.5">
+                    {punchAuditCount > 0 && (
+                      <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-orange-300 bg-orange-500/20 rounded px-0.5 py-px leading-none">
+                        <ShieldAlert className="w-2 h-2" />{punchAuditCount}
+                      </span>
+                    )}
+                    {getShiftHistory(s.id).length > 0 && (
+                      <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-amber-300 bg-amber-500/20 rounded px-0.5 py-px leading-none">
+                        <History className="w-2 h-2" />{getShiftHistory(s.id).length}
+                      </span>
+                    )}
+                  </div>
+                )}
+                <ArrowRight className="absolute bottom-0.5 right-1 w-2 h-2 text-white/40 opacity-0 group-hover:opacity-100 transition-opacity active:opacity-90" />
+              </div>
+            </button>
+          );
+        };
+
+        return (
+          <td key={dateStr} className={`px-1.5 py-1.5 ${tdBorder} align-top md:px-1 md:py-1 h-px`} style={tdStyle}>
+            <div className="flex h-full flex-col">
+              {before16.length > 0 && (
+                <div className="flex flex-col gap-1 md:gap-0.5">
+                  {before16.map((s) => renderShiftButton(s))}
+                </div>
+              )}
+              {from16.length > 0 && (
+                <div className={`flex flex-col gap-1 md:gap-0.5 ${before16.length > 0 ? 'mt-1.5 md:mt-1' : 'mt-auto'}`}>
+                  {from16.map((s) => renderShiftButton(s))}
+                </div>
+              )}
+            </div>
+          </td>
+        );
+      })}
+
+      {/* Totale settimana */}
+      <td className="px-3 py-2 text-center border-l-2 border-l-white/15 md:px-2 md:py-1.5" style={{ background: userIdx % 2 === 0 ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.14)' }}>
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-xs font-semibold text-white/55 md:text-[11px]">
+            {showFullTimesheetGrid || plannedOnlyTimesheetGrid
+              ? formatMinutesToHoursAndMinutes(totals?.plannedMins ?? 0)
+              : t.ts_times_masked_hm}
+          </div>
+          {showFullTimesheetGrid && (totals?.actualMins ?? 0) > 0 && (
+            <>
+              <div className="text-sm font-bold text-white md:text-xs">
+                {formatMinutesToHoursAndMinutes(totals?.actualMins ?? 0)}
+              </div>
+              <div className={`text-[11px] font-semibold ${(totals?.deltaMins ?? 0) >= 0 ? 'text-accent' : 'text-red-400'} md:text-[11px]`}>
+                {(totals?.deltaMins ?? 0) >= 0 ? '+' : ''}
+                {fmtHM(totals?.deltaMins ?? 0)}
+              </div>
+            </>
+          )}
+          {plannedOnlyTimesheetGrid && (totals?.frozenOfficialMins ?? 0) > 0 && (
+            <div
+              className="text-sm font-bold text-white md:text-xs"
+              title={t.ts_kpi_frozen_official}
+            >
+              {formatMinutesToHoursAndMinutes(totals?.frozenOfficialMins ?? 0)}
+            </div>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+});
+
+type TimesheetGridRowProps = {
+  user: User;
+  userIdx: number;
+  totals?: UserTotalsRow;
+  dayDataByDate: Record<string, DayData> | undefined;
+  weekDays: Date[];
+  viewMode: 'day' | 'week' | 'month';
+  isDayInConfiguredPeriod: (d: Date) => boolean;
+  weekViewPayrollDayStr: string;
+  shiftsById: Map<string, Shift>;
+  punchAudits: Record<string, PunchAuditEntry[]>;
+  highlightedShiftIds: Set<string>;
+  statFilter: { label: string; ids: Set<string> } | null;
+  showFullTimesheetGrid: boolean;
+  plannedOnlyTimesheetGrid: boolean;
+  t: ReturnType<typeof getTranslations>;
+  getShiftCardStyle: (s: ShiftRow, punchAuditCount: number, cellDateStr?: string, boardShift?: Shift | null) => ShiftCardStyleResult;
+  onOpenDrawer: OpenDrawerFn;
+  onEmployeeWeekReview: (user: User) => void;
+};
+
+const TimesheetMobileCard = memo(function TimesheetMobileCard({
+  user, totals, hasShifts, dayDataByDate, weekDays, isMobile, plannedOnlyTimesheetGrid,
+  t, locale, shiftsById, punchAudits,
+  getShiftCardStyle, onOpenDayReview, onOpenDrawer,
+}: TimesheetMobileCardProps) {
+  return (
+    <div className="rounded-xl border border-neutral-500 rounded-2xl p-4 shadow-sm border border-neutral-500 overflow-hidden">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h4 className="font-bold text-lg text-white">{user.first_name}</h4>
+          {user.department && (
+            <p className="text-[11px] text-white/50 font-medium uppercase tracking-wider">{user.department}</p>
+          )}
+        </div>
+        <div className="text-right">
+          <div className="text-[11px] font-bold text-white/50 uppercase tracking-tight">{t.stats_total}</div>
+          <div className="text-sm font-bold text-accent">
+            {formatMinutesToHoursAndMinutes(totals?.actualMins || totals?.plannedMins || 0)}
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {!hasShifts ? (
+          <div className="py-4 text-center border-2 border-dashed border-slate-100 rounded-xl">
+            <p className="text-xs text-white/50 italic">{t.no_shifts_this_week}</p>
+          </div>
+        ) : (
+          weekDays.map(day => {
+            const dateStr = format(day, 'yyyy-MM-dd');
+            const dayData = dayDataByDate?.[dateStr];
+            if (!dayData || dayData.shifts.length === 0) return null;
+
+            const todayDate = isToday(day);
+
+            const onOpenDayQueue = () => { if (!isMobile) onOpenDayReview(dateStr); };
+            const dayClickBlocked = isMobile || plannedOnlyTimesheetGrid;
+            return (
+              <div
+                key={dateStr}
+                className={`flex items-start gap-3 p-2 rounded-xl ${todayDate ? 'bg-accent/5 ring-1 ring-accent/20' : 'bg-slate-50/50'} ${dayClickBlocked ? 'cursor-default' : 'cursor-pointer'}`}
+                role={dayClickBlocked ? undefined : 'button'}
+                tabIndex={dayClickBlocked ? undefined : 0}
+                onClick={dayClickBlocked ? undefined : onOpenDayQueue}
+                onKeyDown={dayClickBlocked ? undefined : (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onOpenDayQueue();
+                  }
+                }}
+              >
+                <div className="w-10 shrink-0 text-center">
+                  <div className={`text-[11px] font-bold uppercase ${todayDate ? 'text-accent' : 'text-white/50'}`}>
+                    {format(day, 'EEE', { locale })}
+                  </div>
+                  <div className={`text-xs font-bold ${todayDate ? 'text-accent' : 'text-white/70'}`}>
+                    {format(day, 'd', { locale })}
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  {dayData.shifts.map(s => {
+                    const punchAuditCount = s.punchInId ? (punchAudits[s.punchInId]?.length ?? 0) : 0;
+                    const boardShift = shiftsById.get(s.id) ?? null;
+                    const { border, bg, ring } = getShiftCardStyle(s, punchAuditCount, dateStr, boardShift);
+
+                    const shiftClickBlocked = isMobile || plannedOnlyTimesheetGrid;
+                    return (
+                      <div
+                        key={s.id}
+                        onClick={shiftClickBlocked ? undefined : (e) => {
+                          e.stopPropagation();
+                          onOpenDrawer(s, user, dateStr, null, 'turno');
+                        }}
+                        className={`flex w-full items-center justify-between rounded-lg border-l-4 ${border} ${bg} ${ring} p-2 text-left ${shiftClickBlocked ? 'cursor-default' : 'cursor-pointer transition-transform '}`}
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-white/90">
+                            {s.plannedStart}–{s.plannedEnd || '?'}
+                          </span>
+                          {s.punched && s.actualStart && (
+                            <span className="text-[11px] font-medium text-white/60">
+                              {s.actualStart}–{s.actualEnd || '...'}
+                            </span>
+                          )}
+                        </div>
+                        {!isMobile && <ChevronRight className="h-4 w-4 text-white/30" />}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+});
+
+type TimesheetMobileCardProps = {
+  user: User;
+  totals?: UserTotalsRow;
+  hasShifts: boolean;
+  dayDataByDate: Record<string, DayData> | undefined;
+  weekDays: Date[];
+  isMobile: boolean;
+  plannedOnlyTimesheetGrid: boolean;
+  t: ReturnType<typeof getTranslations>;
+  locale: Locale;
+  shiftsById: Map<string, Shift>;
+  punchAudits: Record<string, PunchAuditEntry[]>;
+  getShiftCardStyle: (s: ShiftRow, punchAuditCount: number, cellDateStr?: string, boardShift?: Shift | null) => ShiftCardStyleResult;
+  onOpenDayReview: (dateStr: string) => void;
+  onOpenDrawer: OpenDrawerFn;
+};
+
 export default function Timesheets() {
   const { shifts, punchRecords, updateShift, approveShift, updatePunchRecord, addPunchRecord, deletePunchRecordsForShift } = useAppData();
   const { currentUser, effectiveLanguage, isSessionElevated, globalPinSessionId, users } = useAppUser();
@@ -696,14 +1099,17 @@ export default function Timesheets() {
 
   const periodStartDate = getPeriodStartDate(displayPeriodConfig);
   const periodEndDate = getPeriodEndDate(displayPeriodConfig);
-  const allPeriodDays = (() => {
+  // Memoizzato: senza useMemo l'IIFE creava un NUOVO array a ogni render, invalidando
+  // l'intera catena di useMemo (weekDays → timesheetData → userTotals → weekViewStats),
+  // che veniva ricalcolata (O(U×D×S + S×P)) a ogni interazione della pagina.
+  const allPeriodDays = useMemo(() => {
     try {
       const end = periodEndDate >= periodStartDate ? periodEndDate : addDays(periodStartDate, 6);
       return eachDayOfInterval({ start: periodStartDate, end });
     } catch {
       return eachDayOfInterval({ start: periodStartDate, end: addDays(periodStartDate, 6) });
     }
-  })();
+  }, [periodStartDate, periodEndDate]);
 
   /** Vista Mese: griglia lun–dom allineata al calcolo paghe (settimane intere sul periodo). */
   const _calendarPaddedDays = useMemo(() => {
@@ -804,6 +1210,7 @@ export default function Timesheets() {
   }, [timesheetHeaderSticky]);
 
   // Sincronizza scroll orizzontale: corpo → header mirror
+  // deps []: senza, il listener veniva rimosso e ri-attaccato a OGNI render (cleanup + re-subscribe).
   useEffect(() => {
     const body = timesheetBodyScrollRef.current;
     const header = timesheetHeaderScrollRef.current;
@@ -811,7 +1218,7 @@ export default function Timesheets() {
     const sync = () => { header.scrollLeft = body.scrollLeft; };
     body.addEventListener('scroll', sync, { passive: true });
     return () => body.removeEventListener('scroll', sync);
-  });
+  }, []);
 
   // Reparti dalla configurazione: rispetta ordine, nascosti e custom — aggiornato al cambio delle impostazioni
   const availableDepts = useMemo(() => {
@@ -1136,17 +1543,23 @@ export default function Timesheets() {
     }
   }, [approvalConfirm, employeeWeekFreezeBatch]);
 
-  // Carica audit log per la settimana
-  useEffect(() => {
-    const weekPunchIds = punchRecords
-      .filter((p) => {
-        const d = p.timestamp ? new Date(p.timestamp) : null;
-        if (!d) return false;
-        const dateStr = format(d, 'yyyy-MM-dd');
-        return dateStr >= weekStr && dateStr < weekEnd;
-      })
-      .map((p) => p.id);
+  // Carica audit log per la settimana: rieseguito SOLO quando cambia davvero il contenuto
+  // dei punch della settimana. Prima la dipendenza era l'intero array `punchRecords`:
+  // ogni sync (realtime/polling) cambiava l'identità dell'array → filtro O(P) + query DB
+  // inutili anche senza alcuna modifica.
+  const weekPunchIds = useMemo(() => {
+    const ids: string[] = [];
+    for (const p of punchRecords) {
+      const d = p.timestamp ? new Date(p.timestamp) : null;
+      if (!d || !isValid(d)) continue;
+      const dateStr = format(d, 'yyyy-MM-dd');
+      if (dateStr >= weekStr && dateStr < weekEnd) ids.push(p.id);
+    }
+    return ids;
+  }, [punchRecords, weekStr, weekEnd]);
+  const weekPunchIdsKey = useMemo(() => weekPunchIds.join('|'), [weekPunchIds]);
 
+  useEffect(() => {
     if (weekPunchIds.length === 0) { setPunchAudits({}); return; }
 
     database.punchAuditLog.getByPunchIds(weekPunchIds).then((entries) => {
@@ -1157,7 +1570,8 @@ export default function Timesheets() {
       }
       setPunchAudits(grouped);
     }).catch(() => { /* tabella non ancora creata */ });
-  }, [punchRecords, weekStr, weekEnd]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- il contenuto di weekPunchIds è codificato in weekPunchIdsKey
+  }, [weekPunchIdsKey]);
 
   const visibleUsers = useMemo(() => {
     // Se l'utente corrente NON è gestionale, vede solo sé stesso
@@ -1211,6 +1625,50 @@ export default function Timesheets() {
     () => ({ autoBreaksFeatureEnabled: featureFlags['auto_breaks'] !== false }),
     [featureFlags]
   );
+
+  /**
+   * Indice delle timbrature: per shift_id e per (user, data).
+   * Elimina le scansioni O(P) di `punchRecords.find(...)` ripetute per ogni turno
+   * (prima: 3+ passate sull'intero array per turno in `timesheetData`, più quelle
+   * di weekViewStats e dinnerShiftsNeedingClose → costi O(S×P) con parsing Date).
+   */
+  const punchIndex = useMemo(() => {
+    const byShiftId = new Map<string, PunchRecord[]>();
+    const byUserDate = new Map<string, PunchRecord[]>();
+    for (const p of punchRecords) {
+      if (p.shift_id) {
+        const arr = byShiftId.get(p.shift_id);
+        if (arr) arr.push(p);
+        else byShiftId.set(p.shift_id, [p]);
+      }
+      const d = new Date(p.timestamp);
+      if (isValid(d)) {
+        const key = `${p.user_id}|${format(d, 'yyyy-MM-dd')}`;
+        const arr = byUserDate.get(key);
+        if (arr) arr.push(p);
+        else byUserDate.set(key, [p]);
+      }
+    }
+    return { byShiftId, byUserDate };
+  }, [punchRecords]);
+
+  /** Candidati (in ordine dell'array originale) per il match punch↔turno. */
+  const punchesForShift = useCallback(
+    (shift: { id?: string; user_id: string; date: string }): PunchRecord[] => {
+      const withShiftId = shift.id ? (punchIndex.byShiftId.get(shift.id) ?? []) : [];
+      const byUserDate = punchIndex.byUserDate.get(`${shift.user_id}|${shift.date}`);
+      if (!byUserDate || byUserDate.length === 0) return withShiftId;
+      return withShiftId.concat(byUserDate.filter((p) => !p.shift_id));
+    },
+    [punchIndex]
+  );
+
+  /** Lookup O(1) per il rendering delle celle: prima c'era `shifts.find` in ogni cella del triplo loop (O(S) per cella). */
+  const shiftsById = useMemo(() => {
+    const m = new Map<string, Shift>();
+    for (const s of shifts) m.set(s.id, s);
+    return m;
+  }, [shifts]);
 
   const timesheetData = useMemo(() => {
     const data: Record<string, Record<string, DayData>> = {};
@@ -1275,10 +1733,11 @@ export default function Timesheets() {
           const shiftHour = parseInt(plannedStart.split(':')[0], 10);
           const isLunch = shiftHour < 16;
 
-          const punchIn = punchRecords.find((p) => {
+          // Candidati pre-indicizzati (per shift_id o per user+data): niente scansione dell'intero array punch.
+          const shiftPunches = punchesForShift({ id: s.id, user_id: user.id, date: dateStr });
+          const punchIn = shiftPunches.find((p) => {
             if (p.type !== 'in') return false;
-            if (s.id && p.shift_id) return p.shift_id === s.id;
-            if (p.user_id !== user.id) return false;
+            if (s.id && p.shift_id) return true; // già filtrati per shift_id nell'indice
             const pDate = new Date(p.timestamp);
             if (!isValid(pDate)) return false;
             if (format(pDate, 'yyyy-MM-dd') !== dateStr) return false;
@@ -1286,10 +1745,9 @@ export default function Timesheets() {
           });
 
           const nextCalendarDayStr = format(addDays(parseISO(dateStr), 1), 'yyyy-MM-dd');
-          const punchOut = punchRecords.find((p) => {
+          const punchOut = shiftPunches.find((p) => {
             if (p.type !== 'out') return false;
-            if (s.id && p.shift_id) return p.shift_id === s.id;
-            if (p.user_id !== user.id) return false;
+            if (s.id && p.shift_id) return true; // già filtrati per shift_id nell'indice
             const pDate = new Date(p.timestamp);
             if (!isValid(pDate)) return false;
             const pDateStr = format(pDate, 'yyyy-MM-dd');
@@ -1321,7 +1779,8 @@ export default function Timesheets() {
           let actualEndFullForRow: string | undefined = actualEndFull;
 
           if (frozen) {
-            const r = getResolvedStartEndForHours(s as Shift, punchRecords);
+            // Passa i soli candidati del turno: getPunchPairForShift faceva altre 2 scansioni O(P).
+            const r = getResolvedStartEndForHours(s as Shift, shiftPunches);
             displayActualStart = r.start;
             displayActualEnd = r.end;
             grossActualMins = calculateShiftMinutesGross(r.start, r.end);
@@ -1427,7 +1886,7 @@ export default function Timesheets() {
       }
     }
     return data;
-  }, [visibleUsers, weekDays, weekShifts, punchRecords, breakRules, breakComputeOpts]);
+  }, [visibleUsers, weekDays, weekShifts, breakRules, breakComputeOpts, punchesForShift]);
 
   const userTotals = useMemo(() => {
     const totals: Record<
@@ -1454,6 +1913,57 @@ export default function Timesheets() {
       };
     }
     return totals;
+  }, [visibleUsers, weekDays, timesheetData]);
+
+  /** Turni revisionabili per giorno (header "revisiona"): prima era un reduce O(U×S) inline nel render, duplicato in 2 header. */
+  const dayReviewableCountByDate = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const day of weekDays) {
+      const dStr = format(day, 'yyyy-MM-dd');
+      let n = 0;
+      for (const u of visibleUsers) {
+        const d = timesheetData[u.id]?.[dStr];
+        if (!d) continue;
+        for (const s of d.shifts) if (shiftEligibleForDayReview(s)) n++;
+      }
+      counts[dStr] = n;
+    }
+    return counts;
+  }, [weekDays, visibleUsers, timesheetData]);
+
+  /** Totali di colonna per il footer della tabella: prima 3 reduce O(U) inline per ogni giorno nel render. */
+  const weekFooterTotalsByDate = useMemo(() => {
+    const totals: Record<string, { planned: number; actual: number; frozen: number }> = {};
+    for (const day of weekDays) {
+      const dStr = format(day, 'yyyy-MM-dd');
+      let planned = 0;
+      let actual = 0;
+      let frozen = 0;
+      for (const u of visibleUsers) {
+        const d = timesheetData[u.id]?.[dStr];
+        if (!d) continue;
+        planned += d.totalPlannedMins;
+        actual += d.totalActualMins;
+        frozen += d.totalFrozenOfficialMins;
+      }
+      totals[dStr] = { planned, actual, frozen };
+    }
+    return totals;
+  }, [weekDays, visibleUsers, timesheetData]);
+
+  /** Utenti con almeno un turno nella settimana (card mobile "Nessun turno"). */
+  const usersWithShifts = useMemo(() => {
+    const set = new Set<string>();
+    for (const u of visibleUsers) {
+      const byDate = timesheetData[u.id];
+      if (!byDate) continue;
+      let has = false;
+      for (const d of weekDays) {
+        if ((byDate[format(d, 'yyyy-MM-dd')]?.shifts.length ?? 0) > 0) { has = true; break; }
+      }
+      if (has) set.add(u.id);
+    }
+    return set;
   }, [visibleUsers, weekDays, timesheetData]);
 
   /** Vista settimana: toolbar Approva settimana + menu (tutti / per dipendente; abilitazione se dati completi). */
@@ -1593,7 +2103,7 @@ export default function Timesheets() {
         if (isFutureDay) continue;
 
         const startMins = toMinutesFromMidnight((s.start_time || '').slice(0, 5));
-        const punchIn = findPunchInForShiftOnDate(s, s.user_id, dateStr, punchRecords);
+        const punchIn = findPunchInForShiftOnDate(s, s.user_id, dateStr, punchesForShift(s));
         if (!punchIn) {
           senzaTimbratura++;
           senzaTimbratureIds.push(s.id);
@@ -1607,7 +2117,7 @@ export default function Timesheets() {
       }
     }
     return { inTurno, ritardi, ritardiIds, senzaTimbratura, senzaTimbratureIds, approvati };
-  }, [weekShifts, weekDays, punchRecords, visibleUsers, todayStr, weekStr, weekEnd]);
+  }, [weekShifts, weekDays, visibleUsers, todayStr, weekStr, weekEnd, punchesForShift]);
 
   // ── Turni dinner senza OUT (solo oggi, solo se oggi è nel periodo) ─────────────────
   const dinnerShiftsNeedingClose = useMemo(() => {
@@ -1630,17 +2140,14 @@ export default function Timesheets() {
       if (startHour < 16) continue;
 
       const user = visibleUsers.find((u) => u.id === s.user_id);
-      const punchIn = punchRecords.find(
-        (p) =>
-          p.type === 'in' &&
-          (p.shift_id === s.id || (p.user_id === s.user_id && new Date(p.timestamp).getHours() >= 16))
+      const shiftPunches = punchesForShift(s);
+      const punchIn = shiftPunches.find(
+        (p) => p.type === 'in' && (p.shift_id === s.id || new Date(p.timestamp).getHours() >= 16)
       );
       if (!punchIn) continue;
 
-      const hasOut = punchRecords.some(
-        (p) =>
-          p.type === 'out' &&
-          (p.shift_id === s.id || (p.user_id === s.user_id && new Date(p.timestamp).getHours() >= 16))
+      const hasOut = shiftPunches.some(
+        (p) => p.type === 'out' && (p.shift_id === s.id || new Date(p.timestamp).getHours() >= 16)
       );
       const hasClockOut = !!(punchIn as { clock_out_time?: string | null }).clock_out_time;
       if (hasOut || hasClockOut) continue;
@@ -1673,7 +2180,7 @@ export default function Timesheets() {
       });
     }
     return result;
-  }, [weekShifts, todayStr, visibleUsers, punchRecords, breakRules, breakComputeOpts, weekStr, weekEnd]);
+  }, [weekShifts, todayStr, visibleUsers, breakRules, breakComputeOpts, weekStr, weekEnd, punchesForShift]);
 
   const scrollToTimesheetAnchor = useCallback((elementId: string) => {
     requestAnimationFrame(() => {
@@ -1981,7 +2488,7 @@ export default function Timesheets() {
     }
   };
 
-  const openDrawer = (
+  const openDrawer = useCallback((
     shift: ShiftRow,
     user: { id: string; first_name: string; department?: string },
     dateStr: string,
@@ -2041,7 +2548,7 @@ export default function Timesheets() {
     setDrawerShiftEditsExpanded(false);
     // Collassa il form se le timbrature esistono già; espandilo solo se mancano
     setDrawerManualPunchFormExpanded(!shift.punched);
-  };
+  }, [canTeamTimesheetOps, featureFlags, drawerSessionId, globalPinSessionId, punchAudits]);
 
   const toISOFromDateHHMM = (dateStr: string, hhmm: string): string => {
     const [h, m] = hhmm.split(':').map(Number);
@@ -2325,7 +2832,7 @@ export default function Timesheets() {
 
   // ── Day Review ───────────────────────────────────────────────────────────
 
-  const handleOpenDayReview = (dateStr: string) => {
+  const handleOpenDayReview = useCallback((dateStr: string) => {
     const items: DrawerReviewQueueItem[] = [];
     for (const user of visibleUsers) {
       const dayData = timesheetData[user.id]?.[dateStr];
@@ -2353,9 +2860,9 @@ export default function Timesheets() {
       queue,
       null  // openSource null → review queue footer + frecce ↑↓ tramite reviewScope='day'
     );
-  };
+  }, [visibleUsers, timesheetData, openDrawer]);
 
-  const handleOpenEmployeeWeekReview = (user: User) => {
+  const handleOpenEmployeeWeekReview = useCallback((user: User) => {
     const items: DrawerReviewQueueItem[] = [];
     for (const day of weekDays) {
       const inP = viewMode === 'month' ? isDayInConfiguredPeriod(day) : true;
@@ -2397,7 +2904,7 @@ export default function Timesheets() {
       queue,
       'name'
     );
-  };
+  }, [weekDays, viewMode, isDayInConfiguredPeriod, timesheetData, showError, t, openDrawer]);
 
   const goToDrawerReviewIndex = (i: number) => {
     const q = drawerReviewQueueRef.current;
@@ -2615,7 +3122,7 @@ export default function Timesheets() {
 
   // ── Helpers rendering ────────────────────────────────────────────────────
 
-  const getShiftCardStyle = (s: ShiftRow, punchAuditCount: number, cellDateStr?: string, boardShift?: Shift | null) => {
+  const getShiftCardStyle = useCallback((s: ShiftRow, punchAuditCount: number, cellDateStr?: string, boardShift?: Shift | null) => {
     const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
     const startMins = toMinutesFromMidnight(s.plannedStart);
     const endMins = toMinutesFromMidnight((s.plannedEnd || '00:00').slice(0, 5));
@@ -2760,7 +3267,7 @@ export default function Timesheets() {
       label: t.ts_status_unpunched,
       labelCls: 'text-white/60 bg-white/15',
     };
-  };
+  }, [todayStr, t, punchRecords]);
 
   // ── Render ───────────────────────────────────────────────────────────────
 
@@ -3860,109 +4367,27 @@ export default function Timesheets() {
           {/* ── Griglia presenze (ancora scroll dalle card riepilogo) ─── */}
           {uiW('timesheet.main_grid') && (
           <>
-          {/* Mobile Card View */}
+          {/* Mobile Card View (card memoizzate: si ri-renderizzano solo se cambiano le props) */}
           <div className="md:hidden space-y-4 px-4 pb-8">
-            {visibleUsers.map((user) => {
-              const totals = userTotals[user.id];
-              const userHasShifts = weekDays.some(day => {
-                const dateStr = format(day, 'yyyy-MM-dd');
-                return timesheetData[user.id]?.[dateStr]?.shifts.length > 0;
-              });
-
-              return (
-                <div key={user.id} className="rounded-xl border border-neutral-500 rounded-2xl p-4 shadow-sm border border-neutral-500 overflow-hidden">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h4 className="font-bold text-lg text-white">{user.first_name}</h4>
-                      {user.department && (
-                        <p className="text-[11px] text-white/50 font-medium uppercase tracking-wider">{user.department}</p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[11px] font-bold text-white/50 uppercase tracking-tight">{t.stats_total}</div>
-                      <div className="text-sm font-bold text-accent">
-                        {formatMinutesToHoursAndMinutes(totals?.actualMins || totals?.plannedMins || 0)}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    {!userHasShifts ? (
-                      <div className="py-4 text-center border-2 border-dashed border-slate-100 rounded-xl">
-                        <p className="text-xs text-white/50 italic">{t.no_shifts_this_week}</p>
-                      </div>
-                    ) : (
-                      weekDays.map(day => {
-                        const dateStr = format(day, 'yyyy-MM-dd');
-                        const dayData = timesheetData[user.id]?.[dateStr];
-                        if (!dayData || dayData.shifts.length === 0) return null;
-                        
-                        const todayDate = isToday(day);
-
-                        const onOpenDayQueue = () => { if (!isMobile) handleOpenDayReview(dateStr); };
-                        const dayClickBlocked = isMobile || plannedOnlyTimesheetGrid;
-                        return (
-                          <div
-                            key={dateStr}
-                            className={`flex items-start gap-3 p-2 rounded-xl ${todayDate ? 'bg-accent/5 ring-1 ring-accent/20' : 'bg-slate-50/50'} ${dayClickBlocked ? 'cursor-default' : 'cursor-pointer'}`}
-                            role={dayClickBlocked ? undefined : 'button'}
-                            tabIndex={dayClickBlocked ? undefined : 0}
-                            onClick={dayClickBlocked ? undefined : onOpenDayQueue}
-                            onKeyDown={dayClickBlocked ? undefined : (e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                onOpenDayQueue();
-                              }
-                            }}
-                          >
-                            <div className="w-10 shrink-0 text-center">
-                              <div className={`text-[11px] font-bold uppercase ${todayDate ? 'text-accent' : 'text-white/50'}`}>
-                                {format(day, 'EEE', { locale })}
-                              </div>
-                              <div className={`text-xs font-bold ${todayDate ? 'text-accent' : 'text-white/70'}`}>
-                                {format(day, 'd', { locale })}
-                              </div>
-                            </div>
-                            
-                            <div className="flex-1 space-y-2">
-                              {dayData.shifts.map(s => {
-                                const punchAuditCount = s.punchInId ? (punchAudits[s.punchInId]?.length ?? 0) : 0;
-                                const boardShift = shifts.find((sh) => sh.id === s.id) ?? null;
-                                const { border, bg, ring } = getShiftCardStyle(s, punchAuditCount, dateStr, boardShift);
-                                
-                                const shiftClickBlocked = isMobile || plannedOnlyTimesheetGrid;
-                                return (
-                                  <div
-                                    key={s.id}
-                                    onClick={shiftClickBlocked ? undefined : (e) => {
-                                      e.stopPropagation();
-                                      openDrawer(s, user, dateStr, null, 'turno');
-                                    }}
-                                    className={`flex w-full items-center justify-between rounded-lg border-l-4 ${border} ${bg} ${ring} p-2 text-left ${shiftClickBlocked ? 'cursor-default' : 'cursor-pointer transition-transform '}`}
-                                  >
-                                    <div className="flex flex-col">
-                                      <span className="text-xs font-bold text-white/90">
-                                        {s.plannedStart}–{s.plannedEnd || '?'}
-                                      </span>
-                                      {s.punched && s.actualStart && (
-                                        <span className="text-[11px] font-medium text-white/60">
-                                          {s.actualStart}–{s.actualEnd || '...'}
-                                        </span>
-                                      )}
-                                    </div>
-                                    {!isMobile && <ChevronRight className="h-4 w-4 text-white/30" />}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {visibleUsers.map((user) => (
+              <TimesheetMobileCard
+                key={user.id}
+                user={user}
+                totals={userTotals[user.id]}
+                hasShifts={usersWithShifts.has(user.id)}
+                dayDataByDate={timesheetData[user.id]}
+                weekDays={weekDays}
+                isMobile={isMobile}
+                plannedOnlyTimesheetGrid={plannedOnlyTimesheetGrid}
+                t={t}
+                locale={locale}
+                shiftsById={shiftsById}
+                punchAudits={punchAudits}
+                getShiftCardStyle={getShiftCardStyle}
+                onOpenDayReview={handleOpenDayReview}
+                onOpenDrawer={openDrawer}
+              />
+            ))}
           </div>
 
           {/* Desktop Table View */}
@@ -3997,10 +4422,7 @@ export default function Timesheets() {
                         const isPayrollDay = dStr === weekViewPayrollDayStr;
                         const payrollHighlight = isPayrollDay && (viewMode === 'week' || inP);
                         const canReviewThisDay = dStr <= todayStr;
-                        const dayReviewableCount = visibleUsers.reduce((n, u) => {
-                          const d = timesheetData[u.id]?.[dStr];
-                          return n + (d?.shifts.filter((s) => shiftEligibleForDayReview(s)).length ?? 0);
-                        }, 0);
+                        const dayReviewableCount = dayReviewableCountByDate[dStr] ?? 0;
                         const canReview = inP && canReviewThisDay && canTeamTimesheetOps && dayReviewableCount > 0;
                         const weekEndCol = viewMode === 'month' && (dayIdx + 1) % 7 === 0;
                         return (
@@ -4073,10 +4495,7 @@ export default function Timesheets() {
                     const isPayrollDay = dStr === weekViewPayrollDayStr;
                     const payrollHighlight = isPayrollDay && (viewMode === 'week' || inP);
                     const canReviewThisDay = dStr <= todayStr;
-                    const dayReviewableCount = visibleUsers.reduce((n, u) => {
-                      const d = timesheetData[u.id]?.[dStr];
-                      return n + (d?.shifts.filter((s) => shiftEligibleForDayReview(s)).length ?? 0);
-                    }, 0);
+                    const dayReviewableCount = dayReviewableCountByDate[dStr] ?? 0;
                     const canReview = inP && canReviewThisDay && canTeamTimesheetOps && dayReviewableCount > 0;
                     const weekEndCol = viewMode === 'month' && (dayIdx + 1) % 7 === 0;
                     return (
@@ -4136,251 +4555,29 @@ export default function Timesheets() {
               </thead>
 
               <tbody>
-                {visibleUsers.map((user, userIdx) => {
-                        const totals = userTotals[user.id];
-                        const _isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
-                        return (
-                          <tr
-                            key={user.id}
-                            className={`depth-row last:border-b-0`}
-                            style={{ background: userIdx % 2 === 0 ? 'rgba(20,45,110,0.60)' : 'rgba(20,45,110,0.70)' }}
-                          >
-                      {/* Nome dipendente — click → revisione settimana (coda turni) */}
-                      <td className="sticky left-0 pl-4 pr-3 py-2 border-r border-r-white/10 z-10 md:py-1.5 md:pl-3 md:pr-2 align-middle" style={{ background: 'transparent', boxShadow: 'none' }}>
-                        <div className="flex flex-col gap-1 justify-center">
-                          <button
-                            type="button"
-                            className="w-full max-w-full rounded-lg py-0.5 text-right transition-colors hover:bg-white/[0.04] hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-                            aria-label={formatTrans(t.ts_employee_week_review_open_aria, { name: user.first_name })}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenEmployeeWeekReview(user);
-                            }}
-                          >
-                            <div className="font-semibold text-sm text-white md:text-xs">{user.first_name}</div>
-                            {user.department && (
-                              <div className="text-[11px] text-white/40 mt-0.5 md:text-[11px] uppercase">{user.department}</div>
-                            )}
-                          </button>
-                        </div>
-                      </td>
-
-                      {/* Celle giornaliere */}
-                      {weekDays.map((day, dayIdx) => {
-                        const dateStr = format(day, 'yyyy-MM-dd');
-                        const dayData = timesheetData[user.id]?.[dateStr];
-                        const todayDate = isToday(day);
-                        const inP = viewMode === 'month' ? isDayInConfiguredPeriod(day) : true;
-                        const isPayrollDay = dateStr === weekViewPayrollDayStr;
-                        const payrollHighlight = isPayrollDay && (viewMode === 'week' || inP);
-                        const weekEndCol = viewMode === 'month' && (dayIdx + 1) % 7 === 0;
-                        const tdBorder = weekEndCol ? 'border-r-2 border-r-white/15' : 'border-r border-r-white/10';
-                        const tdMuted = viewMode === 'month' && !inP;
-                        const tdStyle: React.CSSProperties = payrollHighlight
-                          ? { background: 'rgba(51,102,204,0.12)' }
-                          : todayDate && inP
-                            ? { background: 'rgba(0,82,255,0.08)' }
-                            : tdMuted
-                              ? { background: 'transparent', opacity: 0.35 }
-                              : { background: userIdx % 2 === 0 ? 'rgba(20,45,110,0.60)' : 'rgba(20,45,110,0.70)' };
-
-                        if (!dayData || dayData.shifts.length === 0) {
-                          return (
-                            <td key={dateStr} className={`px-2 py-2 text-center ${tdBorder} md:px-1.5 md:py-1.5`} style={tdStyle}>
-                              <span className="text-sm md:text-xs text-white/45">–</span>
-                            </td>
-                          );
-                        }
-
-                        const { before16, from16 } = partitionShiftsByPlannedHour16(dayData.shifts);
-                        const renderShiftButton = (s: ShiftRow) => {
-                                const punchAuditCount = s.punchInId ? (punchAudits[s.punchInId]?.length ?? 0) : 0;
-                                const boardShift = shifts.find((sh) => sh.id === s.id) ?? null;
-                                const { border, bg, ring, dot } = getShiftCardStyle(s, punchAuditCount, dateStr, boardShift);
-                                const publishedCell = s.status === 'confirmed' || s.status === 'approved';
-                                const showPlannedTimesInCell =
-                                  showFullTimesheetGrid || (plannedOnlyTimesheetGrid && publishedCell);
-                                const deltaColor =
-                                  s.deltaMins > 5 ? 'text-accent' : s.deltaMins < -5 ? 'text-red-400' : 'text-white/50';
-
-                                // Logica per determinare se mostrare l'orario pianificato come "effettivo" in assenza di timbrature
-                                const showPlannedAsActual = !s.punched && publishedCell;
-                                const displayActualMins = showPlannedAsActual ? s.plannedMins : s.actualMins;
-                                const displayDeltaMins = showPlannedAsActual ? 0 : s.deltaMins;
-
-                                const isHighlighted = highlightedShiftIds.has(s.id);
-                                const isDimmed = statFilter !== null && !isHighlighted;
-                                return (
-                                  <button
-                                    key={s.id}
-                                    type="button"
-                                    onClick={plannedOnlyTimesheetGrid ? undefined : () => {
-                                      openDrawer(s, user, dateStr, null, 'turno');
-                                    }}
-                                    className={`relative flex w-full items-stretch text-left rounded-lg border-l-[3px] ${border} ${bg} ${ring} py-1 pl-2 pr-2 shadow-sm transition-colors group md:rounded-md md:py-0.5 md:pl-1.5 md:pr-1.5 md:border-l-2 ${plannedOnlyTimesheetGrid ? 'cursor-default' : 'hover:shadow-md'} ${isHighlighted ? 'ts-shift-highlighted' : ''} ${isDimmed ? 'opacity-20 pointer-events-none' : ''}`}
-                                  >
-                                    {/* Spunta / lucchetto subito dopo la barra verticale, poi orari */}
-                                    {(s.status === 'confirmed' || s.status === 'approved') && (
-                                      <span className="mr-1.5 flex shrink-0 flex-col items-center justify-center gap-0.5 self-stretch md:mr-1">
-                                        {s.status === 'confirmed' && (
-                                          <Check
-                                            className="h-2.5 w-2.5 shrink-0 text-brand-mid md:h-2 md:w-2"
-                                            strokeWidth={2.5}
-                                            aria-hidden
-                                          />
-                                        )}
-                                        {s.status === 'approved' && (
-                                          <Lock
-                                            className="h-2.5 w-2.5 shrink-0 text-emerald-600 md:h-2 md:w-2"
-                                            strokeWidth={2.5}
-                                            aria-hidden
-                                          />
-                                        )}
-                                      </span>
-                                    )}
-                                    <div className="flex min-w-0 flex-1 flex-col gap-1 md:gap-0.5">
-                                    <div className="mb-0.5 flex items-center justify-between gap-1 md:mb-0">
-                                      <span
-                                        className="text-[11px] font-semibold text-white/70 tabular-nums md:text-[11px]"
-                                        aria-label={
-                                          showPlannedTimesInCell
-                                            ? undefined
-                                            : t.ts_times_grid_times_masked_aria
-                                        }
-                                      >
-                                        {showPlannedTimesInCell
-                                          ? `${s.plannedStart}–${s.plannedEnd || '?'}`
-                                          : t.ts_times_masked_range}
-                                      </span>
-                                      <span className={`h-2 w-2 flex-shrink-0 rounded-full ${dot} md:h-1.5 md:w-1.5`} />
-                                    </div>
-                                    {/* Effettivo: mostra solo orari timbratura reali; se non timbrato → "–". */}
-                                    {showFullTimesheetGrid ? (
-                                      s.punched ? (
-                                        s.actualEnd ? (
-                                          <div className="flex items-center justify-between gap-1">
-                                            <span className="text-[11px] font-bold text-white tabular-nums md:text-[11px]">
-                                              {`${s.actualStart}–${s.actualEnd}`}
-                                            </span>
-                                            <span
-                                              className={`max-w-[min(100%,5.5rem)] shrink-0 text-right text-[11px] font-semibold leading-tight tabular-nums md:max-w-[4.75rem] md:text-[11px] ${
- s.breakMinutesActual > 0 ? 'text-white/50' : deltaColor
- }`}
-                                              title={
-                                                s.breakMinutesActual > 0
-                                                  ? `${t.ts_net_hours}: ${fmtHM(displayActualMins)}`
-                                                  : undefined
-                                              }
-                                            >
-                                              {s.breakMinutesActual > 0
-                                                ? `−${fmtBreakDeductionShort(s.breakMinutesActual)}`
-                                                : `${displayDeltaMins >= 0 ? '+' : ''}${fmtHM(displayDeltaMins)}`}
-                                            </span>
-                                          </div>
-                                        ) : (
-                                          <div className="flex items-start justify-between gap-1 md:gap-0.5">
-                                            <div className="min-w-0 flex flex-1 flex-wrap items-center gap-x-0.5 text-[11px] font-semibold text-red-400 md:text-[11px]">
-                                              <span>{s.actualStart}</span>
-                                              <span className="text-red-500">{t.ts_missing_exit}</span>
-                                            </div>
-                                            {s.breakMinutes > 0 && (
-                                              <span
-                                                className="max-w-[min(100%,5.5rem)] shrink-0 text-right text-[11px] font-semibold leading-tight tabular-nums text-white/50 md:max-w-[4.75rem] md:text-[11px]"
-                                                title={`${t.ts_kpi_planned}: ${fmtHM(s.plannedMins)}`}
-                                              >
-                                                {`−${fmtBreakDeductionShort(s.breakMinutes)}`}
-                                              </span>
-                                            )}
-                                          </div>
-                                        )
-                                      ) : (
-                                        <span className="text-[11px] font-semibold text-white/45 md:text-[11px]">–</span>
-                                      )
-                                    ) : plannedOnlyTimesheetGrid &&
-                                      publishedCell &&
-                                      s.displayFromFrozenApprovedTimes &&
-                                      s.actualStart &&
-                                      s.actualEnd ? (
-                                      <div className="flex items-center justify-between gap-1">
-                                        <span
-                                          className="text-[11px] font-bold text-white tabular-nums md:text-[11px]"
-                                          title={t.ts_kpi_frozen_official}
-                                        >
-                                          {`${s.actualStart}–${s.actualEnd}`}
-                                        </span>
-                                      </div>
-                                    ) : null}
-                                    {/* Badge icone — assoluti in alto a destra */}
-                                    {showFullTimesheetGrid && (punchAuditCount > 0 || getShiftHistory(s.id).length > 0) && (
-                                      <div className="absolute top-0.5 right-1 flex items-center gap-0.5">
-                                        {punchAuditCount > 0 && (
-                                          <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-orange-300 bg-orange-500/20 rounded px-0.5 py-px leading-none">
-                                            <ShieldAlert className="w-2 h-2" />{punchAuditCount}
-                                          </span>
-                                        )}
-                                        {getShiftHistory(s.id).length > 0 && (
-                                          <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-amber-300 bg-amber-500/20 rounded px-0.5 py-px leading-none">
-                                            <History className="w-2 h-2" />{getShiftHistory(s.id).length}
-                                          </span>
-                                        )}
-                                      </div>
-                                    )}
-                                    <ArrowRight className="absolute bottom-0.5 right-1 w-2 h-2 text-white/40 opacity-0 group-hover:opacity-100 transition-opacity active:opacity-90" />
-                                    </div>
-                                  </button>
-                                );
-                        };
-
-                        return (
-                          <td key={dateStr} className={`px-1.5 py-1.5 ${tdBorder} align-top md:px-1 md:py-1 h-px`} style={tdStyle}>
-                            <div className="flex h-full flex-col">
-                              {before16.length > 0 && (
-                                <div className="flex flex-col gap-1 md:gap-0.5">
-                                  {before16.map((s) => renderShiftButton(s))}
-                                </div>
-                              )}
-                              {from16.length > 0 && (
-                                <div className={`flex flex-col gap-1 md:gap-0.5 ${before16.length > 0 ? 'mt-1.5 md:mt-1' : 'mt-auto'}`}>
-                                  {from16.map((s) => renderShiftButton(s))}
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        );
-                      })}
-
-                      {/* Totale settimana */}
-                      <td className="px-3 py-2 text-center border-l-2 border-l-white/15 md:px-2 md:py-1.5" style={{ background: userIdx % 2 === 0 ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.14)' }}>
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="text-xs font-semibold text-white/55 md:text-[11px]">
-                            {showFullTimesheetGrid || plannedOnlyTimesheetGrid
-                              ? formatMinutesToHoursAndMinutes(totals?.plannedMins ?? 0)
-                              : t.ts_times_masked_hm}
-                          </div>
-                          {showFullTimesheetGrid && (totals?.actualMins ?? 0) > 0 && (
-                            <>
-                              <div className="text-sm font-bold text-white md:text-xs">
-                                {formatMinutesToHoursAndMinutes(totals?.actualMins ?? 0)}
-                              </div>
-                              <div className={`text-[11px] font-semibold ${(totals?.deltaMins ?? 0) >= 0 ? 'text-accent' : 'text-red-400'} md:text-[11px]`}>
-                                {(totals?.deltaMins ?? 0) >= 0 ? '+' : ''}
-                                {fmtHM(totals?.deltaMins ?? 0)}
-                              </div>
-                            </>
-                          )}
-                          {plannedOnlyTimesheetGrid && (totals?.frozenOfficialMins ?? 0) > 0 && (
-                            <div
-                              className="text-sm font-bold text-white md:text-xs"
-                              title={t.ts_kpi_frozen_official}
-                            >
-                              {formatMinutesToHoursAndMinutes(totals?.frozenOfficialMins ?? 0)}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {visibleUsers.map((user, userIdx) => (
+                  <TimesheetGridRow
+                    key={user.id}
+                    user={user}
+                    userIdx={userIdx}
+                    totals={userTotals[user.id]}
+                    dayDataByDate={timesheetData[user.id]}
+                    weekDays={weekDays}
+                    viewMode={viewMode}
+                    isDayInConfiguredPeriod={isDayInConfiguredPeriod}
+                    weekViewPayrollDayStr={weekViewPayrollDayStr}
+                    shiftsById={shiftsById}
+                    punchAudits={punchAudits}
+                    highlightedShiftIds={highlightedShiftIds}
+                    statFilter={statFilter}
+                    showFullTimesheetGrid={showFullTimesheetGrid}
+                    plannedOnlyTimesheetGrid={plannedOnlyTimesheetGrid}
+                    t={t}
+                    getShiftCardStyle={getShiftCardStyle}
+                    onOpenDrawer={openDrawer}
+                    onEmployeeWeekReview={handleOpenEmployeeWeekReview}
+                  />
+                ))}
 
                 {/* Empty state — nessun dipendente */}
                 {visibleUsers.length === 0 && (
@@ -4423,12 +4620,10 @@ export default function Timesheets() {
                     </td>
                     {weekDays.map((day, dayIdx) => {
                       const dateStr = format(day, 'yyyy-MM-dd');
-                      const planned = visibleUsers.reduce((s, u) => s + (timesheetData[u.id]?.[dateStr]?.totalPlannedMins ?? 0), 0);
-                      const actual = visibleUsers.reduce((s, u) => s + (timesheetData[u.id]?.[dateStr]?.totalActualMins ?? 0), 0);
-                      const frozenCol = visibleUsers.reduce(
-                        (s, u) => s + (timesheetData[u.id]?.[dateStr]?.totalFrozenOfficialMins ?? 0),
-                        0
-                      );
+                      const colTotals = weekFooterTotalsByDate[dateStr] ?? { planned: 0, actual: 0, frozen: 0 };
+                      const planned = colTotals.planned;
+                      const actual = colTotals.actual;
+                      const frozenCol = colTotals.frozen;
                       const inP = viewMode === 'month' ? isDayInConfiguredPeriod(day) : true;
                       const isPayrollDay = dateStr === weekViewPayrollDayStr;
                       const payrollHighlight = isPayrollDay && (viewMode === 'week' || inP);
