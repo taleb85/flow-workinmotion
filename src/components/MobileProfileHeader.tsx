@@ -92,7 +92,9 @@ export default function MobileProfileHeader({
   const shellClass = `w-full ${showOnDesktop ? '' : 'md:hidden'}`;
 
   const body = (
-    <div className="relative" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }} ref={wrapperRef}>
+    /* Il padding safe-area è gestito dall'header (Flexbox con padding-top env):
+       qui non serve più alcun padding interno. */
+    <div className="relative" ref={wrapperRef}>
     <div
       className="flow-brand-header px-4 flex items-center justify-between gap-3"
       style={{ height: 50 }}
