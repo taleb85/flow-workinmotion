@@ -1772,7 +1772,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           </span>
           {/* Settimana successiva — in fondo a destra della riga */}
           <button type="button" onClick={nextWeek} aria-label="Settimana successiva"
-            className="rounded-lg bg-white/10 px-3 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5 md:h-4 md:w-4" /></button>
+            className="rounded-lg bg-white/10 px-3 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5" /></button>
           {selectedShiftIds.size > 0 && (
             <div className="flex items-center gap-1.5 ml-auto">
               <span className="text-xs font-bold text-white/60 whitespace-nowrap">{selectedShiftIds.size} selezionati</span>
