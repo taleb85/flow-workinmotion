@@ -1766,7 +1766,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               className="rounded-lg bg-white/10 px-2 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5 md:h-4 md:w-4" /></button>
           </div>
           <span
-            className="flex-1 md:flex-none min-w-0 max-w-full truncate text-sm font-semibold text-white/50 tabular-nums"
+            className="flex-1 min-w-0 max-w-full truncate text-sm font-semibold text-white/50 tabular-nums"
             title={`${(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()} — ${(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()}`}
           >
             {(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
