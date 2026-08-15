@@ -114,6 +114,10 @@ body {
 #root {
   height: 100vh;
   height: 100dvh;
+  /* iOS: in standalone dopo un reload `dvh` può restare "corto" (altezza
+     senza status bar) e creare una banda vuota in basso. fill-available
+     forza l'altezza piena disponibile. */
+  min-height: -webkit-fill-available;
   background: transparent;
   display: flex;
   flex-direction: column;

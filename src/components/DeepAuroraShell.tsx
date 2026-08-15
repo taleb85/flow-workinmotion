@@ -9,6 +9,13 @@ export default function DeepAuroraShell({ theme }: { theme: BackgroundTheme }) {
         style={{ background: theme.previewGradient }}
       />
 
+      {/* Fade superiore: zona alta sempre scura e pulita (sotto status bar/header,
+          niente bagliori né gradiente chiaro che sembrino "sfocatura" su iOS) */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[200px]"
+        style={{ background: `linear-gradient(to bottom, ${theme.appBg} 0%, ${theme.appBg}e6 45%, transparent 100%)` }}
+      />
+
       {theme.glows.map((g, i) => (
         <div
           key={i}
