@@ -1762,17 +1762,20 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               className="rounded-lg bg-white/10 px-3 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-5 w-5 md:h-4 md:w-4" /></button>
             <button type="button" onClick={goToday}
               className="rounded-lg bg-white/10 px-2.5 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors text-xs md:text-xs font-bold uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">{t.today_btn ?? 'Oggi'}</button>
+            {/* Desktop: ▶ nel gruppo (come prima) — su mobile è a destra */}
+            <button type="button" onClick={nextWeek} aria-label="Settimana successiva"
+              className="hidden md:flex rounded-lg bg-white/10 px-3 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5 md:h-4 md:w-4" /></button>
           </div>
           <span
-            className="flex-1 min-w-0 max-w-full truncate text-sm font-semibold text-white/50 tabular-nums"
+            className="flex-1 md:flex-none min-w-0 max-w-full truncate text-sm font-semibold text-white/50 tabular-nums"
             title={`${(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()} — ${(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()}`}
           >
             {(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
             <span className="hidden md:inline"> — {(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}</span>
           </span>
-          {/* Settimana successiva — in fondo a destra della riga */}
+          {/* Mobile: settimana successiva in fondo a destra della riga */}
           <button type="button" onClick={nextWeek} aria-label="Settimana successiva"
-            className="rounded-lg bg-white/10 px-3 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5" /></button>
+            className="md:hidden rounded-lg bg-white/10 px-3 py-2 text-white/60 hover:text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5" /></button>
           {selectedShiftIds.size > 0 && (
             <div className="flex items-center gap-1.5 ml-auto">
               <span className="text-xs font-bold text-white/60 whitespace-nowrap">{selectedShiftIds.size} selezionati</span>
@@ -1798,7 +1801,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
         {/* Mobile: filtri su una riga sola (filtro | sett/periodo | data periodo);
             desktop: riga flessibile allineata a destra */}
-        <div className="flex w-full min-w-0 items-center gap-1.5 md:ml-auto md:justify-end md:gap-2">
+        <div className="flex w-full min-w-0 items-center gap-1.5 md:ml-auto md:flex-wrap md:justify-end md:gap-2">
           {departments.length > 1 && (
             <div className="shrink-0 md:flex-none relative">
               <button ref={deptTriggerRef} type="button" onClick={toggleDeptDropdown}
