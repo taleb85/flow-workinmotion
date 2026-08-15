@@ -141,9 +141,10 @@ export default function MobileProfileHeader({
         )}
       </div>
 
-      {/* Destra: live dot + data | separatore | azioni (extra + campanella + logout) — nascosto su mobile */}
-      <div className="hidden md:flex shrink-0 items-center gap-2.5">
-        {/* Status: live dot + data */}
+      {/* Destra: data | separatore | azioni (extra + campanella + logout) —
+          visibile anche su mobile (campanella e logout in alto a destra) */}
+      <div className="flex shrink-0 items-center gap-2.5">
+        {/* Status: live dot + data — solo desktop */}
         <span
           className="hidden md:inline text-[13px] font-medium whitespace-nowrap capitalize tabular-nums"
           style={{ color: 'rgba(255,255,255,0.60)', letterSpacing: '0.01em' }}
@@ -151,8 +152,8 @@ export default function MobileProfileHeader({
           {dateLabel}
         </span>
 
-        {/* Separatore verticale */}
-        <span className="w-px h-4 bg-white/15 shrink-0 mx-0.5" />
+        {/* Separatore verticale — solo desktop */}
+        <span className="hidden md:block w-px h-4 bg-white/15 shrink-0 mx-0.5" />
 
         {/* Slot azioni (sync + PIN dall'esterno) */}
         {rightExtra}

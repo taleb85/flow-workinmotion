@@ -8,7 +8,6 @@ import type { User, Shift, PunchRecord, Language } from '../../types';
 import { useAppUser } from '../../context/appSliceContexts';
 import { useAppData } from '../../context/appSliceContexts';
 import { useAppConfig } from '../../context/appSliceContexts';
-import { UnifiedBellButton } from '../UnifiedBellButton';
 import { PATH_PROFILO } from '../../config/appPaths';
 import { APP_SESSION_STORAGE_KEY } from '../../constants/appSession';
 import { persistStoredUiLanguage } from '../../utils/uiLanguagePreference';
@@ -173,39 +172,6 @@ export default function MobileStaffDashboard({
       ? `${inProgress.shift.start_time.slice(0, 5)} – ${inProgress.shift.end_time?.slice(0, 5) ?? '…'} · ${inProgress.shift.type === 'lunch' ? t.lunch : t.dinner}`
       : null;
 
-  const handleMobileLogout = useCallback(() => {
-    applyUnauthenticatedDocumentTheme();
-    try { localStorage.removeItem(APP_SESSION_STORAGE_KEY); } catch { /* ignore */ }
-    if (user.language && ['it', 'en', 'es', 'fr'].includes(user.language)) {
-      persistStoredUiLanguage(user.language as Language);
-    }
-    setIsSessionElevated(false);
-    setCurrentUser(null);
-    navigate(PATH_PROFILO, { replace: true });
-  }, [user.language, setIsSessionElevated, setCurrentUser, navigate]);
-
-  const rightContent = (
-    <>
-      <div style={{ transform: 'scale(1.3)', transformOrigin: 'center' }}>
-        <UnifiedBellButton
-          userId={user.id}
-          effectiveLanguage={language}
-          onMessageClick={() => {}}
-        />
-      </div>
-      <button
-        type="button"
-        onClick={handleMobileLogout}
-        title="Esci"
-        aria-label="Esci"
-        style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255, 255, 255, 0.10)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
-        className="text-white/70 hover:bg-white/15 hover:text-white touch-manipulation"
-      >
-        <LogOut style={{ width: 16, height: 16 }} strokeWidth={2} color="#ef4444" aria-hidden />
-      </button>
-    </>
-  );
-
   const tabSpinner = (
     <div className="flex items-center justify-center min-h-[200px]">
       <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -218,7 +184,6 @@ export default function MobileStaffDashboard({
         return (
           <MobileHome
             greetingText={greetingText}
-            rightContent={rightContent}
             todayLabel={safeFormatDate(todayStr, 'EEEE d MMMM', { locale })}
             statsLabels={statsLabels}
             weeklyMinutes={weeklyMinutesProp ?? stats.weeklyMinutes}
