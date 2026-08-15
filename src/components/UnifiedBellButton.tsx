@@ -108,11 +108,11 @@ export function UnifiedBellButton({
             ? `Errore caricamento notifiche`
             : `Campanella notifiche${totalUnread > 0 ? ` con ${totalUnread} nuovi messaggi` : ''}`
         }
-        className={`relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 touch-manipulation liquid-glass text-accent ${
- isDisabled
- ? 'opacity-50 cursor-not-allowed'
- : ' '
- }`}
+        className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 touch-manipulation liquid-glass text-accent ${
+          isDisabled
+            ? 'opacity-50 cursor-not-allowed'
+            : ' '
+        }`}
       >
         <svg
           viewBox="0 0 24 24"
@@ -121,7 +121,7 @@ export function UnifiedBellButton({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-3.5 w-3.5"
+          className="h-4 w-4"
         >
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
