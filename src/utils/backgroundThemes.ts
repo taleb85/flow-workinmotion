@@ -22,8 +22,8 @@ const THEMES: BackgroundTheme[] = [
     appBg: '#0a0a0e',
     previewGradient: 'radial-gradient(ellipse at 50% 0%, rgba(148,163,184,0.10) 0%, rgba(80,90,110,0.06) 30%, transparent 70%)',
     glows: [
-      { color: '#94a3b8', opacity: 0.09, blur: 190, position: { top: '-5rem', left: '50%' }, size: '40rem 56rem' },
-      { color: '#cbd5e1', opacity: 0.06, blur: 150, position: { top: '-2rem', right: '10%' }, size: '26rem 30rem' },
+      /* Nessun glow in alto: i bagliori blurred in cima allo schermo davano
+         l'effetto "sfocatura sopra l'header" su iOS. Aurora solo in basso/meta. */
       { color: '#5eead4', opacity: 0.07, blur: 160, position: { bottom: '20%', right: '8%' }, size: '24rem 28rem' },
       { color: '#67e8f9', opacity: 0.05, blur: 140, position: { top: '25%', left: '-6rem' }, size: '20rem 24rem' },
       { color: '#a78bfa', opacity: 0.04, blur: 130, position: { bottom: '-4rem', left: '18%' }, size: '18rem 22rem' },
@@ -39,8 +39,7 @@ const THEMES: BackgroundTheme[] = [
     appBg: '#3a3d44',
     previewGradient: 'radial-gradient(ellipse at 50% 0%, rgba(148,163,184,0.12) 0%, rgba(100,112,130,0.06) 35%, rgba(80,90,105,0.02) 75%, rgba(58,61,68,0.00) 100%)',
     glows: [
-      { color: '#94a3b8', opacity: 0.07, blur: 200, position: { top: '-6rem', left: '50%' }, size: '44rem 60rem' },
-      { color: '#cbd5e1', opacity: 0.05, blur: 160, position: { top: '-3rem', right: '10%' }, size: '28rem 34rem' },
+      /* Nessun glow in alto — vedi tema 'slate' */
       { color: '#5eead4', opacity: 0.06, blur: 170, position: { bottom: '20%', right: '8%' }, size: '26rem 30rem' },
       { color: '#67e8f9', opacity: 0.04, blur: 150, position: { top: '25%', left: '-7rem' }, size: '22rem 26rem' },
       { color: '#a78bfa', opacity: 0.03, blur: 140, position: { bottom: '-5rem', left: '18%' }, size: '18rem 22rem' },

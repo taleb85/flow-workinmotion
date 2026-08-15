@@ -693,7 +693,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         className={`sticky md:fixed top-0 left-0 right-0 z-[10040] shrink-0 bg-app-bg transition-[visibility,opacity] duration-150 ${
           overlayOpen ? 'invisible opacity-0 pointer-events-none' : ''
         } ${
-          isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''
+          isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'pointer-events-none' : ''
         }`}
       >
         <MobileProfileHeader
