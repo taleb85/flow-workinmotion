@@ -690,10 +690,9 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       <header
         ref={appStickyHeaderRef}
         aria-label="Navigazione principale"
-        /* TEST NITIDEZZA: nessun backdrop-filter/filter/box-shadow nell'header
-           (regola .app-header in index.css), sfondo SOLIDO #121212.
-           Il padding sotto la tacca è gestito dal contenitore del logo. */
-        className={`app-header sticky md:fixed top-0 left-0 right-0 z-[10050] shrink-0 border-b border-white/10 transition-[visibility,opacity] duration-150 ${
+        /* Header: stesso effetto della bottom nav (trasparente + blur 16px,
+           regola .app-header in index.css). I figli non hanno effetti. */
+        className={`app-header sticky md:fixed top-0 left-0 right-0 z-[10050] shrink-0 transition-[visibility,opacity] duration-150 ${
           overlayOpen ? 'invisible opacity-0 pointer-events-none' : ''
         } ${
           isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'pointer-events-none' : ''
