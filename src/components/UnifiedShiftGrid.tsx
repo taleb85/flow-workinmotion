@@ -1755,7 +1755,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* Toolbar sticky in tutte le viewport */}
        <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mb-3 w-full min-w-0 md:sticky md:top-[50px] md:z-50 py-2"
         data-toolbar-mode={mode}>
-        <div className="ui-toolbar-row-tight flex min-w-0 flex-1 flex-wrap items-center gap-1.5 md:gap-2">
+        <div className="ui-toolbar-row-tight flex min-w-0 flex-1 flex-nowrap md:flex-wrap items-center gap-1.5 md:gap-2">
           <div className="flex shrink-0 items-center gap-1">
             <button type="button" onClick={prevWeek} aria-label="Settimana precedente"
               className="rounded-lg bg-white/10 px-2 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-5 w-5 md:h-4 md:w-4" /></button>
@@ -1796,7 +1796,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
         <div className="ui-toolbar-row-tight flex min-w-0 flex-wrap items-center gap-1.5 md:gap-2 md:ml-auto md:justify-end">
           {departments.length > 1 && (
-            <div className="flex-1 md:flex-none relative">
+            <div className="shrink-0 md:flex-none relative">
               <button ref={deptTriggerRef} type="button" onClick={toggleDeptDropdown}
                 className="relative flex max-w-none md:max-w-[min(100%,7.5rem)] items-center gap-1 truncate rounded-lg bg-white/10 py-1.5 pl-2 pr-6 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-white/60 transition-colors hover:text-white md:px-2.5 md:pr-7 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                 <Filter className="h-3 w-3 shrink-0 text-white/40" aria-hidden />
@@ -1822,7 +1822,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               )}
             </div>
           )}
-          <div className="flex flex-1 md:flex-none shrink-0 items-center gap-1 rounded-lg bg-white/5 p-0.5">
+          <div className="flex shrink-0 md:flex-none items-center gap-1 rounded-lg bg-white/5 p-0.5">
             <button type="button" onClick={() => setViewMode('week')}
               className={`rounded-md px-1.5 md:px-2.5 py-1.5 text-[10px] md:text-[10px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
               <span className="md:hidden">{t.view_week_short ?? 'Sett.'}</span>
