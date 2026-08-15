@@ -2377,19 +2377,6 @@ td, th {
   opacity: 1 !important;
 }
 
-/* ── iOS standalone: zona "glassata" del sistema (~99pt) ───────────────
-   iOS applica un velo translucido smerigliato sulla zona alta dello schermo
-   (status bar + Dynamic Island) nelle app installate. Non è rimovibile via
-   CSS: per evitare che logo e scritta risultino sfocati, il contenuto
-   dell'header va posizionato SOTTO quella zona (~104px). */
-@supports (-webkit-touch-callout: none) {
-  @media (display-mode: standalone) {
-    .app-header {
-      padding-top: 104px !important;
-    }
-  }
-}
-
 /* ── iOS: blur ridotti per prestazioni (evita crash Safari "Abnormally stopped") ──
    I backdrop-filter su schermo intero (modali, vetro) sono i più costosi:
    su iPhone li riduciamo sensibilmente, l'aspetto resta praticamente uguale. */
