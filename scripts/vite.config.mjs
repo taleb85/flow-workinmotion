@@ -133,9 +133,9 @@ export default defineConfig(({ command }) => {
         description: 'FLOW — Work in Motion. Gestione turni e presenze.',
         start_url: '/profilo',
         lang: 'it',
-        display: 'standalone',
+        display: 'fullscreen',
         background_color: '#0a0a0c',
-        theme_color: '#0a0a0c',
+        theme_color: '#121212',
         orientation: 'portrait',
         scope: '/',
         icons: [
