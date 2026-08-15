@@ -114,6 +114,9 @@ body {
 #root {
   height: 100vh;
   height: 100dvh;
+  /* Altezza reale imposta da index.html (visualViewport): copre il glitch di
+     iOS standalone dopo il reload, quando dvh/fill-available restano corti. */
+  height: var(--app-vh, 100dvh);
   /* iOS: in standalone dopo un reload `dvh` può restare "corto" (altezza
      senza status bar) e creare una banda vuota in basso. fill-available
      forza l'altezza piena disponibile. */

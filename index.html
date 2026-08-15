@@ -184,6 +184,30 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script>
+      /* iOS standalone: dopo un reload/refresh `innerHeight` (e quindi 100dvh/
+         fill-available) può restare "corto" (altezza senza la zona status bar),
+         lasciando una banda vuota in fondo. `visualViewport.height` resta invece
+         sempre l'altezza reale: la applichiamo a #root via variabile CSS. */
+      (function () {
+        var setH = function () {
+          var vv = window.visualViewport;
+          var h = vv && vv.height ? vv.height : window.innerHeight;
+          if (h > 0) document.documentElement.style.setProperty('--app-vh', h + 'px');
+        };
+        setH();
+        window.addEventListener('resize', setH);
+        window.addEventListener('orientationchange', function () { setTimeout(setH, 200); });
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', setH);
+        window.addEventListener('load', setH);
+        /* Correzione post-reload: riprova nei primi frame utili */
+        setTimeout(setH, 250);
+        setTimeout(setH, 800);
+        document.addEventListener('visibilitychange', function () {
+          if (!document.hidden) setTimeout(setH, 150);
+        });
+      })();
+    </script>
 
     <!-- Favicon + PWA (logo Flow — barre arancioni su #1a2744) -->
     <!-- Cache-buster statico: nessuna dipendenza da env (un %VITE_% non definito
