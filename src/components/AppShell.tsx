@@ -703,7 +703,8 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-start',
-          paddingTop: 'env(safe-area-inset-top, 0px)',
+          /* env() + margine extra per scendere un po' sotto la tacca */
+          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 14px)',
         }}
       >
         <MobileProfileHeader
