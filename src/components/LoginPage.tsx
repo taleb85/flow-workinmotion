@@ -138,9 +138,10 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
         await database.users.update(inviteUserId, patch as Partial<UserType>);
       }
 
-      // Richiedi permessi notifiche
+      // Richiedi permessi notifiche (non bloccante: su iOS Safari nel browser
+      // le notifiche web non sono supportate e requestPermission può fallire)
       if ('Notification' in window && Notification.permission === 'default') {
-        await Notification.requestPermission();
+        try { await Notification.requestPermission(); } catch { /* ignora */ }
       }
 
       // Richiedi geolocalizzazione

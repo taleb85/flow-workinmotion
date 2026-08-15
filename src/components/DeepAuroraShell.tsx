@@ -1,5 +1,12 @@
 import { type BackgroundTheme } from '../utils/backgroundThemes';
 
+/* iOS: i blur enormi dell'aurora (fino a ~190px su elementi da 40rem) sono la
+   causa più probabile del crash "Abnormally stopped" di Safari (memoria GPU).
+   Su iPhone riduciamo blur e dimensioni dei bagliori: aspetto simile, costo
+   di rendering molto più basso. */
+const IS_IOS =
+  typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+
 export default function DeepAuroraShell({ theme }: { theme: BackgroundTheme }) {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -16,21 +23,26 @@ export default function DeepAuroraShell({ theme }: { theme: BackgroundTheme }) {
         style={{ background: `linear-gradient(to bottom, ${theme.appBg} 0%, ${theme.appBg}e6 45%, transparent 100%)` }}
       />
 
-      {theme.glows.map((g, i) => (
-        <div
-          key={i}
-          className="pointer-events-none absolute rounded-full"
-          style={{
-            backgroundColor: g.color,
-            opacity: g.opacity,
-            filter: `blur(${g.blur}px)`,
-            width: g.size.split(' ')[1] ?? g.size,
-            height: g.size.split(' ')[0] ?? g.size,
-            ...g.position,
-            transform: g.position.left && g.position.left !== '50%' ? undefined : g.position.left === '50%' ? 'translateX(-50%)' : undefined,
-          }}
-        />
-      ))}
+      {theme.glows.map((g, i) => {
+        const sizeTokens = g.size.split(' ');
+        const glowWidth = sizeTokens[1] ?? g.size;
+        const glowHeight = sizeTokens[0] ?? g.size;
+        return (
+          <div
+            key={i}
+            className="pointer-events-none absolute rounded-full"
+            style={{
+              backgroundColor: g.color,
+              opacity: g.opacity,
+              filter: `blur(${IS_IOS ? Math.min(g.blur, 60) : g.blur}px)`,
+              width: IS_IOS ? `calc(${glowWidth} / 2)` : glowWidth,
+              height: IS_IOS ? `calc(${glowHeight} / 2)` : glowHeight,
+              ...g.position,
+              transform: g.position.left && g.position.left !== '50%' ? undefined : g.position.left === '50%' ? 'translateX(-50%)' : undefined,
+            }}
+          />
+        );
+      })}
 
       {/* Stelle */}
       <div className="pointer-events-none absolute top-[6%] right-[18%] h-[3px] w-[3px] rounded-full shadow-[0_0_10px_rgba(var(--star-color),0.5)]" style={{ backgroundColor: `rgba(${theme.starColor},0.3)` }} />

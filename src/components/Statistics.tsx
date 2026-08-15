@@ -557,17 +557,17 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                       className="h-9 inline-flex items-center px-3 rounded-2xl bg-white/20 text-white text-xs font-extrabold uppercase tracking-wider shrink-0 shadow-sm active:bg-white/30 transition-colors">
                       {t.today}
                     </button>
-                    <div className="flex items-center rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                    <div className="flex items-center rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.28)' }}>
                       <button
                         type="button"
                         onClick={() => setNavOffset(o => o - 1)}
-                        className="flex items-center justify-center h-9 w-9 text-white/50 hover:bg-white/10 transition-colors active:bg-white/80"
+                        className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-white/10 transition-colors active:bg-white/80"
                       >
                         <ChevronLeft className="h-4 w-4" aria-hidden />
                       </button>
                       <div className="flex items-center gap-1.5 px-2">
-                        <Calendar className="h-3 w-3 text-white/45 shrink-0" aria-hidden />
-                        <span className="text-xs font-bold text-white/80 tabular-nums whitespace-nowrap">
+                        <Calendar className="h-3 w-3 text-white/60 shrink-0" aria-hidden />
+                        <span className="text-xs font-bold text-white tabular-nums whitespace-nowrap">
                           {statsTab === 'current_week'
                             ? `S.${getISOWeek(rangeStart)} · ${format(rangeStart, 'd MMM', { locale: statsLoc })} – ${format(rangeEnd, 'd MMM', { locale: statsLoc })}`
                             : `${format(rangeStart, 'd MMM', { locale: statsLoc })} – ${format(rangeEnd, 'd MMM yy', { locale: statsLoc })}`
@@ -577,7 +577,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                       <button
                         type="button"
                         onClick={() => setNavOffset(o => o + 1)}
-                        className="flex items-center justify-center h-9 w-9 text-white/50 hover:bg-white/10 transition-colors active:bg-white/80"
+                        className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-white/10 transition-colors active:bg-white/80"
                       >
                         <ChevronRight className="h-4 w-4" aria-hidden />
                       </button>

@@ -690,7 +690,10 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       <header
         ref={appStickyHeaderRef}
         aria-label="Navigazione principale"
-        className={`sticky md:fixed top-0 left-0 right-0 z-[10040] shrink-0 bg-app-bg transition-[visibility,opacity] duration-150 ${
+        /* NIENTE backdrop-blur qui: su iOS Safari il backdrop-filter su un
+           header sticky causa glitch di compositing (doppio colore/ghosting
+           e sfocatura su logo e scritta FLOW). Barra semitrasparente e nitida. */
+        className={`sticky md:fixed top-0 left-0 right-0 z-[10050] shrink-0 bg-app-bg/85 border-b border-white/10 transition-[visibility,opacity,background] duration-150 ${
           overlayOpen ? 'invisible opacity-0 pointer-events-none' : ''
         } ${
           isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'pointer-events-none' : ''
@@ -844,7 +847,10 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
 
       {/* ── Bottom Tab Bar ── */}
       {!noNavTabs && (
-        <div className="fixed bottom-0 left-0 right-0 z-[10040] shrink-0" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div
+          className="fixed bottom-0 left-0 right-0 z-[10040] shrink-0"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
           <TopTabBar
             activeTab={activeTab}
             onTabChange={handleTabChange}

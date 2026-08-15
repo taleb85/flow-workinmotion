@@ -185,26 +185,44 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <script>
+      /* Flag iOS per ridurre gli effetti GPU pesanti (blur aurora, backdrop-filter):
+         causa frequente del crash "Abnormally stopped" di Safari su iPhone. */
+      (function () {
+        document.documentElement.setAttribute(
+          'data-ios',
+          /iphone|ipad|ipod/i.test(navigator.userAgent || '') ? '1' : '0'
+        );
+      })();
+    </script>
+    <script>
       /* iOS standalone: dopo un reload/refresh `innerHeight` (e quindi 100dvh/
          fill-available) può restare "corto" (altezza senza la zona status bar),
          lasciando una banda vuota in fondo. `visualViewport.height` resta invece
-         sempre l'altezza reale: la applichiamo a #root via variabile CSS. */
+         sempre l'altezza reale: la applichiamo a #root via variabile CSS.
+         In standalone, all'avvio, usiamo anche screen.height come valore pieno. */
       (function () {
-        var setH = function () {
+        var isStandalone = function () {
+          return window.navigator.standalone === true ||
+            (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+        };
+        var setH = function (allowScreen) {
           var vv = window.visualViewport;
           var h = vv && vv.height ? vv.height : window.innerHeight;
+          if (allowScreen && isStandalone() && window.screen && window.screen.height && h < window.screen.height) {
+            h = window.screen.height;
+          }
           if (h > 0) document.documentElement.style.setProperty('--app-vh', h + 'px');
         };
-        setH();
-        window.addEventListener('resize', setH);
-        window.addEventListener('orientationchange', function () { setTimeout(setH, 200); });
-        if (window.visualViewport) window.visualViewport.addEventListener('resize', setH);
-        window.addEventListener('load', setH);
+        setH(true);
+        window.addEventListener('resize', function () { setH(false); });
+        window.addEventListener('orientationchange', function () { setTimeout(function () { setH(true); }, 200); });
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', function () { setH(false); });
+        window.addEventListener('load', function () { setH(true); });
         /* Correzione post-reload: riprova nei primi frame utili */
-        setTimeout(setH, 250);
-        setTimeout(setH, 800);
+        setTimeout(function () { setH(true); }, 250);
+        setTimeout(function () { setH(true); }, 800);
         document.addEventListener('visibilitychange', function () {
-          if (!document.hidden) setTimeout(setH, 150);
+          if (!document.hidden) setTimeout(function () { setH(true); }, 150);
         });
       })();
     </script>

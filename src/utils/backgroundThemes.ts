@@ -20,7 +20,9 @@ const THEMES: BackgroundTheme[] = [
     id: 'slate',
     label: { it: 'Ardesia', en: 'Slate' },
     appBg: '#0a0a0e',
-    previewGradient: 'radial-gradient(ellipse at 50% 0%, rgba(148,163,184,0.10) 0%, rgba(80,90,110,0.06) 30%, transparent 70%)',
+    /* Nessuna luce in cima (ellisse centrata più in basso): la zona alta resta
+       pulita anche sui temi chiari (evita l'effetto "sfocatura/difetto" in alto) */
+    previewGradient: 'radial-gradient(ellipse at 50% 58%, rgba(148,163,184,0.10) 0%, rgba(80,90,110,0.06) 30%, transparent 70%)',
     glows: [
       /* Nessun glow in alto: i bagliori blurred in cima allo schermo davano
          l'effetto "sfocatura sopra l'header" su iOS. Aurora solo in basso/meta. */
@@ -37,7 +39,8 @@ const THEMES: BackgroundTheme[] = [
     id: 'paper',
     label: { it: 'Carta', en: 'Paper' },
     appBg: '#3a3d44',
-    previewGradient: 'radial-gradient(ellipse at 50% 0%, rgba(148,163,184,0.12) 0%, rgba(100,112,130,0.06) 35%, rgba(80,90,105,0.02) 75%, rgba(58,61,68,0.00) 100%)',
+    /* Nessuna luce in cima: vedi tema 'slate' */
+    previewGradient: 'radial-gradient(ellipse at 50% 58%, rgba(148,163,184,0.12) 0%, rgba(100,112,130,0.06) 35%, rgba(80,90,105,0.02) 75%, rgba(58,61,68,0.00) 100%)',
     glows: [
       /* Nessun glow in alto — vedi tema 'slate' */
       { color: '#5eead4', opacity: 0.06, blur: 170, position: { bottom: '20%', right: '8%' }, size: '26rem 30rem' },

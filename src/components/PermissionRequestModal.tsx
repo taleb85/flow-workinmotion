@@ -179,12 +179,9 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
   const canProceed = notifGranted && locGranted && pushActive;
 
   const handleContinua = () => {
-    if (!canProceed) return;
     markPermissionModalAsked();
     onDone();
   };
-
-  const missingCount = [notifGranted, locGranted, pushActive].filter((ok) => !ok).length;
 
   return (
     <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-4 bg-black/70 backdrop-blur-md">
@@ -329,19 +326,18 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
           <button
             type="button"
             onClick={handleContinua}
-            disabled={!canProceed}
             className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-colors 
- ${canProceed
- ? 'bg-blue-600 hover:bg-blue-500 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]'
- : 'bg-white/10 text-white/40 cursor-not-allowed'
- }`}
+${canProceed
+  ? 'bg-blue-600 hover:bg-blue-500 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]'
+  : 'bg-white/15 text-white/90 hover:bg-white/20 border border-white/20'
+}`}
           >
-            {canProceed ? 'Continua' : missingCount > 1 ? 'Consenti i 2 permessi per continuare' : 'Consenti il permesso per continuare'}
+            {canProceed ? 'Continua' : 'Continua senza attivare ora'}
           </button>
           <p className="text-center text-[11px] text-white/50 mt-2">
             {canProceed
               ? 'Ora puoi entrare nell’app'
-              : 'L’app non si avvia finché notifiche e posizione non sono consentite'}
+              : 'Puoi abilitarle anche dopo dalla campanella / impostazioni'}
           </p>
         </div>
       </motion.div>

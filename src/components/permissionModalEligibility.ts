@@ -52,8 +52,23 @@ export function markLocationGranted(): void {
  * I permessi non supportati dal browser NON bloccano l'avvio.
  */
 export async function shouldShowPermissionModal(): Promise<boolean> {
-  // Notifiche: richieste solo se supportate
-  const notifMissing = 'Notification' in window && Notification.permission !== 'granted';
+  // Già richiesto in passato → non bloccare di nuovo l'avvio: su alcuni
+  // browser iOS le notifiche non sono concesse (serve l'app installata) e
+  // senza questo controllo l'app resterebbe bloccata per sempre. L'utente
+  // può abilitarle dopo dalla campanella / impostazioni.
+  if (alreadyAskedForPermissionModal()) return false;
+
+  // Su iPhone nel browser (non standalone) le notifiche web NON sono
+  // concedibili (iOS le permette solo nelle PWA installate): non richiederle,
+  // altrimenti l'app resterebbe bloccata per sempre.
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+  const isStandalone =
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true ||
+    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  const notifRequestable = !(isIOS && !isStandalone);
+
+  // Notifiche: richieste solo se supportate e concedibili
+  const notifMissing = 'Notification' in window && notifRequestable && Notification.permission !== 'granted';
   // Posizione: richiesta solo se supportata — considerata concessa se il
   // flag locale è impostato O se il Permissions API dice "granted".
   let locMissing = !isLocationGrantedFlag();

@@ -2363,6 +2363,31 @@ td, th {
   border-bottom-color: rgba(255, 255, 255, 0.08) !important;
 }
 
+/* ── Header sticky: nessun backdrop-filter al suo interno ──
+   Su iOS Safari i backdrop-filter annidati dentro un header sticky
+   (pulsanti liquid-glass/surface) causano glitch di compositing che
+   rendono sfocati logo e scritta. L'header è solido: il blur è inutile. */
+header [class*="liquid-glass"],
+header [class*="surface-"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* ── iOS: blur ridotti per prestazioni (evita crash Safari "Abnormally stopped") ──
+   I backdrop-filter su schermo intero (modali, vetro) sono i più costosi:
+   su iPhone li riduciamo sensibilmente, l'aspetto resta praticamente uguale. */
+html[data-ios="1"] .modal-glass-panel,
+html[data-ios="1"] .drawer-glass-panel {
+  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(10px) !important;
+}
+html[data-ios="1"] .liquid-glass,
+html[data-ios="1"] [class*="surface-glass"],
+html[data-ios="1"] .ui-toolbar-page-band-presences .ui-toolbar-group {
+  -webkit-backdrop-filter: blur(6px) !important;
+  backdrop-filter: blur(6px) !important;
+}
+
 /* ── Testo globale ── */
 body {
   color: rgba(255, 255, 255, 0.92);
