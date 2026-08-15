@@ -699,11 +699,13 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
           isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'pointer-events-none' : ''
         }`}
         style={{
-          backgroundColor: '#121212',
+          backgroundColor: 'rgba(18, 18, 18, 1)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-start',
           paddingTop: 'env(safe-area-inset-top, 0px)',
+          /* BORDO ROSSO TEMPORANEO (test): mostra dove finisce l'header */
+          border: '1px solid red',
         }}
       >
         <MobileProfileHeader
