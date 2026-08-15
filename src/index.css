@@ -82,10 +82,9 @@ body .top-tabbar {
 
 /*
  * Sfondo globale app: scroll su #root, html/body stesso colore.
- * Safe-area iOS: con viewport-fit=cover la pagina si estende sotto il
- * notch / Dynamic Island / home indicator. Il padding env() sul body tiene
- * il contenuto in-flow lontano dalle inset; gli elementi position:fixed
- * (bottom nav, modali) gestiscono la safe area internamente.
+ * Safe-area iOS gestita a livello di contenuto (header sticky, bottom nav,
+ * modali) perché lo sfondo a tema dell'app è full-bleed (si estende fino ai
+ * bordi dello schermo, anche sotto notch / home indicator).
  * overscroll-behavior: none → blocca il rimbalzo / scroll chaining su iOS 16+.
  */
 html {
@@ -100,36 +99,25 @@ html,
 body,
 #root {
   margin: 0 !important;
+  padding: 0 !important;
   width: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--text-primary);
 }
 
-html,
-#root {
-  padding: 0 !important;
-}
-
 body {
-  /* Altezza reale = viewport: il body non scrolla mai, scrolla solo #root */
   min-height: 100%;
   min-height: 100dvh;
   min-height: -webkit-fill-available;
-  box-sizing: border-box;
-  padding: 0;
   background: #0a0a0e;
   color-scheme: dark;
   overscroll-behavior: none;
-  /* Spazio sotto Dynamic Island/Notch e sopra l'home indicator (iOS) */
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 #root {
   height: 100vh;
-  /* Altezza del contenitore di scroll al netto delle safe-area del body */
-  height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  height: 100dvh;
   background: transparent;
   display: flex;
   flex-direction: column;

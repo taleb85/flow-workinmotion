@@ -93,7 +93,7 @@ function LoginRoute() {
 
   return (
     <RouteErrorBoundary sectionName="Login">
-      <div role="region" aria-label="Accesso" className="relative min-h-full w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
+      <div role="region" aria-label="Accesso" className="relative min-h-screen min-h-[100dvh] w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
         <DeepAuroraShell theme={bgTheme} />
         <AnimatePresence mode="wait">
           <LoginPage key="login" onLogin={handleLogin} onBack={handleBack} />
@@ -187,16 +187,6 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     const obs = new MutationObserver(check);
     obs.observe(document.body, { attributes: true, attributeFilter: ['data-overlay'] });
     return () => obs.disconnect();
-  }, []);
-
-  const [headerScrolled, setHeaderScrolled] = useState(false);
-  useEffect(() => {
-    const el = document.getElementById('root');
-    if (!el) return;
-    const onScroll = () => setHeaderScrolled(el.scrollTop > 10);
-    onScroll();
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
   }, []);
 
   // ── Clear PWA badge on app open + visibility change ──────────────────────
@@ -654,7 +644,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     </AnimatePresence>
     <div
       role="region" aria-label="Applicazione"
-      className="relative w-full min-h-full text-white font-sans antialiased safe-area-pad pt-0 flex flex-col"
+      className="relative w-full min-h-dvh text-white font-sans antialiased safe-area-pad pt-0 flex flex-col"
       style={{ background: bgTheme.appBg }}
     >
       <DeepAuroraShell theme={bgTheme} />
@@ -700,14 +690,11 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       <header
         ref={appStickyHeaderRef}
         aria-label="Navigazione principale"
-        className={`sticky md:fixed top-0 left-0 right-0 z-[10040] shrink-0 transition-[visibility,opacity,background] duration-150 ${
- overlayOpen ? 'invisible opacity-0 pointer-events-none' : ''
- } ${
- isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''
- } ${headerScrolled ? 'bg-app-bg/92 backdrop-blur-[20px]' : ''}`}
-        style={{
-          background: headerScrolled ? undefined : 'transparent',
-        }}
+        className={`sticky md:fixed top-0 left-0 right-0 z-[10040] shrink-0 bg-app-bg/92 backdrop-blur-[20px] transition-[visibility,opacity,background] duration-150 ${
+          overlayOpen ? 'invisible opacity-0 pointer-events-none' : ''
+        } ${
+          isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''
+        }`}
       >
         <MobileProfileHeader
           onLogout={onLogout}
