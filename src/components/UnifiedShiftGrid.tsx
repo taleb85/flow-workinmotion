@@ -1825,20 +1825,20 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               )}
             </div>
           )}
-          <div className="flex shrink-0 md:flex-none items-center gap-1 rounded-lg bg-white/5 p-0.5">
+          <div className="flex flex-1 md:flex-none min-w-0 items-center gap-1 rounded-lg bg-white/5 p-0.5">
             <button type="button" onClick={() => setViewMode('week')}
-              className={`rounded-md px-1.5 md:px-2.5 py-1.5 text-[10px] md:text-[10px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
+              className={`flex-1 md:flex-none rounded-md px-1.5 md:px-2.5 py-1.5 text-[10px] md:text-[10px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
               <span className="md:hidden">{t.view_week_short ?? 'Sett.'}</span>
               <span className="hidden md:inline">{t.view_week ?? 'Settimana'}</span>
             </button>
             <button type="button" onClick={() => setViewMode('period')}
-              className={`rounded-md px-1.5 md:px-2.5 py-1.5 text-[10px] md:text-[10px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'period' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
+              className={`flex-1 md:flex-none rounded-md px-1.5 md:px-2.5 py-1.5 text-[10px] md:text-[10px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'period' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
               {t.view_period ?? 'Periodo'}
             </button>
           </div>
 
           <button ref={periodTriggerRef} type="button" onClick={togglePeriodPopover}
-            className="flex flex-1 md:flex-none max-w-none md:max-w-[min(100%,11rem)] min-w-0 items-center gap-1 truncate rounded-lg bg-white/5 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/50 transition-colors hover:text-white hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+            className="flex shrink-0 md:flex-none max-w-none md:max-w-[min(100%,11rem)] items-center gap-1 truncate rounded-lg bg-white/5 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/50 transition-colors hover:text-white hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
             <CalendarDays className="h-3 w-3 shrink-0" />
             <span className="truncate md:hidden">
               {format(periodStart, 'd/M', { locale })}–{format(periodEnd, 'd/M', { locale })}
