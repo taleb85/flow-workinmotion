@@ -1762,8 +1762,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               className="rounded-lg bg-white/10 px-2 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-5 w-5 md:h-4 md:w-4" /></button>
             <button type="button" onClick={goToday}
               className="rounded-lg bg-white/10 px-2.5 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors text-xs md:text-xs font-bold uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">{t.today_btn ?? 'Oggi'}</button>
-            <button type="button" onClick={nextWeek} aria-label="Settimana successiva"
-              className="rounded-lg bg-white/10 px-2 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5 md:h-4 md:w-4" /></button>
           </div>
           <span
             className="flex-1 min-w-0 max-w-full truncate text-sm font-semibold text-white/50 tabular-nums"
@@ -1772,6 +1770,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             {(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
             <span className="hidden md:inline"> — {(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}</span>
           </span>
+          {/* Settimana successiva — in fondo a destra della riga */}
+          <button type="button" onClick={nextWeek} aria-label="Settimana successiva"
+            className="rounded-lg bg-white/10 px-2 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5 md:h-4 md:w-4" /></button>
           {selectedShiftIds.size > 0 && (
             <div className="flex items-center gap-1.5 ml-auto">
               <span className="text-xs font-bold text-white/60 whitespace-nowrap">{selectedShiftIds.size} selezionati</span>
