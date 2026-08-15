@@ -92,9 +92,8 @@ export default function MobileProfileHeader({
   const shellClass = `w-full ${showOnDesktop ? '' : 'md:hidden'}`;
 
   const body = (
-    /* Padding ≥ 50px per scendere sotto la tacca (test nitidezza logo):
-       max(50px, env(safe-area-inset-top)) copre notch e casi standard. */
-    <div className="relative" style={{ paddingTop: 'max(50px, env(safe-area-inset-top, 0px))' }} ref={wrapperRef}>
+    /* Il padding sotto la tacca è gestito dall'header (padding-top env) */
+    <div className="relative" ref={wrapperRef}>
     <div
       className="flow-brand-header px-4 flex items-center justify-between gap-3"
       style={{ height: 50 }}
@@ -106,7 +105,7 @@ export default function MobileProfileHeader({
         <div
           role="button"
           tabIndex={0}
-          style={{ width: 30, height: 30, flexShrink: 0, cursor: 'pointer' }}
+          style={{ width: 40, height: 40, flexShrink: 0, cursor: 'pointer' }}
           onClick={() => {
             if ('caches' in window) {
               caches.keys().then(names => Promise.all(names.map(n => caches.delete(n)))).finally(() => {
@@ -118,16 +117,18 @@ export default function MobileProfileHeader({
           }}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click(); }}
         >
-          <FlowWaveIcon size={36} />
+          <div style={{ width: 40, height: 40, borderRadius: 10, flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0 }}>
+            <FlowWaveIcon size={40} />
+          </div>
         </div>
-        <div className="flex flex-col leading-none select-none">
+        <div className="flex flex-col select-none">
           <span
-            style={{ color: '#ffffff', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}
+            style={{ color: '#ffffff', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 'normal' }}
           >
             FLOW
           </span>
           <span
-            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 10, fontWeight: 500, letterSpacing: '0.20em', textTransform: 'uppercase', marginTop: 3, lineHeight: 1 }}
+            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 10, fontWeight: 500, letterSpacing: '0.20em', textTransform: 'uppercase', marginTop: 3, lineHeight: 'normal' }}
           >
             Work in Motion <span style={{ color: 'rgba(255,255,255,0.25)', marginLeft: 2 }}>v{__APP_VERSION__}</span>
           </span>

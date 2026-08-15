@@ -701,8 +701,9 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         style={{
           backgroundColor: '#121212',
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          paddingTop: 'env(safe-area-inset-top, 0px)',
         }}
       >
         <MobileProfileHeader
