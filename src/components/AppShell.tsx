@@ -699,7 +699,8 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
           isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'pointer-events-none' : ''
         }`}
         style={{
-          backgroundColor: 'rgba(18, 18, 18, 1)',
+          /* Stesso effetto della bottom nav: sfondo trasparente (il blur è
+             applicato dalla classe .app-header in index.css) */
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-start',

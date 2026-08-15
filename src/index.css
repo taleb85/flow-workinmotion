@@ -2363,12 +2363,16 @@ td, th {
   border-bottom-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* ── Header: rimozione totale di effetti (test nitidezza logo) ─────────
-   Su iOS Safari backdrop-filter/filter/box-shadow/opacity dentro un header
-   sticky causano glitch di compositing (ghosting/doppio colore e sfocatura
-   su logo e scritta). Rimuoviamo TUTTI gli effetti dall'header e da tutti
-   i suoi discendenti. L'header usa sfondo SOLIDO e OPACO. */
-.app-header,
+/* ── Header: stesso effetto della bottom nav ────────────────────────────
+   L'header usa sfondo trasparente + backdrop-filter blur(16px) (come la
+   bottom nav). I FIGLI restano senza effetti (backdrop-filter/filter/
+   box-shadow/opacity rimossi con !important) per evitare il glitch di
+   compositing di iOS Safari su logo e scritta. */
+.app-header {
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
 .app-header * {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
