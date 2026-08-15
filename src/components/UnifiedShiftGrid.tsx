@@ -1801,7 +1801,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
         {/* Mobile: filtri su una riga sola (filtro | sett/periodo | data periodo);
             desktop: riga flessibile allineata a destra */}
-        <div className="flex w-full min-w-0 items-center gap-1.5 md:ml-auto md:flex-wrap md:justify-end md:gap-2">
+        <div className="flex w-full min-w-0 items-center gap-1.5 md:ml-auto md:h-10 md:max-h-10 md:flex-nowrap md:justify-end md:gap-2">
           {departments.length > 1 && (
             <div className="shrink-0 md:flex-none relative">
               <button ref={deptTriggerRef} type="button" onClick={toggleDeptDropdown}

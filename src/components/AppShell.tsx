@@ -721,7 +721,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                 disabled={isRefreshing || dataSyncInProgress}
                 title={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso...' : 'Sincronizza dati'}
                 aria-label={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso' : 'Sincronizza dati'}
-                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
+                className={`flex h-9 w-9 md:h-7 md:w-7 shrink-0 items-center justify-center rounded-xl md:rounded-lg text-xs md:text-[11px] font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
                   isRefreshing || dataSyncInProgress
                     ? 'text-amber-500 liquid-glass-amber'
                     : isSynced
@@ -730,14 +730,14 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                 }`}
               >
                 {isRefreshing || dataSyncInProgress ? (
-                  <RotateCw className="h-4 w-4 animate-spin" strokeWidth={2.5} aria-hidden />
+                  <RotateCw className="h-4 w-4 md:h-3.5 md:w-3.5 animate-spin" strokeWidth={2.5} aria-hidden />
                 ) : isSynced ? (
                   <span className="relative inline-flex" aria-hidden>
-                    <Cloud className="h-4 w-4" strokeWidth={2.5} />
+                    <Cloud className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2.5} />
                     <span className="absolute -bottom-0.5 -right-1 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-emerald-500 text-white" style={{ fontSize: 7 }}>✓</span>
                   </span>
                 ) : (
-                  <CloudOff className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+                  <CloudOff className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2.5} aria-hidden />
                 )}
               </button>
               {featureFlags['unlock_with_pin'] !== false && currentUser && isManagement && (
@@ -746,15 +746,15 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   onClick={() => setShowPinMenu(true)}
                   title={globalPinSessionId ? 'Sessione PIN attiva' : 'Sblocca sessione PIN'}
                   aria-label={globalPinSessionId ? 'Gestisci sessione PIN' : 'Sblocca sessione PIN'}
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
+                  className={`flex h-9 w-9 md:h-7 md:w-7 shrink-0 items-center justify-center rounded-xl md:rounded-lg text-xs md:text-[11px] font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
                     globalPinSessionId
                       ? 'text-emerald-500 liquid-glass-green'
                       : 'text-red-500 liquid-glass-red'
                   }`}
                 >
                   {globalPinSessionId
-                    ? <Unlock className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-                    : <Lock className="h-4 w-4" strokeWidth={2.5} aria-hidden />}
+                    ? <Unlock className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2.5} aria-hidden />
+                    : <Lock className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2.5} aria-hidden />}
                 </button>
               )}
             </div>
