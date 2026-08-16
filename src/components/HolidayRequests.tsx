@@ -208,7 +208,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
   const labelStyle = { color: 'rgba(255,255,255,0.80)' } as React.CSSProperties;
 
   return (
-    <div className={`font-sans flex h-[calc(100dvh-140px)] w-full flex-col pt-2 ${embedded ? '' : 'pb-content'}`}>
+    <div className={`font-sans flex h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem)-3rem)] md:h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem))] w-full flex-col pt-2 ${embedded ? '' : 'pb-content'}`}>
       <motion.div
         className="flex flex-col flex-1 min-h-0"
         initial={{ opacity: 0, y: 16 }}
@@ -225,14 +225,14 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
               {pendingAll.length}
             </span>
           )}
-          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.55)' }}>
+          <p className="ui-section-title">
             {isAdmin ? t.pending : `${myHolidays.length} ${t.request_holiday}`}
           </p>
         </div>
         <button
           type="button"
           onClick={() => setShowForm(true)}
-          className="gap-1.5 px-3 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-80"
+          className="gap-1.5 px-3 py-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-80"
           style={{ background: 'transparent', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1.5px solid rgba(255,255,255,0.25)', borderRadius: '0.5rem' }}
         >
           {t.request_holiday}

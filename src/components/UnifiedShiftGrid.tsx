@@ -1734,7 +1734,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   }, [t, mode, weekPunchRecords, isPeriodView, selectedShiftIds, toggleSelectShift, handleOpenDrawer, handleShiftContextMenu, handleDragStart, handleDragEnd, canEdit, extraRowHeight, slotRowHeight, renderExtraShiftRows]);
 
   return (
-    <div ref={gridRootRef} className="w-full flex-1 min-h-0 flex flex-col font-sans">
+    <div ref={gridRootRef} className="w-full flex-none min-h-0 flex flex-col font-sans md:flex-1">
       {/* Linea divisoria tra dipendenti */}
       <style>{`.wst-employee-row td { border-bottom: 1px solid rgba(255,255,255,0.20) !important; }
 .wst-employee-row td { border-top: 1px solid rgba(255,255,255,0.10) !important; }
@@ -2126,7 +2126,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       )}
 
       {/* ── Mobile Card View (card memoizzate: si ri-renderizzano solo se le loro props cambiano) ── */}
-      <div className="md:hidden space-y-4 px-1 pb-4">
+      <div className="md:hidden space-y-4 px-1 pb-content">
         {visibleUsers.map((user) => (
           <ShiftGridMobileCard
             key={user.id}

@@ -441,7 +441,7 @@ export default function ProfileNavTabPanel({
   const roleDisplay = translateRole(currentUser.role ?? '', effectiveLanguage);
 
   return (
-    <div className="w-full max-w-lg mx-auto pb-content font-sans min-h-[calc(100dvh-140px)]">
+    <div className="w-full max-w-lg mx-auto pb-content font-sans h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem)-3rem)] md:h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem))] overflow-y-auto overscroll-contain scrollbar-none">
       {/* Photo crop modal */}
       {cropObjectUrl ? (
         <ProfilePhotoCropperModal

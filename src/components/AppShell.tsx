@@ -644,7 +644,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     </AnimatePresence>
     <div
       role="region" aria-label="Applicazione"
-      className="relative w-full min-h-dvh text-white font-sans antialiased safe-area-pad pt-0 flex flex-col"
+      className="relative w-full min-h-[var(--app-vh,100dvh)] text-white font-sans antialiased safe-area-pad pt-0 flex flex-col"
       style={{ background: bgTheme.appBg }}
     >
       <DeepAuroraShell theme={bgTheme} />
@@ -699,12 +699,12 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         }`}
         style={{
           /* Stesso effetto della bottom nav: sfondo trasparente (il blur è
-             applicato dalla classe .app-header in index.css) */
+             applicato dalla classe .app-header in index.css).
+             Padding-top: gestito in CSS (.app-header) — 24px+safe su mobile
+             (sotto la tacca), 8px su desktop. */
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-start',
-          /* env() + margine extra per scendere un po' sotto la tacca */
-          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 24px)',
         }}
       >
         <MobileProfileHeader

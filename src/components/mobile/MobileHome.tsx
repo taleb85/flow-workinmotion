@@ -80,7 +80,7 @@ export default function MobileHome({
 }: MobileHomeProps) {
 
   const { pullDistance, isRefreshing, isTriggered, indicatorOpacity, indicatorRotation } =
-    usePullToRefresh({ onRefresh: onRefresh ?? (() => {}), disabled: !onRefresh });
+    usePullToRefresh({ onRefresh: onRefresh ?? (() => {}), disabled: true });
   const t = useT();
   const { effectiveLanguage } = useAppUser();
   const calLocale = getDateLocale(effectiveLanguage);

@@ -15,7 +15,7 @@ export default function UnifiedShiftsPage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="w-full h-full min-h-0 flex flex-col mx-auto px-0 pb-2 pt-3 font-sans md:px-2"
+      className="w-full min-h-0 flex flex-col mx-auto px-0 pb-2 pt-3 font-sans md:h-full md:px-2"
     >
       {/* Admin badge */}
       {isSessionElevated && (
@@ -28,7 +28,7 @@ export default function UnifiedShiftsPage() {
       )}
 
       {/* Unified Grid — riempie tutto lo spazio */}
-      <div className="flex-1 min-h-0 rounded-xl border border-white/10 bg-transparent p-0 shadow-sm overflow-hidden flex flex-col md:p-2">
+      <div className="flex-none min-h-0 rounded-xl border border-white/10 bg-transparent p-0 shadow-sm overflow-hidden flex flex-col md:flex-1 md:p-2">
         <UnifiedShiftGrid
           mode="realtime"
           onModeChange={() => {}}

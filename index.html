@@ -185,6 +185,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <script>
+      /* Blocca lo zoom a pizzico (pinch) su iOS, dove il meta viewport user-scalable
+         è ignorato (iOS 10+). Intercetta i gesti Safari (gesturestart/gesturechange)
+         e il touchmove con 2+ dita. Lo scroll a un dito NON viene toccato:
+         preventDefault scatta solo durante il pinch. */
+      (function () {
+        document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+        document.addEventListener('gesturechange', function (e) { e.preventDefault(); });
+        document.addEventListener('touchmove', function (e) {
+          if (e.touches && e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+      })();
+    </script>
+    <script>
       /* Flag iOS per ridurre gli effetti GPU pesanti (blur aurora, backdrop-filter):
          causa frequente del crash "Abnormally stopped" di Safari su iPhone. */
       (function () {

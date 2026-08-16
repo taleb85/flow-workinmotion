@@ -794,7 +794,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
         {showManagementStatsChrome && (
           <div className="mb-5 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs font-bold uppercase tracking-widest text-white/70">
+              <p className="text-[0.6875rem] font-bold uppercase tracking-widest text-white/70">
                 {tv.stats_analytics_title ?? 'Analytics'}
               </p>
               <button
@@ -944,7 +944,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
             {/* ── DESKTOP: card unica con tabella (invariato) ── */}
             <div className="hidden md:block rounded-xl border border-neutral-500 overflow-hidden border-l-4 border-l-white/30 border border-neutral-500">
               <div className="flex items-center justify-between gap-3 px-5 py-4 md:px-6">
-                <p className="text-xs font-bold uppercase tracking-widest text-white/80">
+                <p className="text-[0.6875rem] font-bold uppercase tracking-widest text-white/80">
                   {t.stats_your_hours_in_range}
                 </p>
                 <p className="text-2xl font-bold tabular-nums text-white">
@@ -1033,7 +1033,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
               <div className="rounded-xl border border-neutral-500 overflow-hidden border-l-4 border-l-white/30 border border-neutral-500">
                 {/* Intestazione totale */}
                 <div className="flex items-center justify-between gap-3 px-5 py-4 md:px-6">
-                  <p className="text-xs font-bold uppercase tracking-widest text-white/80">
+                  <p className="text-[0.6875rem] font-bold uppercase tracking-widest text-white/80">
                     {tv.stats_mgmt_personal_hours_period ?? t.stats_your_hours_in_range}
                   </p>
                   <p className="text-2xl font-bold tabular-nums text-white">
@@ -1151,7 +1151,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
             )}
             {showManagementStatsChrome && (
               <div className="rounded-xl border border-neutral-500 border-l-4 border-l-white/30 border border-neutral-500 p-5 md:p-6">
-                <p className="mb-2 text-xs font-bold uppercase tracking-widest text-white/80">
+                <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-widest text-white/80">
                   {deptFilter === 'all' ? (tv.stats_team_hours_period ?? t.stats_total) : `TOTALE ${translateDepartmentValue(deptFilter, effectiveLanguage).toUpperCase()}`}
                 </p>
                 <p className="text-3xl font-bold tabular-nums text-white/80">

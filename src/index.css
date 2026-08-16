@@ -127,6 +127,17 @@ body,
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--text-primary);
+  /* Blocca il pinch-to-zoom su Android/Chrome senza toccare il meta viewport
+     (su iOS il meta è ignorato: lì interviene lo script anti-gesti in index.html).
+     pan-x pan-y = scroll libero in entrambe le direzioni, niente zoom. */
+  touch-action: pan-x pan-y;
+  /* Niente scroll orizzontale a livello pagina: gli elementi decorativi
+     (aurora/wave) che sforano la larghezza vengono tagliati, non creano
+     scrollbar. Gli scroll orizzontali interni (.scroll-x-only, ecc.) restano attivi.
+     NB: `clip` (non `hidden`) perché su iOS `overflow-x: hidden` + 
+     -webkit-overflow-scrolling: touch viene ignorato da WebKit e lo scroll
+     orizzontale continuerebbe a funzionare. `clip` taglia davvero. */
+  overflow-x: clip;
 }
 
 body {
@@ -901,7 +912,7 @@ button[role="switch"][class~="bg-accent"] {
 
   /* Scroll orizzontale senza interferire con lo scroll verticale della pagina */
   .scroll-x-only {
-    touch-action: pan-x pinch-zoom;
+    touch-action: pan-x;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -2397,6 +2408,10 @@ td, th {
 .app-header {
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
+  /* Spazio sotto la status bar (safe-area) + margine minimo:
+     su mobile il safe-area tiene il logo sotto la Dynamic Island,
+     su desktop non c'è notch quindi il margine è solo estetico. */
+  padding-top: calc(env(safe-area-inset-top, 0px) + 18px);
 }
 
 .app-header * {

@@ -75,7 +75,7 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border border-slate-200">
           <Calendar className="w-7 h-7 text-white/40" />
         </div>
-        <p className="text-white/70 font-bold uppercase tracking-widest text-[11px]">
+        <p className="text-white/70 font-bold uppercase tracking-widest text-[0.6875rem]">
           {t.no_shifts_scheduled}
         </p>
       </div>
@@ -113,16 +113,16 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
             <div className="flex items-center justify-between px-4 py-3 shift-separator-ultra">
               <div className="flex items-center gap-2">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-white/60 leading-none mb-0.5">
+                  <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/60 leading-none mb-0.5">
                     {t.week_label ?? 'Sett.'}
                   </p>
-                  <p className="text-[13px] font-semibold text-white">
+                  <p className="text-[0.8125rem] font-semibold text-white">
                     {format(week.start, 'd MMM', { locale })} – {format(week.end, 'd MMM', { locale })}
                   </p>
                 </div>
               </div>
               {totalLabel && (
-                <span className="text-[13px] font-extrabold text-white tabular-nums">
+                <span className="text-[0.8125rem] font-extrabold text-white tabular-nums">
                   {totalLabel}
                 </span>
               )}
@@ -143,10 +143,10 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
                   >
                     {/* Day header */}
                     <div className={`px-2 py-2 text-center ${today ? 'bg-accent/20' : ''}`}>
-                      <p className={`text-[11px] font-bold uppercase tracking-wider ${today ? 'text-accent' : 'text-white/60'}`}>
+                      <p className={`text-[0.6875rem] font-bold uppercase tracking-wider ${today ? 'text-accent' : 'text-white/60'}`}>
                         {format(day, 'EEE', { locale })}
                       </p>
-                      <p className={`text-[13px] font-semibold tabular-nums ${today ? 'text-white' : 'text-white/90'}`}>
+                      <p className={`text-[0.8125rem] font-semibold tabular-nums ${today ? 'text-white' : 'text-white/90'}`}>
                         {format(day, 'd')}
                       </p>
                     </div>
@@ -173,13 +173,13 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
                         return (
                           <div key={shift.id} className="text-center">
                             {isAbsent ? (
-                              <p className="text-[11px] font-normal text-white/30 uppercase tracking-widest py-1">OFF</p>
+                              <p className="text-[0.6875rem] font-normal text-white/30 uppercase tracking-widest py-1">OFF</p>
                             ) : (
                               <>
-                                <p className={`text-[13px] font-bold tabular-nums leading-tight ${statusCls}`}>
+                                <p className={`text-[0.8125rem] font-bold tabular-nums leading-tight ${statusCls}`}>
                                   {shift.start_time.slice(0, 5)}–{shift.end_time?.slice(0, 5) ?? '…'}
                                 </p>
-                                <p className="text-[11px] font-medium text-white/40">
+                                <p className="text-[0.6875rem] font-medium text-white/40">
                                   {hoursLabel}
                                 </p>
                               </>
@@ -557,7 +557,7 @@ export default function StaffPersonalDashboard({
     <div className="flex items-center gap-2 mb-4 px-4">
       {/* Etichetta "Oggi" a sinistra — cliccabile per tornare al periodo corrente */}
       <button type="button" onClick={() => onOffsetChange(() => 0)}
-        className="h-9 inline-flex items-center px-3 rounded-2xl bg-accent text-white text-[11px] font-extrabold uppercase tracking-wider shrink-0 shadow-sm active:bg-accent/80 transition-colors">
+        className="h-9 inline-flex items-center px-3 rounded-2xl bg-accent text-white text-[0.6875rem] font-extrabold uppercase tracking-wider shrink-0 shadow-sm active:bg-accent/80 transition-colors">
         {t.today}
       </button>
 
@@ -573,7 +573,7 @@ export default function StaffPersonalDashboard({
 
         <div className="flex-1 flex items-center justify-center gap-1.5 px-2 min-w-0">
           <Calendar className="h-3 w-3 text-white/50 shrink-0" />
-          <span className="text-[11px] font-bold text-white/80 tabular-nums truncate">
+          <span className="text-[0.6875rem] font-bold text-white/80 tabular-nums truncate">
             {mode === 'week'
               ? `S.${getISOWeek(range.start)} · ${format(range.start, 'd MMM', { locale: mobileLocale })} – ${format(range.end, 'd MMM', { locale: mobileLocale })}`
               : `${format(range.start, 'd MMM', { locale: mobileLocale })} – ${format(range.end, 'd MMM yy', { locale: mobileLocale })}`
@@ -666,7 +666,7 @@ export default function StaffPersonalDashboard({
               >
                 {seedingDemoProfile ? t.ui_ellipsis : t.settings_seed_demo_profile_btn}
               </button>
-              <p className="text-[11px] text-white/50 leading-relaxed">{t.settings_seed_demo_profile_hint}</p>
+              <p className="text-[0.6875rem] text-white/50 leading-relaxed">{t.settings_seed_demo_profile_hint}</p>
             </div>
           )}
           <button
@@ -731,19 +731,19 @@ export default function StaffPersonalDashboard({
   );
 
   return (
-    <div className="w-full flex-1 min-h-0 scroll-smooth text-white/90 font-sans antialiased pb-content pt-0">
+    <div className={`w-full flex-none min-h-0 scroll-smooth text-white/90 font-sans antialiased pt-0 md:flex-1 ${activeTab === 'profile' ? '' : 'pb-content'}`}>
       <div className="w-full">
       {holidaysFocus && (
         <div className="mb-3 flex items-center gap-2">
           <button
             type="button"
             onClick={() => setHolidaysFocus(false)}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent min-h-[44px] px-2 -ml-2 rounded-xl hover:bg-accent/10 touch-target active:bg-accent/80"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent min-h-[2.75rem] px-2 -ml-2 rounded-xl hover:bg-accent/10 touch-target active:bg-accent/80"
           >
             <ChevronLeft className="w-5 h-5" aria-hidden />
             {(t as { back?: string }).back ?? 'Indietro'}
           </button>
-          <span className="text-xs font-bold text-white/80 uppercase tracking-widest truncate" title={t.sidebar_holidays}>{t.sidebar_holidays}</span>
+          <span className="text-[0.6875rem] font-bold text-white/80 uppercase tracking-widest truncate" title={t.sidebar_holidays}>{t.sidebar_holidays}</span>
         </div>
       )}
 
