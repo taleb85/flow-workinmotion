@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, ChevronRight, ChevronLeft, LogOut, Shield, Calendar } from 'lucide-react';
+import { ChevronRight, ChevronLeft, LogOut, Shield, Calendar } from 'lucide-react';
 import { database } from '../lib/database';
 import { useAppUser, useAppData, useAppConfig, useAppOverlay } from '../context/AppContext';
 import { useT } from '../hooks/useT';
 import { User as UserType, Shift, HolidayRequest, PunchRecord, type Language } from '../types';
-import type { BreakRule, BreakMinutesComputeOptions } from '../utils/breakRules';
 import { format, isToday, isFuture, startOfWeek, endOfWeek, addWeeks, addDays, startOfMonth, endOfMonth, parseISO, isWithinInterval, startOfDay, endOfDay, getISOWeek } from 'date-fns';
 import { it as itLocale } from 'date-fns/locale';
 import { loadPeriodConfig, getPeriodDateRange, prevPeriodConfig, nextPeriodConfig, type PeriodConfig } from '../utils/periodConfig';
@@ -27,9 +26,7 @@ import ManagementMobileTimesheet from './mobile/ManagementMobileTimesheet';
 import MobileRequests from './mobile/MobileRequests';
 import MobileStatsCards from './mobile/MobileStatsCards';
 import { useIsMobileViewport } from '../hooks/useIsMobileViewport';
-// const Timesheets = lazy(() => import('./Timesheets')); // unused here
 const HolidayRequests = lazy(() => import('./HolidayRequests'));
-const Statistics = lazy(() => import('./Statistics'));
 const SettingsPage = lazy(() => import('./SettingsPage'));
 
 import { CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
@@ -185,205 +182,6 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
                                 <p className="text-[11px] font-medium text-white/40">
                                   {hoursLabel}
                                 </p>
-                              </>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Desktop grid view for staff timesheet ────────────────────────────────────
-function StaffDesktopTimesheet({
-  shifts, punchRecords, user, breakRules, breakComputeOpts, language = 'it', range,
-}: {
-  shifts: Shift[];
-  punchRecords: PunchRecord[];
-  user: UserType;
-  breakRules: BreakRule[];
-  breakComputeOpts: BreakMinutesComputeOptions;
-  language?: Language;
-  /** Se presente: mostra solo la settimana indicata (una sola card). */
-  range?: { start: Date; end: Date };
-}) {
-  const locale = getDateLocale(language) ?? itLocale;
-  const t = getTranslations(language);
-  
-
-  const _STATUS_CONFIG = {
-    approved: { label: t.ts_status_approved ?? 'Approvato', Icon: CheckCircle2, pill: 'shift-badge-approved' },
-    confirmed: { label: t.ts_status_confirmed ?? 'Pubblicato', Icon: AlertCircle, pill: 'shift-badge-confirmed' },
-    absent: { label: t.status_absent ?? 'Assente', Icon: XCircle, pill: 'shift-badge-absent' },
-  } as const;
-
-  const history = range
-    ? shifts
-        .filter(s => isWithinInterval(parseISO(s.date), { start: range.start, end: range.end }))
-        .sort((a, b) => a.date.localeCompare(b.date))
-    : shifts
-        .filter(s => s.date <= format(new Date(), 'yyyy-MM-dd'))
-        .sort((a, b) => b.date.localeCompare(a.date));
-
-  if (!range && history.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border border-slate-200">
-          <Clock className="w-7 h-7 text-white/40" />
-        </div>
-        <p className="text-white/70 font-bold uppercase tracking-widest text-[11px]">
-          {t.no_shifts_scheduled ?? 'Nessuno storico disponibile'}
-        </p>
-      </div>
-    );
-  }
-
-  // Group by week
-  const weeks: { start: Date; end: Date; shifts: Shift[] }[] = [];
-  history.forEach(shift => {
-    const sd = new Date(shift.date);
-    const s = startOfWeek(sd, { weekStartsOn: 1 });
-    const e = endOfWeek(sd, { weekStartsOn: 1 });
-    let week = weeks.find(w => isSameWeek(w.start, s, { weekStartsOn: 1 }));
-    if (!week) { week = { start: s, end: e, shifts: [] }; weeks.push(week); }
-    week.shifts.push(shift);
-  });
-
-  return (
-    <div className="flex flex-col gap-11 pb-8 px-4 md:px-6 max-w-5xl mx-auto">
-      {weeks.map((week, wIdx) => {
-        // Total hours
-        let totalMins = 0;
-        week.shifts.forEach(shift => {
-          const { start, end } = getResolvedStartEndForHours(shift, punchRecords);
-          totalMins += getNetShiftMinutes(shift, start, end, user, breakRules, breakComputeOpts);
-        });
-        const totalH = Math.floor(totalMins / 60);
-        const totalM = totalMins % 60;
-        const totalLabel = totalM > 0 ? `${totalH}h ${totalM}m` : `${totalH}h`;
-
-        // All 7 days of the week
-        const weekDays = eachDayOfInterval({ start: week.start, end: week.end });
-
-        // Map date → shifts
-        const dayMap = new Map<string, Shift[]>();
-        week.shifts.forEach(shift => {
-          const arr = dayMap.get(shift.date) ?? [];
-          arr.push(shift);
-          dayMap.set(shift.date, arr);
-        });
-        weekDays.forEach(d => {
-          const k = format(d, 'yyyy-MM-dd');
-          if (!dayMap.has(k)) dayMap.set(k, []);
-        });
-
-        return (
-          <div key={wIdx}
-            className="shift-card-ultra shift-week-spacing-ultra overflow-hidden"
-          >
-            {/* Week header */}
-            <div className="flex items-center justify-between px-4 py-3 shift-separator-ultra">
-              <div className="flex items-center gap-2">
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-white/60 leading-none mb-0.5">
-                    {t.week_label ?? 'Sett.'}
-                  </p>
-                  <p className="text-[13px] font-semibold text-white">
-                    {format(week.start, 'd MMM', { locale })} – {format(week.end, 'd MMM', { locale })}
-                  </p>
-                </div>
-              </div>
-              {totalMins > 0 && (
-                <span className="text-[13px] font-extrabold text-white tabular-nums">
-                  {totalLabel}
-                </span>
-              )}
-            </div>
-
-            {/* Day grid: 7 columns - NO VERTICAL BORDERS */}
-            <div className="grid grid-cols-7 divide-x divide-white/[0.06]">
-              {weekDays.map((day, dIdx) => {
-                const dateStr = format(day, 'yyyy-MM-dd');
-                const dayShifts = (dayMap.get(dateStr) ?? []).sort((a, b) => a.start_time.localeCompare(b.start_time));
-                const _isWeekend = dIdx >= 5;
-                const today = isToday(day);
-
-                return (
-                  <div
-                    key={dateStr}
-                    className={`flex flex-col min-h-[100px] ${today ? 'bg-white/15' : ''}`}
-                  >
-                    {/* Day header */}
-                    <div className={`px-2 py-2 text-center ${today ? 'bg-accent/20' : ''}`}>
-                      <p className={`text-[11px] font-bold uppercase tracking-wider ${today ? 'text-accent' : 'text-white/60'}`}>
-                        {format(day, 'EEE', { locale })}
-                      </p>
-                      <p className={`text-[13px] font-semibold tabular-nums ${today ? 'text-white' : 'text-white/90'}`}>
-                        {format(day, 'd')}
-                      </p>
-                    </div>
-
-                    {/* Shifts */}
-                    <div className="flex flex-col gap-1 px-2 py-2 flex-1">
-                      {dayShifts.length === 0 ? (
-                        <div className="flex-1 flex items-center justify-center">
-                          <span className="w-1 h-1 rounded-full bg-white/20" />
-                        </div>
-                      ) : dayShifts.map((shift) => {
-                        const isAbsent = shift.approval_status === 'absent';
-                        const isDraft = shift.approval_status === 'draft';
-                        const isApproved = shift.approval_status === 'approved';
-                        const { start, end } = getResolvedStartEndForHours(shift, punchRecords);
-                        const mins = getNetShiftMinutes(shift, start, end, user, breakRules, breakComputeOpts);
-                        const hh = Math.floor(mins / 60);
-                        const mm = mins % 60;
-                        const hoursLabel = isAbsent ? '' : (mm > 0 ? `${hh}h ${mm}m` : `${hh}h`);
-
-                        const statusCls = isDraft ? 'text-white/40' : 'text-white';
-                        const badgeCls = isAbsent
-                          ? 'bg-red-500/20 text-red-300'
-                          : isDraft
-                            ? 'bg-amber-500/20 text-amber-300'
-                            : isApproved
-                              ? 'bg-emerald-500/20 text-emerald-300'
-                              : 'bg-cyan-500/20 text-cyan-300';
-                        const badgeLabel = isAbsent
-                          ? (t.status_absent ?? 'Assente')
-                          : isDraft
-                            ? (t.status_draft ?? 'Bozza')
-                            : isApproved
-                              ? (t.ts_status_approved ?? 'Approvato')
-                              : (t.ts_status_confirmed ?? 'Pubblicato');
-
-                        return (
-                          <div key={shift.id} className="text-center">
-                            {isAbsent ? (
-                              <>
-                                <p className="text-[11px] font-normal text-white/30 uppercase tracking-widest py-1">OFF</p>
-                                <span className={`inline-block rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wider ${badgeCls}`}>{badgeLabel}</span>
-                              </>
-                            ) : (
-                              <>
-                                <p className={`text-[13px] font-bold tabular-nums leading-tight ${statusCls}`}>
-                                  {shift.start_time.slice(0, 5)}–{shift.end_time?.slice(0, 5) ?? '…'}
-                                </p>
-                                <p className="text-[11px] font-medium text-white/40">
-                                  {hoursLabel}
-                                </p>
-                                <span className={`mt-0.5 inline-block rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wider ${badgeCls}`}>{badgeLabel}</span>
-                                {!isAbsent && !punchRecords.some(pr => pr.shift_id === shift.id) && (
-                                  <span className="mt-0.5 inline-block rounded-full bg-amber-500/20 px-1.5 py-px text-[9px] font-bold uppercase tracking-wider text-amber-300">
-                                    {t.home_status_not_punched ?? 'Non timbrato'}
-                                  </span>
-                                )}
                               </>
                             )}
                           </div>
@@ -621,9 +419,6 @@ export default function StaffPersonalDashboard({
 
   const isMobile = useIsMobileViewport();
 
-  /** Sub-tab interno scheda Presenze/Ore: presenze oppure statistiche. */
-  const [tsStaffView, setTsStaffView] = useState<'presence' | 'stats'>('presence');
-
   // ── Navigazione periodo mobile (turni + presenze) ──────────────
   type MobileNavTab = 'week' | 'period';
   const [mobileNavTab, _setMobileNavTab] = useState<MobileNavTab>('period');
@@ -712,9 +507,6 @@ export default function StaffPersonalDashboard({
     [shifts, presenceWeekRange, punchRecords]
   );
 
-  /** Ancoraggio Statistiche: lunedì della settimana selezionata (stringa stabile per memo). */
-  const presenceWeekStart = format(presenceWeekRange.start, 'yyyy-MM-dd');
-
   const mobileLocale = dateLocale ?? itLocale;
 
   // ── Statistiche per MobileStatsCards (seguono la settimana selezionata) ────
@@ -725,7 +517,8 @@ export default function StaffPersonalDashboard({
     const monthStart = startOfMonth(monthRef);
     const monthEnd   = endOfMonth(monthRef);
 
-    const workedStatuses = new Set(['approved', 'confirmed']);
+    // Solo turni APPROVATI contano per le ore (settimana e mese)
+    const workedStatuses = new Set(['approved']);
     const calcMins = (s: Shift) => {
       const { start, end } = getResolvedStartEndForHours(s, punchRecords);
       return getNetShiftMinutes(s, start, end, displayUser, breakRules, breakComputeOpts);
@@ -735,7 +528,7 @@ export default function StaffPersonalDashboard({
     let monthWorkedMins = 0;
     const monthWorkedDays = new Set<string>();
 
-    for (const s of visibleShifts) {
+    for (const s of shifts) {
       if (!workedStatuses.has(s.approval_status ?? '')) continue;
       const d = parseISO(s.date);
       const mins = calcMins(s);
@@ -750,7 +543,7 @@ export default function StaffPersonalDashboard({
       ((displayUser as UserType & { hours_per_week?: number }).hours_per_week ?? 40) * 60;
 
     return { weekWorkedMins, weekCapMins, monthWorkedMins, monthDaysWorked: monthWorkedDays.size };
-  }, [visibleShifts, punchRecords, displayUser, breakRules, breakComputeOpts, presenceWeekRange]);
+  }, [shifts, punchRecords, displayUser, breakRules, breakComputeOpts, presenceWeekRange]);
 
   const MobileNavBar = ({
     mode = mobileNavTab,
@@ -900,7 +693,7 @@ export default function StaffPersonalDashboard({
         />
       ) : (
         <Suspense fallback={tabSpinner}>
-          <HolidayRequests />
+          <HolidayRequests embedded />
         </Suspense>
       )}
     </div>
@@ -973,88 +766,37 @@ export default function StaffPersonalDashboard({
                 {activeTab === 'ferie' && renderHolidays()}
                 {activeTab === 'timesheet' && (
                   <>
-                    {/* ── Sub-tab: Presenze | Statistiche — sempre visibile per tutti i profili ── */}
-                    <div className="flex items-center gap-1.5 mt-8 mb-4 px-4">
-                      {(['presence', 'stats'] as const).map((v) => {
-                        const label = v === 'presence' ? (t.tab_attendance ?? 'Presenze') : (t.tab_statistics ?? 'Statistiche');
-                        const active = tsStaffView === v;
-                        return (
-                          <button
-                            key={v}
-                            type="button"
-                            onClick={() => setTsStaffView(v)}
-                            className={`h-8 px-4 rounded-full text-[11px] font-extrabold uppercase tracking-wider transition-colors ${
- active
- ? 'bg-accent text-white shadow-[0_0_12px_-2px_var(--color-accent)] scale-105'
- : 'bg-white/[0.04] border border-white/[0.07] text-white/40 hover:border-white/25 hover:text-white/80'
- }`}
-                          >
-                            {label}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* ── Statistiche ── */}
-                    {tsStaffView === 'stats' && (
-                      <div className="min-h-0 overflow-y-auto overscroll-y-contain scroll-smooth [-webkit-overflow-scrolling:touch] pb-1">
-                        <Suspense fallback={tabSpinner}>
-                          <Statistics anchorDate={presenceWeekStart} />
-                        </Suspense>
+                    {/* ── Presenze — layout unico (stesso di mobile) ── */}
+                    <div className="mt-8">
+                      <div className="px-4 mb-4">
+                        <MobileStatsCards
+                          weekWorkedMins={mobileStatsData.weekWorkedMins}
+                          weekCapMins={mobileStatsData.weekCapMins}
+                          monthWorkedMins={mobileStatsData.monthWorkedMins}
+                          monthDaysWorked={mobileStatsData.monthDaysWorked}
+                          hoursFormat="hhmm"
+                          labels={{
+                            title: t.mobile_dash_numbers ?? 'I miei numeri',
+                            week: t.ts_period_week ?? 'Settimana',
+                            month: t.ts_period_month ?? 'Mese',
+                            daysWorked:
+                              (t as Record<string, string>).mobile_dash_days_worked ?? 'Giorni lavorati',
+                          }}
+                        />
                       </div>
-                    )}
-
-                    {/* ── Presenze ── */}
-                    {tsStaffView === 'presence' && (
-                      <>
-                        {isMobile && (
-                          <div className="px-4 mb-4">
-                            <MobileStatsCards
-                              weekWorkedMins={mobileStatsData.weekWorkedMins}
-                              weekCapMins={mobileStatsData.weekCapMins}
-                              monthWorkedMins={mobileStatsData.monthWorkedMins}
-                              monthDaysWorked={mobileStatsData.monthDaysWorked}
-                              labels={{
-                                title: t.mobile_dash_numbers ?? 'I miei numeri',
-                                week: t.ts_period_week ?? 'Settimana',
-                                month: t.ts_period_month ?? 'Mese',
-                                daysWorked:
-                                  (t as Record<string, string>).mobile_dash_days_worked ?? 'Giorni lavorati',
-                              }}
-                            />
-                          </div>
-                        )}
-                        {isMobile ? (
-                          <>
-                            <MobileNavBar mode="week" onOffsetChange={setPresenceWeekOffset} range={presenceWeekRange} />
-                            <ManagementMobileTimesheet
-                              variant="embedded"
-                              hideNavBar
-                              forceExpanded
-                              shifts={presenceShiftsFiltered}
-                              punchRecords={punchRecords}
-                              users={users}
-                              currentUserId={displayUser.id}
-                              language={effectiveLanguage}
-                              plannedOnly={getTimesheetGridPrivacyMode(displayUser) === 'planned_only'}
-                            />
-                          </>
-                        ) : (
-                          <>
-                            <MobileNavBar mode="week" onOffsetChange={setPresenceWeekOffset} range={presenceWeekRange} />
-                            <StaffDesktopTimesheet
-                              shifts={presenceShiftsFiltered}
-                              punchRecords={punchRecords}
-                              user={displayUser}
-                              breakRules={breakRules}
-                              breakComputeOpts={breakComputeOpts}
-                              language={effectiveLanguage}
-                              range={presenceWeekRange}
-                            />
-                          </>
-                        )}
-                      </>
-                    )}
+                      <MobileNavBar mode="week" onOffsetChange={setPresenceWeekOffset} range={presenceWeekRange} />
+                      <ManagementMobileTimesheet
+                        variant="embedded"
+                        hideNavBar
+                        forceExpanded
+                        shifts={presenceShiftsFiltered}
+                        punchRecords={punchRecords}
+                        users={users}
+                        currentUserId={displayUser.id}
+                        language={effectiveLanguage}
+                        plannedOnly={getTimesheetGridPrivacyMode(displayUser) === 'planned_only'}
+                      />
+                    </div>
                   </>
                 )}
                 {activeTab === 'profile' && (

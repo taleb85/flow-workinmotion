@@ -340,7 +340,7 @@ export default function HomePage({
       return { border: 'border-l-emerald-400/70', bg: 'bg-emerald-500/10', badge: 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40', dot: 'bg-emerald-400', label: t.home_status_approved };
     }
     if (e.shift.approval_status === 'draft') {
-      return { border: 'border-l-slate-400', bg: 'bg-white/10', badge: 'bg-white/10 text-white/80 border-white/25', dot: 'bg-white/45', label: t.status_draft };
+      return { border: 'border-l-blue-400', bg: 'bg-white/10', badge: 'bg-blue-500/20 text-blue-200 border-blue-400/40', dot: 'bg-blue-400', label: t.status_draft };
     }
     if (e.hasMissingOut || e.isLate) {
       return { border: 'border-l-red-500', bg: 'bg-red-500/12', badge: 'bg-red-500/20 text-red-200 border-red-400/50', dot: 'bg-red-400', label: t.home_status_anomaly };

@@ -51,7 +51,8 @@ const STATUS_BORDER_COLORS: Array<[RegExp, string]> = [
   [/rose/, '#f43f5e'],           // assente
   [/red/, '#ef4444'],            // anomalia
   [/amber/, '#f59e0b'],          // senza timbratura / da chiudere
-  [/slate/, '#94a3b8'],          // bozza
+  [/blue/, '#60a5fa'],           // bozza
+  [/slate/, '#94a3b8'],          // bozza (legacy)
   [/white/, 'rgba(255,255,255,0.45)'], // in turno / da approvare / completato
 ];
 function statusBorderColor(borderClass: string): string {
@@ -84,20 +85,20 @@ export function HomeManagementShiftCard({ e, style, isManager, onClose, onApprov
         marginBottom: 7,
       }}
     >
-      {/* Riga principale: nome/ruolo + orario/badge */}
+      {/* Riga principale: nome/reparto + orario/badge su una sola riga */}
       <div className="flex justify-between items-center gap-2">
-        {/* Sinistra */}
-        <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-semibold truncate" style={{ color: 'white' }} title={e.user?.first_name ?? '—'}>{e.user?.first_name ?? '—'}
+        {/* Sinistra: nome + sottoriga inline */}
+        <div className="min-w-0 flex-1 flex items-baseline gap-1.5">
+          <p className="text-[13px] font-semibold truncate min-w-0" style={{ color: 'white' }} title={e.user?.first_name ?? '—'}>{e.user?.first_name ?? '—'}
           </p>
           {subLine && (
-            <p className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.50)' }} title={subLine}>{subLine}
+            <p className="text-[11px] uppercase truncate min-w-0" style={{ color: 'rgba(255,255,255,0.50)' }} title={subLine}>{subLine}
             </p>
           )}
         </div>
 
-        {/* Destra */}
-        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+        {/* Destra: orario + badge inline */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           <p className="text-[12px] font-semibold tabular-nums" style={{ color: 'white' }}>
             {e.scheduledStart}–{e.scheduledEnd}
           </p>

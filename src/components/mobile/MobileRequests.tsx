@@ -1,7 +1,8 @@
-import { it } from 'date-fns/locale';
 import { Palmtree, Plus, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
 import type { HolidayRequest } from '../../types';
 import { safeFormatDate } from '../../utils/safeDateFormat';
+import { getDateLocale } from '../../utils/translations';
+import { useAppUser } from '../../context/AppContext';
 
 interface MobileRequestsProps {
   requests: HolidayRequest[];
@@ -10,7 +11,8 @@ interface MobileRequestsProps {
 }
 
 export default function MobileRequests({ requests, onRequestNew, t = {} }: MobileRequestsProps) {
-  const locale = it;
+  const { effectiveLanguage } = useAppUser();
+  const locale = getDateLocale(effectiveLanguage);
 
   const STATUS_CONFIG = {
     approved: {
@@ -103,7 +105,7 @@ export default function MobileRequests({ requests, onRequestNew, t = {} }: Mobil
       <button
         onClick={onRequestNew}
         className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-white/15 text-white shadow-2xl flex items-center justify-center transition-transform z-40"
-        aria-label="Nuova richiesta"
+        aria-label={t.new_request ?? 'Nuova richiesta'}
       >
         <Plus className="w-7 h-7" strokeWidth={3} />
       </button>

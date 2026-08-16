@@ -253,7 +253,7 @@ export default function ManagementHomePreview({
                 {t.home_see_all_shifts} <ArrowRight className="h-3 w-3" />
               </span>
             </div>
-            <div className="fluid-grid fluid-grid-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <HomeManagementShiftCard
                 e={demoJean}
                 style={styleApproved}
@@ -342,7 +342,7 @@ export default function ManagementHomePreview({
             onUiToggle={onUiToggle}
             hiddenBadge={hiddenBadge}
           >
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
                 <div className="mb-2 flex items-center justify-between">
                   <TrendingUp className="h-4 w-4 text-white/50" />

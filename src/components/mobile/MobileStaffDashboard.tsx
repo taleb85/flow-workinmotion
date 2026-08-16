@@ -208,10 +208,8 @@ export default function MobileStaffDashboard({
             punchBusy={punchBusy}
             onStart={() => { heavyHaptic(); void smartExecute(); }}
             onEnd={() => void smartExecute()}
-            onNavigateToTimesheet={() => onTabChange?.('timesheet')}
             onRefresh={onRefresh}
             todayWorkShifts={todayWorkShifts}
-            detailLabel={t.detail_link}
             myShifts={myShifts}
           />
         );

@@ -767,7 +767,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         role="main"
         aria-label="Contenuto principale"
         className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''}`}>
-        <div className="w-full app-horizontal-pad pt-0 md:pt-[50px] flex-1 min-h-0 flex flex-col pb-[48px] md:pb-0">
+        <div className="w-full app-horizontal-pad pt-0 md:pt-[var(--app-sticky-header-offset)] flex-1 min-h-0 flex flex-col pb-[48px] md:pb-0">
           {/* PIN portals */}
           {createPortal(
             <AnimatePresence>

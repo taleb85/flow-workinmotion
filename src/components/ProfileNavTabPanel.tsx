@@ -5,10 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAppUser, useAppOverlay } from '../context/AppContext';
 import { useProfileLeaveGuardRef } from '../context/ProfileLeaveGuardContext';
 import { useT } from '../hooks/useT';
-import { getDeviceUiLanguage, persistStoredUiLanguage, readStoredUiLanguage } from '../utils/uiLanguagePreference';
+import { getDeviceUiLanguage, persistStoredUiLanguage, readStoredUiLanguage, clearStoredUiLanguage } from '../utils/uiLanguagePreference';
 import { NotificationPermissionButton } from './NotificationPermissionButton';
 
 import { isManagementRole, isAdminOnly } from '../utils/permissions';
+import { translateRole } from '../utils/roles';
+import { translateDepartmentValue } from '../utils/departmentLabels';
 import { isFeatureEnabled } from '../utils/enabledFeatures';
 import { PinPadModal } from './ui/PinPadModal';
 // import { hasPinUnlockCredential, authenticatePinUnlockCredential } from '../utils/pinUnlockWebAuthn'; // unused
@@ -353,8 +355,14 @@ export default function ProfileNavTabPanel({
     }
     if (pendingLang === savedLang) return;
     const timer = setTimeout(() => {
-      if (pendingLang && pendingLang !== savedLang) {
-        persistStoredUiLanguage(pendingLang);
+      if (pendingLang !== savedLang) {
+        if (pendingLang === null) {
+          clearLanguage();
+          clearStoredUiLanguage();
+        } else {
+          persistStoredUiLanguage(pendingLang);
+          setLanguage(pendingLang);
+        }
         setSavedLang(pendingLang);
         _setLangSaved(true);
         setTimeout(() => _setLangSaved(false), 2000);
@@ -362,6 +370,19 @@ export default function ProfileNavTabPanel({
     }, 800);
     return () => clearTimeout(timer);
   }, [pendingLang, savedLang]);
+
+  // Fumetto "Salvato" anche per l'autosalvataggio della lingua (sotto il gruppo lingua)
+  useEffect(() => {
+    if (!_langSaved) return;
+    const el = document.querySelector('[data-save-field="lang"]');
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      setToastPos({ top: rect.bottom - 2, left: rect.right - 100 });
+    }
+    setShowSavedToast(true);
+    const id = setTimeout(() => setShowSavedToast(false), 2000);
+    return () => clearTimeout(id);
+  }, [_langSaved]);
 
   if (!currentUser) return null;
 
@@ -414,18 +435,10 @@ export default function ProfileNavTabPanel({
   const chevronCls = 'text-white/60';
   const rowLabelCls = 'text-[13px] font-semibold text-white';
 
-  const deptLabel = currentUser.department ?? '';
-  const roleMap: Record<string, string> = {
-    waiter: tv.waiter_role ?? 'waiter',
-    cook: tv.cook_role ?? 'cook',
-    chef: tv.cook_role ?? 'chef',
-    bartender: tv.bartender_role ?? 'bartender',
-    dishwasher: tv.dishwasher_role ?? 'dishwasher',
-    assistant_manager: tv.assistant_manager_role ?? 'assistant_manager',
-    manager: tv.manager_role ?? 'manager',
-    admin: tv.admin_role ?? 'admin',
-  };
-  const roleDisplay = roleMap[currentUser.role ?? ''] ?? (currentUser.role ?? '');
+  const deptLabel = currentUser.department
+    ? translateDepartmentValue(currentUser.department, effectiveLanguage)
+    : '';
+  const roleDisplay = translateRole(currentUser.role ?? '', effectiveLanguage);
 
   return (
     <div className="w-full max-w-lg mx-auto pb-content font-sans min-h-[calc(100dvh-140px)]">
@@ -717,7 +730,7 @@ export default function ProfileNavTabPanel({
             <span className="relative inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-xl shadow-emerald-500/30" style={{ marginTop: 6 }}>
               <span className="absolute -top-[5px] right-3 w-0 h-0 border-l-[5px] border-r-[5px] border-b-[6px] border-l-transparent border-r-transparent border-b-emerald-500" />
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Salvato
+              {t.wst_sync_saved ?? 'Salvato'}
             </span>
           </motion.div>
         )}

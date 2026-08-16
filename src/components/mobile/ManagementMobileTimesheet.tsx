@@ -27,9 +27,8 @@ interface Props {
   language: string;
   plannedOnly?: boolean;
   /**
-   * `embedded`: sotto StaffPersonalDashboard il toggle PRESENZE|STATISTICHE è nel padre;
-   * qui solo griglia + periodo (niente doppia tab né secondo blocco KPI).
-   * `standalone`: vista gestione da App (tab Timesheet) con sottovista completa.
+   * `embedded` (staff): solo griglia con ore giornaliere — niente sub-tab né Statistiche.
+   * `standalone` (gestione): sub-tab Presenze | Statistiche, conteggi turni e Ore tot.
    */
   variant?: 'standalone' | 'embedded';
   /** `embedded` sotto StaffPersonalDashboard: nasconde la navbar interna (la navigazione è nel parent). */
@@ -86,6 +85,12 @@ function punchLabel(pr: PunchRecord): string {
   try { return format(parseISO(t), 'HH:mm'); } catch { return '–'; }
 }
 
+/** Durata in formato `HH:mm` (senza suffissi h/m). */
+function minsHhMm(m: number): string {
+  if (m <= 0) return '00:00';
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+}
+
 function ShiftStatusBadge({ shift, t }: { shift: Shift; t: Record<string, string> }) {
   const isAbsent = shift.approval_status === 'absent';
   const isDraft  = shift.approval_status === 'draft';
@@ -124,7 +129,7 @@ function statusDotColor(status: string | undefined): string {
 
 /* ── Sezione personale ─────────────────────────────────────────────────── */
 function MyTimesheetSection({
-  myShifts, myPunches, locale, dayLetters, language, t, plannedOnly, forceExpanded = false,
+  myShifts, myPunches, locale, dayLetters, language, t, plannedOnly, forceExpanded = false, embedded = false,
 }: {
   myShifts: Shift[];
   myPunches: PunchRecord[];
@@ -134,6 +139,8 @@ function MyTimesheetSection({
   t: Record<string, string>;
   plannedOnly?: boolean;
   forceExpanded?: boolean;
+  /** true (staff embedded): celle senza conteggio e senza legenda; false (gestione standalone): conteggio turni + legenda con Ore tot. */
+  embedded?: boolean;
 }) {
   const cardBg = { background: 'transparent' };
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
@@ -161,6 +168,19 @@ function MyTimesheetSection({
       const k = format(parseISO(p.calculated_time ?? p.timestamp), 'yyyy-MM-dd');
       if (!m[k]) m[k] = [];
       m[k].push(p);
+    });
+    return m;
+  }, [myPunches]);
+
+  // Timbrature accoppiate per turno (più affidabile del matching per giorno, che
+  // mischia in/out quando un turno finisce dopo mezzanotte)
+  const punchByShift = useMemo(() => {
+    const m: Record<string, PunchRecord[]> = {};
+    myPunches.forEach(p => {
+      if (p.shift_id) {
+        if (!m[p.shift_id]) m[p.shift_id] = [];
+        m[p.shift_id].push(p);
+      }
     });
     return m;
   }, [myPunches]);
@@ -278,7 +298,7 @@ function MyTimesheetSection({
                       <div className={`w-full rounded-lg flex flex-col items-center justify-center py-1.5 px-0.5 min-h-[38px] transition-colors ${blockCls} ${
  isSelected && !plannedOnly ? 'ring-2 ring-white/40 ring-offset-1' : ''
  }`}>
-                        {shiftCount > 0 && (
+                        {shiftCount > 0 && !embedded && (
                           <span className="text-[13px] font-black text-white leading-none drop-shadow-sm">
                             {shiftCount}
                           </span>
@@ -286,7 +306,11 @@ function MyTimesheetSection({
                         {shiftCount > 0 && (
                           <span className="flex gap-0.5 mt-1">
                             {dayShifts.filter(s => s.approval_status !== 'absent').slice(0, 4).map(s => (
-                              <span key={s.id} className={`w-1.5 h-1.5 rounded-full ${statusDotColor(s.approval_status)}`} />
+                              <span key={s.id} className={`w-1.5 h-1.5 rounded-full ${
+                                embedded && !myPunches.some(p => p.shift_id === s.id)
+                                  ? 'bg-amber-400'
+                                  : statusDotColor(s.approval_status)
+                              }`} />
                             ))}
                           </span>
                         )}
@@ -297,7 +321,8 @@ function MyTimesheetSection({
                 })}
               </div>
 
-              {/* Footer stats — identico alla scheda turni */}
+              {/* Footer stats — solo gestione standalone; per lo staff rimosso */}
+              {!embedded && (
               <div className="border-t border-white/10 mx-3 pt-2.5 pb-3 flex items-center justify-around">
                 {[
                   { label: t.shift_plural ?? 'Turni', value: confirmed.length.toString() },
@@ -327,6 +352,7 @@ function MyTimesheetSection({
                 </button>
                 )}
               </div>
+              )}
             </div>
 
             {/* Lista dettaglio */}
@@ -337,9 +363,6 @@ function MyTimesheetSection({
                   const dayShifts = byDay[key] ?? [];
                   if (!dayShifts.length) return null;
                   if (!plannedOnly && selectedDayKey && selectedDayKey !== key) return null;
-                  const dayPunches = plannedOnly ? [] : (punchByDay[key] ?? []);
-                  const pIn  = plannedOnly ? null : dayPunches.find(p => p.type === 'in');
-                  const pOut = plannedOnly ? null : dayPunches.find(p => p.type === 'out');
                   const isToday_ = isToday(day);
                   return (
                     <div key={key}>
@@ -349,28 +372,69 @@ function MyTimesheetSection({
                       </p>
                       {dayShifts.map(shift => {
                         const isAbsent = shift.approval_status === 'absent';
+                        const notPunched = !isAbsent && !myPunches.some(p => p.shift_id === shift.id);
+                        const shiftPunches = embedded
+                          ? ((punchByShift[shift.id] ?? []).length > 0 ? punchByShift[shift.id] : (punchByDay[key] ?? []))
+                          : (punchByDay[key] ?? []);
+                        const pIn  = (plannedOnly && !embedded) ? null : shiftPunches.find(p => p.type === 'in');
+                        const pOut = (plannedOnly && !embedded) ? null : shiftPunches.find(p => p.type === 'out');
+                        // Totale ore lavorate (differenza tra le timbrature, se complete)
+                        const workedMins = pIn && pOut
+                          ? Math.max(0, Math.round(
+                              (new Date(pOut.calculated_time ?? pOut.timestamp).getTime()
+                               - new Date(pIn.calculated_time ?? pIn.timestamp).getTime()) / 60000))
+                          : 0;
                         return (
                           <div key={shift.id}
                             className={`flex items-center justify-between rounded-xl px-3 py-2.5 mb-1 border shadow-sm ${
- isAbsent
- ? 'border-red-500/30 bg-red-500/15'
- : 'border-neutral-500'
- }`}
+                              embedded
+                                ? isAbsent
+                                  ? 'border-red-500/40 bg-red-500/15'
+                                  : notPunched
+                                    ? 'border-amber-500/40'
+                                    : shift.approval_status === 'draft'
+                                      ? 'border-amber-500/40'
+                                      : shift.approval_status === 'approved'
+                                        ? 'border-emerald-500/40'
+                                        : 'border-cyan-500/40'
+                                : isAbsent
+                                  ? 'border-red-500/30 bg-red-500/15'
+                                  : 'border-neutral-500'
+                            }`}
                             style={isAbsent ? undefined : cardBg}
                           >
                             <div className="flex flex-col gap-0.5">
-                              <p className={`font-bold tabular-nums text-base leading-none ${isAbsent ? 'text-white/40 line-through' : 'text-white'}`}>
-                                {shift.start_time.slice(0, 5)} – {shift.end_time?.slice(0, 5) ?? '…'}
+                              <p className={`font-bold tabular-nums text-base leading-none flex items-center gap-1.5 ${isAbsent ? 'text-white/40 line-through' : 'text-white'}`}>
+                                {embedded && !isAbsent && pIn ? (
+                                  <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-black text-emerald-300 border-emerald-500/30 bg-emerald-500/15">
+                                    <Clock className="w-3.5 h-3.5 shrink-0" />
+                                    {punchLabel(pIn)} → {pOut ? punchLabel(pOut) : '…'}
+                                    {workedMins > 0 && (
+                                      <>
+                                        <span className="opacity-60">·</span>
+                                        <span className="text-[11px]">{minsHhMm(workedMins)}</span>
+                                      </>
+                                    )}
+                                  </span>
+                                ) : (
+                                  `${shift.start_time.slice(0, 5)} – ${shift.end_time?.slice(0, 5) ?? '…'}`
+                                )}
                               </p>
-                              {/* Timbratura — nascosta in modalità plannedOnly */}
-                              {!plannedOnly && !isAbsent && (pIn || pOut) && (
+                              {/* Staff (embedded): sotto l'orario pianificato, senza etichetta */}
+                              {embedded && !isAbsent && pIn && (
+                                <p className="text-[12px] tabular-nums text-white/60 mt-0.5">
+                                  {shift.start_time.slice(0, 5)} – {shift.end_time?.slice(0, 5) ?? '…'}
+                                </p>
+                              )}
+                              {/* Gestione (standalone): timbratura secondaria come in originale */}
+                              {!embedded && !plannedOnly && !isAbsent && (pIn || pOut) && (
                                 <p className="text-[11px] tabular-nums text-white/55 mt-0.5 flex items-center gap-1">
                                   <Clock className="w-2.5 h-2.5 shrink-0" />
                                   {pIn ? punchLabel(pIn) : '–'} → {pOut ? punchLabel(pOut) : '–'}
                                 </p>
                               )}
-                              {/* Turno pubblicato ma non ancora timbrato (verifica per shift_id) */}
-                              {!plannedOnly && !isAbsent && !myPunches.some(p => p.shift_id === shift.id) && (
+                              {/* Turno pubblicato ma non ancora timbrato (verifica per shift_id) — solo gestione: per lo staff prevale il badge "Non timbrato" */}
+                              {!embedded && !plannedOnly && !isAbsent && !myPunches.some(p => p.shift_id === shift.id) && (
                                 <p className="text-[11px] font-bold text-amber-400/90 mt-0.5 flex items-center gap-1 uppercase tracking-wider">
                                   <Clock className="w-2.5 h-2.5 shrink-0" />
                                   {t.home_status_not_punched ?? 'Non timbrato'}
@@ -382,7 +446,13 @@ function MyTimesheetSection({
                                 </p>
                               )}
                             </div>
-                            <ShiftStatusBadge shift={shift} t={t} />
+                            {embedded && notPunched ? (
+                              <span className="text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border shrink-0 text-amber-300 border-amber-500/30 bg-amber-500/15">
+                                {t.home_status_not_punched ?? 'Non timbrato'}
+                              </span>
+                            ) : (
+                              <ShiftStatusBadge shift={shift} t={t} />
+                            )}
                           </div>
                         );
                       })}
@@ -602,8 +672,10 @@ export default function ManagementMobileTimesheet({
     window.addEventListener('osteria-staff-nav-offset', handler);
     return () => window.removeEventListener('osteria-staff-nav-offset', handler);
   }, [hideNavBar]);
-  const [tsView, setTsView] = useState<'presence' | 'stats'>('presence');
   const embedded = variant === 'embedded';
+  /** Sub-tab interno (solo modalità standalone): presenze oppure statistiche. */
+  const [tsView, setTsView] = useState<'presence' | 'stats'>('presence');
+  const showPresenceBody = embedded || tsView === 'presence';
 
   const getRange = useCallback((mode: NavMode, offset: number): { start: Date; end: Date } => {
     const today = new Date();
@@ -664,10 +736,8 @@ export default function ManagementMobileTimesheet({
     return { weekMins, monthMins, monthDaysWorked: monthDays.size };
   }, [shifts, currentUserId]);
 
-  const showPresenceBody = embedded || tsView === 'presence';
-
   return (
-    <div className="flex flex-col pb-content pt-1">
+    <div className={`flex flex-col pt-1 ${embedded ? '' : 'pb-content'}`}>
 
       {!embedded && (
         <>
@@ -681,10 +751,10 @@ export default function ManagementMobileTimesheet({
                   type="button"
                   onClick={() => setTsView(v)}
                   className={`h-8 px-4 rounded-full text-[11px] font-extrabold uppercase tracking-wider transition-colors ${
- active
- ? 'bg-white/15 text-white shadow-sm'
- : 'bg-white/8 border border-white/20 text-white/60 hover:border-white/35 hover:text-white/90'
- } active:text-white/90`}
+                    active
+                      ? 'bg-white/15 text-white shadow-sm'
+                      : 'bg-white/8 border border-white/20 text-white/60 hover:border-white/35 hover:text-white/90'
+                  } active:text-white/90`}
                 >
                   {label}
                 </button>
@@ -703,22 +773,22 @@ export default function ManagementMobileTimesheet({
 
       {showPresenceBody && (
         <>
-          {!embedded && (
-            <div className="px-4 mb-4">
-              <MobileStatsCards
-                weekWorkedMins={statsData.weekMins}
-                weekCapMins={40 * 60}
-                monthWorkedMins={statsData.monthMins}
-                monthDaysWorked={statsData.monthDaysWorked}
-                labels={{
-                  title: t.tab_statistics ?? 'Statistiche',
-                  week: t.ts_period_week ?? 'Settimana',
-                  month: t.ts_period_month ?? 'Mese',
-                  daysWorked: (t as Record<string, string>).mobile_dash_days_worked ?? 'Giorni lavorati',
-                }}
-              />
-            </div>
-          )}
+      {!embedded && (
+        <div className="px-4 mb-4">
+          <MobileStatsCards
+            weekWorkedMins={statsData.weekMins}
+            weekCapMins={40 * 60}
+            monthWorkedMins={statsData.monthMins}
+            monthDaysWorked={statsData.monthDaysWorked}
+            labels={{
+              title: t.tab_statistics ?? 'Statistiche',
+              week: t.ts_period_week ?? 'Settimana',
+              month: t.ts_period_month ?? 'Mese',
+              daysWorked: (t as Record<string, string>).mobile_dash_days_worked ?? 'Giorni lavorati',
+            }}
+          />
+        </div>
+      )}
 
       {/* Barra navigazione periodo (nascosta in modalità embedded controllata) */}
       {!hideNavBar && (
@@ -752,7 +822,7 @@ export default function ManagementMobileTimesheet({
             <span className="text-[11px] font-black uppercase tracking-widest text-white/55">{t.my_attendance_label ?? 'Le mie presenze'}</span>
             {myShifts.length > 0 && <span className="text-[11px] font-black tabular-nums text-white/70">({myShifts.length})</span>}
           </div>
-          <MyTimesheetSection myShifts={myShifts} myPunches={myPunches} locale={locale} dayLetters={dayLetters} language={language} t={t} plannedOnly={plannedOnly} forceExpanded={forceExpanded} />
+          <MyTimesheetSection myShifts={myShifts} myPunches={myPunches} locale={locale} dayLetters={dayLetters} language={language} t={t} plannedOnly={plannedOnly} forceExpanded={forceExpanded} embedded={embedded} />
         </section>
 
         {/* Team — solo in vista gestione standalone, non nella Presenze personale */}

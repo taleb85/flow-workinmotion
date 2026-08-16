@@ -10,7 +10,7 @@ import { useT } from '../hooks/useT';
 import { canApproveShiftActions } from '../utils/permissions';
 import { isUiWidgetVisible } from '../utils/uiScreenWidgets';
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday, isBefore, startOfDay } from 'date-fns';
-import { it } from 'date-fns/locale';
+import { getDateLocale } from '../utils/translations';
 import type { HolidayRequest } from '../types';
 import { safeFormatDate } from '../utils/safeDateFormat';
 import DatePickerField from './DatePickerField';
@@ -18,8 +18,8 @@ import DatePickerField from './DatePickerField';
 // ─── Status helpers ────────────────────────────────────────────────────────────
 // STATUS_CONFIG is built inside the component to use translations
 
-export default function HolidayRequests() {
-  const { currentUser, users } = useAppUser();
+export default function HolidayRequests({ embedded = false }: { embedded?: boolean } = {}) {
+  const { currentUser, users, effectiveLanguage } = useAppUser();
   const { holidays, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest } = useAppData();
   const { showSuccess, silentRefreshData } = useAppOverlay();
   const { featureFlags } = useAppConfig();
@@ -64,7 +64,7 @@ export default function HolidayRequests() {
 
   if (featureFlags['staff_requests'] === false) {
     return (
-      <div className="app-horizontal-pad font-sans mx-auto flex min-h-[40vh] w-full max-w-7xl items-center justify-center pb-content">
+      <div className={`app-horizontal-pad font-sans mx-auto flex min-h-[40vh] w-full max-w-7xl items-center justify-center ${embedded ? '' : 'pb-content'}`}>
         <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 max-w-md px-6 py-8 text-center">
           <Palmtree className="w-10 h-10 text-white/60 mx-auto mb-3 opacity-90" />
           <p className="text-white/80 font-semibold text-sm">{t.staff_requests_feature_off}</p>
@@ -88,7 +88,10 @@ export default function HolidayRequests() {
   const monthEnd   = endOfMonth(now);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const emptyDays   = Array.from({ length: getDay(monthStart) === 0 ? 6 : getDay(monthStart) - 1 });
-  const weekDays    = ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
+  const calLocale = getDateLocale(effectiveLanguage);
+  const weekDays = Array.from({ length: 7 }, (_, i) =>
+    format(new Date(2024, 0, 1 + i), 'EEEEE', { locale: calLocale }).toUpperCase()
+  );
 
   const calHolidays = isAdmin ? realHolidays : myHolidays;
 
@@ -205,7 +208,7 @@ export default function HolidayRequests() {
   const labelStyle = { color: 'rgba(255,168,0,0.80)' } as React.CSSProperties;
 
   return (
-    <div className="font-sans mx-auto flex h-[calc(100dvh-140px)] w-full max-w-7xl flex-col pb-content pt-2">
+    <div className={`font-sans mx-auto flex h-[calc(100dvh-140px)] w-full max-w-7xl flex-col pt-2 ${embedded ? '' : 'pb-content'}`}>
       <motion.div
         className="flex flex-col flex-1 min-h-0"
         initial={{ opacity: 0, y: 16 }}
@@ -340,7 +343,7 @@ export default function HolidayRequests() {
                     <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 mb-4 p-4">
                       <p className="text-white font-semibold text-sm">{u?.first_name} {u?.last_name}</p>
                       <p className="text-xs mt-1" style={{ color: '#ffffff' }}>
-                        {safeFormatDate(selectedH.start_date, 'd MMM', { locale: it })} – {safeFormatDate(selectedH.end_date, 'd MMM yyyy', { locale: it })}
+                        {safeFormatDate(selectedH.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(selectedH.end_date, 'd MMM yyyy', { locale: calLocale })}
                       </p>
                       {'reason' in selectedH && selectedH.reason && (
                         <p className="text-xs mt-1 italic" style={{ color: 'rgba(255,255,255,0.50)' }}>{String(selectedH.reason)}</p>
@@ -397,7 +400,7 @@ export default function HolidayRequests() {
           <div className="group w-full rounded-xl border px-2 py-2 text-left border-neutral-500 flex-1">
             <div className="flex items-center justify-between mb-1">
               <h3 className="font-semibold text-base" style={{ color: '#ffffff' }}>
-                {format(now, 'MMMM yyyy', { locale: it })}
+                {format(now, 'MMMM yyyy', { locale: calLocale })}
               </h3>
               <div className="flex items-center gap-1.5 text-[10px]" style={{ color: '#ffffff' }}>
                 <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />{t.pending}</span>
@@ -476,7 +479,7 @@ export default function HolidayRequests() {
                         <div key={h.id} className="flex items-center justify-between px-5 py-3.5">
                           <div>
                             <p className="text-white text-[12px] font-medium">
-                              {safeFormatDate(h.start_date, 'd MMM', { locale: it })} – {safeFormatDate(h.end_date, 'd MMM', { locale: it })}
+                              {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM', { locale: calLocale })}
                             </p>
                             <p className="text-white/70 text-xs mt-0.5 uppercase tracking-wider">
                               {h.type ?? 'Ferie'}
@@ -525,7 +528,7 @@ export default function HolidayRequests() {
                         <div className="min-w-0">
                           <p className="text-white text-sm font-semibold truncate" title={u?.first_name}>{u?.first_name} {u?.last_name}</p>
                           <p className="text-white/70 text-xs">
-                            {safeFormatDate(h.start_date, 'd MMM', { locale: it })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: it })}
+                            {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
                             {h.reason && ` · ${h.reason}`}
                           </p>
                         </div>
@@ -589,7 +592,7 @@ export default function HolidayRequests() {
                           <div className="min-w-0">
                             <p className="text-white text-sm font-semibold truncate" title={u?.first_name}>{u?.first_name} {u?.last_name}</p>
                             <p className="text-white/70 text-xs">
-                              {safeFormatDate(h.start_date, 'd MMM', { locale: it })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: it })}
+                              {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
                             </p>
                           </div>
                         </div>
@@ -620,7 +623,7 @@ export default function HolidayRequests() {
                         <div className="min-w-0">
                           <p className="text-white text-sm font-semibold truncate" title={u?.first_name}>{u?.first_name} {u?.last_name}</p>
                           <p className="text-white/70 text-xs">
-                            {safeFormatDate(h.start_date, 'd MMM', { locale: it })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: it })}
+                            {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
                           </p>
                         </div>
                         <button
@@ -661,7 +664,7 @@ export default function HolidayRequests() {
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-white/60" />
                         <span className="text-white text-[12px] font-medium">
-                          {safeFormatDate(h.start_date, 'd MMM', { locale: it })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: it })}
+                          {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
                         </span>
                       </div>
                       <span className="px-2 py-0.5 rounded-full bg-neutral-500/15 text-white/70 text-xs font-semibold uppercase border border-neutral-500/40">{t.status_approved}</span>

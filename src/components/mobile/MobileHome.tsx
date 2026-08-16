@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
-import { Play, LogOut, ChevronRight, Clock, RotateCcw } from 'lucide-react';
+import { Play, LogOut, Clock, RotateCcw } from 'lucide-react';
+import { useT } from '../../hooks/useT';
 import HeaderTodayCoworkersCard from '../HeaderTodayCoworkersCard';
 import { usePullToRefresh } from '../../hooks/usePullToRefresh';
 import { startOfWeek, addDays, format, isToday, type Locale } from 'date-fns';
@@ -39,9 +40,7 @@ export interface MobileHomeProps {
   punchBusy: boolean;
   onStart: () => void;
   onEnd: () => void;
-  onNavigateToTimesheet?: () => void;
   todayWorkShifts: Shift[];
-  detailLabel?: string;
   /** Full list of user shifts — used to build the weekly preview */
   myShifts?: Shift[];
   locale?: Locale;
@@ -81,15 +80,14 @@ export default function MobileHome({
   punchBusy,
   onStart,
   onEnd,
-  onNavigateToTimesheet,
   onRefresh,
   todayWorkShifts,
-  detailLabel = 'Detail',
   myShifts = [],
 }: MobileHomeProps) {
 
   const { pullDistance, isRefreshing, isTriggered, indicatorOpacity, indicatorRotation } =
     usePullToRefresh({ onRefresh: onRefresh ?? (() => {}), disabled: !onRefresh });
+  const t = useT();
   const cardCls = 'rounded-2xl border border-neutral-500';
   const cardStyle = { background: 'transparent' };
 
@@ -262,7 +260,7 @@ export default function MobileHome({
       {/* ── Questa settimana ──────────────────────────────────────────────── */}
       <div className={`${cardCls} px-4 py-3`} style={cardStyle}>
         <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-2">
-          Questa settimana
+          {t.mobile_dash_this_week ?? 'Questa settimana'}
         </p>
         <div className="flex flex-col divide-y divide-white/[0.07]">
           {weekDays.map((day, idx) => {
@@ -305,14 +303,6 @@ export default function MobileHome({
           <h2 className="text-[11px] font-bold uppercase tracking-widest text-white/50">
             {statsLabels.title}
           </h2>
-          {onNavigateToTimesheet && (
-            <button
-              onClick={onNavigateToTimesheet}
-className="text-[11px] font-bold text-white/70 flex items-center gap-0.5 hover:opacity-80 transition-opacity active:opacity-70 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-            >
-              {detailLabel} <ChevronRight className="w-3 h-3" />
-            </button>
-          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">

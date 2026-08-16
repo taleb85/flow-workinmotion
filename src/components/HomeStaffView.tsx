@@ -88,7 +88,7 @@ export default memo(function HomeStaffView({
   const locale = getDateLocale(effectiveLanguage) ?? it;
 
   return (
-    <div className="pb-content pt-6 w-full app-horizontal-pad font-sans">
+    <div className="pb-content pt-6 w-full app-horizontal-pad font-sans md:!pb-32">
       <div className="mx-auto w-full max-w-7xl">
       <div className="block md:hidden space-y-4">
         <MobileStaffDashboard
@@ -115,7 +115,7 @@ export default memo(function HomeStaffView({
       >
         {/* Saluto */}
         {uiW('home_compact.greeting') && (
-        <div>
+        <div className="pt-3 md:pt-6">
           <h1 className="text-white font-bold text-2xl">{t.home_greeting.replace('{name}', currentUser.first_name)}</h1>
         </div>
         )}
@@ -210,7 +210,7 @@ export default memo(function HomeStaffView({
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {grouped[dateStr].sort((a, b) => a.start_time.localeCompare(b.start_time)).map((s) => (
-                      <span key={s.id} className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${s.approval_status === 'draft' ? 'bg-white/10 text-white/70 border-slate-400' : 'bg-white/15 text-white border-white/30'}`}>
+                      <span key={s.id} className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${s.approval_status === 'draft' ? 'bg-blue-500/20 text-blue-200 border-blue-400/40' : 'bg-white/15 text-white border-white/30'}`}>
                         {s.start_time.slice(0, 5)}–{s.end_time?.slice(0, 5) ?? '…'}
                       </span>
                     ))}

@@ -115,7 +115,9 @@ export function NotificationPermissionButton({
  }`}
           />
           <span className="text-[11px] font-semibold uppercase tracking-wider text-white/50">
-            {notificationPermission === 'granted' ? 'Permesso concesso' : 'Permesso non richiesto'}
+            {notificationPermission === 'granted'
+              ? (t.notif_permission_granted ?? 'Permesso concesso')
+              : (t.notif_permission_not_requested ?? 'Permesso non richiesto')}
           </span>
         </div>
         <span className="text-slate-200 text-xs">·</span>
@@ -123,7 +125,9 @@ export function NotificationPermissionButton({
         <div className="flex items-center gap-1.5">
           <span className={`h-2 w-2 rounded-full flex-shrink-0 ${isSubscribed ? 'bg-green-500' : 'bg-slate-300'}`} />
           <span className="text-[11px] font-semibold uppercase tracking-wider text-white/50">
-            {isSubscribed ? 'Iscritto' : 'Non iscritto'}
+            {isSubscribed
+              ? (t.notif_subscribed ?? 'Iscritto')
+              : (t.notif_not_subscribed ?? 'Non iscritto')}
           </span>
         </div>
       </div>

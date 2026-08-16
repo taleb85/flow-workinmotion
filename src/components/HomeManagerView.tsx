@@ -165,14 +165,14 @@ export default memo(function HomeManagerView({
   return (
     <>
       <section
-        className="pb-content pt-6 w-full app-horizontal-pad font-sans"
+        className="pb-content pt-6 w-full app-horizontal-pad font-sans md:!pb-32"
         aria-label={t.home_dashboard_title}
       >
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
           className="flex flex-col gap-5">
 
           {/* ── Saluto ────────────────────────────────────────────────── */}
-          <div className="px-1 pt-3">
+          <div className="px-1 pt-3 md:pt-6">
             <h1 className="text-xl font-extrabold tracking-tight leading-tight text-white">
               {t.home_greeting.replace('{name}', currentUser.first_name)}
             </h1>
@@ -324,7 +324,7 @@ export default memo(function HomeManagerView({
                 <h2 className="text-sm font-bold text-white">{t.home_requires_attention}</h2>
                 <span className="ml-auto text-[11px] font-bold text-red-300 bg-red-500/15 px-2 py-0.5 rounded-full border border-red-400/30">{criticalShifts.length}</span>
               </div>
-              <div className="fluid-grid fluid-grid-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {criticalShifts.map((e) => {
                   const style = getCardStyle(e);
                   return (
@@ -351,7 +351,7 @@ export default memo(function HomeManagerView({
                   {t.home_see_all_shifts} <ArrowRight className="w-3 h-3" />
                 </button>
               </div>
-              <div className="fluid-grid fluid-grid-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {todayShiftsEnriched.map((e) => {
                   const style = getCardStyle(e);
                   return (
@@ -428,7 +428,7 @@ export default memo(function HomeManagerView({
 
             {/* KPI */}
             {uiW('home_mgmt.card_kpi') && (
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 cursor-pointer" onClick={() => onNavigateToShifts?.()}>
                 <div className="flex items-center justify-between mb-2">
                   <TrendingUp className="w-4 h-4 text-white/45" />
