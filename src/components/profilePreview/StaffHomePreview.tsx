@@ -52,7 +52,7 @@ export default function StaffHomePreview({
       >
         <div className="rounded-xl border border-neutral-500 flex items-center justify-between p-4 shadow-sm border border-slate-100" >
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">{t.hours_this_month}</p>
+            <p className="text-[0.625rem] font-semibold uppercase tracking-widest text-white/50">{t.hours_this_month}</p>
             <p className="text-2xl font-bold text-white">32:00</p>
           </div>
           <TrendingUp className="h-8 w-8 text-accent/40" />
@@ -67,7 +67,7 @@ export default function StaffHomePreview({
         hiddenBadge={hiddenBadge}
       >
         <div className="rounded-2xl bg-accent p-5 shadow-md">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">{t.scheduled_today}</p>
+          <p className="text-[0.625rem] font-semibold uppercase tracking-widest text-white/70">{t.scheduled_today}</p>
           <p className="mt-1 text-2xl font-bold text-white">10:00 – 16:00</p>
           <p className="mt-2 flex items-center gap-1 text-xs text-white/70">
             <Clock className="h-3.5 w-3.5" /> {t.lunch}
@@ -104,7 +104,7 @@ export default function StaffHomePreview({
         <button
           type="button"
           tabIndex={-1}
-className="rounded-xl border border-neutral-500 surface-ghost-interactive flex min-h-[52px] w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="rounded-xl border border-neutral-500 surface-ghost-interactive flex min-h-[3.25rem] w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
         >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10">

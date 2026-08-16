@@ -107,11 +107,11 @@ function BroadcastList({
                       <div>
                         <p className="text-sm font-bold text-white">
                           {isMine ? 'Tu' : name}
-                          <span className="ml-1.5 text-[10px] font-medium text-white/40 uppercase bg-white/10 rounded-full px-2 py-0.5">Broadcast</span>
+                          <span className="ml-1.5 text-[0.625rem] font-medium text-white/40 uppercase bg-white/10 rounded-full px-2 py-0.5">Broadcast</span>
                         </p>
                       </div>
                     </div>
-                    <span className="text-[11px] text-white/40 shrink-0">
+                    <span className="text-[0.6875rem] text-white/40 shrink-0">
                       {formatTime(msg.created_at, intlLocale)}
                     </span>
                   </div>
@@ -346,7 +346,7 @@ function NotificationsView({
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold text-white">{n.title}</p>
                   <p className="mt-0.5 text-xs leading-relaxed text-white/70">{n.body}</p>
-                  <p className="mt-2 text-[11px] font-medium uppercase tracking-wider text-white/50">
+                  <p className="mt-2 text-[0.6875rem] font-medium uppercase tracking-wider text-white/50">
                     {formatRelativeDate(n.timestamp)}
                   </p>
                 </div>
@@ -392,7 +392,7 @@ export function DirectMessagesPanel({ onClose }: { onClose?: () => void } = {}) 
               : 'text-white/50 border-transparent hover:text-white/80'
           }`}
         >
-          Notifiche
+          {t.notifications ?? 'Notifiche'}
         </button>
         <button
           onClick={() => handleTabChange('messages')}
@@ -402,9 +402,8 @@ export function DirectMessagesPanel({ onClose }: { onClose?: () => void } = {}) 
               : 'text-white/50 border-transparent hover:text-white/80'
           }`}
         >
-          Messaggi
+          {t.messages ?? 'Messaggi'}
         </button>
-        {/* Pulsante chiudi — overlay assoluto a destra */}
         {onClose && (
           <div className="absolute inset-y-0 right-0 flex items-center gap-1 px-2" style={{ background: BRAND }}>
             <button

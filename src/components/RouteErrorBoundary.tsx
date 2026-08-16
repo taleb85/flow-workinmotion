@@ -1,5 +1,8 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertTriangle, RotateCw } from 'lucide-react';
+import { useAppUser } from '../context/AppContext';
+import { getTranslations, formatTrans } from '../utils/translations';
+import type { Language } from '../types';
 
 interface Props {
   children: ReactNode;
@@ -12,6 +15,27 @@ interface State {
   error: Error | null;
 }
 
+/** Nomi di sezione localizzati per il titolo dell'errore */
+const SECTION_NAMES: Record<string, Partial<Record<Language, string>>> = {
+  Login: { it: 'Accesso', en: 'Login', es: 'Inicio de sesión', fr: 'Connexion' },
+  Home: { it: 'Home', en: 'Home', es: 'Inicio', fr: 'Accueil' },
+  'Turni/Presenze': { it: 'Turni/Presenze', en: 'Shifts/Attendance', es: 'Turnos/Presencias', fr: 'Services/Présences' },
+  Ferie: { it: 'Ferie', en: 'Holidays', es: 'Vacaciones', fr: 'Congés' },
+  Impostazioni: { it: 'Impostazioni', en: 'Settings', es: 'Configuración', fr: 'Réglages' },
+  Profilo: { it: 'Profilo', en: 'Profile', es: 'Perfil', fr: 'Profil' },
+  'Dashboard staff': { it: 'Dashboard staff', en: 'Staff dashboard', es: 'Panel del personal', fr: 'Tableau de bord du personnel' },
+};
+
+function translateSection(name: string | undefined, lang: Language): string {
+  if (!name) return '';
+  return SECTION_NAMES[name]?.[lang] ?? name;
+}
+
+interface InnerProps extends Props {
+  t: Record<string, string>;
+  lang: Language;
+}
+
 /**
  * Error Boundary per-sezione: isola il crash a un singolo tab/pannello
  * senza compromettere il resto dell'app.
@@ -21,7 +45,7 @@ interface State {
  *     <TimesheetGrid />
  *   </RouteErrorBoundary>
  */
-export class RouteErrorBoundary extends Component<Props, State> {
+class RouteErrorBoundaryInner extends Component<InnerProps, State> {
   state: State = { error: null };
 
   static getDerivedStateFromError(error: Error): State {
@@ -40,7 +64,8 @@ export class RouteErrorBoundary extends Component<Props, State> {
     if (this.state.error) {
       if (this.props.fallback) return this.props.fallback;
 
-      const name = this.props.sectionName || 'questa sezione';
+      const { t, sectionName, lang } = this.props;
+      const name = translateSection(sectionName, lang) || (t.route_section_generic ?? 'questa sezione');
 
       return (
         <div
@@ -57,10 +82,10 @@ export class RouteErrorBoundary extends Component<Props, State> {
             </div>
           </div>
           <h3 className="mb-1 text-sm font-semibold text-white/90">
-            Errore in {name}
+            {formatTrans(t.route_error_title ?? 'Errore in {name}', { name })}
           </h3>
           <p className="mb-4 text-xs text-white/50 leading-relaxed">
-            {this.state.error.message || 'Errore imprevisto nel caricamento.'}
+            {this.state.error.message || (t.route_error_unexpected ?? 'Errore imprevisto nel caricamento.')}
           </p>
           <button
             type="button"
@@ -68,7 +93,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
             className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-xs font-semibold text-white/80 transition-colors hover:bg-white/20"
           >
             <RotateCw className="h-3.5 w-3.5" strokeWidth={2} />
-            Riprova
+            {t.retry ?? 'Riprova'}
           </button>
         </div>
       );
@@ -76,4 +101,10 @@ export class RouteErrorBoundary extends Component<Props, State> {
 
     return this.props.children;
   }
+}
+
+export function RouteErrorBoundary(props: Props) {
+  const { effectiveLanguage } = useAppUser();
+  const t = getTranslations(effectiveLanguage);
+  return <RouteErrorBoundaryInner {...props} t={t} lang={effectiveLanguage} />;
 }

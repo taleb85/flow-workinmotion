@@ -72,7 +72,7 @@ export function GlobalPopupsPreview({
 }) {
   return (
     <div className="space-y-2 mt-4 pt-4 border-t border-slate-200">
-      <p className="px-1 text-[9px] font-bold uppercase tracking-wider text-white/60">Menu e Popup Globali</p>
+      <p className="px-1 text-[0.5625rem] font-bold uppercase tracking-wider text-white/60">Menu e Popup Globali</p>
       
       <WidgetChrome
         widgetKey="global.quick_switch"
@@ -87,7 +87,7 @@ export function GlobalPopupsPreview({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-white/90">Cambio rapido utente</p>
-            <p className="mt-0.5 text-[10px] leading-relaxed text-white/60">Pressione lunga sull'avatar</p>
+            <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">Pressione lunga sull'avatar</p>
           </div>
         </div>
       </WidgetChrome>
@@ -105,7 +105,7 @@ export function GlobalPopupsPreview({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-white/90">Centro notifiche</p>
-            <p className="mt-0.5 text-[10px] leading-relaxed text-white/60">Icona campanella nell'header</p>
+            <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">Icona campanella nell'header</p>
           </div>
         </div>
       </WidgetChrome>

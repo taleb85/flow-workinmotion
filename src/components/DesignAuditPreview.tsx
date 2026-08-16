@@ -20,7 +20,7 @@ const BG_OVERLAYS = [
 
 const LOGOS = [
   { id: 'logosvg-full', label: 'FlowLogoSvg — full', render: () => <FlowLogoSvg variant="full" color="orange" style={{ maxWidth: 300 }} /> },
-  { id: 'logosvg-icon', label: 'FlowLogoSvg — icon-only', render: () => <FlowLogoSvg variant="icon-only" color="orange" style={{ width: 80, height: 80 }} /> },
+  { id: 'logosvg-icon', label: 'FlowLogoSvg — icon-only', render: () => <FlowLogoSvg variant="icon-only" color="orange" style={{ width: '5rem', height: '5rem' }} /> },
   { id: 'logosvg-header', label: 'FlowLogoSvg — header', render: () => <FlowLogoSvg variant="header" color="orange" style={{ maxWidth: 200 }} /> },
   { id: 'waveicon', label: 'FlowWaveIcon (120px)', render: () => <FlowWaveIcon size={80} radius={22} /> },
   { id: 'waveicon-small', label: 'FlowWaveIcon (30px)', render: () => <FlowWaveIcon size={30} /> },
@@ -66,18 +66,18 @@ export default function DesignAuditPreview() {
             <div
               key={logo.id}
               onClick={() => toggleLogo(logo.id)}
-              className={`rounded-xl border-2 p-4 flex flex-col items-center justify-center gap-3 min-h-[140px] cursor-pointer transition-colors ${
+              className={`rounded-xl border-2 p-4 flex flex-col items-center justify-center gap-3 min-h-[8.75rem] cursor-pointer transition-colors ${
  kept ? 'border-emerald-500/50 bg-emerald-500/10' : 'border-rose-500/30 bg-rose-500/5 opacity-50'
  }`}
             >
-              <div className="flex items-center justify-center min-h-[60px]">
+              <div className="flex items-center justify-center min-h-[3.75rem]">
                 {logo.render()}
               </div>
               <div className="flex items-center gap-2">
                 <div className={`w-4 h-4 rounded-full border-2 ${kept ? 'bg-emerald-400 border-emerald-400' : 'border-rose-400'}`}>
-                  {kept && <div className="w-full h-full flex items-center justify-center text-[8px] text-white font-bold">✓</div>}
+                  {kept && <div className="w-full h-full flex items-center justify-center text-[0.5rem] text-white font-bold">✓</div>}
                 </div>
-                <span className={`text-[11px] font-bold ${kept ? 'text-white' : 'text-rose-300'}`}>{logo.label}</span>
+                <span className={`text-[0.6875rem] font-bold ${kept ? 'text-white' : 'text-rose-300'}`}>{logo.label}</span>
               </div>
             </div>
           );
@@ -93,7 +93,7 @@ export default function DesignAuditPreview() {
             <div
               key={bg.id}
               onClick={() => toggleBg(bg.id)}
-              className={`rounded-xl border-2 p-4 flex flex-col items-center justify-center gap-2 min-h-[120px] cursor-pointer transition-colors ${
+              className={`rounded-xl border-2 p-4 flex flex-col items-center justify-center gap-2 min-h-[7.5rem] cursor-pointer transition-colors ${
  kept ? 'border-emerald-500/50' : 'border-rose-500/30 opacity-50'
  }`}
               style={{
@@ -101,7 +101,7 @@ export default function DesignAuditPreview() {
                 ...(bg.css ? { background: bg.css } : {}),
               }}
             >
-              <span className={`text-[11px] font-bold text-center px-2 py-1 rounded ${
+              <span className={`text-[0.6875rem] font-bold text-center px-2 py-1 rounded ${
  bg.id === 'table-green' ? 'text-gray-800' : 'text-white'
  }`}>{bg.label}</span>
             </div>

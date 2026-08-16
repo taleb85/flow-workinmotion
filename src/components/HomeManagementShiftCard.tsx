@@ -80,26 +80,26 @@ export function HomeManagementShiftCard({ e, style, isManager, onClose, onApprov
         border: '1px solid rgba(255, 255, 255, 0.10)',
         borderLeft: '4px solid',
         borderLeftColor: statusBorderColor(style.border),
-        borderRadius: 10,
+        borderRadius: '0.625rem',
         padding: '11px 12px',
-        marginBottom: 7,
+        marginBottom: '0.4375rem',
       }}
     >
       {/* Riga principale: nome/reparto + orario/badge su una sola riga */}
       <div className="flex justify-between items-center gap-2">
         {/* Sinistra: nome + sottoriga inline */}
         <div className="min-w-0 flex-1 flex items-baseline gap-1.5">
-          <p className="text-[13px] font-semibold truncate min-w-0" style={{ color: 'white' }} title={e.user?.first_name ?? '—'}>{e.user?.first_name ?? '—'}
+          <p className="text-[0.8125rem] font-semibold truncate min-w-0" style={{ color: 'white' }} title={e.user?.first_name ?? '—'}>{e.user?.first_name ?? '—'}
           </p>
           {subLine && (
-            <p className="text-[11px] uppercase truncate min-w-0" style={{ color: 'rgba(255,255,255,0.50)' }} title={subLine}>{subLine}
+            <p className="text-[0.6875rem] uppercase truncate min-w-0" style={{ color: 'rgba(255,255,255,0.50)' }} title={subLine}>{subLine}
             </p>
           )}
         </div>
 
         {/* Destra: orario + badge inline */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          <p className="text-[12px] font-semibold tabular-nums" style={{ color: 'white' }}>
+          <p className="text-[0.75rem] font-semibold tabular-nums" style={{ color: 'white' }}>
             {e.scheduledStart}–{e.scheduledEnd}
           </p>
           <div className="flex items-center gap-1">
@@ -108,7 +108,7 @@ export function HomeManagementShiftCard({ e, style, isManager, onClose, onApprov
               : <Sun className="h-2.5 w-2.5 text-amber-300 opacity-70" />
             }
             <span
-              className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${style.badge}`}
+              className={`text-[0.6875rem] font-semibold px-2 py-0.5 rounded-full ${style.badge}`}
               style={style.label.toLowerCase().includes('approv') ? {
                 background: 'rgba(16, 185, 129, 0.20)',
                 color: '#6ee7b7',
@@ -124,12 +124,12 @@ export function HomeManagementShiftCard({ e, style, isManager, onClose, onApprov
       {/* Orario effettivo / delta (se timbrato) */}
       {actualTimeStr && (
         <div className="mt-1.5 flex items-center gap-2">
-          <span className="text-[11px] tabular-nums" style={{ color: 'rgba(255,255,255,0.50)' }}>
+          <span className="text-[0.6875rem] tabular-nums" style={{ color: 'rgba(255,255,255,0.50)' }}>
             ↳ {actualTimeStr}
           </span>
           {deltaLabel && (
             <span
-              className="text-[11px] font-bold"
+              className="text-[0.6875rem] font-bold"
               style={{ color: e.deltaMins > 5 ? '#34d399' : e.deltaMins < -5 ? '#f87171' : 'rgba(255,255,255,0.40)' }}
             >
               {deltaLabel}
@@ -145,7 +145,7 @@ export function HomeManagementShiftCard({ e, style, isManager, onClose, onApprov
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-amber-500/80 hover:bg-amber-500 text-white text-[11px] font-bold transition-colors active:bg-amber-500/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-amber-500/80 hover:bg-amber-500 text-white text-[0.6875rem] font-bold transition-colors active:bg-amber-500/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               <LogOutIcon className="w-3 h-3" /> {t.home_btn_close_shift}
             </button>
@@ -155,7 +155,7 @@ export function HomeManagementShiftCard({ e, style, isManager, onClose, onApprov
               type="button"
               onClick={onApprove}
               disabled={approvingId === e.shift.id}
-              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-accent/80 hover:bg-accent text-white text-[11px] font-bold transition-colors disabled:opacity-50 active:bg-accent/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-accent/80 hover:bg-accent text-white text-[0.6875rem] font-bold transition-colors disabled:opacity-50 active:bg-accent/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               <Check className="w-3 h-3" />
               {approvingId === e.shift.id ? '...' : t.home_btn_approve}

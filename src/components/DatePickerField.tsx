@@ -232,27 +232,8 @@ const DatePickerField = forwardRef<HTMLButtonElement, DatePickerFieldProps>(func
         aria-haspopup="dialog"
         onClick={() => {
           if (disabled) return;
-          if (!open && innerRef.current) {
-            const rect = innerRef.current.getBoundingClientRect();
-            const gap = 4;
-            const panelHeight = 380;
-            const panelWidth = Math.min(328, window.innerWidth - 32);
-
-            let top: number;
-            if (rect.bottom + gap + panelHeight > window.innerHeight) {
-              top = Math.max(8, rect.top - gap - panelHeight);
-            } else {
-              top = rect.bottom + gap;
-            }
-
-            let left = rect.left;
-            if (left + panelWidth > window.innerWidth - 16) {
-              left = window.innerWidth - panelWidth - 16;
-            }
-            if (left < 16) left = 16;
-
-            setMenuStyle({ top, left });
-          }
+          // Popover centrato sullo schermo (translate -50% centra in base alla dimensione reale)
+          setMenuStyle({ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' });
           setOpen((o) => !o);
         }}
         className={`inline-flex shrink-0 items-center text-left font-semibold leading-none tabular-nums text-white/90 transition-colors rounded-xl border border-neutral-500 surface-ghost-interactive hover:border-neutral-500 focus:outline-none focus:ring-2 focus:ring-accent/25 disabled:cursor-not-allowed disabled:opacity-50 ${btnSizeClass} ${className} active:brightness-95`}
@@ -265,7 +246,7 @@ const DatePickerField = forwardRef<HTMLButtonElement, DatePickerFieldProps>(func
         <div
           ref={popRef}
           className="fixed z-[10050] rounded-2xl border border-white/10 bg-neutral-800/70 p-3 md:p-3.5 shadow-2xl"
-          style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', top: menuStyle.top, left: menuStyle.left }}
+          style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', ...menuStyle }}
         >
           {panelInner}
         </div>,

@@ -36,7 +36,7 @@ const FlowWaveIcon = memo(function FlowWaveIcon({ size = 48, radius, className, 
       <FlowLogoSvg
         variant="icon-only"
         color="orange"
-        style={{ width: size, height: size, display: 'block' }}
+        style={{ width: size, height: size, display: 'block', borderRadius: r, overflow: 'hidden' }}
       />
     </div>
   );

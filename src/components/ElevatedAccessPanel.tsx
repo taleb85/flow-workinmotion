@@ -39,7 +39,7 @@ export default function ElevatedAccessPanel() {
 
   return (
     <div className="space-y-2">
-      <p className="text-[11px] text-white/55 leading-relaxed mb-3">
+      <p className="text-[0.6875rem] text-white/55 leading-relaxed mb-3">
         Quando attivato, il dipendente vede la scheda <strong className="text-white/80">Admin</strong> nella navigazione e può accedere all'area gestionale senza PIN aggiuntivo.
       </p>
 
@@ -61,7 +61,7 @@ export default function ElevatedAccessPanel() {
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-white truncate" title={u.first_name}>{u.first_name} {u.last_name ?? ''}
                 </p>
-                <p className="text-[11px] uppercase tracking-wide elevated-role-label" style={{ color: '#ffffff' }}>
+                <p className="text-[0.6875rem] uppercase tracking-wide elevated-role-label" style={{ color: '#ffffff' }}>
                   {translateRole(u.role, effectiveLanguage)}
                 </p>
               </div>

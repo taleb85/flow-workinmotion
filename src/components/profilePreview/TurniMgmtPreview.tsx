@@ -42,7 +42,7 @@ export default function TurniMgmtPreview({
               <Filter className="h-3 w-3" /> {t.wst_filters}
               <ChevronDown className="h-3 w-3" />
             </span>
-            <span className="rounded-xl border border-slate-200 px-2 py-1 text-[10px] font-semibold text-white/60">
+            <span className="rounded-xl border border-slate-200 px-2 py-1 text-[0.625rem] font-semibold text-white/60">
               {t.wst_actions ?? 'Azioni'} ▾
             </span>
           </div>
@@ -62,7 +62,7 @@ export default function TurniMgmtPreview({
               key={d}
               className={`flex min-w-[2.5rem] flex-col items-center rounded-lg px-1 py-1 text-center ${i === 2 ? 'bg-accent/10 border border-accent/20' : ''}`}
             >
-              <span className={`text-[9px] font-bold ${i === 2 ? 'text-accent' : 'text-white/50'}`}>{d}</span>
+              <span className={`text-[0.5625rem] font-bold ${i === 2 ? 'text-accent' : 'text-white/50'}`}>{d}</span>
               <span className={`text-xs font-bold ${i === 2 ? 'text-accent' : 'text-white/90'}`}>{10 + i}</span>
             </div>
           ))}
@@ -77,7 +77,7 @@ export default function TurniMgmtPreview({
         hiddenBadge={hiddenBadge}
       >
         <div className="rounded-xl border border-neutral-500 overflow-hidden shadow-sm" >
-          <div className="grid grid-cols-[minmax(4rem,1fr)_repeat(7,minmax(0,1fr))] gap-px bg-slate-100 text-[10px]">
+          <div className="grid grid-cols-[minmax(4rem,1fr)_repeat(7,minmax(0,1fr))] gap-px bg-slate-100 text-[0.625rem]">
             <div className="flex items-center gap-1 bg-white px-2 py-2 font-bold text-white/50">
               <Users className="h-3 w-3" /> Team
             </div>
@@ -90,14 +90,14 @@ export default function TurniMgmtPreview({
               <div key={nm} className="contents">
                 <div className={`bg-white px-2 py-3 font-semibold text-white/80 ${idx % 2 === 1 ? 'bg-slate-50/50' : ''}`}>{nm}</div>
                 {days.map((d, di) => (
-                  <div key={`${nm}-${d}`} className={`min-h-[52px] bg-white p-0.5 ${idx % 2 === 1 ? 'bg-slate-50/50' : ''}`}>
+                  <div key={`${nm}-${d}`} className={`min-h-[3.25rem] bg-white p-0.5 ${idx % 2 === 1 ? 'bg-slate-50/50' : ''}`}>
                     {di === 2 && nm === 'Jean' && (
-                      <div className="rounded-lg bg-accent/10 px-1 py-1 text-center text-[9px] font-bold text-accent border border-accent/20">
+                      <div className="rounded-lg bg-accent/10 px-1 py-1 text-center text-[0.5625rem] font-bold text-accent border border-accent/20">
                         10–16
                       </div>
                     )}
                     {di === 4 && nm === 'John' && (
-                      <div className="rounded-lg bg-accent/10 px-1 py-1 text-center text-[9px] font-bold text-accent border border-accent/20">
+                      <div className="rounded-lg bg-accent/10 px-1 py-1 text-center text-[0.5625rem] font-bold text-accent border border-accent/20">
                         18–23
                       </div>
                     )}
@@ -106,7 +106,7 @@ export default function TurniMgmtPreview({
               </div>
             ))}
           </div>
-          <p className="flex items-center justify-center gap-1 border-t border-slate-50 py-2 text-[10px] text-white/50">
+          <p className="flex items-center justify-center gap-1 border-t border-slate-50 py-2 text-[0.625rem] text-white/50">
             <Calendar className="h-3 w-3" />
             {tv.profile_visibility_turni_grid_hint ?? 'Griglia dimostrativa — in app sono i turni reali del periodo.'}
           </p>
@@ -126,7 +126,7 @@ export default function TurniMgmtPreview({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-white/90">Popup dettaglio turno</p>
-            <p className="mt-0.5 text-[10px] leading-relaxed text-white/60">
+            <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">
               {tv.profile_visibility_generic_widget_demo ?? 'Contenuto dimostrativo: in app qui compariranno i dati reali.'}
             </p>
           </div>

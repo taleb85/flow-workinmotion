@@ -205,10 +205,10 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
     color: '#ffffff',
   } as React.CSSProperties;
   const labelCls = 'block text-xs font-bold uppercase tracking-wider mb-1';
-  const labelStyle = { color: 'rgba(255,168,0,0.80)' } as React.CSSProperties;
+  const labelStyle = { color: 'rgba(255,255,255,0.80)' } as React.CSSProperties;
 
   return (
-    <div className={`font-sans mx-auto flex h-[calc(100dvh-140px)] w-full max-w-7xl flex-col pt-2 ${embedded ? '' : 'pb-content'}`}>
+    <div className={`font-sans flex h-[calc(100dvh-140px)] w-full flex-col pt-2 ${embedded ? '' : 'pb-content'}`}>
       <motion.div
         className="flex flex-col flex-1 min-h-0"
         initial={{ opacity: 0, y: 16 }}
@@ -220,7 +220,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
       <div className="mb-5 mt-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           {isAdmin && pendingAll.length > 0 && (
-            <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full text-[11px] font-bold"
+            <span className="inline-flex items-center justify-center min-w-[1.375rem] h-[1.375rem] px-1.5 rounded-full text-[0.6875rem] font-bold"
               style={{ background: 'rgba(245,158,11,0.25)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.35)' }}>
               {pendingAll.length}
             </span>
@@ -232,7 +232,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
         <button
           type="button"
           onClick={() => setShowForm(true)}
-          className="gap-1.5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-80"
+          className="gap-1.5 px-3 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-80"
           style={{ background: 'transparent', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1.5px solid rgba(255,255,255,0.25)', borderRadius: '0.5rem' }}
         >
           {t.request_holiday}
@@ -247,13 +247,15 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/40 backdrop-blur-md supports-[backdrop-filter]:bg-black/30 p-4"
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/10 p-4"
             onClick={() => setShowForm(false)}
           >
             <motion.form
-              initial={{ scale: 0.95, opacity: 0, y: 12 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 12 }}
+              initial={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               onSubmit={handleSubmit}
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md rounded-2xl border border-white/15 p-6 shadow-2xl bg-transparent"
@@ -295,7 +297,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                   />
                 </div>
 
-                <button type="submit" className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent to-amber-500 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-accent/20 transition-colors hover:shadow-xl hover:shadow-accent/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                <button type="submit" className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-accent text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-accent/20 transition-colors hover:shadow-xl hover:shadow-accent/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                   <Check className="w-3.5 h-3.5" strokeWidth={3} />
                   {t.request_holiday}
                 </button>
@@ -313,13 +315,15 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/40 backdrop-blur-md supports-[backdrop-filter]:bg-black/30 p-4"
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/10 p-4"
             onClick={() => setSelectedH(null)}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 12 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 12 }}
+              initial={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-sm rounded-2xl border border-white/15 p-6 shadow-2xl bg-transparent"
               style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
@@ -402,7 +406,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
               <h3 className="font-semibold text-base" style={{ color: '#ffffff' }}>
                 {format(now, 'MMMM yyyy', { locale: calLocale })}
               </h3>
-              <div className="flex items-center gap-1.5 text-[10px]" style={{ color: '#ffffff' }}>
+              <div className="flex items-center gap-1.5 text-[0.625rem]" style={{ color: '#ffffff' }}>
                 <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />{t.pending}</span>
                 <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500 inline-block" />{t.status_approved}</span>
               </div>
@@ -438,7 +442,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                   <div
                     key={day.toString()}
                     onClick={() => isPending && isAdmin && setSelectedH(holiday)}
-                    className={`min-h-[44px] min-w-[44px] aspect-square rounded-xl flex items-center justify-center text-xs font-semibold transition-colors select-none touch-target
+                    className={`min-h-[2.75rem] min-w-[2.75rem] aspect-square rounded-xl flex items-center justify-center text-xs font-semibold transition-colors select-none touch-target
  ${isPending && isAdmin ? 'cursor-pointer hover:opacity-80' : 'cursor-default'} active:opacity-70`}
                     style={dayStyle}
                     onMouseEnter={(e) => {
@@ -478,7 +482,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                       return (
                         <div key={h.id} className="flex items-center justify-between px-5 py-3.5">
                           <div>
-                            <p className="text-white text-[12px] font-medium">
+                            <p className="text-white text-[0.75rem] font-medium">
                               {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM', { locale: calLocale })}
                             </p>
                             <p className="text-white/70 text-xs mt-0.5 uppercase tracking-wider">
@@ -538,7 +542,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                           type="button"
                           onClick={() => handleStatusChange(h.id, 'approved')}
                           disabled={updatingId === h.id}
-                          className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white disabled:cursor-not-allowed disabled:opacity-50 transition-colors hover:opacity-90"
+                          className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white disabled:cursor-not-allowed disabled:opacity-50 transition-colors hover:opacity-90"
                           style={{ background: '#10b981' }}
                         >
                           {updatingId === h.id ? (
@@ -554,7 +558,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                           type="button"
                           onClick={() => handleStatusChange(h.id, 'rejected')}
                           disabled={updatingId === h.id}
-                          className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white disabled:cursor-not-allowed disabled:opacity-50 transition-colors hover:opacity-90"
+                          className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white disabled:cursor-not-allowed disabled:opacity-50 transition-colors hover:opacity-90"
                           style={{ background: '#ef4444' }}
                         >
                           {updatingId === h.id ? (
@@ -663,7 +667,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                     <div key={h.id} className="flex items-center justify-between px-5 py-3.5">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-white/60" />
-                        <span className="text-white text-[12px] font-medium">
+                        <span className="text-white text-[0.75rem] font-medium">
                           {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
                         </span>
                       </div>

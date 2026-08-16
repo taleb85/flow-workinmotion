@@ -257,10 +257,10 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
         {/* TAB: Funzionalità */}
         {tab === 'features' && (
           <>
-            <p className="text-[11px] text-white/40 mb-3">Abilita o disabilita i moduli per questa sede.</p>
+            <p className="text-[0.6875rem] text-white/40 mb-3">Abilita o disabilita i moduli per questa sede.</p>
 
             <div className="space-y-1 mb-4">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-white/40 mb-2">Moduli principali</p>
+              <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-2">Moduli principali</p>
               {([
                 { key: 'timesheets', label: 'Presenze (timbrature)' },
                 { key: 'shifts',     label: 'Turni (tabellone)' },
@@ -275,7 +275,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             </div>
 
             <div className="border-t border-neutral-500 pt-3 space-y-1">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-white/40 mb-2">Funzionalità avanzate</p>
+              <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-2">Funzionalità avanzate</p>
               {FEATURE_DEFS.map((f) => (
                 <div key={f.slug} className="flex items-center justify-between py-1.5">
                   <span className={`text-sm ${f.dangerous ? 'text-red-600' : 'text-white/80'}`}>
@@ -291,7 +291,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
         {/* TAB: Regole turni */}
         {tab === 'workrules' && (
           <div className="space-y-4">
-            <p className="text-[11px] text-white/40">Valori predefiniti per le regole di lavoro. L'admin della sede può modificarli.</p>
+            <p className="text-[0.6875rem] text-white/40">Valori predefiniti per le regole di lavoro. L'admin della sede può modificarli.</p>
 
             <RuleRow
               label="Ore max giornaliere"
@@ -326,7 +326,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             </RuleRow>
 
             <div className="border-t border-neutral-500 pt-3 space-y-2">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-white/40 mb-1">Alert automatici</p>
+              <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-1">Alert automatici</p>
               {([
                 { key: 'criticEnabled',    label: 'Alert critico (turno lungo + riposo insufficiente)' },
                 { key: 'attentionEnabled', label: 'Alert attenzione (ore oltre limite)' },
@@ -344,7 +344,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
         {/* TAB: Geofence */}
         {tab === 'geofence' && (
           <div className="space-y-3">
-            <p className="text-[11px] text-white/40">
+            <p className="text-[0.6875rem] text-white/40">
               Coordinate GPS del locale per la funzione geofence (timbratura entro un raggio).
               Richiede di abilitare "Geofence timbrature" nelle Funzionalità.
             </p>
@@ -392,7 +392,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
                     className="w-full rounded-lg border border-neutral-500 bg-white/8 px-3 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40"
                   />
                 </div>
-                <p className="text-[11px] text-white/40">
+                <p className="text-[0.6875rem] text-white/40">
                   Lat {settings.geofence.lat.toFixed(5)} · Lng {settings.geofence.lng.toFixed(5)} · R {settings.geofence.radiusM}m
                 </p>
               </div>
@@ -403,7 +403,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
         {/* TAB: Locale */}
         {tab === 'locale' && (
           <div className="space-y-4">
-            <p className="text-[11px] text-white/40">Lingua predefinita e fuso orario della sede.</p>
+            <p className="text-[0.6875rem] text-white/40">Lingua predefinita e fuso orario della sede.</p>
 
             <div className="space-y-1">
               <label htmlFor="sa-locale-lang" className="text-xs font-semibold text-white/70">Lingua predefinita</label>
@@ -434,12 +434,12 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
         {/* Salva impostazioni — sempre visibile, disabilitato nel tab Dipendenti (salvataggio inline per-utente) */}
         <div className="pt-2 border-t border-neutral-500 space-y-1.5">
           {dirty && !saving && (
-            <p className="text-center text-[11px] font-semibold text-amber-500">
+            <p className="text-center text-[0.6875rem] font-semibold text-amber-500">
               ● Modifiche non salvate
             </p>
           )}
           {saved && (
-            <p className="text-center text-[11px] font-semibold text-emerald-600">
+            <p className="text-center text-[0.6875rem] font-semibold text-emerald-600">
               ✓ Impostazioni salvate
             </p>
           )}

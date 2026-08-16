@@ -103,7 +103,7 @@ export default function RoleFeatureSectionsBlock(props: Props) {
         description={lockedOn ? homeHint : undefined}
         badge={
           lockedOn ? (
-            <span className="rounded-lg px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white/60" style={{ background: 'rgba(255,255,255,0.13)', border: '1px solid rgba(255,255,255,0.22)' }}>
+            <span className="rounded-lg px-1.5 py-0.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60" style={{ background: 'rgba(255,255,255,0.13)', border: '1px solid rgba(255,255,255,0.22)' }}>
               {tv.role_template_always_on ?? 'Sempre'}
             </span>
           ) : undefined
@@ -133,7 +133,7 @@ export default function RoleFeatureSectionsBlock(props: Props) {
                   aria-controls={panelId}
                   aria-label={`${tv.role_template_tab_expand_aria ?? ''} — ${label}`}
                   onClick={() => toggleTabGroup(group.id)}
-                  className="flex min-h-[56px] w-full items-center gap-2 px-5 py-3 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 focus-visible:ring-inset"
+                  className="flex min-h-[3.5rem] w-full items-center gap-2 px-5 py-3 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 focus-visible:ring-inset"
                   onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.07)'; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = ''; }}
                 >

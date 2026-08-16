@@ -258,7 +258,7 @@ export default memo(function HomeManagerView({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-2xl font-bold text-white leading-none tabular-nums">{value}</p>
-                  <p className="text-[11px] text-white/75 mt-1 leading-tight">{label}</p>
+                  <p className="text-[0.6875rem] text-white/75 mt-1 leading-tight">{label}</p>
                 </div>
               </div>
             ))}
@@ -271,7 +271,7 @@ export default memo(function HomeManagerView({
               <div className="flex items-center gap-2 mb-3">
                 <Moon className="w-4 h-4 text-amber-600" />
                 <h2 className="text-sm font-bold text-white">{t.home_dinner_close_required}</h2>
-                <span className="ml-auto rounded-full border border-amber-400/40 bg-amber-500/15 px-2 py-0.5 text-[11px] font-bold text-amber-300">
+                <span className="ml-auto rounded-full border border-amber-400/40 bg-amber-500/15 px-2 py-0.5 text-[0.6875rem] font-bold text-amber-300">
                   {dinnerNeedsClose.length}
                 </span>
               </div>
@@ -287,19 +287,19 @@ export default memo(function HomeManagerView({
                       </div>
                       <div>
                         <p className="font-bold text-white text-sm">{e.user?.first_name ?? '—'}</p>
-                        <p className="text-[11px] text-white/55">{e.user?.department ?? e.user?.role ?? ''}</p>
+                        <p className="text-[0.6875rem] text-white/55">{e.user?.department ?? e.user?.role ?? ''}</p>
                       </div>
-                      <span className="ml-auto flex items-center gap-1 rounded-full border border-accent/50 bg-accent/15 px-2 py-0.5 text-[11px] font-bold text-white">
+                      <span className="ml-auto flex items-center gap-1 rounded-full border border-accent/50 bg-accent/15 px-2 py-0.5 text-[0.6875rem] font-bold text-white">
                         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-500" /> {t.home_badge_in_shift}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 mb-3">
                       <div className="bg-transparent rounded-xl px-2.5 py-2 text-center border border-white/10">
-                        <p className="text-[11px] text-white/45 uppercase font-semibold mb-0.5">{t.home_label_planned}</p>
+                        <p className="text-[0.6875rem] text-white/45 uppercase font-semibold mb-0.5">{t.home_label_planned}</p>
                         <p className="text-sm font-bold text-white tabular-nums">{e.scheduledStart}–{e.scheduledEnd}</p>
                       </div>
                       <div className="bg-transparent rounded-xl px-2.5 py-2 text-center border border-white/10">
-                        <p className="text-[11px] text-white/45 uppercase font-semibold mb-0.5">{t.home_label_entry}</p>
+                        <p className="text-[0.6875rem] text-white/45 uppercase font-semibold mb-0.5">{t.home_label_entry}</p>
                         <p className="text-sm font-bold text-white tabular-nums">{e.actualStart ?? '—'}</p>
                       </div>
                     </div>
@@ -322,7 +322,7 @@ export default memo(function HomeManagerView({
               <div className="flex items-center gap-2 mb-3">
                 <AlertCircle className="w-4 h-4 text-red-500" />
                 <h2 className="text-sm font-bold text-white">{t.home_requires_attention}</h2>
-                <span className="ml-auto text-[11px] font-bold text-red-300 bg-red-500/15 px-2 py-0.5 rounded-full border border-red-400/30">{criticalShifts.length}</span>
+                <span className="ml-auto text-[0.6875rem] font-bold text-red-300 bg-red-500/15 px-2 py-0.5 rounded-full border border-red-400/30">{criticalShifts.length}</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {criticalShifts.map((e) => {
@@ -346,7 +346,7 @@ export default memo(function HomeManagerView({
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="w-4 h-4 text-white/55" />
                 <h2 className="text-sm font-bold text-white">{t.home_todays_shifts}</h2>
-                <span className="text-[11px] text-slate-200 ml-1">({todayShiftsEnriched.length})</span>
+                <span className="text-[0.6875rem] text-slate-200 ml-1">({todayShiftsEnriched.length})</span>
 <button type="button" onClick={() => onNavigateToShifts?.()} className="ml-auto text-xs font-semibold text-accent flex items-center gap-0.5 hover:underline active:brightness-95 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                   {t.home_see_all_shifts} <ArrowRight className="w-3 h-3" />
                 </button>
@@ -415,7 +415,7 @@ export default memo(function HomeManagerView({
                   return (
                     <div key={h.id} className="flex items-center justify-between py-1 border-b border-white/8 last:border-0">
                       <span className="text-white/70 text-xs font-medium truncate flex-1" title={u?.first_name ?? '?'}>{u?.first_name ?? '?'}</span>
-                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ml-2 ${h.status === 'approved' ? 'bg-white/15 text-white/80 border-white/20' : h.status === 'pending' ? 'bg-amber-500/15 text-amber-300 border-amber-400/30' : 'bg-red-500/15 text-red-300 border-red-400/30'}`}>
+                      <span className={`text-[0.6875rem] font-bold px-2 py-0.5 rounded-full border ml-2 ${h.status === 'approved' ? 'bg-white/15 text-white/80 border-white/20' : h.status === 'pending' ? 'bg-amber-500/15 text-amber-300 border-amber-400/30' : 'bg-red-500/15 text-red-300 border-red-400/30'}`}>
                         {h.status === 'approved' ? t.home_holiday_approved : h.status === 'pending' ? t.home_holiday_pending : t.home_holiday_rejected}
                       </span>
                     </div>
@@ -432,17 +432,17 @@ export default memo(function HomeManagerView({
               <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 cursor-pointer" onClick={() => onNavigateToShifts?.()}>
                 <div className="flex items-center justify-between mb-2">
                   <TrendingUp className="w-4 h-4 text-white/45" />
-                  <span className="text-[11px] text-white/55 font-semibold uppercase">{t.home_kpi_hours_week}</span>
+                  <span className="text-[0.6875rem] text-white/55 font-semibold uppercase">{t.home_kpi_hours_week}</span>
                 </div>
                 <p className="text-2xl font-bold text-white tabular-nums">{formatMinutesToHoursAndMinutes(weeklyMinutes)}</p>
               </div>
               <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 cursor-pointer" onClick={() => onNavigateToShifts?.()}>
                 <div className="flex items-center justify-between mb-2">
                   <Calendar className="w-4 h-4 text-white/45" />
-                  <span className="text-[11px] text-white/55 font-semibold uppercase">{t.home_kpi_shifts_week}</span>
+                  <span className="text-[0.6875rem] text-white/55 font-semibold uppercase">{t.home_kpi_shifts_week}</span>
                 </div>
                 <p className="text-2xl font-bold text-white tabular-nums">{todayShiftsEnriched.length}</p>
-                <p className="text-[11px] text-white/55 mt-0.5">{t.home_today}</p>
+                <p className="text-[0.6875rem] text-white/55 mt-0.5">{t.home_today}</p>
               </div>
             </div>
             )}
@@ -477,11 +477,11 @@ export default memo(function HomeManagerView({
 
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   <div className="bg-transparent rounded-xl p-3 text-center border border-white/10">
-                    <p className="text-[11px] text-white/45 uppercase font-semibold mb-1">{t.home_label_planned}</p>
+                    <p className="text-[0.6875rem] text-white/45 uppercase font-semibold mb-1">{t.home_label_planned}</p>
                     <p className="font-bold text-white tabular-nums">{closeModal.actualStart} → {closeModal.plannedEnd}</p>
                   </div>
                   <div className="rounded-xl bg-brand-deep/8 p-3 text-center">
-                    <p className="text-[11px] text-white/55 uppercase font-semibold mb-1">{t.home_label_entry}</p>
+                    <p className="text-[0.6875rem] text-white/55 uppercase font-semibold mb-1">{t.home_label_entry}</p>
                     <p className="font-bold text-white tabular-nums">{closeModal.actualStart}</p>
                   </div>
                 </div>
@@ -506,7 +506,7 @@ export default memo(function HomeManagerView({
                       { label: t.home_modal_duration, val: `${Math.floor(previewMins / 60)}h${previewMins % 60 > 0 ? String(previewMins % 60).padStart(2,'0') : ''}` },
                     ].map(({ label, val }) => (
                       <div key={label}>
-                        <p className="text-[11px] text-white/45 uppercase font-semibold mb-0.5">{label}</p>
+                        <p className="text-[0.6875rem] text-white/45 uppercase font-semibold mb-0.5">{label}</p>
                         <p className="font-bold text-white text-sm tabular-nums">{val}</p>
                       </div>
                     ))}

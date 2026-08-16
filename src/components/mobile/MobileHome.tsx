@@ -1,7 +1,10 @@
 import { type ReactNode } from 'react';
 import { Play, LogOut, Clock, RotateCcw } from 'lucide-react';
 import { useT } from '../../hooks/useT';
+import { useAppUser } from '../../context/AppContext';
+import { getDateLocale } from '../../utils/translations';
 import HeaderTodayCoworkersCard from '../HeaderTodayCoworkersCard';
+import MobileStatsCards from './MobileStatsCards';
 import { usePullToRefresh } from '../../hooks/usePullToRefresh';
 import { startOfWeek, addDays, format, isToday, type Locale } from 'date-fns';
 import type { Shift } from '../../types';
@@ -46,15 +49,6 @@ export interface MobileHomeProps {
   locale?: Locale;
 }
 
-function fmtH(mins: number) {
-  if (!Number.isFinite(mins) || mins <= 0) return '0h';
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return m > 0 ? `${h}h ${String(m).padStart(2, '0')}m` : `${h}h`;
-}
-
-const DAY_LABELS = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
-
 export default function MobileHome({
   greetingText,
   todayLabel,
@@ -88,6 +82,8 @@ export default function MobileHome({
   const { pullDistance, isRefreshing, isTriggered, indicatorOpacity, indicatorRotation } =
     usePullToRefresh({ onRefresh: onRefresh ?? (() => {}), disabled: !onRefresh });
   const t = useT();
+  const { effectiveLanguage } = useAppUser();
+  const calLocale = getDateLocale(effectiveLanguage);
   const cardCls = 'rounded-2xl border border-neutral-500';
   const cardStyle = { background: 'transparent' };
 
@@ -95,10 +91,6 @@ export default function MobileHome({
   const shiftRange = firstShift
     ? `${firstShift.start_time.slice(0, 5)} → ${firstShift.end_time?.slice(0, 5) ?? '…'}`
     : null;
-
-  const weekPct = weekCapMinutes > 0
-    ? Math.min(100, Math.round((weeklyMinutes / weekCapMinutes) * 100))
-    : 0;
 
   // ── Weekly preview data ────────────────────────────────────────────────
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -153,11 +145,11 @@ export default function MobileHome({
       <section className="shift-card-ultra px-4 py-4" data-tour="punch" style={{ background: 'transparent', border: '1px solid rgb(115, 115, 115)', boxShadow: 'none' }}>
         {/* Header row: label + stato badge */}
         <div className="flex items-center justify-between mb-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-white/50">
+          <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-white/50">
             {todayShiftLabel}
           </p>
           {inProgress ? (
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-white/70">
+            <span className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-white/70">
               <span className="w-1.5 h-1.5 rounded-full bg-white/40 animate-pulse" />
               {inProgressLabel}
             </span>
@@ -202,7 +194,7 @@ export default function MobileHome({
                 <span className="text-base font-medium shift-time-clean text-white">
                   {s.start_time.slice(0, 5)} – {s.end_time?.slice(0, 5) ?? '…'}
                 </span>
-                <span className="text-[11px] font-medium uppercase tracking-wider text-white/50">
+                <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-white/50">
                   {s.type === 'lunch' ? 'Pranzo' : 'Cena'}
                 </span>
               </div>
@@ -240,7 +232,7 @@ export default function MobileHome({
             </button>
           ) : (
             todayWorkShiftsCount > 0 && (
-              <p className="text-center text-[11px] font-bold uppercase tracking-widest text-white/50 py-2">
+              <p className="text-center text-[0.6875rem] font-bold uppercase tracking-widest text-white/50 py-2">
                 {tapStartHint}
               </p>
             )
@@ -259,7 +251,7 @@ export default function MobileHome({
 
       {/* ── Questa settimana ──────────────────────────────────────────────── */}
       <div className={`${cardCls} px-4 py-3`} style={cardStyle}>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-2">
+        <p className="text-[0.6875rem] font-bold uppercase tracking-widest text-white/50 mb-2">
           {t.mobile_dash_this_week ?? 'Questa settimana'}
         </p>
         <div className="flex flex-col divide-y divide-white/[0.07]">
@@ -267,7 +259,8 @@ export default function MobileHome({
             const dayShifts = shiftsForDay(day);
             const today = isToday(day);
             const dayNum = format(day, 'd');
-            const label = `${DAY_LABELS[idx]} ${dayNum}`;
+            const dayName = format(day, 'EEE', { locale: calLocale });
+            const label = `${dayName.charAt(0).toUpperCase()}${dayName.slice(1)} ${dayNum}`;
 
             return (
               <div
@@ -300,44 +293,24 @@ export default function MobileHome({
       {/* ── I miei numeri ───────────────────────────────────────────── */}
       <section>
         <div className="flex items-center justify-between px-1 mb-2">
-          <h2 className="text-[11px] font-bold uppercase tracking-widest text-white/50">
+          <h2 className="text-[0.6875rem] font-bold uppercase tracking-widest text-white/50">
             {statsLabels.title}
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          {/* Ore settimana */}
-          <div className={`${cardCls} px-4 py-3`} style={cardStyle}>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-1">
-              {statsLabels.week}
-            </p>
-            <p className="text-xl font-black text-white tabular-nums leading-none mb-2">
-              {fmtH(weeklyMinutes)}
-            </p>
-            <div className="w-full bg-white/15 rounded-full h-1.5">
-              <div
-                className="h-full rounded-full bg-white/40 transition-[width] duration-700 ease-out"
-                style={{ width: `${weekPct}%` }}
-              />
-            </div>
-            <p className="text-[11px] text-white/50 mt-1 tabular-nums">
-              / {fmtH(weekCapMinutes)}
-            </p>
-          </div>
-
-          {/* Ore mese */}
-          <div className={`${cardCls} px-4 py-3`} style={cardStyle}>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-1">
-              {statsLabels.month}
-            </p>
-            <p className="text-xl font-black text-white tabular-nums leading-none mb-1">
-              {fmtH(monthlyMinutes)}
-            </p>
-            <p className="text-[11px] text-white/50 tabular-nums">
-              {monthDaysWorked} {statsLabels.daysWorked}
-            </p>
-          </div>
-        </div>
+        <MobileStatsCards
+          weekWorkedMins={weeklyMinutes}
+          weekCapMins={weekCapMinutes}
+          monthWorkedMins={monthlyMinutes}
+          monthDaysWorked={monthDaysWorked}
+          hoursFormat="hhmm"
+          labels={{
+            title: statsLabels.title,
+            week: t.ts_period_week ?? 'Settimana',
+            month: t.ts_period_month ?? 'Mese',
+            daysWorked: statsLabels.daysWorked,
+          }}
+        />
       </section>
 
     </div>

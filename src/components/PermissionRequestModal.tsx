@@ -256,7 +256,7 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
           {pushSubError && (
             <div className="flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5">
               <ShieldAlert className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
-              <p className="text-[11px] leading-relaxed text-rose-200/90">{pushSubError}</p>
+              <p className="text-[0.6875rem] leading-relaxed text-rose-200/90">{pushSubError}</p>
             </div>
           )}
 
@@ -296,7 +296,7 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
           {locationError && !locDenied && (
             <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
               <MapPin className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-[11px] leading-relaxed text-amber-200/90">
+              <p className="text-[0.6875rem] leading-relaxed text-amber-200/90">
                 {locationError}{' '}
                 <button type="button" onClick={handleLocation} className="underline font-semibold text-amber-100 hover:text-white">
                   Riprova
@@ -309,7 +309,7 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
           {(notifDenied || locDenied) && (
             <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
               <Settings className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-[11px] leading-relaxed text-amber-200/90">
+              <p className="text-[0.6875rem] leading-relaxed text-amber-200/90">
                 {notifDenied && locDenied
                   ? 'Notifiche e posizione sono bloccate. '
                   : notifDenied
@@ -334,7 +334,7 @@ ${canProceed
           >
             {canProceed ? 'Continua' : 'Continua senza attivare ora'}
           </button>
-          <p className="text-center text-[11px] text-white/50 mt-2">
+          <p className="text-center text-[0.6875rem] text-white/50 mt-2">
             {canProceed
               ? 'Ora puoi entrare nell’app'
               : 'Puoi abilitarle anche dopo dalla campanella / impostazioni'}

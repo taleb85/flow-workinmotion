@@ -152,18 +152,22 @@ export default function RequestHolidayModal({ isOpen, onClose, userId }: Request
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[10050] flex flex-col bg-slate-900/50 backdrop-blur-sm"
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/10"
+          onClick={handleClose}
           role="presentation"
         >
           <motion.form
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 34 }}
+            initial={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             onSubmit={handleSubmit}
-            className="flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-transparent backdrop-blur-xl" style={{ WebkitBackdropFilter: 'blur(8px)' }}
+            onClick={(e) => e.stopPropagation()}
+            className="modal-glass-panel flex max-h-[92dvh] w-full max-w-lg flex-col rounded-3xl px-5 pt-4 pb-5"
           >
-            <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3 pt-[max(12px,env(safe-area-inset-top,0px))]">
+            {/* Intestazione */}
+            <div className="mb-4 flex shrink-0 items-center justify-between">
               <h3 className="text-lg font-bold text-white">{title}</h3>
               <button
                 type="button"
@@ -171,44 +175,44 @@ export default function RequestHolidayModal({ isOpen, onClose, userId }: Request
                   lightHaptic();
                   handleClose();
                 }}
-                className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white/70 transition-colors hover:bg-white/15 active:bg-white/80"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-white/15 active:bg-white/80"
                 aria-label={t.cancel}
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain scroll-smooth px-4 py-4 [-webkit-overflow-scrolling:touch]">
+            {/* Corpo scrollabile */}
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain scroll-smooth pr-0.5 [-webkit-overflow-scrolling:touch]">
               {fields}
             </div>
 
-            <div className="shrink-0 border-t border-white/10 px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom,0px))] bg-transparent">
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    lightHaptic();
-                    handleClose();
-                  }}
-                  className="min-h-[56px] rounded-3xl border border-slate-200 text-base font-bold text-white/80 transition-colors"
-                >
-                  {t.cancel}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !startDate || !endDate}
-                  className="flex min-h-[56px] items-center justify-center gap-2 rounded-3xl bg-accent text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-accent/20 transition-colors hover:shadow-xl hover:shadow-accent/30 disabled:cursor-not-allowed disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
-                >
-                  {isSubmitting ? (
-                    <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <Check className="h-5 w-5" strokeWidth={3} />
-                      {t.request_holiday ?? 'Invia'}
-                    </>
-                  )}
-                </button>
-              </div>
+            {/* Azioni */}
+            <div className="mt-4 grid shrink-0 grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  lightHaptic();
+                  handleClose();
+                }}
+                className="min-h-[3.25rem] rounded-2xl border border-slate-200 text-base font-bold text-white/80 transition-colors"
+              >
+                {t.cancel}
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting || !startDate || !endDate}
+                className="flex min-h-[3.25rem] items-center justify-center gap-2 rounded-2xl bg-accent text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-accent/20 transition-colors hover:shadow-xl hover:shadow-accent/30 disabled:cursor-not-allowed disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              >
+                {isSubmitting ? (
+                  <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Check className="h-5 w-5" strokeWidth={3} />
+                    {t.request_holiday ?? 'Invia'}
+                  </>
+                )}
+              </button>
             </div>
           </motion.form>
         </motion.div>
@@ -223,13 +227,14 @@ export default function RequestHolidayModal({ isOpen, onClose, userId }: Request
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/40 backdrop-blur-md supports-[backdrop-filter]:bg-black/30 p-4"
+        className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/10 p-4"
         onClick={handleClose}
       >
         <motion.form
-          initial={{ scale: 0.95, opacity: 0, y: 12 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 12 }}
+          initial={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+          exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           onSubmit={handleSubmit}
           onClick={(e) => e.stopPropagation()}
           className="w-full max-w-md rounded-2xl border border-white/15 p-6 shadow-2xl bg-transparent"

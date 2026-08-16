@@ -433,7 +433,7 @@ export default function ProfileNavTabPanel({
 
   const _menuRowBase = 'w-full flex items-center justify-between rounded-xl px-4 py-3.5 transition-colors  border border-neutral-500 hover:bg-white/10';
   const chevronCls = 'text-white/60';
-  const rowLabelCls = 'text-[13px] font-semibold text-white';
+  const rowLabelCls = 'text-[0.8125rem] font-semibold text-white';
 
   const deptLabel = currentUser.department
     ? translateDepartmentValue(currentUser.department, effectiveLanguage)
@@ -536,7 +536,7 @@ export default function ProfileNavTabPanel({
             <h2 className="text-base font-bold tracking-tight" style={{ color: '#ffffff' }}>
               {displayName}
             </h2>
-            <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            <p className="text-[0.6875rem]" style={{ color: 'rgba(255,255,255,0.55)' }}>
               {roleDisplay}{deptLabel && deptLabel !== roleDisplay ? ` · ${deptLabel}` : ''}
             </p>
           </div>
@@ -546,7 +546,7 @@ export default function ProfileNavTabPanel({
             {[roleDisplay, t.status_active].filter(Boolean).map((label, i) => (
               <span
                 key={i}
-                className="text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider"
+                className="text-[0.6875rem] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider"
                 style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.20)', color: 'rgba(255,255,255,0.65)' }}
               >
                 {label}
@@ -674,10 +674,10 @@ export default function ProfileNavTabPanel({
               </div>
               <div className="flex-1 text-left">
                 <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>
-                  Pannello Impostazioni
+                  {tv.settings_panel_title ?? 'Pannello Impostazioni'}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: 'rgba(165, 180, 252, 0.75)' }}>
-                  Area gestionale riservata
+                  {tv.settings_panel_subtitle ?? 'Area gestionale riservata'}
                 </p>
               </div>
               <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(165, 180, 252, 0.60)' }} />
@@ -727,8 +727,8 @@ export default function ProfileNavTabPanel({
               transform: 'translate(-100%, 0)',
             }}
           >
-            <span className="relative inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-xl shadow-emerald-500/30" style={{ marginTop: 6 }}>
-              <span className="absolute -top-[5px] right-3 w-0 h-0 border-l-[5px] border-r-[5px] border-b-[6px] border-l-transparent border-r-transparent border-b-emerald-500" />
+            <span className="relative inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-xl shadow-emerald-500/30" style={{ marginTop: '0.375rem' }}>
+              <span className="absolute -top-[0.3125rem] right-3 w-0 h-0 border-l-[0.3125rem] border-r-[0.3125rem] border-b-[0.375rem] border-l-transparent border-r-transparent border-b-emerald-500" />
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               {t.wst_sync_saved ?? 'Salvato'}
             </span>

@@ -45,7 +45,7 @@ export default function Toast({ message, type = 'error', onClose }: ToastProps) 
         }}
       >
         <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: accentColor }} />
-        <p className="min-w-0 flex-1 text-left text-[12px] font-semibold leading-snug text-white/95 break-words">
+        <p className="min-w-0 flex-1 text-left text-[0.75rem] font-semibold leading-snug text-white/95 break-words">
           {message}
         </p>
         <button

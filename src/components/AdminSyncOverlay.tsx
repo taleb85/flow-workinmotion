@@ -83,7 +83,7 @@ export default function AdminSyncOverlay({ onDone, onReload }: Props) {
           transition={{ duration: 3.2, ease: 'easeInOut' }}
         />
       </svg>
-        <div className="flex aspect-square w-[min(44vw,7.5rem)] max-w-[120px] items-center justify-center rounded-[1.75rem] bg-brand-mid/10">
+        <div className="flex aspect-square w-[min(44vw,7.5rem)] max-w-[7.5rem] items-center justify-center rounded-[1.75rem] bg-brand-mid/10">
           <motion.div
             animate={{ rotate: [0, 360] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}

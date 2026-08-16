@@ -114,7 +114,7 @@ export function NotificationPermissionButton({
  notificationPermission === 'granted' ? 'bg-green-500' : 'bg-amber-400'
  }`}
           />
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-white/50">
+          <span className="text-[0.6875rem] font-semibold uppercase tracking-wider text-white/50">
             {notificationPermission === 'granted'
               ? (t.notif_permission_granted ?? 'Permesso concesso')
               : (t.notif_permission_not_requested ?? 'Permesso non richiesto')}
@@ -124,7 +124,7 @@ export function NotificationPermissionButton({
         {/* Iscrizione push */}
         <div className="flex items-center gap-1.5">
           <span className={`h-2 w-2 rounded-full flex-shrink-0 ${isSubscribed ? 'bg-green-500' : 'bg-slate-300'}`} />
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-white/50">
+          <span className="text-[0.6875rem] font-semibold uppercase tracking-wider text-white/50">
             {isSubscribed
               ? (t.notif_subscribed ?? 'Iscritto')
               : (t.notif_not_subscribed ?? 'Non iscritto')}
@@ -134,7 +134,7 @@ export function NotificationPermissionButton({
 
       {/* Conferma salvataggio */}
       {isSubscribed && savedOk && (
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-green-600">
+        <div className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-green-600">
           <CheckCircle2 className="h-3 w-3" />
           <span>{t.notif_push_saved}</span>
         </div>
@@ -150,7 +150,7 @@ export function NotificationPermissionButton({
 
       {/* Suggerimento iniziale */}
       {notificationPermission === 'default' && !isSubscribed && (
-        <p className="text-[11px] text-white/60 leading-relaxed">
+        <p className="text-[0.6875rem] text-white/60 leading-relaxed">
           {t.notif_push_hint}
         </p>
       )}

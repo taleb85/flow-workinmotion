@@ -77,9 +77,9 @@ export default function BackgroundGallery({
                 />
               ))}
               {/* Stelle miniature */}
-              <div className="absolute top-[15%] right-[20%] h-[2px] w-[2px] rounded-full shadow-[0_0_4px_rgba(255,255,255,0.4)]" style={{ backgroundColor: `rgba(${theme.starColor},0.3)` }} />
-              <div className="absolute top-[40%] left-[15%] h-[2px] w-[2px] rounded-full shadow-[0_0_4px_rgba(255,255,255,0.3)]" style={{ backgroundColor: `rgba(${theme.starColor},0.2)` }} />
-              <div className="absolute top-[70%] right-[30%] h-[2px] w-[2px] rounded-full shadow-[0_0_4px_rgba(255,255,255,0.25)]" style={{ backgroundColor: `rgba(${theme.starColor},0.15)` }} />
+              <div className="absolute top-[15%] right-[20%] h-[0.125rem] w-[0.125rem] rounded-full shadow-[0_0_4px_rgba(255,255,255,0.4)]" style={{ backgroundColor: `rgba(${theme.starColor},0.3)` }} />
+              <div className="absolute top-[40%] left-[15%] h-[0.125rem] w-[0.125rem] rounded-full shadow-[0_0_4px_rgba(255,255,255,0.3)]" style={{ backgroundColor: `rgba(${theme.starColor},0.2)` }} />
+              <div className="absolute top-[70%] right-[30%] h-[0.125rem] w-[0.125rem] rounded-full shadow-[0_0_4px_rgba(255,255,255,0.25)]" style={{ backgroundColor: `rgba(${theme.starColor},0.15)` }} />
 
               {/* Checkmark */}
               {isActive && (
@@ -108,7 +108,7 @@ export default function BackgroundGallery({
             aria-label={t.bg_gallery_open ?? 'Sfondi'}
             className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10"
           >
-            <span className="text-[13px] font-semibold text-white">{t.bg_gallery_btn ?? 'Sfondo'}</span>
+            <span className="text-[0.8125rem] font-semibold text-white">{t.bg_gallery_btn ?? 'Sfondo'}</span>
             <ChevronRight className={`w-4 h-4 text-white/60 transition-transform duration-200 ${open ? 'rotate-90' : ''}`} aria-hidden />
           </button>
           <AnimatePresence initial={false}>
@@ -131,7 +131,7 @@ export default function BackgroundGallery({
           type="button"
           onClick={() => setOpen(true)}
           aria-label={t.bg_gallery_open ?? 'Sfondi'}
-          className="inline-flex min-h-[44px] w-full md:w-auto items-center justify-center gap-2 rounded-xl border border-neutral-500 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/15"
+          className="inline-flex min-h-[2.75rem] w-full md:w-auto items-center justify-center gap-2 rounded-xl border border-neutral-500 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/15"
         >
           <Palette className="h-4 w-4" />
           {t.bg_gallery_btn ?? 'Sfondo app'}
@@ -168,7 +168,7 @@ export default function BackgroundGallery({
                     </div>
                     <div>
                       <h2 className="text-base font-bold text-white">{t.bg_gallery_title ?? 'Sfondo app'}</h2>
-                      <p className="text-[11px] text-white/50">{t.bg_gallery_subtitle ?? 'Scegli lo sfondo che preferisci'}</p>
+                      <p className="text-[0.6875rem] text-white/50">{t.bg_gallery_subtitle ?? 'Scegli lo sfondo che preferisci'}</p>
                     </div>
                   </div>
                   <button
@@ -184,7 +184,7 @@ export default function BackgroundGallery({
 
                 {/* Footer */}
                 <div className="border-t border-white/10 px-4 py-2.5 text-center">
-                  <p className="text-[10px] text-white/40">{t.bg_gallery_footer ?? 'Lo sfondo si aggiorna subito e rimane salvato'}</p>
+                  <p className="text-[0.625rem] text-white/40">{t.bg_gallery_footer ?? 'Lo sfondo si aggiorna subito e rimane salvato'}</p>
                 </div>
               </motion.div>
             </motion.div>

@@ -74,7 +74,7 @@ export default function MobileStaffShifts({ user, myShifts, language, todayStr }
           <ChevronLeft className="h-5 w-5" aria-hidden />
         </button>
         <div className="flex min-w-0 flex-col items-center">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-white/70">
+          <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/70">
             {t.timesheet_my_week ?? 'La tua settimana'}
           </span>
           <span className="text-xs text-white/50">
@@ -113,7 +113,7 @@ export default function MobileStaffShifts({ user, myShifts, language, todayStr }
             return (
               <div key={dateStr} className="overflow-hidden rounded-2xl border border-white/10">
                 <div
-                  className={`flex items-center justify-between gap-2 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider ${
+                  className={`flex items-center justify-between gap-2 px-3 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider ${
                     dayIsToday ? 'bg-accent/15 text-accent' : 'bg-white/5 text-white/60'
                   }`}
                 >
@@ -129,12 +129,12 @@ export default function MobileStaffShifts({ user, myShifts, language, todayStr }
                       <span className="text-sm font-bold text-white">
                         {fmtTime(s.start_time)}–{fmtTime(s.end_time)}
                       </span>
-                      <span className="text-[11px] text-white/45">
+                      <span className="text-[0.6875rem] text-white/45">
                         {s.type === 'lunch' ? t.lunch : t.dinner}
                       </span>
                     </div>
                     <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[0.625rem] font-bold ${
                         statusColor[s.approval_status] ?? 'bg-white/10 text-white/60'
                       }`}
                     >

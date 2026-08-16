@@ -255,10 +255,10 @@ export function ProfileFormSelf({
         if (!scope) return null;
         return (
           <div className="rounded-xl border border-neutral-500 bg-white/8 px-3 py-2.5">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-white/45 mb-1">
+            <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/45 mb-1">
               {tv.profile_role_scope_label}
             </p>
-            <p className="text-[11px] text-white/70 leading-snug">{scope}</p>
+            <p className="text-[0.6875rem] text-white/70 leading-snug">{scope}</p>
           </div>
         );
       })()}
@@ -388,7 +388,7 @@ export function AdminTimesheetGridPrivacyEditor({ user }: { user: UserType }) {
           <p className="text-xs font-semibold text-white">
             {tv.admin_timesheet_grid_planned_only_label}
           </p>
-          <p className="mt-1 text-[11px] leading-snug text-white/55">
+          <p className="mt-1 text-[0.6875rem] leading-snug text-white/55">
             {tv.admin_timesheet_grid_planned_only_hint}
           </p>
         </div>
@@ -530,7 +530,7 @@ export function ProfileFormAdmin({
   return (
     <>
       {readOnly && (
-        <p className="mb-4 rounded-xl border border-neutral-500 bg-white/8 px-3 py-2 text-[11px] text-white/70 font-sans">
+        <p className="mb-4 rounded-xl border border-neutral-500 bg-white/8 px-3 py-2 text-[0.6875rem] text-white/70 font-sans">
           {(t as { settings_delegated_readonly_hint?: string }).settings_delegated_readonly_hint ??
             'Solo lettura. Per modifiche contatta un amministratore.'}
         </p>
@@ -644,7 +644,7 @@ export function ProfileFormAdmin({
               disabled={readOnly}
             />
             {activePinConflictMessage && !readOnly ? (
-              <p className="mt-1.5 text-[11px] font-medium text-red-600 font-sans leading-snug">
+              <p className="mt-1.5 text-[0.6875rem] font-medium text-red-600 font-sans leading-snug">
                 {activePinConflictMessage}
               </p>
             ) : null}
@@ -657,10 +657,10 @@ export function ProfileFormAdmin({
           if (!scope) return null;
           return (
             <div className="rounded-xl border border-neutral-500 bg-white/8 px-3 py-2.5">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-white/45 mb-1">
+              <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/45 mb-1">
                 {tv.profile_role_scope_label}
               </p>
-              <p className="text-[11px] text-white/70 leading-snug">{scope}</p>
+              <p className="text-[0.6875rem] text-white/70 leading-snug">{scope}</p>
             </div>
           );
         })()}
@@ -707,7 +707,7 @@ export function ProfileFormAdmin({
             placeholder={(t as { profile_hourly_rate_placeholder?: string }).profile_hourly_rate_placeholder ?? 'es. 12,50'}
             disabled={readOnly}
           />
-          <p className="text-[11px] text-white/55 mt-1 font-sans">
+          <p className="text-[0.6875rem] text-white/55 mt-1 font-sans">
             {(t as { profile_hourly_rate_hint?: string }).profile_hourly_rate_hint ?? ''}
           </p>
         </div>
@@ -752,7 +752,7 @@ export function ProfileFormAdmin({
               placeholder="GG/MM/AAAA"
             />
             {tv.profile_employment_start_hint ? (
-              <p className="text-[11px] text-white/55 mt-1 font-sans">
+              <p className="text-[0.6875rem] text-white/55 mt-1 font-sans">
                 {tv.profile_employment_start_hint}
               </p>
             ) : null}
@@ -776,7 +776,7 @@ export function ProfileFormAdmin({
                 placeholder="GG/MM/AAAA"
               />
               {tv.profile_employment_end_hint ? (
-                <p className="text-[11px] text-white/55 mt-1 font-sans">
+                <p className="text-[0.6875rem] text-white/55 mt-1 font-sans">
                   {tv.profile_employment_end_hint}
                 </p>
               ) : null}
@@ -794,7 +794,7 @@ export function ProfileFormAdmin({
 
         {variant === 'edit' && (!readOnly || isManagementRole(currentUser.role)) && (
           <div className="rounded-xl border border-neutral-500 bg-white/8 p-4 space-y-3">
-            <p className="text-[12px] leading-relaxed text-white/70 font-sans text-center">
+            <p className="text-[0.75rem] leading-relaxed text-white/70 font-sans text-center">
               {formatTrans(
                 tv.admin_employee_access_link_hint_simple ??
                   'Invia il link a {name}. Aprendolo compilerà i dati mancanti e attiverà le notifiche.',
@@ -817,7 +817,7 @@ export function ProfileFormAdmin({
         )}
 
         {!readOnly && (
-          <p className="text-[11px] text-white/55 mt-2">
+          <p className="text-[0.6875rem] text-white/55 mt-2">
             {(t as { permissions_in_settings?: string }).permissions_in_settings ??
               'Funzionalità, moduli e visibilità schede: Impostazioni → Team → Permessi sul dipendente (template ruoli + anteprima).'}
           </p>

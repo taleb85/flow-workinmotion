@@ -129,7 +129,7 @@ export function UnifiedBellButton({
 
         {/* Badge numero notifiche non lette - Rosso acceso con numero bianco */}
         {totalUnread > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[8px] font-black text-white" style={{ background: 'linear-gradient(135deg,#f87171,#dc2626)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.18), 0 2px 8px rgba(220,38,38,0.55)', border: '1.5px solid rgba(255,255,255,0.55)' }}>
+          <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[0.5rem] font-black text-white" style={{ background: 'linear-gradient(135deg,#f87171,#dc2626)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.18), 0 2px 8px rgba(220,38,38,0.55)', border: '1.5px solid rgba(255,255,255,0.55)' }}>
             {totalUnread > 9 ? '9+' : totalUnread}
           </span>
         )}

@@ -76,11 +76,11 @@ export default function SwUpdateOverlay() {
         transition={{ duration: 2.4, ease: 'easeInOut', repeat: Infinity }}
         className="leading-none"
       >
-        <FlowLogoSvg variant="icon-only" color="orange" style={{ width: 120, height: 120, display: 'block' }} />
+        <FlowLogoSvg variant="icon-only" color="orange" style={{ width: '7.5rem', height: '7.5rem', display: 'block' }} />
       </motion.div>
 
       {/* Stato */}
-      <div className="flex flex-col items-center gap-1.5 min-h-[44px]">
+      <div className="flex flex-col items-center gap-1.5 min-h-[2.75rem]">
         <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">
           Aggiornamento in corso
         </p>
@@ -99,7 +99,7 @@ export default function SwUpdateOverlay() {
       </div>
 
       {/* Steps lista */}
-      <ul className="w-full max-w-[220px] space-y-2.5 text-left">
+      <ul className="w-full max-w-[13.75rem] space-y-2.5 text-left">
         <AnimatePresence initial={false}>
           {STEPS.slice(0, visibleCount).map((step, i) => {
             const isDone = doneCount > i;

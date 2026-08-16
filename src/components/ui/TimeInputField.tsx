@@ -165,10 +165,10 @@ export function TimeInputField({
 
   const boxSize =
     size === 'hero'
-      ? 'min-h-[56px] gap-1 rounded-xl border px-2 py-2 text-3xl'
+      ? 'min-h-[3.5rem] gap-1 rounded-xl border px-2 py-2 text-3xl'
       : size === 'lg'
-        ? 'min-h-[52px] gap-1 rounded-xl border px-1.5 py-2 text-xl'
-        : 'min-h-[44px] gap-0.5 rounded-xl px-1 text-base font-semibold';
+        ? 'min-h-[3.25rem] gap-1 rounded-xl border px-1.5 py-2 text-xl'
+        : 'min-h-[2.75rem] gap-0.5 rounded-xl px-1 text-base font-semibold';
   const inner =
     'min-w-0 flex-1 bg-transparent text-center font-bold tabular-nums text-white outline-none placeholder:text-white/30 focus:outline-none cursor-pointer';
 

@@ -49,7 +49,7 @@ export default function TimesheetTabPreview({
                 </div>
               </div>
             </div>
-            <p className="mt-0.5 text-[10px] font-medium text-white/60">
+            <p className="mt-0.5 text-[0.625rem] font-medium text-white/60">
               {t.stats_preset_current_week}
             </p>
           </div>
@@ -74,7 +74,7 @@ export default function TimesheetTabPreview({
           ].map((c) => (
             <div key={c.l} className={`rounded-xl border border-neutral-500 p-3 text-center ${c.b} shadow-sm border border-slate-100`} >
               <p className="text-xl font-bold text-white">{c.v}</p>
-              <p className="mt-0.5 text-[10px] font-medium text-white/60">{c.l}</p>
+              <p className="mt-0.5 text-[0.625rem] font-medium text-white/60">{c.l}</p>
             </div>
           ))}
         </div>
@@ -91,15 +91,15 @@ export default function TimesheetTabPreview({
       >
         <div className="fluid-grid fluid-grid-3 gap-2">
           <div className="rounded-xl border border-neutral-500 p-3 shadow-sm border border-slate-100" >
-            <p className="text-[10px] font-bold uppercase text-white/50">{t.stats_approved_hours}</p>
+            <p className="text-[0.625rem] font-bold uppercase text-white/50">{t.stats_approved_hours}</p>
             <p className="text-xl font-bold text-white">128:30</p>
           </div>
           <div className="rounded-xl border border-neutral-500 p-3 shadow-sm border border-slate-100" >
-            <p className="text-[10px] font-bold uppercase text-white/50">{t.stats_estimated_cost}</p>
+            <p className="text-[0.625rem] font-bold uppercase text-white/50">{t.stats_estimated_cost}</p>
             <p className="text-xl font-bold text-white">—</p>
           </div>
           <div className="rounded-xl border border-neutral-500 p-3 shadow-sm border border-slate-100" >
-            <p className="text-[10px] font-bold uppercase text-white/50">{t.pending}</p>
+            <p className="text-[0.625rem] font-bold uppercase text-white/50">{t.pending}</p>
             <p className="text-xl font-bold text-amber-800">3</p>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function TimesheetTabPreview({
         hiddenBadge={hiddenBadge}
       >
         <div className="rounded-xl border border-neutral-500 overflow-hidden shadow-sm border border-slate-100" >
-          <div className="grid grid-cols-[minmax(4rem,1fr)_repeat(4,minmax(0,1fr))] gap-px bg-slate-100 text-[9px]">
+          <div className="grid grid-cols-[minmax(4rem,1fr)_repeat(4,minmax(0,1fr))] gap-px bg-slate-100 text-[0.5625rem]">
             <div className="bg-white px-1 py-2 font-bold text-white/50">Staff</div>
             {['Lun', 'Mar', 'Mer', 'Gio'].map((d) => (
               <div key={d} className="bg-white py-2 text-center font-bold text-white/50">
@@ -161,7 +161,7 @@ export default function TimesheetTabPreview({
             <div className="contents">
               <div className="bg-white px-2 py-2 font-semibold text-white/80">{previewUser.first_name}</div>
               {dailyHours.map((hours, i) => (
-                <div key={i} className="min-h-[36px] bg-white p-0.5 text-center">
+                <div key={i} className="min-h-[2.25rem] bg-white p-0.5 text-center">
                   {hours || <span className="text-slate-200">—</span>}
                 </div>
               ))}
@@ -185,7 +185,7 @@ export default function TimesheetTabPreview({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-white/90">Popup revisione timbratura</p>
-            <p className="mt-0.5 text-[10px] leading-relaxed text-white/60">
+            <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">
               {tv.profile_visibility_generic_widget_demo ?? 'Contenuto dimostrativo: in app qui compariranno i dati reali.'}
             </p>
           </div>
@@ -202,7 +202,7 @@ export default function TimesheetTabPreview({
         hiddenBadge={hiddenBadge}
       >
         <div className="rounded-xl border border-accent/25 bg-accent/5 p-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-accent-dark/80">{t.timesheet_my_week}</p>
+          <p className="text-[0.625rem] font-bold uppercase tracking-widest text-accent-dark/80">{t.timesheet_my_week}</p>
           <p className="mt-1 text-lg font-bold text-white">32:00</p>
           <p className="text-xs text-white/70">{t.shifts_week}</p>
         </div>

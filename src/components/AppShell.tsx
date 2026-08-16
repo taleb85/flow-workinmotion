@@ -721,7 +721,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                 disabled={isRefreshing || dataSyncInProgress}
                 title={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso...' : 'Sincronizza dati'}
                 aria-label={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso' : 'Sincronizza dati'}
-                className={`flex h-9 w-9 md:h-7 md:w-7 shrink-0 items-center justify-center rounded-xl md:rounded-lg text-xs md:text-[11px] font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
+                className={`flex h-9 w-9 md:h-7 md:w-7 shrink-0 items-center justify-center rounded-xl md:rounded-lg text-xs md:text-[0.6875rem] font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
                   isRefreshing || dataSyncInProgress
                     ? 'text-amber-500 liquid-glass-amber'
                     : isSynced
@@ -734,7 +734,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                 ) : isSynced ? (
                   <span className="relative inline-flex" aria-hidden>
                     <Cloud className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2.5} />
-                    <span className="absolute -bottom-0.5 -right-1 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-emerald-500 text-white" style={{ fontSize: 7 }}>✓</span>
+                    <span className="absolute -bottom-0.5 -right-1 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-emerald-500 text-white" style={{ fontSize: '0.4375rem' }}>✓</span>
                   </span>
                 ) : (
                   <CloudOff className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2.5} aria-hidden />
@@ -746,7 +746,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   onClick={() => setShowPinMenu(true)}
                   title={globalPinSessionId ? 'Sessione PIN attiva' : 'Sblocca sessione PIN'}
                   aria-label={globalPinSessionId ? 'Gestisci sessione PIN' : 'Sblocca sessione PIN'}
-                  className={`flex h-9 w-9 md:h-7 md:w-7 shrink-0 items-center justify-center rounded-xl md:rounded-lg text-xs md:text-[11px] font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
+                  className={`flex h-9 w-9 md:h-7 md:w-7 shrink-0 items-center justify-center rounded-xl md:rounded-lg text-xs md:text-[0.6875rem] font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
                     globalPinSessionId
                       ? 'text-emerald-500 liquid-glass-green'
                       : 'text-red-500 liquid-glass-red'
@@ -767,7 +767,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         role="main"
         aria-label="Contenuto principale"
         className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''}`}>
-        <div className="w-full app-horizontal-pad pt-0 md:pt-[var(--app-sticky-header-offset)] flex-1 min-h-0 flex flex-col pb-[48px] md:pb-0">
+        <div className="w-full app-horizontal-pad pt-0 md:pt-[var(--app-sticky-header-offset)] flex-1 min-h-0 flex flex-col pb-[3rem] md:pb-0">
           {/* PIN portals */}
           {createPortal(
             <AnimatePresence>
@@ -809,7 +809,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   <button type="button" onClick={closePinMenu} className="absolute top-5 right-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors active:bg-white/80" aria-label={t.close}>
                     <X size={20} strokeWidth={2.5} />
                   </button>
-                  <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.9 }} className="flex flex-col items-center w-full max-w-[320px] px-6">
+                  <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.9 }} className="flex flex-col items-center w-full max-w-[20rem] px-6">
                     <div className="flex flex-col items-center text-center mb-10">
                       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent/20 border-2 border-accent/40 mb-5">
                         <ShieldCheck className="w-9 h-9 text-accent" strokeWidth={2} />
@@ -882,11 +882,11 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   ],
                 }}
                 transition={{ duration: 2.4, ease: 'easeInOut', repeat: Infinity }}
-                style={{ borderRadius: 32 }}
+                style={{ borderRadius: '2rem' }}
               >
                 <FlowWaveIcon size={120} radius={32} />
               </motion.div>
-              <div className="flex flex-col items-center gap-1 min-h-[40px]">
+              <div className="flex flex-col items-center gap-1 min-h-[2.5rem]">
                 <p className="text-white/70 text-xs font-semibold uppercase tracking-widest">
                   {t.sync_total_in_progress}
                 </p>
@@ -999,7 +999,7 @@ function ProtectedApp() {
             opacity:   { duration: 0.5, ease: 'easeOut' },
             boxShadow: { duration: 2.4, ease: 'easeInOut', repeat: Infinity, delay: 0.5 },
           }}
-          style={{ borderRadius: 38 }}
+          style={{ borderRadius: '2.375rem' }}
         >
           <FlowWaveIcon size={140} radius={38} />
         </motion.div>

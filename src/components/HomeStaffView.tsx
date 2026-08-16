@@ -157,9 +157,9 @@ export default memo(function HomeStaffView({
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       {isDinner ? <Moon className="w-4 h-4 text-amber-600" /> : <Sun className="w-4 h-4 text-amber-500" />}
-                      <span className="text-[11px] font-bold uppercase tracking-wide text-white/55">{isDinner ? t.dinner : t.lunch}</span>
+                      <span className="text-[0.6875rem] font-bold uppercase tracking-wide text-white/55">{isDinner ? t.dinner : t.lunch}</span>
                     </div>
-                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${punched ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40' : 'bg-amber-500/15 text-amber-200 border-amber-400/50'}`}>
+                    <span className={`text-[0.6875rem] font-bold px-2.5 py-0.5 rounded-full border ${punched ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40' : 'bg-amber-500/15 text-amber-200 border-amber-400/50'}`}>
                       {punched ? t.home_punched : t.home_not_punched}
                     </span>
                   </div>
@@ -177,7 +177,7 @@ export default memo(function HomeStaffView({
           const next = upcomingShifts.filter((s) => s.date !== todayStr)[0];
           return (
             <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
-              <p className="text-[11px] font-bold text-white/55 uppercase tracking-wider mb-2">{t.home_next_shift}</p>
+              <p className="text-[0.6875rem] font-bold text-white/55 uppercase tracking-wider mb-2">{t.home_next_shift}</p>
               <p className="text-lg font-bold text-white mb-1">{getDateLabel(next.date)}</p>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-white/60" />
@@ -205,7 +205,7 @@ export default memo(function HomeStaffView({
               return Object.keys(grouped).sort().slice(0, 7).map((dateStr, idx) => (
                 <motion.div key={dateStr} initial={{ x: -8, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 + idx * 0.04 }}
                   className="flex items-center py-2.5 border-b border-slate-50 last:border-0 gap-3">
-                  <p className="text-white/55 font-semibold text-xs uppercase tracking-wide w-[72px] flex-shrink-0">
+                  <p className="text-white/55 font-semibold text-xs uppercase tracking-wide w-[4.5rem] flex-shrink-0">
                     {safeFormatDate(dateStr, 'EEE d', { locale })}
                   </p>
                   <div className="flex flex-wrap gap-1.5">

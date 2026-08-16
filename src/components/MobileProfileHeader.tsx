@@ -96,7 +96,7 @@ export default function MobileProfileHeader({
     <div className="relative" ref={wrapperRef}>
     <div
       className="flow-brand-header px-4 flex items-center justify-between gap-3"
-      style={{ height: 50 }}
+      style={{ height: '3.125rem' }}
     >
       {/* Sinistra: icona F + testo */}
       <div
@@ -105,7 +105,7 @@ export default function MobileProfileHeader({
         <div
           role="button"
           tabIndex={0}
-          style={{ width: 40, height: 40, flexShrink: 0, cursor: 'pointer' }}
+          style={{ width: '2.5rem', height: '2.5rem', flexShrink: 0, cursor: 'pointer' }}
           onClick={() => {
             if ('caches' in window) {
               caches.keys().then(names => Promise.all(names.map(n => caches.delete(n)))).finally(() => {
@@ -117,24 +117,24 @@ export default function MobileProfileHeader({
           }}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click(); }}
         >
-          <div style={{ width: 40, height: 40, borderRadius: 10, flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0 }}>
+          <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '0.625rem', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0 }}>
             <FlowWaveIcon size={40} />
           </div>
         </div>
         <div className="flex flex-col select-none">
           <span
-            style={{ color: '#ffffff', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 'normal' }}
+            style={{ color: '#ffffff', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '1.125rem', fontWeight: 700, letterSpacing: '0.08em', lineHeight: 'normal' }}
           >
             FLOW
           </span>
           <span
-            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 10, fontWeight: 500, letterSpacing: '0.20em', textTransform: 'uppercase', marginTop: 3, lineHeight: 'normal' }}
+            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.625rem', fontWeight: 500, letterSpacing: '0.20em', textTransform: 'uppercase', marginTop: '0.1875rem', lineHeight: 'normal' }}
           >
-            Work in Motion <span style={{ color: 'rgba(255,255,255,0.25)', marginLeft: 2 }}>v{__APP_VERSION__}</span>
+            Work in Motion <span style={{ color: 'rgba(255,255,255,0.25)', marginLeft: '0.125rem' }}>v{__APP_VERSION__}</span>
           </span>
         </div>
         {isSessionElevated && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-bold text-white shadow-sm">
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[0.6875rem] font-bold text-white shadow-sm">
             <ShieldCheck className="h-3 w-3" />
             Admin
           </span>
@@ -146,7 +146,7 @@ export default function MobileProfileHeader({
       <div className="flex shrink-0 items-center gap-2.5">
         {/* Status: live dot + data — solo desktop */}
         <span
-          className="hidden md:inline text-[13px] font-medium whitespace-nowrap capitalize tabular-nums"
+          className="hidden md:inline text-[0.8125rem] font-medium whitespace-nowrap capitalize tabular-nums"
           style={{ color: 'rgba(255,255,255,0.60)', letterSpacing: '0.01em' }}
         >
           {dateLabel}
@@ -173,7 +173,7 @@ export default function MobileProfileHeader({
             title={t.header_logout}
             aria-label={t.header_logout}
             style={{ background: 'rgba(255, 255, 255, 0.16)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.15s', flexShrink: 0 }}
-            className="h-9 w-9 md:h-7 md:w-7 rounded-[10px] md:rounded-[7px] text-white/70 hover:bg-white/15 hover:text-white touch-manipulation"
+            className="h-9 w-9 md:h-7 md:w-7 rounded-[0.625rem] md:rounded-[0.4375rem] text-white/70 hover:bg-white/15 hover:text-white touch-manipulation"
           >
             <LogOut className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2} color="#ef4444" aria-hidden />
           </button>

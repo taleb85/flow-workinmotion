@@ -52,7 +52,7 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border border-white/[0.09]">
           <Calendar className="w-7 h-7 text-white/25" />
         </div>
-        <p className="text-white/25 font-bold uppercase tracking-widest text-[11px]">
+        <p className="text-white/25 font-bold uppercase tracking-widest text-[0.6875rem]">
           {t.no_shifts_scheduled}
         </p>
       </div>
@@ -109,19 +109,19 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
 
                   return (
                     <div key={i} className="flex flex-col items-center gap-1">
-                      <span className={`text-[11px] font-bold ${isToday_ ? 'text-white' : 'text-white/50'}`}>{dayLetters[i]}</span>
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold ${
+                      <span className={`text-[0.6875rem] font-bold ${isToday_ ? 'text-white' : 'text-white/50'}`}>{dayLetters[i]}</span>
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[0.6875rem] font-bold ${
  isToday_ ? 'bg-white/20 text-white' : 'text-white/60'
  }`}>
                         {format(day, 'd')}
                       </div>
-                      <div className={`w-full rounded-lg flex flex-col items-center justify-center py-1.5 px-0.5 min-h-[38px] transition-colors ${blockCls}`}>
+                      <div className={`w-full rounded-lg flex flex-col items-center justify-center py-1.5 px-0.5 min-h-[2.375rem] transition-colors ${blockCls}`}>
                         {shiftCount > 0 && (
-                          <span className="text-[13px] font-black text-white leading-none drop-shadow-sm">
+                          <span className="text-[0.8125rem] font-black text-white leading-none drop-shadow-sm">
                             {shiftCount}
                           </span>
                         )}
-                        {isAbsent && <span className="text-[11px] font-bold text-red-500 opacity-80">—</span>}
+                        {isAbsent && <span className="text-[0.6875rem] font-bold text-red-500 opacity-80">—</span>}
                       </div>
                     </div>
                   );
@@ -137,7 +137,7 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
                 ].map(({ label, value }, i) => (
                   <div key={i} className="flex flex-col items-center gap-0.5">
                     <span className="text-sm font-black text-white/90 tabular-nums">{value}</span>
-                    <span className="text-[11px] text-white/50 uppercase font-bold tracking-wider">{label}</span>
+                    <span className="text-[0.6875rem] text-white/50 uppercase font-bold tracking-wider">{label}</span>
                   </div>
                 ))}
               </div>
@@ -151,7 +151,7 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
                 if (!dayShifts.length) return null;
                 return (
                   <div key={key}>
-                    <p className="text-[11px] font-black uppercase tracking-widest mt-2 mb-1.5 text-white/70 flex items-center gap-2">
+                    <p className="text-[0.6875rem] font-black uppercase tracking-widest mt-2 mb-1.5 text-white/70 flex items-center gap-2">
                       {format(day, 'EEEE d MMMM', { locale })}
                       {isToday(day) && (
                         <span className="h-1 w-1 rounded-full bg-white/60" />
@@ -185,12 +185,12 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
                               {shift.start_time.slice(0, 5)} – {shift.end_time?.slice(0, 5) ?? '…'}
                             </p>
                             {shift.department && (
-                              <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mt-0.5">
+                              <p className="text-[0.6875rem] font-bold uppercase tracking-widest text-white/50 mt-0.5">
                                 {translateDepartmentValue(shift.department, language as Language)}
                               </p>
                             )}
                           </div>
-                          <span className={`text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${badgeCls}`}>
+                          <span className={`text-[0.6875rem] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${badgeCls}`}>
                             {badgeLabel}
                           </span>
                         </div>

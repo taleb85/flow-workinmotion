@@ -173,7 +173,7 @@ export default function MobileStaffDashboard({
       : null;
 
   const tabSpinner = (
-    <div className="flex items-center justify-center min-h-[200px]">
+    <div className="flex items-center justify-center min-h-[12.5rem]">
       <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
     </div>
   );

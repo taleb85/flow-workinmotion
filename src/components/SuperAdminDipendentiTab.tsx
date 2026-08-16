@@ -227,40 +227,40 @@ export default function DipendentiTab({ tenantId }: { tenantId: string }) {
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <label htmlFor="sa-dip-first" className="text-[11px] font-semibold text-white/55">Nome *</label>
+                  <label htmlFor="sa-dip-first" className="text-[0.6875rem] font-semibold text-white/55">Nome *</label>
                   <input id="sa-dip-first" value={form.first_name} onChange={(e) => setF('first_name', e.target.value)} placeholder="Mario"
                     className="w-full rounded-lg border border-neutral-500 bg-white/8 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40" />
                 </div>
                 <div className="space-y-1">
-                  <label htmlFor="sa-dip-last" className="text-[11px] font-semibold text-white/55">Cognome</label>
+                  <label htmlFor="sa-dip-last" className="text-[0.6875rem] font-semibold text-white/55">Cognome</label>
                   <input id="sa-dip-last" value={form.last_name ?? ''} onChange={(e) => setF('last_name', e.target.value)} placeholder="Rossi"
                     className="w-full rounded-lg border border-neutral-500 bg-white/8 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40" />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="sa-dip-email" className="text-[11px] font-semibold text-white/55">Email</label>
+                <label htmlFor="sa-dip-email" className="text-[0.6875rem] font-semibold text-white/55">Email</label>
                 <input id="sa-dip-email" type="email" value={form.email} onChange={(e) => setF('email', e.target.value)} placeholder="mario@email.com"
                   className="w-full rounded-lg border border-neutral-500 bg-white/8 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40" />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <label htmlFor="sa-dip-role" className="text-[11px] font-semibold text-white/55">Ruolo *</label>
+                  <label htmlFor="sa-dip-role" className="text-[0.6875rem] font-semibold text-white/55">Ruolo *</label>
                   <select id="sa-dip-role" value={form.role} onChange={(e) => setF('role', e.target.value as UserRole)}
                     className="w-full rounded-lg border border-neutral-500 bg-white/8 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40">
                     {ROLE_OPTIONS.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label htmlFor="sa-dip-dept" className="text-[11px] font-semibold text-white/55">Reparto</label>
+                  <label htmlFor="sa-dip-dept" className="text-[0.6875rem] font-semibold text-white/55">Reparto</label>
                   <input id="sa-dip-dept" value={form.department ?? ''} onChange={(e) => setF('department', e.target.value)} placeholder="sala, bar, cucina…"
                     className="w-full rounded-lg border border-neutral-500 bg-white/8 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40" />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="sa-dip-pin" className="text-[11px] font-semibold text-white/55">PIN (4 cifre) *</label>
+                <label htmlFor="sa-dip-pin" className="text-[0.6875rem] font-semibold text-white/55">PIN (4 cifre) *</label>
                 <div className="relative">
                   <input
                     id="sa-dip-pin"
@@ -326,9 +326,9 @@ className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-accent 
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white/90 truncate" title={u.first_name}>{u.first_name} {u.last_name}
-                  {u.status !== 'active' && <span className="ml-1.5 text-[11px] font-bold text-red-400">(sospeso)</span>}
+                  {u.status !== 'active' && <span className="ml-1.5 text-[0.6875rem] font-bold text-red-400">(sospeso)</span>}
                 </p>
-                <p className="text-[11px] text-white/40 truncate" title={ROLE_LABELS[u.role]}>{ROLE_LABELS[u.role]}{u.department ? ` · ${u.department}` : ''}
+                <p className="text-[0.6875rem] text-white/40 truncate" title={ROLE_LABELS[u.role]}>{ROLE_LABELS[u.role]}{u.department ? ` · ${u.department}` : ''}
                 </p>
               </div>
               {/* Azioni */}
@@ -371,7 +371,7 @@ className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-accent 
             </button>
           ) : (
             <div className="space-y-1.5">
-              <p className="text-[11px] text-amber-400/80 text-center">
+              <p className="text-[0.6875rem] text-amber-400/80 text-center">
                 Elimina {demoUsers.length} utenti demo? L'azione è irreversibile.
               </p>
               <div className="flex gap-2">

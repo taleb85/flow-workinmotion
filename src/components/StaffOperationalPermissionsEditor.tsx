@@ -62,7 +62,7 @@ export default function StaffOperationalPermissionsEditor({ user, currentUser }:
       <p className="ui-section-title mb-2 text-white/50">
         {formatTrans(t.settings_operational_perms_heading, { name: user.first_name ?? '' })}
       </p>
-      <p className="text-[11px] text-white/60 mb-2 leading-snug">{t.settings_operational_perms_editable_hint}</p>
+      <p className="text-[0.6875rem] text-white/60 mb-2 leading-snug">{t.settings_operational_perms_editable_hint}</p>
       <div className={PERMISSION_SUMMARY_LIST_CLASS}>
         {rows.map((perm) => {
           const enabled = isUserPermissionEffective(user, perm.key);
@@ -83,7 +83,7 @@ export default function StaffOperationalPermissionsEditor({ user, currentUser }:
               description={perm.description}
               badge={
                 perm.adminOnly ? (
-                  <span className="text-[11px] font-bold text-accent border border-accent/30 bg-accent/8 rounded-xl px-1.5 py-0.5 uppercase tracking-wider">
+                  <span className="text-[0.6875rem] font-bold text-accent border border-accent/30 bg-accent/8 rounded-xl px-1.5 py-0.5 uppercase tracking-wider">
                     {t.settings_badge_admin}
                   </span>
                 ) : undefined
@@ -109,7 +109,7 @@ export default function StaffOperationalPermissionsEditor({ user, currentUser }:
                   </button>
                 ) : (
                   <span
-                    className={`shrink-0 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${
+                    className={`shrink-0 text-[0.6875rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${
  enabled ? 'bg-accent text-white shadow-sm' : 'bg-slate-100 text-white/60'
  }`}
                   >

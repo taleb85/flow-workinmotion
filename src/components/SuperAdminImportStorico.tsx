@@ -442,7 +442,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-bold text-amber-700">Importa turni storici</h2>
-          <p className="text-[11px] text-amber-600/70 mt-0.5">
+          <p className="text-[0.6875rem] text-amber-600/70 mt-0.5">
             CSV con turni passati. I nomi non riconosciuti vengono ignorati. Stesso slot (sede, data, orari, tipo) non viene duplicato se è già in tabella.
           </p>
         </div>
@@ -452,7 +452,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="sa-import-tenant" className="text-[11px] font-semibold text-white/55 uppercase tracking-wider">Sede di destinazione</label>
+        <label htmlFor="sa-import-tenant" className="text-[0.6875rem] font-semibold text-white/55 uppercase tracking-wider">Sede di destinazione</label>
         <select id="sa-import-tenant" value={selectedTenantId} onChange={(e) => { setSelectedTenantId(e.target.value); setRows([]); setImportResult(null); }}
           className="w-full rounded-xl border border-neutral-500 bg-white/8 px-3 py-2.5 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-amber-400/40">
           {tenants.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -475,14 +475,14 @@ className="flex items-center justify-center gap-1.5 rounded-xl border border-neu
       </div>
 
       <div className="rounded-xl bg-white/5 border border-neutral-500 p-3 space-y-2">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-white/40">Formato A — griglia settimanale (Ore dipendenti)</p>
-        <p className="text-[11px] text-white/55 leading-snug">
-          Separatore <strong>;</strong>, prima riga con <code className="text-[11px]">DATA:</code> e giorni <code className="text-[11px]">MONDAY 29;;TUESDAY 30;;</code> … Poi una riga per dipendente (nome in maiuscolo) e righe successive senza nome per altri turni nella stessa settimana.
-          Includi nel <strong>nome file</strong> qualsiasi data della settimana in <strong>DD-MM-YY</strong> o <strong>DD-MM-YYYY</strong> (es. <code className="text-[11px]">04-01-26</code> o <code className="text-[11px]">16-02-2026</code>).
+        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">Formato A — griglia settimanale (Ore dipendenti)</p>
+        <p className="text-[0.6875rem] text-white/55 leading-snug">
+          Separatore <strong>;</strong>, prima riga con <code className="text-[0.6875rem]">DATA:</code> e giorni <code className="text-[0.6875rem]">MONDAY 29;;TUESDAY 30;;</code> … Poi una riga per dipendente (nome in maiuscolo) e righe successive senza nome per altri turni nella stessa settimana.
+          Includi nel <strong>nome file</strong> qualsiasi data della settimana in <strong>DD-MM-YY</strong> o <strong>DD-MM-YYYY</strong> (es. <code className="text-[0.6875rem]">04-01-26</code> o <code className="text-[0.6875rem]">16-02-2026</code>).
         </p>
-        <p className="text-[11px] font-bold uppercase tracking-wider text-white/40 pt-1">Formato B — una riga per turno</p>
-        <code className="text-[11px] text-white/55 leading-relaxed whitespace-pre block">{`Nome,Data,Inizio,Fine\nGUSTAVO,29/01/2026,10:00,16:00`}</code>
-        <p className="text-[11px] text-white/40">Virgola &nbsp;·&nbsp; Data GG/MM/AAAA &nbsp;·&nbsp; Ora HH:MM</p>
+        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 pt-1">Formato B — una riga per turno</p>
+        <code className="text-[0.6875rem] text-white/55 leading-relaxed whitespace-pre block">{`Nome,Data,Inizio,Fine\nGUSTAVO,29/01/2026,10:00,16:00`}</code>
+        <p className="text-[0.6875rem] text-white/40">Virgola &nbsp;·&nbsp; Data GG/MM/AAAA &nbsp;·&nbsp; Ora HH:MM</p>
       </div>
 
       {parseError && <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-600">{parseError}</div>}
@@ -495,24 +495,24 @@ className="flex items-center justify-center gap-1.5 rounded-xl border border-neu
             <p className="text-sm font-bold text-amber-800">Nessun turno nuovo: erano già tutti presenti nel database.</p>
           )}
           {(importResult.duplicateInFile ?? 0) > 0 && (
-            <p className="text-[11px] text-white/70">Righe duplicate nel file (stesso slot): {importResult.duplicateInFile}</p>
+            <p className="text-[0.6875rem] text-white/70">Righe duplicate nel file (stesso slot): {importResult.duplicateInFile}</p>
           )}
           {(importResult.alreadyInDb ?? 0) > 0 && (
-            <p className="text-[11px] text-white/70">Già in tabella (stessa settimana / stesso slot): {importResult.alreadyInDb}</p>
+            <p className="text-[0.6875rem] text-white/70">Già in tabella (stessa settimana / stesso slot): {importResult.alreadyInDb}</p>
           )}
-          {importResult.skipped.length > 0 && <p className="text-[11px] text-amber-600">Ignorati (non trovati): {importResult.skipped.join(', ')}</p>}
+          {importResult.skipped.length > 0 && <p className="text-[0.6875rem] text-amber-600">Ignorati (non trovati): {importResult.skipped.join(', ')}</p>}
         </div>
       )}
 
       {rows.length > 0 && (
         <div className="space-y-3">
           <div className="flex gap-2 flex-wrap">
-            <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-700">✓ {matched.length} turni pronti</span>
-            {unmatched.length > 0 && <span className="px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-[11px] font-bold text-red-600">✗ Non riconosciuti: {unmatched.join(', ')}</span>}
+            <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[0.6875rem] font-bold text-emerald-700">✓ {matched.length} turni pronti</span>
+            {unmatched.length > 0 && <span className="px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-[0.6875rem] font-bold text-red-600">✗ Non riconosciuti: {unmatched.join(', ')}</span>}
           </div>
           <div className="rounded-xl border border-neutral-500 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-[11px]">
+              <table className="w-full text-[0.6875rem]">
                 <thead><tr className="bg-white/5 text-white/55">
                   <th className="px-3 py-2 text-left">Nome CSV</th>
                   <th className="px-3 py-2 text-left">Trovato</th>
@@ -533,14 +533,14 @@ className="flex items-center justify-center gap-1.5 rounded-xl border border-neu
                 </tbody>
               </table>
             </div>
-            {rows.length > 15 && <p className="text-center text-[11px] text-white/40 py-2 border-t border-white/12">… e altri {rows.length - 15} turni</p>}
+            {rows.length > 15 && <p className="text-center text-[0.6875rem] text-white/40 py-2 border-t border-white/12">… e altri {rows.length - 15} turni</p>}
           </div>
         </div>
       )}
 
       {/* Pulsante importazione sempre visibile in fondo */}
       <div className="rounded-xl border border-amber-400/40 bg-white/8 p-4 space-y-3 shadow-sm">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-amber-800/80">Importazione nel database</p>
+        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-amber-800/80">Importazione nel database</p>
         {rows.length === 0 && (
           <p className="text-xs text-white/70">
             Carica un CSV con il pulsante sopra: comparirà l’anteprima e potrai confermare l’import.
@@ -553,7 +553,7 @@ className="flex items-center justify-center gap-1.5 rounded-xl border border-neu
         )}
         {rows.length > 0 && matched.length > 0 && (
           <p className="text-xs text-emerald-800">
-            Pronti <strong>{matched.length}</strong> turni da scrivere in tabella <code className="text-[11px] bg-white/10 px-1 rounded">shifts</code>
+            Pronti <strong>{matched.length}</strong> turni da scrivere in tabella <code className="text-[0.6875rem] bg-white/10 px-1 rounded">shifts</code>
             {unmatched.length > 0 && (
               <span className="text-amber-700"> · {rows.length - matched.length} righe saltate (nome non trovato)</span>
             )}
@@ -577,21 +577,21 @@ className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500
       {/* ── Storico importazioni ── */}
       <div className="rounded-xl border border-neutral-500 bg-white/8 overflow-hidden">
         <div className="flex items-center justify-between px-4 py-2.5 bg-white/5 border-b border-neutral-500">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-white/55">Storico importazioni</p>
+          <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/55">Storico importazioni</p>
           <button
             onClick={() => void loadHistory(selectedTenantId)}
             disabled={historyLoading}
-            className="text-[11px] text-white/40 hover:text-white/80 transition font-semibold active:text-white/80"
+            className="text-[0.6875rem] text-white/40 hover:text-white/80 transition font-semibold active:text-white/80"
           >
             {historyLoading ? 'Caricamento…' : '↺ Aggiorna'}
           </button>
         </div>
 
         {!historyLoading && importHistory.length === 0 && (
-          <p className="text-[11px] text-white/40 px-4 py-3">Nessun file importato con tracciamento.</p>
+          <p className="text-[0.6875rem] text-white/40 px-4 py-3">Nessun file importato con tracciamento.</p>
         )}
         {historyLoading && (
-          <p className="text-[11px] text-white/40 px-4 py-3">Caricamento…</p>
+          <p className="text-[0.6875rem] text-white/40 px-4 py-3">Caricamento…</p>
         )}
 
         {importHistory.length > 0 && (
@@ -599,10 +599,10 @@ className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500
             {importHistory.map((batch) => (
               <div key={batch.adminNote} className="flex items-center gap-3 px-4 py-2.5">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[12px] font-semibold text-white/80 truncate" title={batch.fileName}>
+                  <p className="text-[0.75rem] font-semibold text-white/80 truncate" title={batch.fileName}>
                     {batch.fileName}
                   </p>
-                  <p className="text-[11px] text-white/40 mt-0.5">
+                  <p className="text-[0.6875rem] text-white/40 mt-0.5">
                     {batch.minDate === batch.maxDate
                       ? batch.minDate
                       : `${batch.minDate} → ${batch.maxDate}`}
@@ -613,17 +613,17 @@ className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500
 
                 {confirmDelete === batch.adminNote ? (
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[11px] text-red-600 font-semibold">Eliminare {batch.count} turni?</span>
+                    <span className="text-[0.6875rem] text-red-600 font-semibold">Eliminare {batch.count} turni?</span>
                     <button
                       onClick={() => void deleteImportBatch(batch.adminNote)}
                       disabled={deletingBatch === batch.adminNote}
-                      className="rounded-lg bg-red-500 hover:bg-red-600 px-2 py-1 text-[11px] font-bold text-white transition disabled:opacity-50 active:bg-red-600/80"
+                      className="rounded-lg bg-red-500 hover:bg-red-600 px-2 py-1 text-[0.6875rem] font-bold text-white transition disabled:opacity-50 active:bg-red-600/80"
                     >
                       {deletingBatch === batch.adminNote ? '…' : 'Sì, elimina'}
                     </button>
                     <button
                       onClick={() => setConfirmDelete(null)}
-                      className="rounded-lg border border-neutral-500 px-2 py-1 text-[11px] font-semibold text-white/70 hover:bg-white/5 transition active:bg-white/5/80"
+                      className="rounded-lg border border-neutral-500 px-2 py-1 text-[0.6875rem] font-semibold text-white/70 hover:bg-white/5 transition active:bg-white/5/80"
                     >
                       Annulla
                     </button>
@@ -631,7 +631,7 @@ className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500
                 ) : (
                   <button
                     onClick={() => setConfirmDelete(batch.adminNote)}
-                    className="shrink-0 flex items-center gap-1 rounded-lg border border-red-200 px-2 py-1 text-[11px] font-semibold text-red-500 hover:bg-red-50 hover:border-red-300 transition active:bg-red-50/80"
+                    className="shrink-0 flex items-center gap-1 rounded-lg border border-red-200 px-2 py-1 text-[0.6875rem] font-semibold text-red-500 hover:bg-red-50 hover:border-red-300 transition active:bg-red-50/80"
                   >
                     <Trash2 className="w-3 h-3" />
                     Elimina

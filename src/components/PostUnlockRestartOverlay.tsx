@@ -98,12 +98,12 @@ export default function PostUnlockRestartOverlay({ language }: { language: Langu
           ],
         }}
         transition={{ duration: 2.4, ease: 'easeInOut', repeat: Infinity }}
-        style={{ borderRadius: 32, marginBottom: 24 }}
+        style={{ borderRadius: '2rem', marginBottom: '1.5rem' }}
       >
         <FlowWaveIcon size={120} radius={32} />
       </motion.div>
 
-      <div className="flex flex-col items-center gap-1 mb-5 min-h-[40px]">
+      <div className="flex flex-col items-center gap-1 mb-5 min-h-[2.5rem]">
         <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">Riavvio in corso</p>
         <h2 className="text-sm font-bold tracking-tight text-white/90">
           {tv.post_unlock_restart_title ?? 'Aggiornamento completato'}
@@ -111,7 +111,7 @@ export default function PostUnlockRestartOverlay({ language }: { language: Langu
       </div>
 
       {/* Passaggi */}
-      <ul className="mb-6 flex w-full max-w-[220px] flex-col gap-2.5 text-left" aria-hidden>
+      <ul className="mb-6 flex w-full max-w-[13.75rem] flex-col gap-2.5 text-left" aria-hidden>
         <AnimatePresence initial={false}>
           {STEPS.slice(0, visibleCount).map((step, i) => {
             const isDone  = i < doneCount;

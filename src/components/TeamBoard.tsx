@@ -88,7 +88,7 @@ className="px-3 py-1.5 rounded-xl bg-white/10 text-white/70 text-xs font-semibol
               <p className="text-xs italic" style={{ color: '#ffffff' }}>{t.home_board_empty}</p>
             )}
             {boardNote && !editingBoard && (
-              <p className="text-[11px] text-amber-600 mt-1">
+              <p className="text-[0.6875rem] text-amber-600 mt-1">
                 Da {boardNote.author} · {safeFormatDate(boardNote.updatedAt, 'd MMM HH:mm', { locale: it })}
               </p>
             )}

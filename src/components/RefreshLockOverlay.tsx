@@ -149,7 +149,7 @@ export default function RefreshLockOverlay() {
         ) : (
           <Smartphone className="w-5 h-5 text-[#455a3f]" />
         )}
-        <span className="text-[11px] font-black uppercase tracking-tighter leading-none">
+        <span className="text-[0.6875rem] font-black uppercase tracking-tighter leading-none">
           {t.sync_lock_link_device}
         </span>
       </button>

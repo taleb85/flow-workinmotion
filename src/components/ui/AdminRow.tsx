@@ -23,7 +23,7 @@ const AdminRow = memo(function AdminRow({
 }: AdminRowProps) {
   return (
     <div
-      className={`flex min-h-[56px] items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 transition-colors last:border-b-0 hover:bg-gray-50/50 ${className} active:bg-gray-50/80`}
+      className={`flex min-h-[3.5rem] items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 transition-colors last:border-b-0 hover:bg-gray-50/50 ${className} active:bg-gray-50/80`}
     >
       <div className="flex min-w-0 flex-1 items-center gap-3 pr-2">
         {icon != null ? <span className="shrink-0 text-white/60 [&_svg]:block">{icon}</span> : null}
@@ -38,7 +38,7 @@ const AdminRow = memo(function AdminRow({
             {badge}
           </div>
           {description != null && description !== '' ? (
-            <span className="mt-0.5 text-[11px] leading-snug text-white/60">{description}</span>
+            <span className="mt-0.5 text-[0.6875rem] leading-snug text-white/60">{description}</span>
           ) : null}
         </div>
       </div>

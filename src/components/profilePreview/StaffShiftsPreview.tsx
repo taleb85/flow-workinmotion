@@ -28,7 +28,7 @@ export default function StaffShiftsPreview({
         hiddenBadge={hiddenBadge}
       >
         <div className="rounded-xl border border-neutral-500 p-4 shadow-sm border border-slate-100" >
-          <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">{t.approved_hours_summary}</p>
+          <p className="text-[0.625rem] font-bold uppercase tracking-widest text-white/50">{t.approved_hours_summary}</p>
           <p className="mt-1 text-2xl font-bold text-white">24:00</p>
           <p className="mt-1 text-xs text-white/60">{t.hours_this_month}</p>
         </div>

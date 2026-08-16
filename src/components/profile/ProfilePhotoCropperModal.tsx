@@ -243,7 +243,7 @@ export default function ProfilePhotoCropperModal({ imageSrc, labels, onClose, on
         </button>
       </div>
 
-      <p className="shrink-0 px-4 pb-[max(12px,env(safe-area-inset-bottom,0px))] pt-1 text-center text-[11px] leading-snug text-white/50">
+      <p className="shrink-0 px-4 pb-[max(12px,env(safe-area-inset-bottom,0px))] pt-1 text-center text-[0.6875rem] leading-snug text-white/50">
         {labels.hint}
       </p>
     </div>,

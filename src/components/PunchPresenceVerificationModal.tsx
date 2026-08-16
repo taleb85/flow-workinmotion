@@ -116,7 +116,7 @@ className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center 
                   </div>
                   <div
                     id={qrContainerId}
-                    className="mx-auto min-h-[260px] w-full max-w-[280px] overflow-hidden rounded-xl bg-black"
+                    className="mx-auto min-h-[16.25rem] w-full max-w-[17.5rem] overflow-hidden rounded-xl bg-black"
                   />
                   {busy && (
                     <div className="mt-3 flex justify-center">

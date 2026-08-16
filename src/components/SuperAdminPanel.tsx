@@ -116,7 +116,7 @@ function SuperAdminPinGate({ onUnlocked }: { onUnlocked: () => void }) {
       </motion.div>
 
       {/* Tastierino numerico */}
-      <div className="grid grid-cols-3 gap-3 w-full max-w-[260px] relative">
+      <div className="grid grid-cols-3 gap-3 w-full max-w-[16.25rem] relative">
         {PAD.flat().map((key, i) => {
           if (key === '') return <div key={i} />;
           const isDelete = key === '⌫';
@@ -272,15 +272,15 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
           />
 <button type="button" onClick={() => { setSlugManual(false); setSlug(slugify(name)); }} className="text-xs text-accent hover:underline shrink-0 active:brightness-95 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">Auto</button>
         </div>
-        <p className="text-[11px] text-white/40">Sarà il sottodominio: <span className="font-mono">{slug || '…'}.tuodominio.com</span></p>
+        <p className="text-[0.6875rem] text-white/40">Sarà il sottodominio: <span className="font-mono">{slug || '…'}.tuodominio.com</span></p>
       </div>
 
       {/* Nota branding — colore e logo fissi FLOW */}
       <div className="rounded-xl border border-neutral-500 bg-white/6 px-3.5 py-2.5 flex items-center gap-2.5">
         <div className="w-6 h-6 rounded-full bg-brand-deep flex items-center justify-center shrink-0">
-          <span className="text-white text-[11px] font-bold">F</span>
+          <span className="text-white text-[0.6875rem] font-bold">F</span>
         </div>
-        <p className="text-[11px] text-white/55">
+        <p className="text-[0.6875rem] text-white/55">
           Colore, font e logo sono fissi — brand FLOW per tutte le sedi.
         </p>
       </div>
@@ -293,7 +293,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
             <p className="text-sm font-semibold text-white/80 leading-snug">
               Carica dati demo
             </p>
-            <p className="text-[11px] text-white/40 leading-snug mt-0.5">
+            <p className="text-[0.6875rem] text-white/40 leading-snug mt-0.5">
               Dipendenti anonimizzati + turni settimana corrente dal template demo
             </p>
           </div>
@@ -622,7 +622,7 @@ function SuperAdminPanelInner() {
             />
             <div className="min-w-0">
               <h1 className="text-base font-bold text-white leading-tight truncate">Super Admin</h1>
-              <p className="text-[11px] text-[#2255BB] leading-tight hidden md:block">Gestione sedi</p>
+              <p className="text-[0.6875rem] text-[#2255BB] leading-tight hidden md:block">Gestione sedi</p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -742,7 +742,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-bold text-white text-sm">{t.name}</span>
-                              {!t.is_active && <span className="text-[11px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-200">Inattiva</span>}
+                              {!t.is_active && <span className="text-[0.6875rem] font-bold uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-200">Inattiva</span>}
                             </div>
 
                             {/* Slug */}
@@ -829,7 +829,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                                 <p className="text-xs font-semibold text-red-600 text-center">
                                   Eliminare <span className="font-bold text-red-700">"{t.name}"</span>?
                                 </p>
-                                <p className="text-[11px] text-red-500/80 text-center">
+                                <p className="text-[0.6875rem] text-red-500/80 text-center">
                                   Questa azione è irreversibile. Verranno eliminati tutti i dipendenti e i dati della sede.
                                 </p>
                                 <div className="flex gap-2 pt-1">

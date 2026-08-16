@@ -50,8 +50,7 @@ export default function MobileStatsCards({
           {labels.week}
         </p>
         <p className={`${sizeCls} font-bold text-white mb-3 tabular-nums whitespace-nowrap`}>
-          {fmt(weekWorkedMins)} <span className="text-white/30 font-normal">/</span>{' '}
-          {fmt(weekCapMins)}
+          {fmt(weekWorkedMins)}
         </p>
         <div className="w-full bg-white/15 rounded-full h-2">
           <div

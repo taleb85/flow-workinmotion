@@ -274,7 +274,7 @@ const FlowLogoSvg = memo(function FlowLogoSvg({
     );
     if (headerBar) {
       return (
-        <div className={`inline-flex max-w-full rounded-[10px] bg-[#1a2744] px-3 py-1.5 ${className}`.trim()}>
+        <div className={`inline-flex max-w-full rounded-[0.625rem] bg-[#1a2744] px-3 py-1.5 ${className}`.trim()}>
           {svg}
         </div>
       );

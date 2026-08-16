@@ -408,7 +408,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
               </button>
 
               {/* Note privacy */}
-              <p className="text-center text-[11px] text-white/45 leading-relaxed">
+              <p className="text-center text-[0.6875rem] text-white/45 leading-relaxed">
                 {lang === 'it'
                   ? 'I tuoi dati sono cifrati e utilizzati solo per identificarti nell\'app.'
                   : lang === 'es'

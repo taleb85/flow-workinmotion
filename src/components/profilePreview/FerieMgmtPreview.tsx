@@ -52,7 +52,7 @@ className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-
       >
         <div className="rounded-xl border border-neutral-500 p-3">
           <p className="mb-2 text-center text-xs font-bold text-white/70">Marzo 2026</p>
-          <div className="grid grid-cols-7 gap-1 text-center text-[10px]">
+          <div className="grid grid-cols-7 gap-1 text-center text-[0.625rem]">
             {['L', 'M', 'M', 'G', 'V', 'S', 'D'].map((d, i) => (
               <span key={`h-${i}`} className="font-bold text-white/50">
                 {d}
@@ -88,7 +88,7 @@ className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-
                 <p className="text-sm font-semibold text-white/90">Jean · Ferie</p>
                 <p className="text-xs text-white/60">15–19 mar</p>
               </div>
-              <span className="shrink-0 rounded-lg bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+              <span className="shrink-0 rounded-lg bg-amber-50 px-2 py-0.5 text-[0.625rem] font-bold text-amber-800">
                 {t.pending ?? 'In attesa'}
               </span>
             </div>

@@ -80,10 +80,10 @@ function NavPreviewBar({
   const hub = size === 'hub';
   const interactive = !!onSelectTab && activeTab != null;
   const pad = fs ? 'py-4 px-3 md:px-5' : hub ? 'py-2 px-2 md:px-3' : 'py-2 px-2';
-  const rowMin = fs ? 'min-h-[72px] md:min-h-[88px]' : hub ? 'min-h-[48px] md:min-h-[52px]' : 'min-h-[44px]';
+  const rowMin = fs ? 'min-h-[4.5rem] md:min-h-[5.5rem]' : hub ? 'min-h-[3rem] md:min-h-[3.25rem]' : 'min-h-[2.75rem]';
   const gap = fs ? 'gap-1.5 px-1' : hub ? 'gap-1 px-0.5' : 'gap-0.5 px-1';
-  const iconSz = fs ? 'w-7 h-7 md:w-8 md:h-8' : hub ? 'w-[18px] h-[18px] md:w-5 md:h-5' : 'w-4 h-4';
-  const labelSz = fs ? 'text-[11px] md:text-xs' : hub ? 'text-[11px] md:text-[11px]' : 'text-[11px]';
+  const iconSz = fs ? 'w-7 h-7 md:w-8 md:h-8' : hub ? 'w-[1.125rem] h-[1.125rem] md:w-5 md:h-5' : 'w-4 h-4';
+  const labelSz = fs ? 'text-[0.6875rem] md:text-xs' : hub ? 'text-[0.6875rem] md:text-[0.6875rem]' : 'text-[0.6875rem]';
   return (
     <div className={`rounded-[1.25rem] border border-neutral-500 shadow-inner ${pad}`} style={{ backgroundColor: ACCENT }}>
       <div className={`flex justify-between items-stretch gap-1 md:gap-2 ${rowMin}`}>
@@ -503,13 +503,13 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                         {u.first_name} {u.last_name ?? ''}
                       </p>
                       <p
-                        className="text-[11px] text-white/60 truncate"
+                        className="text-[0.6875rem] text-white/60 truncate"
                         title={translateRole(u.role, currentUser.language)}
                       >
                         {translateRole(u.role, currentUser.language)}
                       </p>
                       {u.status !== 'active' && (
-                        <span className="mt-1 inline-block rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[11px] font-bold text-amber-700 uppercase">
+                        <span className="mt-1 inline-block rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[0.6875rem] font-bold text-amber-700 uppercase">
                           {u.status}
                         </span>
                       )}
@@ -541,7 +541,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
           aria-modal="true"
           aria-labelledby="profile-visibility-fs-title"
         >
-          <header className="sticky top-0 z-[10070] safe-area-pad flex min-h-[72px] shrink-0 items-center gap-3 border-b border-slate-200/90 bg-white/90 px-4 py-3 pt-[max(12px,env(safe-area-inset-top,0px))] shadow-sm backdrop-blur-lg md:px-5">
+          <header className="sticky top-0 z-[10070] safe-area-pad flex min-h-[4.5rem] shrink-0 items-center gap-3 border-b border-slate-200/90 bg-white/90 px-4 py-3 pt-[max(12px,env(safe-area-inset-top,0px))] shadow-sm backdrop-blur-lg md:px-5">
             <button
               type="button"
               onClick={closePreview}
@@ -553,7 +553,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
             <div className="min-w-0 flex-1">
               <p
                 id="profile-visibility-fs-title"
-                className="text-[11px] font-bold text-white/60 uppercase tracking-wider"
+                className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider"
               >
                 {tv.profile_visibility_fullscreen_title ?? 'Anteprima profilo'}
               </p>
@@ -564,7 +564,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                 {previewUser.first_name} {previewUser.last_name ?? ''}
               </p>
               <p
-                className="text-[11px] text-white/60 truncate"
+                className="text-[0.6875rem] text-white/60 truncate"
                 title={translateRole(previewUser.role, currentUser.language)}
               >
                 {translateRole(previewUser.role, currentUser.language)}
@@ -574,12 +574,12 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
               <button
                 type="button"
                 onClick={handleSaveAndApply}
-                className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase shadow-sm transition-colors hover:bg-accent-hover hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+                className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-[0.6875rem] font-bold tracking-wider text-white uppercase shadow-sm transition-colors hover:bg-accent-hover hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               >
                 {tv.profile_visibility_save_apply ?? 'Salva e applica'}
               </button>
             ) : (
-              <span className="shrink-0 rounded-lg border border-accent/20 bg-accent/10 px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-accent uppercase">
+              <span className="shrink-0 rounded-lg border border-accent/20 bg-accent/10 px-2.5 py-1.5 text-[0.6875rem] font-bold tracking-wider text-accent uppercase">
                 {tv.profile_visibility_readonly_preview ?? 'Solo lettura'}
               </span>
             )}
@@ -589,13 +589,13 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
             <div className="mx-auto w-full max-w-7xl space-y-4">
               <div className="rounded-xl border border-neutral-500 overflow-hidden">
                 <div className="border-b border-slate-100 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-bold text-white/60 uppercase tracking-wider">
+                  <p className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider">
                     {tv.profile_visibility_preview_banner ?? 'Anteprima navigazione'}
                   </p>
                 </div>
                 <div className="p-3 md:p-4 space-y-2">
                   {isSelectedAdmin && (
-                    <p className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] leading-snug text-amber-800">
+                    <p className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[0.6875rem] leading-snug text-amber-800">
                       {tv.profile_visibility_admin_note ??
                         'Profilo Amministratore: tutte le funzioni restano attive; non si applicano eccezioni qui.'}
                     </p>
@@ -678,7 +678,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                           />
                           {staffModulesForActiveTab.length > 0 && (
                             <div className="space-y-1 border-t border-neutral-500/80 pt-1.5">
-                              <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-white/60">
+                              <p className="px-1 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">
                                 {tv.profile_visibility_tab_staff_modules ?? 'Moduli area personale'}
                               </p>
                               {staffModulesForActiveTab.map((mod) => {
@@ -686,14 +686,14 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                                 return (
                                   <div
                                     key={mod}
-                                    className={`flex min-h-[44px] items-stretch gap-0 rounded-lg border-2 ${
+                                    className={`flex min-h-[2.75rem] items-stretch gap-0 rounded-lg border-2 ${
  enabled
  ? 'border-slate-200 rounded-xl border border-neutral-500'
  : 'border-dashed border-neutral-500/70 bg-slate-300/40'
  }`}
                                   >
                                     <div
-                                      className={`w-[3px] shrink-0 ${enabled ? 'bg-accent' : 'bg-slate-400'}`}
+                                      className={`w-[0.1875rem] shrink-0 ${enabled ? 'bg-accent' : 'bg-slate-400'}`}
                                       aria-hidden
                                     />
                                     <div className="flex min-w-0 flex-1 items-center justify-between gap-2 py-1.5 pl-2 pr-1.5">
@@ -755,7 +755,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                             </span>
                             <ChevronDown className="h-4 w-4 shrink-0 text-white/50 transition-transform group-open:rotate-180" />
                           </summary>
-                          <p className="border-t border-slate-100 px-4 pt-2 text-[11px] text-white/60">
+                          <p className="border-t border-slate-100 px-4 pt-2 text-[0.6875rem] text-white/60">
                             {tv.profile_visibility_tab_permissions_hint ??
                               'Attivano o disattivano funzioni e spesso la presenza della scheda in app.'}
                           </p>

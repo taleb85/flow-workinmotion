@@ -26,7 +26,7 @@ interface PinPadModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
   leftActionButton?: ReactNode;
-  /** Sovrascrive le classi dell'overlay (default: 'bg-black/30 backdrop-blur-[3px]') */
+  /** Sovrascrive le classi dell'overlay (default: 'bg-black/30 backdrop-blur-[0.1875rem]') */
   backdropClass?: string;
   /** ID utente per biometrica interna (usato solo se leftActionButton non è fornito) */
   userId?: string;
@@ -174,7 +174,7 @@ export function PinPadModal({
               <div key={i} className="relative flex items-center justify-center">
                 {filledCount === i && (
                   <motion.div animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }}
-                    className="absolute -left-3 h-8 w-[2px] rounded-full bg-white/70" />
+                    className="absolute -left-3 h-8 w-[0.125rem] rounded-full bg-white/70" />
                 )}
                 <motion.div
                   animate={filledCount > i ? { scale: [1, 1.3, 1] } : { scale: 1 }}
@@ -186,7 +186,7 @@ export function PinPadModal({
                 />
                 {filledCount === 4 && i === 3 && (
                   <motion.div animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }}
-                    className="absolute -right-3 h-8 w-[2px] rounded-full bg-white/70" />
+                    className="absolute -right-3 h-8 w-[0.125rem] rounded-full bg-white/70" />
                 )}
               </div>
             ))}
@@ -255,7 +255,7 @@ export function PinPadModal({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
         transition={{ type: 'spring', stiffness: 360, damping: 30, mass: 0.9 }}
-        className="flex flex-col w-full max-w-[340px] mx-4 rounded-3xl overflow-hidden"
+        className="flex flex-col w-full max-w-[21.25rem] mx-4 rounded-3xl overflow-hidden"
         style={{ backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.18)', boxShadow: '0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08), 0 0 40px rgba(255,255,255,0.04)' }}
         onClick={e => e.stopPropagation()}
       >

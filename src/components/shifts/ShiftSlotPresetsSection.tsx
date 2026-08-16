@@ -98,7 +98,7 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-white/50">{slotLabel}</p>
+        <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50">{slotLabel}</p>
         <button
           type="button"
           onClick={() => {
@@ -106,7 +106,7 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
             setNewStart('');
             setNewEnd('');
           }}
-          className={`shrink-0 rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+          className={`shrink-0 rounded-lg px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-wider transition-colors ${
  editMode
  ? 'bg-accent/20 text-accent'
  : 'bg-white/10 text-white/60 hover:text-white'
@@ -119,7 +119,7 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
       {editMode ? (
         <div className="space-y-1.5 rounded-xl border border-white/10 bg-white/[0.03] p-2">
           {presets.length === 0 ? (
-            <p className="py-1 text-center text-[10px] text-white/40">
+            <p className="py-1 text-center text-[0.625rem] text-white/40">
               {tv.no_presets ?? 'Nessun orario salvato'}
             </p>
           ) : (
@@ -136,17 +136,17 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
  isDraggingOver(i) ? 'bg-white/10 ring-1 ring-white/30' : ''
  } ${dragIndex === i ? 'opacity-40' : ''}`}
               >
-                <span className="flex shrink-0 cursor-grab active:cursor-grabbing px-1 text-[11px] text-white/30 hover:text-white/50" aria-hidden="true">
+                <span className="flex shrink-0 cursor-grab active:cursor-grabbing px-1 text-[0.6875rem] text-white/30 hover:text-white/50" aria-hidden="true">
                   ⠿
                 </span>
-                <span className="flex-1 rounded-lg bg-white/10 px-2.5 py-1 text-[11px] font-bold tabular-nums text-white">
+                <span className="flex-1 rounded-lg bg-white/10 px-2.5 py-1 text-[0.6875rem] font-bold tabular-nums text-white">
                   {start}–{end}
                 </span>
                 <button
                   type="button"
                   onClick={() => removePreset(i)}
                   aria-label={tv.delete ?? 'Elimina'}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-[11px] font-bold text-red-300 hover:bg-red-500/25"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-[0.6875rem] font-bold text-red-300 hover:bg-red-500/25"
                 >
                   ✕
                 </button>
@@ -154,7 +154,7 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
             ))
           )}
           <div className="border-t border-white/10 pt-2">
-            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-white/40">
+            <p className="mb-1.5 text-[0.625rem] font-semibold uppercase tracking-wide text-white/40">
               {tv.add_preset ?? 'Aggiungi orario'}
             </p>
             <div className="mb-2 flex items-center gap-1.5">
@@ -164,7 +164,7 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
                 size="md"
                 className="min-w-0 flex-1 border-white/20 bg-white/10"
               />
-              <span className="text-[11px] text-white/40">–</span>
+              <span className="text-[0.6875rem] text-white/40">–</span>
               <TimeInputField
                 value={newEnd}
                 onChange={setNewEnd}
@@ -176,7 +176,7 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
               type="button"
               onClick={addPreset}
               disabled={!newStart.trim() || !newEnd.trim()}
-              className="w-full rounded-lg bg-accent/20 py-1.5 text-[11px] font-bold text-accent transition-colors hover:bg-accent/30 disabled:opacity-40 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              className="w-full rounded-lg bg-accent/20 py-1.5 text-[0.6875rem] font-bold text-accent transition-colors hover:bg-accent/30 disabled:opacity-40 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               + {tv.add ?? 'Aggiungi'}
             </button>
@@ -195,9 +195,9 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
                   onApply(start, end);
                   onAutoCreate?.(start, end);
                 }}
-                className={`rounded-lg px-2 py-2 text-[12px] font-bold tabular-nums transition-colors duration-200 border whitespace-nowrap ${
+                className={`rounded-lg px-2 py-2 text-[0.75rem] font-bold tabular-nums transition-colors duration-200 border whitespace-nowrap ${
  isActive
- ? 'border-[3px] border-white bg-white/15 text-white shadow-[0_0_8px_#fff]'
+ ? 'border-[0.1875rem] border-white bg-white/15 text-white shadow-[0_0_8px_#fff]'
  : 'border-transparent bg-white/15 text-white hover:bg-white/20'
  }`}
               >

@@ -41,7 +41,7 @@ export default function GenericWidgetsColumn({
         const sub = applicable[0]?.screenLabel ?? groupKey;
         return (
           <div key={groupKey} className="space-y-2">
-            <p className="px-1 text-[9px] font-bold uppercase tracking-wider text-white/60">{sub}</p>
+            <p className="px-1 text-[0.5625rem] font-bold uppercase tracking-wider text-white/60">{sub}</p>
             <div className="space-y-3">
               {applicable
                 .filter((w) => widgetAppliesToUser(w, previewUser.role))
@@ -65,7 +65,7 @@ export default function GenericWidgetsColumn({
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-semibold text-white/90">{w.label}</p>
-                          <p className="mt-0.5 text-[10px] leading-relaxed text-white/60">
+                          <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">
                             {tv.profile_visibility_generic_widget_demo ??
                               'Contenuto dimostrativo: in app qui compariranno i dati reali.'}
                           </p>

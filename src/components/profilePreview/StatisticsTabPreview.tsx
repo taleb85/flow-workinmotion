@@ -37,7 +37,7 @@ export default function StatisticsTabPreview({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-white/90">{t.stats_title}</p>
-            <p className="mt-0.5 text-[10px] leading-relaxed text-white/60">
+            <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">
               {tv.profile_visibility_generic_widget_demo ?? 'Contenuto dimostrativo: in app qui compariranno i dati reali.'}
             </p>
           </div>
@@ -60,10 +60,10 @@ export default function StatisticsTabPreview({
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-white/90">{t.stats_preset_period}</p>
             <div className="mt-1 flex flex-wrap gap-2">
-              <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-white/80">
+              <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-[0.625rem] font-semibold text-white/80">
                 {t.stats_preset_current_month}
               </span>
-              <span className="rounded-lg border border-slate-200 px-2 py-0.5 text-[10px] font-semibold text-white/60">
+              <span className="rounded-lg border border-slate-200 px-2 py-0.5 text-[0.625rem] font-semibold text-white/60">
                 PDF Export
               </span>
             </div>
@@ -102,7 +102,7 @@ export default function StatisticsTabPreview({
         hiddenBadge={hiddenBadge}
       >
         <div className="rounded-xl border border-neutral-500 p-4">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-white/50">{t.mod_stats_hours}</p>
+          <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50">{t.mod_stats_hours}</p>
           <p className="mt-1 text-2xl font-bold text-white">24:00</p>
           <p className="text-xs text-white/60">{t.stats_preset_current_week}</p>
         </div>

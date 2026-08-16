@@ -689,7 +689,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                       style={!showDeptMenu ? { color: 'rgba(255,255,255,0.80)' } : {}}
                     >
                       <Filter className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
-                      <span className="max-w-[80px] truncate">
+                      <span className="max-w-[5rem] truncate">
                         {deptFilter === 'all' ? 'Reparti' : translateDepartmentValue(deptFilter, effectiveLanguage)}
                       </span>
                       <ChevronDown className={`h-3 w-3 md:h-3.5 md:w-3.5 text-white/45 transition-transform ${showDeptMenu ? 'rotate-180' : ''}`} />
@@ -717,7 +717,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                               {t.department_filter_label}
                             </div>
                             <button type="button" onClick={() => { setDeptFilter('all'); setShowDeptMenu(false); }}
-                              className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${deptFilter === 'all' ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
+                              className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[0.6875rem] font-bold transition-colors ${deptFilter === 'all' ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
                               <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                 <Check className={`h-3 w-3 ${deptFilter === 'all' ? 'text-white' : 'text-white/80'}`} strokeWidth={3} />
                               </div>
@@ -727,7 +727,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                             <div className="my-1 h-px bg-white/10" />
                             {departments.map((d) => (
                               <button key={d.value} type="button" onClick={() => { setDeptFilter(d.value); setShowDeptMenu(false); }}
-                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${deptFilter === d.value ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
+                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[0.6875rem] font-bold transition-colors ${deptFilter === d.value ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
                                 <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                   <span className={`h-2.5 w-2.5 rounded-full shadow-sm ${deptFilter === d.value ? 'bg-white' : ''}`}
                                     style={deptFilter !== d.value ? { backgroundColor: d.color ?? getDeptColor(d.value) } : {}} />
@@ -743,7 +743,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                             <CenteredModalPortal
                               open={showDeptMenu}
                               onClose={() => setShowDeptMenu(false)}
-                              maxWidthClass="max-w-[280px]"
+                              maxWidthClass="max-w-[17.5rem]"
                               panelClassName="p-1 !text-slate-50"
                               panelStyle={{
                                 background: 'var(--bg-popover-solid, rgb(21, 40, 72))',
@@ -758,7 +758,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                                 </button>
                               </div>
                               <button type="button" onClick={() => { setDeptFilter('all'); setShowDeptMenu(false); }}
-                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${deptFilter === 'all' ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
+                                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[0.6875rem] font-bold transition-colors ${deptFilter === 'all' ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
                                 <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                   <Check className={`h-3 w-3 ${deptFilter === 'all' ? 'text-white' : 'text-white/80'}`} strokeWidth={3} />
                                 </div>
@@ -768,7 +768,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                               <div className="my-1 h-px bg-white/10" />
                               {departments.map((d) => (
                                 <button key={d.value} type="button" onClick={() => { setDeptFilter(d.value); setShowDeptMenu(false); }}
-                                  className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors ${deptFilter === d.value ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
+                                  className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[0.6875rem] font-bold transition-colors ${deptFilter === d.value ? 'bg-white/20 text-white shadow-md' : 'text-white/80 hover:bg-white/10'} active:bg-white/15`}>
                                   <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                                     <span className={`h-2.5 w-2.5 rounded-full shadow-sm ${deptFilter === d.value ? 'bg-white' : ''}`}
                                       style={deptFilter !== d.value ? { backgroundColor: d.color ?? getDeptColor(d.value) } : {}} />
@@ -811,7 +811,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 className="rounded-2xl border border-white/12 px-3 py-3"
                 style={{ background: 'rgba(255,255,255,0.06)' }}
               >
-                <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
+                <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/45">
                   {tv.stats_kpi_month_hours ?? 'Ore mese (calendario)'}
                 </p>
                 <p className="mt-1 text-lg font-bold tabular-nums text-white">
@@ -822,7 +822,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 className="rounded-2xl border border-white/12 px-3 py-3"
                 style={{ background: 'rgba(255,255,255,0.06)' }}
               >
-                <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
+                <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/45">
                   {tv.stats_kpi_present_absent ?? 'Presenze / assenze (mese)'}
                 </p>
                 <p className="mt-1 text-lg font-bold tabular-nums text-white">
@@ -833,7 +833,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 className="rounded-2xl border border-white/12 px-3 py-3"
                 style={{ background: 'rgba(255,255,255,0.06)' }}
               >
-                <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
+                <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/45">
                   {tv.stats_kpi_avg_week ?? 'Media ore / sett. (vista)'}
                 </p>
                 <p className="mt-1 text-lg font-bold tabular-nums text-white">
@@ -844,7 +844,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 className="rounded-2xl border border-white/12 px-3 py-3"
                 style={{ background: 'rgba(255,255,255,0.06)' }}
               >
-                <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
+                <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/45">
                   {tv.stats_kpi_active_today ?? 'Dipendenti con turno oggi'}
                 </p>
                 <p className="mt-1 text-lg font-bold tabular-nums text-white">{kpiActiveToday}</p>
@@ -854,7 +854,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
               className="rounded-2xl border border-white/12 p-4"
               style={{ background: 'rgba(255,255,255,0.05)' }}
             >
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-white/50">
+              <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white/50">
                 {tv.stats_trend_8w ?? 'Trend ultime 8 settimane'}
               </p>
               {(() => {
@@ -907,7 +907,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                   </svg>
                 );
               })()}
-              <div className="mt-1 flex justify-between text-[9px] font-semibold text-white/40">
+              <div className="mt-1 flex justify-between text-[0.5625rem] font-semibold text-white/40">
                 {eightWeekTrend.map((t) => (
                   <span key={t.key}>{t.label}</span>
                 ))}
@@ -972,44 +972,44 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                             <table className="w-full border-collapse border border-white/12" style={{ minWidth: `${weekDays.length * 60 + 120}px` }}>
                             <thead>
                               <tr className="bg-white/10">
-                                <th className="py-2 pl-5 pr-2 text-left text-[11px] font-bold uppercase tracking-wider text-white/70 border border-white/12">
+                                <th className="py-2 pl-5 pr-2 text-left text-[0.6875rem] font-bold uppercase tracking-wider text-white/70 border border-white/12">
                                   {w.label}
                                 </th>
                                 {weekDays.map((day) => (
-                                  <th key={format(day, 'yyyy-MM-dd')} className="px-2 py-2 text-center min-w-[60px] border border-white/12">
-                                    <span className="block text-[11px] font-bold uppercase tracking-wider text-white/70">
+                                  <th key={format(day, 'yyyy-MM-dd')} className="px-2 py-2 text-center min-w-[3.75rem] border border-white/12">
+                                    <span className="block text-[0.6875rem] font-bold uppercase tracking-wider text-white/70">
                                       {format(day, 'EEE', { locale: statsLoc })}
                                     </span>
-                                    <span className="block text-[11px] font-semibold text-white/45 tabular-nums">
+                                    <span className="block text-[0.6875rem] font-semibold text-white/45 tabular-nums">
                                       {format(day, 'dd/MM')}
                                     </span>
                                   </th>
                                 ))}
-                                <th className="py-2 pl-2 pr-5 text-right text-[11px] font-bold uppercase tracking-wider text-white/70 min-w-[60px] border border-white/12 bg-white/10">
+                                <th className="py-2 pl-2 pr-5 text-right text-[0.6875rem] font-bold uppercase tracking-wider text-white/70 min-w-[3.75rem] border border-white/12 bg-white/10">
                                   Tot.
                                 </th>
                               </tr>
                             </thead>
                             <tbody>
                               <tr>
-                                <td className="py-2 pl-5 pr-2 border border-white/12 text-[11px] text-white/45" />
+                                <td className="py-2 pl-5 pr-2 border border-white/12 text-[0.6875rem] text-white/45" />
                                 {weekDays.map((day) => {
                                   const dayKey = format(day, 'yyyy-MM-dd');
                                   const mins = minutesByUserByDay[currentUser.id]?.[dayKey] ?? 0;
                                   return (
                                     <td key={dayKey} className="px-2 py-2.5 text-center tabular-nums border border-white/12">
                                       {mins > 0 ? (
-                                        <span className="text-[13px] font-bold text-white">
+                                        <span className="text-[0.8125rem] font-bold text-white">
                                           {formatMinutesToHoursAndMinutes(mins)}
                                         </span>
                                       ) : (
-                                        <span className="text-[13px] text-white/25">—</span>
+                                        <span className="text-[0.8125rem] text-white/25">—</span>
                                       )}
                                     </td>
                                   );
                                 })}
                                 <td className="py-2.5 pl-2 pr-5 text-right tabular-nums border border-white/12 bg-white/5">
-                                  <span className={`text-[13px] font-extrabold ${weekMins > 0 ? 'text-white' : 'text-white/25'}`}>
+                                  <span className={`text-[0.8125rem] font-extrabold ${weekMins > 0 ? 'text-white' : 'text-white/25'}`}>
                                     {weekMins > 0 ? formatMinutesToHoursAndMinutes(weekMins) : '—'}
                                   </span>
                                 </td>
@@ -1053,7 +1053,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                           {/* ── Mobile: layout fisso senza scroll ── */}
                           <div className="md:hidden px-3 py-2">
                             <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-[11px] font-bold uppercase tracking-wide text-white/70">
+                              <span className="text-[0.6875rem] font-bold uppercase tracking-wide text-white/70">
                                 {format(clampedStart, 'dd/MM')} → {format(clampedEnd, 'dd/MM')}
                               </span>
                               <span className={`text-sm font-extrabold tabular-nums ${weekMins > 0 ? 'text-white' : 'text-white/50'}`}>
@@ -1066,18 +1066,18 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                                 const mins = minutesByUserByDay[currentUser.id]?.[dayKey] ?? 0;
                                 return (
                                   <div key={dayKey} className="flex flex-col items-center py-1.5 rounded">
-                                    <span className="block text-[11px] font-bold uppercase text-white/60 leading-none mb-0.5">
+                                    <span className="block text-[0.6875rem] font-bold uppercase text-white/60 leading-none mb-0.5">
                                       {format(day, 'EEE', { locale: statsLoc }).slice(0, 3)}
                                     </span>
-                                    <span className="block text-[11px] text-white/50 tabular-nums leading-none mb-1">
+                                    <span className="block text-[0.6875rem] text-white/50 tabular-nums leading-none mb-1">
                                       {format(day, 'dd')}
                                     </span>
                                     {mins > 0 ? (
-                                      <span className="text-[11px] font-bold text-white tabular-nums leading-none">
+                                      <span className="text-[0.6875rem] font-bold text-white tabular-nums leading-none">
                                         {formatMinutesToHoursAndMinutes(mins)}
                                       </span>
                                     ) : (
-                                      <span className="text-[11px] text-white/40 leading-none">—</span>
+                                      <span className="text-[0.6875rem] text-white/40 leading-none">—</span>
                                     )}
                                   </div>
                                 );
@@ -1096,20 +1096,20 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                               </colgroup>
                               <thead>
                                 <tr>
-                                  <th className="py-2 pl-5 pr-2 text-left text-[11px] font-bold uppercase tracking-wider text-white/60">
+                                  <th className="py-2 pl-5 pr-2 text-left text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">
                                     {w.label}
                                   </th>
                                   {weekDays.map((day) => (
                                     <th key={format(day, 'yyyy-MM-dd')} className="py-2 px-1 text-center">
-                                      <span className="block text-[11px] font-bold uppercase tracking-wider text-white/60">
+                                      <span className="block text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">
                                         {format(day, 'EEE', { locale: statsLoc })}
                                       </span>
-                                      <span className="block text-[11px] font-semibold text-white/60 tabular-nums">
+                                      <span className="block text-[0.6875rem] font-semibold text-white/60 tabular-nums">
                                         {format(day, 'dd/MM')}
                                       </span>
                                     </th>
                                   ))}
-                                  <th className="py-2 pr-5 text-right text-[11px] font-bold uppercase tracking-wider text-white/60">
+                                  <th className="py-2 pr-5 text-right text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">
                                     Tot.
                                   </th>
                                 </tr>
@@ -1124,17 +1124,17 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                                     return (
                                       <td key={dayKey} className="py-2.5 px-1 text-center tabular-nums">
                                         {mins > 0 ? (
-                                          <span className="text-[13px] font-bold text-white">
+                                          <span className="text-[0.8125rem] font-bold text-white">
                                             {formatMinutesToHoursAndMinutes(mins)}
                                           </span>
                                         ) : (
-                                          <span className="text-[13px] font-normal text-white/40">—</span>
+                                          <span className="text-[0.8125rem] font-normal text-white/40">—</span>
                                         )}
                                       </td>
                                     );
                                   })}
                                   <td className="py-2.5 pr-5 text-right tabular-nums">
-                                    <span className={`text-[13px] font-extrabold ${weekMins > 0 ? 'text-white' : 'text-white/40'}`}>
+                                    <span className={`text-[0.8125rem] font-extrabold ${weekMins > 0 ? 'text-white' : 'text-white/40'}`}>
                                       {weekMins > 0 ? formatMinutesToHoursAndMinutes(weekMins) : '—'}
                                     </span>
                                   </td>
@@ -1189,20 +1189,20 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                     <div className="md:hidden px-3 pb-3 pt-1 space-y-1.5">
                       {/* Header giorni (fisso per tutte le righe) */}
                       <div className="flex items-center gap-1">
-                        <div className="w-[72px] shrink-0" />
+                        <div className="w-[4.5rem] shrink-0" />
                         <div className="grid flex-1 gap-0" style={{ gridTemplateColumns: `repeat(${weekDays.length}, 1fr)` }}>
                           {weekDays.map((day) => (
                             <div key={format(day, 'yyyy-MM-dd')} className="flex flex-col items-center">
-                              <span className="text-[7px] font-bold uppercase text-white/80 leading-none">
+                              <span className="text-[0.4375rem] font-bold uppercase text-white/80 leading-none">
                                 {format(day, 'EEE', { locale: statsLoc }).slice(0, 3)}
                               </span>
-                              <span className="text-[7px] text-white/35 tabular-nums leading-none mt-0.5">
+                              <span className="text-[0.4375rem] text-white/35 tabular-nums leading-none mt-0.5">
                                 {format(day, 'dd')}
                               </span>
                             </div>
                           ))}
                         </div>
-                        <div className="w-[44px] shrink-0 text-right text-[7px] font-bold uppercase text-white/35">Tot.</div>
+                        <div className="w-[2.75rem] shrink-0 text-right text-[0.4375rem] font-bold uppercase text-white/35">Tot.</div>
                       </div>
                       {/* Righe utenti */}
                       {filteredUsers.map((u, i) => {
@@ -1210,12 +1210,12 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                         const rowBg = i % 2 === 0 ? 'bg-white/5' : '';
                         return (
                           <div key={u.id} className={`flex items-center gap-1 rounded-lg py-1.5 ${rowBg}`}>
-                            <div className="w-[72px] shrink-0 pl-1">
+                            <div className="w-[4.5rem] shrink-0 pl-1">
                               <span className="block text-xs font-semibold uppercase tracking-wide text-white/80 truncate">
                                 {(u.first_name ?? '').trim() || '—'}
                               </span>
                               {deptFilter === 'all' && u.department && (
-                                <span className="block text-[11px] font-bold text-white/45 uppercase leading-none truncate mt-0.5" title={translateDepartmentValue(u.department, effectiveLanguage)}>{translateDepartmentValue(u.department, effectiveLanguage)}
+                                <span className="block text-[0.6875rem] font-bold text-white/45 uppercase leading-none truncate mt-0.5" title={translateDepartmentValue(u.department, effectiveLanguage)}>{translateDepartmentValue(u.department, effectiveLanguage)}
                                 </span>
                               )}
                             </div>
@@ -1236,8 +1236,8 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                                 );
                               })}
                             </div>
-                            <div className="w-[44px] shrink-0 text-right pr-1">
-                              <span className={`text-[11px] font-extrabold tabular-nums ${userWeekTotal > 0 ? 'text-white/80' : 'text-white/25'}`}>
+                            <div className="w-[2.75rem] shrink-0 text-right pr-1">
+                              <span className={`text-[0.6875rem] font-extrabold tabular-nums ${userWeekTotal > 0 ? 'text-white/80' : 'text-white/25'}`}>
                                 {userWeekTotal > 0 ? formatMinutesToHoursAndMinutes(userWeekTotal) : '—'}
                               </span>
                             </div>
@@ -1247,7 +1247,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                       {/* Footer totali giornalieri su mobile */}
                       {showManagementStatsChrome && weekTotal > 0 && (
                         <div className="flex items-center gap-1 pt-1 border-t border-white/12 mt-1 rounded-lg">
-                          <div className="w-[72px] shrink-0 pl-1 text-[11px] font-bold uppercase tracking-wide text-white/80">
+                          <div className="w-[4.5rem] shrink-0 pl-1 text-[0.6875rem] font-bold uppercase tracking-wide text-white/80">
                             {t.stats_total}
                           </div>
                           <div className="grid flex-1 gap-0" style={{ gridTemplateColumns: `repeat(${weekDays.length}, 1fr)` }}>
@@ -1267,8 +1267,8 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                               );
                             })}
                           </div>
-                          <div className="w-[44px] shrink-0 text-right pr-1">
-                            <span className="text-[11px] font-extrabold text-white/80 tabular-nums">
+                          <div className="w-[2.75rem] shrink-0 text-right pr-1">
+                            <span className="text-[0.6875rem] font-extrabold text-white/80 tabular-nums">
                               {formatMinutesToHoursAndMinutes(weekTotal)}
                             </span>
                           </div>
@@ -1287,20 +1287,20 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                         </colgroup>
                         <thead>
                           <tr className="bg-white/8" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15)' }}>
-                            <th className="sticky left-0 z-10 bg-white/8 backdrop-blur-sm py-2 pl-5 pr-3 text-left text-[11px] font-bold uppercase tracking-wider text-white/80 border-r border-white/12">
+                            <th className="sticky left-0 z-10 bg-white/8 backdrop-blur-sm py-2 pl-5 pr-3 text-left text-[0.6875rem] font-bold uppercase tracking-wider text-white/80 border-r border-white/12">
                               {tv.department_filter_label ?? 'Nome'}
                             </th>
                             {weekDays.map((day) => (
                               <th key={format(day, 'yyyy-MM-dd')} className="py-2 px-1 text-center border-r border-white/10 last:border-r-0">
-                                <span className="block text-[11px] font-bold uppercase tracking-wider text-white/80">
+                                <span className="block text-[0.6875rem] font-bold uppercase tracking-wider text-white/80">
                                   {format(day, 'EEE', { locale: statsLoc })}
                                 </span>
-                                <span className="block text-[11px] font-semibold text-white/80 tabular-nums">
+                                <span className="block text-[0.6875rem] font-semibold text-white/80 tabular-nums">
                                   {format(day, 'dd/MM')}
                                 </span>
                               </th>
                             ))}
-                            <th className="py-2 pr-5 text-right text-[11px] font-bold uppercase tracking-wider text-white/80">
+                            <th className="py-2 pr-5 text-right text-[0.6875rem] font-bold uppercase tracking-wider text-white/80">
                               Tot.
                             </th>
                           </tr>
@@ -1312,11 +1312,11 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                             return (
                               <tr key={u.id} className={`${rowBg} depth-row`}>
                                 <td className={`sticky left-0 z-10 backdrop-blur-sm py-2.5 pl-5 pr-3 border-r border-white/12 ${i % 2 === 0 ? 'bg-white/5' : 'bg-white/3'}`}>
-                                  <span className="block text-[11px] font-semibold uppercase tracking-wide text-white truncate">
+                                  <span className="block text-[0.6875rem] font-semibold uppercase tracking-wide text-white truncate">
                                     {(u.first_name ?? '').trim() || '—'}
                                   </span>
                                   {deptFilter === 'all' && u.department && (
-                                    <span className="block text-[11px] font-bold text-white/45 uppercase tracking-wider truncate" title={translateDepartmentValue(u.department, effectiveLanguage)}>{translateDepartmentValue(u.department, effectiveLanguage)}
+                                    <span className="block text-[0.6875rem] font-bold text-white/45 uppercase tracking-wider truncate" title={translateDepartmentValue(u.department, effectiveLanguage)}>{translateDepartmentValue(u.department, effectiveLanguage)}
                                     </span>
                                   )}
                                 </td>
@@ -1326,17 +1326,17 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                                   return (
                                     <td key={dayKey} className="py-2.5 px-1 text-center tabular-nums border-r border-white/8 last:border-r-0">
                                       {mins > 0 ? (
-                                        <span className="text-[13px] font-bold text-white/80">
+                                        <span className="text-[0.8125rem] font-bold text-white/80">
                                           {formatMinutesToHoursAndMinutes(mins)}
                                         </span>
                                       ) : (
-                                        <span className="text-[13px] font-normal text-white/25">—</span>
+                                        <span className="text-[0.8125rem] font-normal text-white/25">—</span>
                                       )}
                                     </td>
                                   );
                                 })}
                                 <td className="py-2.5 pr-5 text-right tabular-nums">
-                                  <span className={`text-[13px] font-extrabold ${userWeekTotal > 0 ? 'text-white/80' : 'text-white/25'}`}>
+                                  <span className={`text-[0.8125rem] font-extrabold ${userWeekTotal > 0 ? 'text-white/80' : 'text-white/25'}`}>
                                     {userWeekTotal > 0 ? formatMinutesToHoursAndMinutes(userWeekTotal) : '—'}
                                   </span>
                                 </td>
@@ -1347,7 +1347,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                         {showManagementStatsChrome && (
                           <tfoot>
                             <tr className="bg-white/8" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15)' }}>
-                              <td className="sticky left-0 z-10 bg-white/8 py-2.5 pl-5 pr-3 text-[11px] font-bold uppercase tracking-wider text-white/80 border-r border-white/12">
+                              <td className="sticky left-0 z-10 bg-white/8 py-2.5 pl-5 pr-3 text-[0.6875rem] font-bold uppercase tracking-wider text-white/80 border-r border-white/12">
                                 {t.stats_total}
                               </td>
                               {weekDays.map((day) => {
@@ -1356,17 +1356,17 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                                 return (
                                   <td key={dayKey} className="py-2.5 px-1 text-center tabular-nums border-r border-white/10 last:border-r-0">
                                     {dayTotal > 0 ? (
-                                      <span className="text-[13px] font-bold text-white/80">
+                                      <span className="text-[0.8125rem] font-bold text-white/80">
                                         {formatMinutesToHoursAndMinutes(dayTotal)}
                                       </span>
                                     ) : (
-                                      <span className="text-[13px] font-normal text-white/25">—</span>
+                                      <span className="text-[0.8125rem] font-normal text-white/25">—</span>
                                     )}
                                   </td>
                                 );
                               })}
                               <td className="py-2.5 pr-5 text-right tabular-nums">
-                                <span className="text-[13px] font-extrabold text-white/80">
+                                <span className="text-[0.8125rem] font-extrabold text-white/80">
                                   {weekTotal > 0 ? formatMinutesToHoursAndMinutes(weekTotal) : '—'}
                                 </span>
                               </td>

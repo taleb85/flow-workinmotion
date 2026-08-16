@@ -83,7 +83,7 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
   }
 
   return (
-    <div className="flex flex-col gap-11 pb-8 px-4 md:px-6 max-w-5xl mx-auto">
+    <div className="flex flex-col gap-11 pb-8 px-4 md:px-6">
       {weeks.map((week, wIdx) => {
         const weekDays = eachDayOfInterval({ start: week.start, end: week.end });
         const byDay = new Map<string, Shift[]>();
@@ -732,7 +732,7 @@ export default function StaffPersonalDashboard({
 
   return (
     <div className="w-full flex-1 min-h-0 scroll-smooth text-white/90 font-sans antialiased pb-content pt-0">
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="w-full">
       {holidaysFocus && (
         <div className="mb-3 flex items-center gap-2">
           <button

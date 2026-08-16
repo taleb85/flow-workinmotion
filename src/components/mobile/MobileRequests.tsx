@@ -71,7 +71,7 @@ export default function MobileRequests({ requests, onRequestNew, t = {} }: Mobil
             >
               <div className="flex justify-between items-start">
                 <div className="flex flex-col">
-                  <p className="text-[11px] font-black text-white/50 uppercase tracking-[0.2em] mb-1">
+                  <p className="text-[0.6875rem] font-black text-white/50 uppercase tracking-[0.2em] mb-1">
                     {safeFormatDate(req.created_at, 'd MMM yyyy', { locale })}
                   </p>
                   <div className="flex items-center gap-2">
@@ -83,7 +83,7 @@ export default function MobileRequests({ requests, onRequestNew, t = {} }: Mobil
                 
                 <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border ${config.bg} ${config.border} ${config.color}`}>
                   <Icon className="w-3.5 h-3.5" />
-                  <span className="text-[11px] font-black uppercase tracking-wider">
+                  <span className="text-[0.6875rem] font-black uppercase tracking-wider">
                     {config.label}
                   </span>
                 </div>

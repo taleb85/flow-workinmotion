@@ -555,7 +555,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       {tenantBootstrapError ? (
         <div
           role="alert"
-          className="pointer-events-none absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-amber-400/35 bg-black/50 px-3 py-2 text-center text-[13px] leading-snug text-amber-100 backdrop-blur-sm"
+          className="pointer-events-none absolute left-4 right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-xl border border-amber-400/35 bg-black/50 px-3 py-2 text-center text-[0.8125rem] leading-snug text-amber-100 backdrop-blur-sm"
         >
           {tenantBootstrapError}
         </div>
@@ -569,7 +569,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
         <FlowLogoSvg
           variant="icon-only"
           color="orange"
-          className="w-full max-w-[860px] min-w-[320px] h-auto overflow-x-hidden"
+          className="w-full max-w-[53.75rem] min-w-[20rem] h-auto overflow-x-hidden"
           style={{ opacity: 0.055, filter: 'saturate(0) brightness(0) blur(6px)' }}
         />
       </div>
@@ -600,7 +600,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
             </span>
           </button>
           <p
-             className="mt-8 text-[11px] font-semibold tracking-[0.25em] uppercase select-none pointer-events-none animate-breathe"
+             className="mt-8 text-[0.6875rem] font-semibold tracking-[0.25em] uppercase select-none pointer-events-none animate-breathe"
             style={{ color: '#ffffff' }}
           >
             Tap to start
@@ -628,7 +628,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
           </div>
 
           {/* Form fields */}
-          <motion.div animate={shakeControls} className="w-full max-w-[272px] space-y-3">
+          <motion.div animate={shakeControls} className="w-full max-w-[17rem] space-y-3">
 
             {/* Invite onboarding — nuovo dipendente */}
             {isInviteLink && !inviteOnboardDone && (
@@ -642,7 +642,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
 
                 {/* Email */}
                 <div className="relative">
-                  <Mail className="absolute left-3 top-[13px] w-4 h-4 text-accent" aria-hidden />
+                  <Mail className="absolute left-3 top-[0.8125rem] w-4 h-4 text-accent" aria-hidden />
                   <input
                     type="email"
                     inputMode="email"
@@ -657,7 +657,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
 
                 {/* PIN (pre-compilato) */}
                 <div className="relative">
-                  <Lock className="absolute left-3 top-[13px] w-4 h-4 text-accent" aria-hidden />
+                  <Lock className="absolute left-3 top-[0.8125rem] w-4 h-4 text-accent" aria-hidden />
                   <input
                     type="text"
                     inputMode="numeric"
@@ -672,7 +672,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
 
                 {/* Telefono */}
                 <div className="relative">
-                  <Phone className="absolute left-3 top-[13px] w-4 h-4 text-accent" aria-hidden />
+                  <Phone className="absolute left-3 top-[0.8125rem] w-4 h-4 text-accent" aria-hidden />
                   <input
                     type="tel"
                     inputMode="tel"
@@ -686,7 +686,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
 
                 {/* Error */}
                 {error && (
-                  <p className="text-red-300 text-[11px] text-center rounded-lg px-3 py-1.5" style={{ background: 'rgba(255,80,80,0.16)' }}>{error}</p>
+                  <p className="text-red-300 text-[0.6875rem] text-center rounded-lg px-3 py-1.5" style={{ background: 'rgba(255,80,80,0.16)' }}>{error}</p>
                 )}
 
                 <button
@@ -835,7 +835,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
             {/* Sezione biometrico */}
             {showDeviceSection && (
               <div className="space-y-3 pt-1">
-                <div className="flex items-center gap-2 text-white/30 text-[11px]">
+                <div className="flex items-center gap-2 text-white/30 text-[0.6875rem]">
                   <span className="h-px flex-1 bg-white/12" aria-hidden />
                   <span>{t.login_device_or ?? 'oppure'}</span>
                   <span className="h-px flex-1 bg-white/12" aria-hidden />

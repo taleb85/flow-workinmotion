@@ -16,7 +16,7 @@ export function MaintenancePage() {
           L'app è temporaneamente in manutenzione.
         </p>
         <p className="text-white/50 text-sm mb-8">Torneremo attivi tra poco. 👨‍🍳</p>
-        <div className="rounded-xl border border-neutral-500 px-4 py-2 text-[11px] text-white/60">
+        <div className="rounded-xl border border-neutral-500 px-4 py-2 text-[0.6875rem] text-white/60">
           Per assistenza contatta il responsabile.
         </div>
       </div>

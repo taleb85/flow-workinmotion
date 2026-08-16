@@ -5,6 +5,7 @@ import { database } from '../lib/database';
 import { supabase } from '../lib/supabase';
 import { PinPadModal } from './ui/PinPadModal';
 import { format, parseISO, addDays } from 'date-fns';
+import { getDateLocale } from '../utils/translations';
 import {
   loadPeriodConfig,
   savePeriodConfig as persistPeriodConfig,
@@ -120,7 +121,7 @@ function DepartmentColorPicker({
           maxWidthClass="max-w-sm"
           panelClassName="p-3.5"
         >
-          <p className="mb-3 px-0.5 text-[11px] font-bold uppercase tracking-wider text-white">
+          <p className="mb-3 px-0.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white">
             {title}
           </p>
           <div className="grid grid-cols-6 gap-2.5">
@@ -192,7 +193,7 @@ function FeatureFlagCard({
         <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
           isMaintenance && enabled ? 'bg-red-500/20 text-red-400' : 'bg-accent/10 text-accent'
         }`}>
-          <span className="w-[18px] h-[18px]">{iconMap[feature.slug]}</span>
+          <span className="w-[1.125rem] h-[1.125rem]">{iconMap[feature.slug]}</span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
@@ -200,7 +201,7 @@ function FeatureFlagCard({
               <p className={`text-sm font-semibold leading-tight ${
                 isMaintenance && enabled ? 'text-red-400' : 'text-white/90'
               }`}>{featureLabel}</p>
-              <p className="text-[11px] md:text-xs text-white mt-1 leading-snug">{featureDescription}</p>
+              <p className="text-[0.6875rem] md:text-xs text-white mt-1 leading-snug">{featureDescription}</p>
             </div>
             <button
               type="button"
@@ -217,14 +218,14 @@ function FeatureFlagCard({
           </div>
           {detailLines.length > 0 && (
             <>
-              <button type="button" aria-expanded={detailsOpen} onClick={() => setDetailsOpen(!detailsOpen)} className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-white transition-colors">
+              <button type="button" aria-expanded={detailsOpen} onClick={() => setDetailsOpen(!detailsOpen)} className="mt-2 flex items-center gap-1 text-[0.6875rem] font-semibold text-white transition-colors">
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${detailsOpen ? 'rotate-180' : ''}`} />
                 {t.impostazioni_detail_label || 'Dettagli'}
               </button>
               {detailsOpen && (
                 <div className="rounded-xl border border-neutral-500 mt-2 bg-white/5 px-2.5 py-2">
-                  <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-white/60">{t.impostazioni_detail_label || 'Dettagli'}</p>
-                  <ul className="list-disc space-y-1 pl-3.5 text-[11px] leading-relaxed text-white/70">
+                  <p className="mb-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">{t.impostazioni_detail_label || 'Dettagli'}</p>
+                  <ul className="list-disc space-y-1 pl-3.5 text-[0.6875rem] leading-relaxed text-white/70">
                     {detailLines.map((line, i) => (<li key={i}>{line}</li>))}
                   </ul>
                 </div>
@@ -279,7 +280,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
         >
           <span className="block truncate text-sm font-semibold uppercase text-white" title={user.first_name ?? ''}>{user.first_name ?? ''} {user.last_name ?? ''}
           </span>
-          <span className="text-white/55 text-[11px] uppercase tracking-wider">
+          <span className="text-white/55 text-[0.6875rem] uppercase tracking-wider">
             {translateRole(user.role, currentUser.language)}
             {!isPurelyManagementRole(user.role) && user.status === 'active' && !isUserVisibleOnTeamSchedule(user) && (
               <span className="ml-1.5 text-amber-600 font-semibold normal-case">
@@ -335,7 +336,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
                           }
                           onSetShareMenu(null);
                         }}
-                        className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-[12px] font-medium text-white/80 hover:bg-white/5 transition-colors active:bg-white/5/80"
+                        className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-[0.75rem] font-medium text-white/80 hover:bg-white/5 transition-colors active:bg-white/5/80"
                       >
                         <Link2 className="w-3.5 h-3.5 shrink-0 text-white/40" />
                         Copia link accesso
@@ -355,7 +356,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
               onClick={() => {
                 onSetVisibility(isVisibilityOpen ? null : user.id);
               }}
-              className={`px-2 py-1 text-[11px] font-bold uppercase rounded-md transition-colors border ${isVisibilityOpen ? 'bg-white/15 text-accent border-accent/30 shadow-sm' : 'text-white/55 border-transparent hover:text-white/80'} active:text-white/80'}`}
+              className={`px-2 py-1 text-[0.6875rem] font-bold uppercase rounded-md transition-colors border ${isVisibilityOpen ? 'bg-white/15 text-accent border-accent/30 shadow-sm' : 'text-white/55 border-transparent hover:text-white/80'} active:text-white/80'}`}
             >
               {t.what_sees}
             </button>
@@ -370,7 +371,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
                     <button
                       type="button"
                       onClick={() => onSetDeleteConfirm(null)}
-                      className="rounded-lg border border-neutral-500 px-2 py-1 text-[11px] font-semibold text-white/55 hover:bg-white/10 active:bg-white/80"
+                      className="rounded-lg border border-neutral-500 px-2 py-1 text-[0.6875rem] font-semibold text-white/55 hover:bg-white/10 active:bg-white/80"
                     >
                       {t.cancel ?? 'Annulla'}
                     </button>
@@ -382,7 +383,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
                         await onDeleteUser(user.id);
                         showSuccess?.(t.settings_delete_user_success);
                       }}
-                      className="rounded-lg bg-red-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-red-700 active:bg-red-700/80"
+                      className="rounded-lg bg-red-600 px-2 py-1 text-[0.6875rem] font-bold text-white hover:bg-red-700 active:bg-red-700/80"
                     >
                       {t.settings_delete_user_title ?? 'Elimina'}
                     </button>
@@ -790,7 +791,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
           </p>
           <section className="mb-6">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-[11px] font-semibold uppercase tracking-widest text-white/80">
+              <h2 className="text-[0.6875rem] font-semibold uppercase tracking-widest text-white/80">
                 {t.settings_team_section_title}
               </h2>
               <div className="flex flex-wrap items-center justify-end gap-2">
@@ -832,7 +833,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold uppercase text-white" title={user.first_name}>{user.first_name} {user.last_name ?? ''}
                         </p>
-                        <p className="text-[11px] uppercase tracking-wider text-white/55">
+                        <p className="text-[0.6875rem] uppercase tracking-wider text-white/55">
                           {translateRole(user.role, currentUser.language)}
                           {!isActiveRow && (
                             <span className="ml-1.5 font-semibold text-amber-400">
@@ -857,7 +858,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                               showError?.((t as { copy_failed?: string }).copy_failed ?? 'Copia non riuscita.');
                             }
                           }}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-500 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-500 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
                         >
                           <Copy className="h-3.5 w-3.5 shrink-0" aria-hidden />
                           Link accesso
@@ -865,7 +866,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         <button
                           type="button"
                           onClick={() => setEditingUser(user)}
-                          className="rounded-lg border border-neutral-500 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                          className="rounded-lg border border-neutral-500 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
                         >
                           {t.settings_delegated_view_profile}
                         </button>
@@ -873,7 +874,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           <button
                             type="button"
                             onClick={() => handleDelegateSuspend(user)}
-                            className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 bg-red-500/15 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-red-400 transition-colors hover:bg-red-500/150/25 active:bg-red-500/150/80"
+                            className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 bg-red-500/15 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-red-400 transition-colors hover:bg-red-500/150/25 active:bg-red-500/150/80"
                           >
                             <UserX className="h-3.5 w-3.5 shrink-0" aria-hidden />
                             {t.settings_delegated_suspend}
@@ -885,7 +886,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                                 <button
                                   type="button"
                                   onClick={() => setDeleteConfirmUserId(null)}
-                                  className="rounded-lg border border-neutral-500 px-2 py-1 text-[11px] font-semibold text-white/55 hover:bg-white/10 active:bg-white/80"
+                                  className="rounded-lg border border-neutral-500 px-2 py-1 text-[0.6875rem] font-semibold text-white/55 hover:bg-white/10 active:bg-white/80"
                                 >
                                   {t.cancel ?? 'Annulla'}
                                 </button>
@@ -897,7 +898,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                                     await deleteUser(user.id);
                                     showSuccess?.(t.settings_delete_user_success);
                                   }}
-                                  className="rounded-lg bg-red-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-red-700 active:bg-red-700/80"
+                                  className="rounded-lg bg-red-600 px-2 py-1 text-[0.6875rem] font-bold text-white hover:bg-red-700 active:bg-red-700/80"
                                 >
                                   {t.settings_delete_user_title ?? 'Elimina'}
                                 </button>
@@ -915,7 +916,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                             <button
                               type="button"
                               onClick={() => handleDelegateReactivate(user)}
-                              className="inline-flex items-center gap-1 rounded-lg border border-accent/35 bg-accent/10 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-accent/15 active:bg-accent/80"
+                              className="inline-flex items-center gap-1 rounded-lg border border-accent/35 bg-accent/10 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-accent/15 active:bg-accent/80"
                             >
                               <UserCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
                               {t.settings_delegated_reactivate}
@@ -1009,7 +1010,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 className={`h-4 w-4 shrink-0 text-white/40 transition-transform ${teamSectionExpanded ? 'rotate-180' : ''}`}
                 aria-hidden
               />
-              <h2 className="text-[11px] font-semibold uppercase tracking-widest text-white/80">
+              <h2 className="text-[0.6875rem] font-semibold uppercase tracking-widest text-white/80">
                 {t.settings_team_section_title}
               </h2>
             </button>
@@ -1093,7 +1094,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 {teamNotifyLoading ? '…' : t.admin_notify_team_button}
               </button>
             </div>
-            <p className="text-[11px] md:text-xs text-white/70 leading-relaxed">
+            <p className="text-[0.6875rem] md:text-xs text-white/70 leading-relaxed">
               {t.admin_notify_team_desc}
             </p>
           </div>
@@ -1107,7 +1108,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             defaultOpen={false}
           >
             <div className="p-4 rounded-xl space-y-4 border border-neutral-500" style={{ background: 'transparent' }}>
-              <p className="text-[11px] text-white/55 leading-snug">{t.settings_departments_cloud_hint}</p>
+              <p className="text-[0.6875rem] text-white/55 leading-snug">{t.settings_departments_cloud_hint}</p>
               {/* Lista reparti */}
               <div className="flex flex-wrap gap-2">
                 {departments.map((d) => {
@@ -1128,7 +1129,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       </span>
                       {!isBuiltin && d.permissionCategory && (
                         <span
-                          className="text-[11px] font-semibold normal-case opacity-90 border-l border-white/35 pl-1.5 shrink-0 max-w-[5.5rem] truncate"
+                          className="text-[0.6875rem] font-semibold normal-case opacity-90 border-l border-white/35 pl-1.5 shrink-0 max-w-[5.5rem] truncate"
                           title={t.settings_dept_permission_group}
                         >
                           {d.permissionCategory === 'sala_bar'
@@ -1142,7 +1143,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       )}
                       {isBuiltin && d.permissionCategory && (
                         <span
-                          className="text-[11px] font-semibold normal-case opacity-90 border-l border-white/35 pl-1.5 shrink-0 max-w-[5.5rem] truncate"
+                          className="text-[0.6875rem] font-semibold normal-case opacity-90 border-l border-white/35 pl-1.5 shrink-0 max-w-[5.5rem] truncate"
                           title={t.settings_dept_permission_group}
                         >
                           {d.permissionCategory === 'sala_bar'
@@ -1191,7 +1192,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               {/* Reparti built-in nascosti — pulsante ripristino */}
               {hiddenBuiltins.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2 border-t border-white/10 pt-3 group/missing">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-white/40">
+                  <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
                     Nascosti
                   </span>
                   {hiddenBuiltins.map((v) => {
@@ -1231,11 +1232,11 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     className="overflow-hidden"
                   >
                     <div className="space-y-3 rounded-xl border border-accent/25 bg-white/8 p-3">
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-white/55">
+                      <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/55">
                         {t.settings_dept_edit_title}
                       </p>
                       {builtinValues.has(editingDeptValue) && (
-                        <p className="text-[11px] text-white/55 leading-snug">{t.settings_dept_builtin_edit_hint}</p>
+                        <p className="text-[0.6875rem] text-white/55 leading-snug">{t.settings_dept_builtin_edit_hint}</p>
                       )}
                       <div className="flex flex-col gap-3 md:flex-row md:items-end md:flex-wrap">
                         <DepartmentColorPicker
@@ -1267,7 +1268,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         />
                         {!builtinValues.has(editingDeptValue) && (
                           <div>
-                            <label className="block text-[11px] font-bold uppercase tracking-wider text-white/40 mb-1">
+                            <label className="block text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-1">
                               {t.settings_dept_permission_group}
                             </label>
                             <select
@@ -1316,7 +1317,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         </div>
                       </div>
                       {!builtinValues.has(editingDeptValue) && (
-                        <p className="text-[11px] text-white/55 leading-snug">{t.settings_dept_permission_group_hint}</p>
+                        <p className="text-[0.6875rem] text-white/55 leading-snug">{t.settings_dept_permission_group_hint}</p>
                       )}
                     </div>
                   </motion.div>
@@ -1371,7 +1372,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 </div>
                 <div className="flex flex-col gap-2 md:flex-row md:items-start md:gap-4">
                   <div className="shrink-0 md:w-56">
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-white/40 mb-1">
+                    <label className="block text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-1">
                       {t.settings_dept_permission_group}
                     </label>
                     <select
@@ -1385,12 +1386,12 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       <option value="bar">{t.department_bar}</option>
                     </select>
                   </div>
-                  <p className="text-[11px] text-white/60 leading-snug flex-1 pt-0 md:pt-5">
+                  <p className="text-[0.6875rem] text-white/60 leading-snug flex-1 pt-0 md:pt-5">
                     {t.settings_dept_permission_group_hint}
                   </p>
                 </div>
               </div>
-              <p className="text-[11px] text-white/60">{t.settings_builtin_depts_hint}</p>
+              <p className="text-[0.6875rem] text-white/60">{t.settings_builtin_depts_hint}</p>
             </div>
           </SettingsAccordionSection>
         )}
@@ -1412,9 +1413,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   </span>
                   <h3 className="text-xs font-bold uppercase tracking-wider text-white">{t.wst_violation_critical}</h3>
                 </div>
-                <p className="text-[11px] text-white/55 leading-snug">{t.wst_violation_critical_sub}</p>
+                <p className="text-[0.6875rem] text-white/55 leading-snug">{t.wst_violation_critical_sub}</p>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[11px] font-medium text-white/70">{t.settings_toggle_on}</span>
+                  <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
                   <button
                     type="button"
                     role="switch"
@@ -1428,7 +1429,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 {workRules.criticEnabled && (
                   <div className="grid grid-cols-2 gap-2 border-t border-white/10 pt-2">
                     <div>
-                      <label className="block text-[11px] font-semibold text-white/55 mb-0.5">{t.settings_wr_max_shift_h}</label>
+                      <label className="block text-[0.6875rem] font-semibold text-white/55 mb-0.5">{t.settings_wr_max_shift_h}</label>
                       <input
                         type="number"
                         min={4}
@@ -1440,7 +1441,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-semibold text-white/55 mb-0.5">{t.settings_wr_min_rest}</label>
+                      <label className="block text-[0.6875rem] font-semibold text-white/55 mb-0.5">{t.settings_wr_min_rest}</label>
                       <input
                         type="number"
                         min={6}
@@ -1463,9 +1464,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   </span>
                   <h3 className="text-xs font-bold uppercase tracking-wider text-white">{t.wst_violation_attention}</h3>
                 </div>
-                <p className="text-[11px] text-white/55 leading-snug">{t.wst_violation_attention_sub}</p>
+                <p className="text-[0.6875rem] text-white/55 leading-snug">{t.wst_violation_attention_sub}</p>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[11px] font-medium text-white/70">{t.settings_toggle_on}</span>
+                  <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
                   <button
                     type="button"
                     role="switch"
@@ -1479,7 +1480,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 {workRules.attentionEnabled && (
                   <div className="grid grid-cols-2 gap-2 border-t border-white/10 pt-2">
                     <div>
-                      <label className="block text-[11px] font-semibold text-white/55 mb-0.5">{t.settings_wr_max_day}</label>
+                      <label className="block text-[0.6875rem] font-semibold text-white/55 mb-0.5">{t.settings_wr_max_day}</label>
                       <input
                         type="number"
                         min={4}
@@ -1491,7 +1492,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-semibold text-white/55 mb-0.5">{t.settings_wr_max_week}</label>
+                      <label className="block text-[0.6875rem] font-semibold text-white/55 mb-0.5">{t.settings_wr_max_week}</label>
                       <input
                         type="number"
                         min={20}
@@ -1514,9 +1515,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   </span>
                   <h3 className="text-xs font-bold uppercase tracking-wider text-white">{t.wst_violation_overlap}</h3>
                 </div>
-                <p className="text-[11px] text-white/55 leading-snug">{t.wst_violation_overlap_sub}</p>
+                <p className="text-[0.6875rem] text-white/55 leading-snug">{t.wst_violation_overlap_sub}</p>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[11px] font-medium text-white/70">{t.settings_toggle_on}</span>
+                  <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
                   <button
                     type="button"
                     role="switch"
@@ -1571,7 +1572,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                        title={rule.title}>{rule.title}
                       </h3>
                     </div>
-                    <p className="text-[11px] text-white/55 leading-snug">
+                    <p className="text-[0.6875rem] text-white/55 leading-snug">
                       {rule.breakStart} – {rule.breakEnd}
                       {rule.minShiftDurationEnabled !== false ? (
                         <>
@@ -1586,7 +1587,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       </span>
                     </p>
                     <div className="flex items-center justify-between pt-1 mt-auto">
-                      <span className="text-[11px] font-medium text-white/70">{t.settings_toggle_on}</span>
+                      <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
@@ -1612,7 +1613,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               <button
                 type="button"
                 onClick={() => setCreatingBreakRule(true)}
-                className="rounded-xl border border-neutral-500 surface-ghost-interactive flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-neutral-500/90 p-4 text-white/55 transition-colors hover:border-accent hover:bg-accent/5 hover:text-accent active:text-accent"
+                className="rounded-xl border border-neutral-500 surface-ghost-interactive flex min-h-[7.5rem] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-neutral-500/90 p-4 text-white/55 transition-colors hover:border-accent hover:bg-accent/5 hover:text-accent active:text-accent"
               >
                 <Plus className="w-6 h-6" />
                 <span className="text-xs font-semibold">{t.settings_break_new_rule}</span>
@@ -1635,7 +1636,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             }
           >
             <div className="space-y-3">
-              <p className="text-[12px] text-white/55 leading-relaxed">
+              <p className="text-[0.75rem] text-white/55 leading-relaxed">
                 {t.settings_week_template_manage_hint ?? 'Gestisci i template di settimana salvati dal tabellone turni. Ogni template memorizza i turni assegnati per giorno e dipendente e può essere riapplicato in qualsiasi settimana.'}
               </p>
 
@@ -1644,7 +1645,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 type="button"
                 onClick={loadShiftTemplates}
                 disabled={shiftTemplatesLoading}
-                className="flex items-center gap-1.5 text-[12px] text-blue-600 font-medium disabled:opacity-50"
+                className="flex items-center gap-1.5 text-[0.75rem] text-blue-600 font-medium disabled:opacity-50"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${shiftTemplatesLoading ? 'animate-spin' : ''}`} />
                 {shiftTemplatesLoading ? 'Aggiornamento…' : 'Aggiorna lista'}
@@ -1654,8 +1655,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               {!shiftTemplatesLoading && shiftTemplates.length === 0 && (
                 <div className="flex flex-col items-center gap-2 py-8 text-center">
                   <CalendarDays className="h-8 w-8 text-white/30" />
-                  <p className="text-[13px] text-white/40">{t.settings_no_templates_saved ?? 'Nessun template salvato.'}</p>
-                  <p className="text-[11px] text-white/60">Salva una settimana dal tabellone turni usando il menu Template.</p>
+                  <p className="text-[0.8125rem] text-white/40">{t.settings_no_templates_saved ?? 'Nessun template salvato.'}</p>
+                  <p className="text-[0.6875rem] text-white/60">Salva una settimana dal tabellone turni usando il menu Template.</p>
                 </div>
               )}
 
@@ -1663,7 +1664,11 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               {shiftTemplates.length > 0 && (
                 <div className="fluid-grid fluid-grid-2 gap-2.5">
                   {shiftTemplates.map((tmpl) => {
-                    const DAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+                    const tplLocale = getDateLocale(effectiveLanguage);
+                    const tplDay = (d: number) => {
+                      const n = format(new Date(2024, 0, 7 + d), 'EEE', { locale: tplLocale });
+                      return n.charAt(0).toUpperCase() + n.slice(1);
+                    };
                     const isDeletingThis = shiftTemplateDeleting === tmpl.name;
                     return (
                       <div
@@ -1674,12 +1679,12 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           <BookTemplate className="h-4 w-4 text-blue-500" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-semibold text-white truncate" title={tmpl.name}>{tmpl.name}</p>
-                          <p className="text-[11px] text-white/55 mt-0.5">
-                            {tmpl.count} turno{tmpl.count !== 1 ? 'i' : ''} · {tmpl.days.map(d => DAY_LABELS[d] ?? d).join(', ')}
+                          <p className="text-[0.8125rem] font-semibold text-white truncate" title={tmpl.name}>{tmpl.name}</p>
+                          <p className="text-[0.6875rem] text-white/55 mt-0.5">
+                            {tmpl.count} {tmpl.count !== 1 ? (t.shift_plural ?? 'turni') : (t.shift_singular ?? 'turno')} · {tmpl.days.map((d) => tplDay(d)).join(', ')}
                           </p>
                           {tmpl.created_at && (
-                            <p className="text-[11px] text-white/60 mt-0.5">
+                            <p className="text-[0.6875rem] text-white/60 mt-0.5">
                               {new Date(tmpl.created_at).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                             </p>
                           )}
@@ -1736,19 +1741,19 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   return (
                     <div className={`rounded-xl border-2 border-l-4 ${borderColor} bg-transparent px-3 py-2.5`}>
                       <div className="flex items-center gap-1.5 mb-1">
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-white/40">
+                        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
                           Periodo attivo
                         </p>
-                        <span className={`text-[11px] font-extrabold uppercase tracking-wide ${ruleColor}`}>
+                        <span className={`text-[0.6875rem] font-extrabold uppercase tracking-wide ${ruleColor}`}>
                           · {ruleName}
                         </span>
                       </div>
-                      <p className="text-[13px] font-bold text-white tabular-nums">
+                      <p className="text-[0.8125rem] font-bold text-white tabular-nums">
                         {format(previewStart, 'dd/MM/yy')}
                         <span className="text-white/40 font-normal"> → </span>
                         {format(previewEnd, 'dd/MM/yy')}
                       </p>
-                      <p className={`text-[11px] mt-0.5 ${ruleColor}`}>
+                      <p className={`text-[0.6875rem] mt-0.5 ${ruleColor}`}>
                         {periodCfg.numWeeks} sett.
                       </p>
                     </div>
@@ -1757,21 +1762,21 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 {/* Bozza (non ancora salvata) */}
                 {periodDraftDirty ? (
                   <div className="rounded-xl border-2 border-l-4 border-amber-300/60 border-l-amber-500 bg-amber-50/80 px-3 py-2.5">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-amber-600 mb-1">
+                    <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-amber-600 mb-1">
                       Bozza non salvata
                     </p>
-                    <p className="text-[13px] font-bold text-white tabular-nums">
+                    <p className="text-[0.8125rem] font-bold text-white tabular-nums">
                       {format(parseISO(periodDraftStart), 'dd/MM/yy')}
                       <span className="text-white/40 font-normal"> → </span>
                       {format(addDays(parseISO(periodDraftStart), periodDraftWeeks * 7 - 1), 'dd/MM/yy')}
                     </p>
-                    <p className="text-[11px] text-amber-600 mt-0.5">
+                    <p className="text-[0.6875rem] text-amber-600 mt-0.5">
                       {periodDraftWeeks} sett. · premi Salva per confermare
                     </p>
                   </div>
                 ) : (
                   <div className="rounded-xl border border-white/10 bg-transparent px-3 py-2.5 flex items-center justify-center">
-                    <p className="text-[11px] text-white/60 text-center leading-snug">
+                    <p className="text-[0.6875rem] text-white/60 text-center leading-snug">
                       Nessuna modifica in bozza
                     </p>
                   </div>
@@ -1780,7 +1785,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
               {/* ── Selettore regola ────────────────────────────────────────── */}
               <div>
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-white/40">
+                <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
                   Regola di calcolo
                 </p>
                 <div className="grid grid-cols-2 gap-2">
@@ -1798,10 +1803,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
  : 'border-neutral-500 bg-white/8 hover:border-white/20'
  } active:brightness-95`}
                   >
-                    <span className={`text-[11px] font-extrabold uppercase tracking-wide ${periodRuleMode === 'last_sunday' ? 'text-accent' : 'text-white/70'}`}>
+                    <span className={`text-[0.6875rem] font-extrabold uppercase tracking-wide ${periodRuleMode === 'last_sunday' ? 'text-accent' : 'text-white/70'}`}>
                       Ultima domenica
                     </span>
-                    <span className="text-[11px] leading-snug text-white/40">
+                    <span className="text-[0.6875rem] leading-snug text-white/40">
                       Il periodo termina sull'ultima dom. del mese
                     </span>
                   </button>
@@ -1819,10 +1824,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
  : 'border-neutral-500 bg-white/8 hover:border-white/20'
  } active:brightness-95`}
                   >
-                    <span className={`text-[11px] font-extrabold uppercase tracking-wide ${periodRuleMode === 'fixed_start' ? 'text-brand-deep' : 'text-white/70'}`}>
+                    <span className={`text-[0.6875rem] font-extrabold uppercase tracking-wide ${periodRuleMode === 'fixed_start' ? 'text-brand-deep' : 'text-white/70'}`}>
                       Primo giorno
                     </span>
-                    <span className="text-[11px] leading-snug text-white/40">
+                    <span className="text-[0.6875rem] leading-snug text-white/40">
                       Imposti la data di inizio, il sistema calcola la fine
                     </span>
                   </button>
@@ -1833,7 +1838,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               {periodRuleMode === 'fixed_start' && (
                 /* Regola "Primo giorno": l'utente imposta la data di inizio */
                 <div>
-                  <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-white/40">
+                  <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
                     Primo giorno del periodo
                   </p>
                   <DatePickerField
@@ -1857,12 +1862,12 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     return (
                       <div className="flex items-center justify-between rounded-xl border border-brand-deep/22 bg-brand-deep/80/8 px-3 py-2.5">
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold text-brand-deep">Primo giorno</span>
-                          <span className="rounded-full bg-brand-deep/80/15 px-2 py-0.5 text-[11px] font-bold text-brand-deep">
+                          <span className="text-[0.6875rem] font-bold text-brand-deep">Primo giorno</span>
+                          <span className="rounded-full bg-brand-deep/80/15 px-2 py-0.5 text-[0.6875rem] font-bold text-brand-deep">
                             {cfg.numWeeks} sett.
                           </span>
                         </div>
-                        <span className="text-[11px] tabular-nums font-semibold text-white/70">
+                        <span className="text-[0.6875rem] tabular-nums font-semibold text-white/70">
                           {format(draftStart, 'dd/MM/yy')} → {format(endDate, 'dd/MM/yy')}
                         </span>
                       </div>
@@ -1901,7 +1906,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             defaultOpen={true}
           >
             <div className="rounded-xl border border-neutral-500 depth-card p-4">
-              <p className="text-[11px] text-white/55 mb-3 leading-snug">{t.settings_presence_section_hint}</p>
+              <p className="text-[0.6875rem] text-white/55 mb-3 leading-snug">{t.settings_presence_section_hint}</p>
               {(() => {
                 const effectiveTok = resolveEffectiveVerificationToken(presenceVerificationConfig);
                 const diskTok = presenceVerificationConfig.verificationToken?.trim() ?? '';
@@ -1909,13 +1914,13 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   effectiveTok.length > 20 ? `${effectiveTok.slice(0, 20)}…` : effectiveTok || '—';
                 return (
                   <div className="rounded-xl border border-neutral-500 mb-3 space-y-1.5 px-3 py-2">
-                    <p className="text-[11px] leading-snug text-white/80">
+                    <p className="text-[0.6875rem] leading-snug text-white/80">
                       {effectiveTok
                         ? formatTrans(t.settings_presence_effective_token_preview, { preview })
                         : t.settings_presence_token_none}
                     </p>
                     {!diskTok && effectiveTok ? (
-                      <p className="text-[11px] text-white/55 leading-snug">{t.settings_presence_token_env_only}</p>
+                      <p className="text-[0.6875rem] text-white/55 leading-snug">{t.settings_presence_token_env_only}</p>
                     ) : null}
                   </div>
                 );
@@ -1978,7 +1983,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       setPresenceQrBusy(false);
                     }
                   }}
-                  className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60 active:bg-accent-hover/80"
+                  className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60 active:bg-accent-hover/80"
                 >
                   <QrCode className="h-4 w-4 shrink-0 text-white" aria-hidden />
                   {presenceQrBusy ? t.ui_ellipsis : t.settings_presence_generate_qr}
@@ -2094,13 +2099,13 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   {t.settings_geofence_editor_title}
                 </h3>
               </div>
-              <p className="text-[11px] text-white/55 mb-3 leading-snug">
+              <p className="text-[0.6875rem] text-white/55 mb-3 leading-snug">
                 {t.settings_geofence_editor_hint}
               </p>
               {geofenceEffectiveConfig && (
                 <div className="mb-3 flex items-start gap-2 rounded-xl border border-brand-200/80 bg-brand-50/90 px-3 py-2">
                   <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-600" aria-hidden />
-                  <p className="text-[11px] leading-snug text-brand-900">
+                  <p className="text-[0.6875rem] leading-snug text-brand-900">
                     {formatTrans(t.settings_geofence_active_summary, {
                       lat: geofenceEffectiveConfig.lat.toFixed(6),
                       lng: geofenceEffectiveConfig.lng.toFixed(6),
@@ -2110,7 +2115,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 </div>
               )}
               <div className="fluid-grid fluid-grid-3 gap-2 mb-3">
-                <label className="flex flex-col gap-1 text-[11px] font-medium text-white/70">
+                <label className="flex flex-col gap-1 text-[0.6875rem] font-medium text-white/70">
                   {t.settings_geofence_lat}
                   <input
                     type="text"
@@ -2121,7 +2126,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     placeholder="45.123456"
                   />
                 </label>
-                <label className="flex flex-col gap-1 text-[11px] font-medium text-white/70">
+                <label className="flex flex-col gap-1 text-[0.6875rem] font-medium text-white/70">
                   {t.settings_geofence_lng}
                   <input
                     type="text"
@@ -2132,7 +2137,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     placeholder="9.123456"
                   />
                 </label>
-                <label className="flex flex-col gap-1 text-[11px] font-medium text-white/70">
+                <label className="flex flex-col gap-1 text-[0.6875rem] font-medium text-white/70">
                   {t.settings_geofence_radius}
                   <input
                     type="text"
@@ -2170,7 +2175,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       setGeoAcquiring(false);
                     }
                   }}
-                  className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border border-neutral-500 px-4 text-xs font-bold uppercase tracking-wider text-white/80 surface-ghost-interactive disabled:opacity-60"
+                  className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl border border-neutral-500 px-4 text-xs font-bold uppercase tracking-wider text-white/80 surface-ghost-interactive disabled:opacity-60"
                 >
                   <LocateFixed className="h-4 w-4 shrink-0 text-accent" aria-hidden />
                   {geoAcquiring ? t.ui_ellipsis : t.settings_geofence_acquire_gps}
@@ -2197,7 +2202,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       setGeoSaving(false);
                     }
                   }}
-                  className="min-h-[40px] rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60 active:bg-accent-hover/80"
+                  className="min-h-[2.5rem] rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60 active:bg-accent-hover/80"
                 >
                   {geoSaving ? t.ui_ellipsis : t.settings_geofence_save}
                 </button>
@@ -2214,19 +2219,19 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
           >
             <div className="rounded-xl border border-neutral-500 overflow-hidden">
               <div className="space-y-3 p-4">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-white/40">{t.settings_backup_data_section}</p>
+                <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">{t.settings_backup_data_section}</p>
 
                 {dataToolsLocked ? (
                   /* ── Stato bloccato ── */
                   <div className="flex flex-col items-center gap-3 rounded-xl border border-neutral-500 bg-white/5/80 py-5 px-4">
                     <Lock className="h-7 w-7 text-white/40" />
-                    <p className="text-[12px] text-center text-white/55 leading-snug">
+                    <p className="text-[0.75rem] text-center text-white/55 leading-snug">
                       Sezione protetta.<br/>Inserisci il tuo PIN per sbloccare.
                     </p>
                     <button
                       type="button"
                       onClick={() => { setDataToolsPin(''); setDataToolsPinError(''); setShowDataToolsPinPad(true); }}
-                      className="flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-[12px] font-semibold text-white shadow-sm hover:bg-accent/90 transition-colors"
+                      className="flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-[0.75rem] font-semibold text-white shadow-sm hover:bg-accent/90 transition-colors"
                     >
                       <KeyRound className="h-3.5 w-3.5" />
                       Sblocca con PIN
@@ -2236,13 +2241,13 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   /* ── Stato sbloccato ── */
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
+                      <span className="text-[0.6875rem] font-semibold text-emerald-600 flex items-center gap-1">
                         <Unlock className="h-3 w-3" /> Sbloccato
                       </span>
                       <button
                         type="button"
                         onClick={() => setDataToolsLocked(true)}
-                        className="text-[11px] text-white/60 hover:text-white/70 transition-colors active:text-white/70"
+                        className="text-[0.6875rem] text-white/60 hover:text-white/70 transition-colors active:text-white/70"
                       >
                         Blocca di nuovo
                       </button>
@@ -2333,7 +2338,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                 <button
                   type="button"
                   onClick={() => setCloudHintExpanded(!cloudHintExpanded)}
-                  className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold transition-colors"
+                  className="mt-0.5 flex items-center gap-1 text-[0.6875rem] font-semibold transition-colors"
                   style={{ color: '#fff' }}
                 >
                   <ChevronDown className={`w-3 h-3 transition-transform ${cloudHintExpanded ? 'rotate-180' : ''}`} />
@@ -2352,7 +2357,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <p className="text-[11px] font-semibold mt-1.5" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                <p className="text-[0.6875rem] font-semibold mt-1.5" style={{ color: 'rgba(255,255,255,0.85)' }}>
                   {settingsCloudLastSyncedAt
                     ? formatTrans(t.settings_cloud_synced_at, {
                         when: new Date(settingsCloudLastSyncedAt).toLocaleString(
@@ -2370,7 +2375,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                 type="button"
                 disabled={pullSyncBusy || pushSyncBusy || dataSyncInProgress}
                 onClick={() => void handlePullSync()}
-                className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80"
+                className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${pullSyncBusy ? 'animate-spin' : ''}`} />
                 {pullSyncBusy ? t.ui_ellipsis : 'Sincronizza'}
@@ -2379,7 +2384,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                 type="button"
                 disabled={pushSyncBusy || settingsCloudPushBusy || pullSyncBusy || dataSyncInProgress}
                 onClick={() => void handlePushSync()}
-                className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80 whitespace-nowrap"
+                className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80 whitespace-nowrap"
               >
                 <UploadCloud className={`h-5 w-5 text-white ${pushSyncBusy ? 'animate-spin' : ''}`} style={{ color: '#fff' }} />
                 {pushSyncBusy ? t.ui_ellipsis : 'Carica sul cloud'}
@@ -2436,7 +2441,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                 </h3>
                 <p className="mt-0.5 text-xs text-white/55">
                   <span
-                    className="inline-block rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-white"
+                    className="inline-block rounded-md px-1.5 py-0.5 text-[0.6875rem] font-semibold text-white"
                     style={{ backgroundColor: deletingDept.color ?? 'var(--brand)' }}
                   >
                     {deletingDept.label}
@@ -2466,7 +2471,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                       const initials = ((u.first_name?.[0] ?? '') + (u.last_name?.[0] ?? '')).toUpperCase() || '?';
                       return (
                         <div key={u.id} className="flex items-center gap-2 rounded-xl border border-neutral-500 bg-white/10 px-3 py-2">
-                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[11px] font-bold text-accent">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[0.6875rem] font-bold text-accent">
                             {initials}
                           </div>
                           <span className="min-w-0 flex-1 truncate text-xs font-semibold text-white/80" title={u.first_name}>{u.first_name} {u.last_name}
@@ -2474,7 +2479,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                           <select
                             value={reassignMap[u.id] ?? ''}
                             onChange={e => setReassignMap(m => ({ ...m, [u.id]: e.target.value }))}
-                            className="min-w-0 max-w-[130px] shrink rounded-lg border border-neutral-500 bg-white/5 px-2 py-1 text-base font-semibold text-white/80 outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent/30"
+                            className="min-w-0 max-w-[8.125rem] shrink rounded-lg border border-neutral-500 bg-white/5 px-2 py-1 text-base font-semibold text-white/80 outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent/30"
                           >
                             <option value="">— nessun reparto —</option>
                             {departments
@@ -2679,7 +2684,7 @@ function BreakRuleModal({
           <div className="grid grid-cols-3 gap-6">
           {/* ── Generale ── */}
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_section_general}</p>
+            <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_section_general}</p>
             <div className="space-y-3">
               {/* Titolo */}
               <div>
@@ -2721,7 +2726,7 @@ function BreakRuleModal({
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-white/80">{t.settings_break_shift_threshold_title}</p>
-                    <p className="text-[11px] text-white/55 mt-0.5 leading-snug">
+                    <p className="text-[0.6875rem] text-white/55 mt-0.5 leading-snug">
                       {minShiftThresholdOn ? t.settings_break_shift_threshold_on : t.settings_break_shift_threshold_off}
                     </p>
                   </div>
@@ -2737,7 +2742,7 @@ function BreakRuleModal({
                 </div>
                 {minShiftThresholdOn && (
                   <div className="flex items-center gap-3 border-t border-white/10/90 pt-1">
-                    <span className="shrink-0 text-[11px] font-semibold uppercase text-white/55">{t.settings_break_min_label}</span>
+                    <span className="shrink-0 text-[0.6875rem] font-semibold uppercase text-white/55">{t.settings_break_min_label}</span>
                     <button
                       type="button"
                       onClick={() => setMinHours((h) => Math.max(0.5, Math.round((h - 0.5) * 10) / 10))}
@@ -2764,7 +2769,7 @@ function BreakRuleModal({
                     {t.settings_break_paid_btn}
                   </button>
                 </div>
-                <p className="text-[11px] text-white/60 mt-1.5">
+                <p className="text-[0.6875rem] text-white/60 mt-1.5">
                   {paid ? t.settings_break_paid_hint : t.settings_break_unpaid_hint}
                 </p>
               </div>
@@ -2773,7 +2778,7 @@ function BreakRuleModal({
 
           {/* ── Assegna a ── */}
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_assign_section}</p>
+            <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_assign_section}</p>
             <div className="space-y-3">
               <div>
                 <label className={labelClass}>
@@ -2816,7 +2821,7 @@ function BreakRuleModal({
 
           {/* ── Applica a ── */}
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_apply_section}</p>
+            <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_apply_section}</p>
             <div className="space-y-3">
               {/* Date range */}
               <div className="grid grid-cols-2 gap-3">

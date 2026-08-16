@@ -69,7 +69,7 @@ className="absolute inset-0 bg-black/40 backdrop-blur-md w-screen h-screen trans
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative my-auto flex w-full max-w-[92vw] min-h-0 flex-col overflow-hidden rounded-[40px] border border-white/10 shadow-2xl md:max-w-[460px] z-[201]"
+          className="relative my-auto flex w-full max-w-[92vw] min-h-0 flex-col overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl md:max-w-[28.75rem] z-[201]"
           style={{ height: 'min(88vh, 680px)', maxHeight: 'min(88vh, 680px)' }}
           onClick={(e) => e.stopPropagation()}
         >

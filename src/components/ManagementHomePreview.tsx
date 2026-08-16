@@ -109,7 +109,7 @@ export default function ManagementHomePreview({
           onUiToggle={onUiToggle}
           hiddenBadge={hiddenBadge}
         >
-          <div className="pt-1 min-h-[2px]" aria-hidden />
+          <div className="pt-1 min-h-[0.125rem]" aria-hidden />
         </WidgetChrome>
 
         {isPurelyManagementRole(previewUser.role) && (
@@ -204,7 +204,7 @@ export default function ManagementHomePreview({
                 </div>
                 <div>
                   <p className="text-2xl font-bold leading-none text-white">{value}</p>
-                  <p className="mt-0.5 text-[11px] leading-tight text-white/60">{label}</p>
+                  <p className="mt-0.5 text-[0.6875rem] leading-tight text-white/60">{label}</p>
                 </div>
               </div>
             ))}
@@ -248,7 +248,7 @@ export default function ManagementHomePreview({
             <div className="mb-3 flex items-center gap-2">
               <Calendar className="h-4 w-4 text-white/60" />
               <h2 className="text-sm font-bold text-white/90">{t.home_todays_shifts}</h2>
-              <span className="ml-1 text-[11px] text-white/50">(2)</span>
+              <span className="ml-1 text-[0.6875rem] text-white/50">(2)</span>
               <span className="ml-auto flex items-center gap-0.5 text-xs font-semibold text-white/60">
                 {t.home_see_all_shifts} <ArrowRight className="h-3 w-3" />
               </span>
@@ -346,17 +346,17 @@ export default function ManagementHomePreview({
               <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
                 <div className="mb-2 flex items-center justify-between">
                   <TrendingUp className="h-4 w-4 text-white/50" />
-                  <span className="text-[11px] font-semibold uppercase text-white/50">{t.home_kpi_hours_week}</span>
+                  <span className="text-[0.6875rem] font-semibold uppercase text-white/50">{t.home_kpi_hours_week}</span>
                 </div>
                 <p className="text-2xl font-bold text-white">{formatMinutesToHoursAndMinutes(weeklyMinutesDemo)}</p>
               </div>
               <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
                 <div className="mb-2 flex items-center justify-between">
                   <Calendar className="h-4 w-4 text-white/50" />
-                  <span className="text-[11px] font-semibold uppercase text-white/50">{t.home_kpi_shifts_week}</span>
+                  <span className="text-[0.6875rem] font-semibold uppercase text-white/50">{t.home_kpi_shifts_week}</span>
                 </div>
                 <p className="text-2xl font-bold text-white">{shiftsWeekDemo}</p>
-                <p className="mt-0.5 text-[11px] text-white/50">{t.home_today}</p>
+                <p className="mt-0.5 text-[0.6875rem] text-white/50">{t.home_today}</p>
               </div>
             </div>
           </WidgetChrome>
@@ -368,8 +368,8 @@ export default function ManagementHomePreview({
   if (embedded) return body;
 
   return (
-    <div className="w-full max-w-3xl rounded-[1.75rem] border-[3px] border-slate-800 bg-transparent p-3 shadow-2xl md:p-4)]">
-      <p className="mb-3 text-center text-[11px] font-bold uppercase tracking-wider text-white/60">
+    <div className="w-full max-w-3xl rounded-[1.75rem] border-[0.1875rem] border-slate-800 bg-transparent p-3 shadow-2xl md:p-4)]">
+      <p className="mb-3 text-center text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">
         {tv.profile_visibility_mock_realistic_label ?? 'Anteprima — Home gestionale (dati dimostrativi)'}
       </p>
       {body}

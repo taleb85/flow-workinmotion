@@ -281,7 +281,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
     >
       <span
         className={`pointer-events-none inline-block h-4 w-4 transform rounded-full toggle-knob transition-all duration-200 ease-in-out ${
- enabled ? 'translate-x-[18px]' : 'translate-x-[2px]'
+ enabled ? 'translate-x-[1.125rem]' : 'translate-x-[0.125rem]'
  }`}
       />
     </button>
@@ -290,7 +290,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   const SectionHeader = ({ title, icon }: { title: string; icon?: React.ReactNode }) => (
     <tr className="bg-white/5">
       <td colSpan={colCount} className="px-4 py-2 border-b border-white/10">
-        <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/50">
+        <span className="flex items-center gap-2 text-[0.625rem] font-bold uppercase tracking-widest text-white/50">
           {icon}
           {title}
         </span>
@@ -354,9 +354,9 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.12 }}
                 style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 99999 }}
-                className="rounded-2xl border border-neutral-500 bg-[#0d1f3c]/95 shadow-xl p-3 w-[280px] font-sans"
+                className="rounded-2xl border border-neutral-500 bg-[#0d1f3c]/95 shadow-xl p-3 w-[17.5rem] font-sans"
               >
-                <p className="text-[9px] font-bold uppercase tracking-wider text-white/50 mb-2">
+                <p className="text-[0.5625rem] font-bold uppercase tracking-wider text-white/50 mb-2">
                   Anteprima — {previewTitle}
                 </p>
                 <div className="flex gap-2">
@@ -375,14 +375,14 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   /** Mini card con etichetta inglobata — stile allineato a ShiftCell. */
   const PreviewCard = ({ children, active, label }: { children: React.ReactNode; active?: boolean; label?: string }) => (
     <div
-      className={`rounded-lg border px-2.5 py-2 text-[10px] leading-tight space-y-0.5 flex-1 ${
+      className={`rounded-lg border px-2.5 py-2 text-[0.625rem] leading-tight space-y-0.5 flex-1 ${
  active
  ? 'border-accent/40 bg-accent/[0.06] text-white/85'
  : 'border-neutral-500 bg-white/8 text-white/50'
  }`}
     >
       {label && (
-        <div className="text-[9px] font-bold uppercase tracking-wider text-white/50 mb-1">
+        <div className="text-[0.5625rem] font-bold uppercase tracking-wider text-white/50 mb-1">
           {label}
         </div>
       )}
@@ -394,11 +394,11 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   const MiniNav = ({ tabs, highlight }: { tabs: { icon: string; label: string; key: string }[]; highlight?: string }) => (
     <div className="flex items-center gap-0.5 rounded-xl bg-white/10 p-0.5">
       {tabs.map(tab => (
-        <div key={tab.key} className={`flex flex-col items-center px-1 py-0.5 rounded-lg flex-1 text-[8px] ${
+        <div key={tab.key} className={`flex flex-col items-center px-1 py-0.5 rounded-lg flex-1 text-[0.5rem] ${
  tab.key === highlight ? 'bg-white/15 text-accent font-bold shadow-sm' : 'text-white/50'
  }`}>
           <span>{tab.icon}</span>
-          <span className="truncate max-w-[28px] text-center" title={tab.label}>{tab.label}</span>
+          <span className="truncate max-w-[1.75rem] text-center" title={tab.label}>{tab.label}</span>
         </div>
       ))}
     </div>
@@ -416,8 +416,8 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
     // ── Schede ──
     home_tab: {
       title: 'Scheda Panoramica',
-      off: <PreviewCard label="Spento"><div className="flex gap-1 items-center opacity-40"><span>🏠</span><span className="line-through">Panoramica</span></div><div className="text-[9px] mt-0.5">Tab assente</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div className="flex gap-1 items-center font-semibold"><span>🏠</span>Panoramica</div><div className="text-[9px] mt-0.5">Tab visibile</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div className="flex gap-1 items-center opacity-40"><span>🏠</span><span className="line-through">Panoramica</span></div><div className="text-[0.5625rem] mt-0.5">Tab assente</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div className="flex gap-1 items-center font-semibold"><span>🏠</span>Panoramica</div><div className="text-[0.5625rem] mt-0.5">Tab visibile</div></PreviewCard>,
     },
     team_view: {
       title: 'Scheda Turni',
@@ -437,75 +437,75 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
     // ── Operazioni Turni ──
     edit_shifts: {
       title: 'Modifica Turni',
-      off: <PreviewCard label="Spento"><div className="font-semibold text-white/60">09:00 – 17:00</div><div className="text-[8px] opacity-40 mt-0.5">✏️ assente</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div className="font-semibold">09:00 – 17:00</div><div className="rounded bg-accent/20 text-accent text-[8px] text-center py-0.5 font-bold mt-0.5">✏️ Modifica</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div className="font-semibold text-white/60">09:00 – 17:00</div><div className="text-[0.5rem] opacity-40 mt-0.5">✏️ assente</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div className="font-semibold">09:00 – 17:00</div><div className="rounded bg-accent/20 text-accent text-[0.5rem] text-center py-0.5 font-bold mt-0.5">✏️ Modifica</div></PreviewCard>,
     },
     approve_shifts: {
       title: 'Congelamento Turni',
-      off: <PreviewCard label="Spento"><div className="font-semibold text-white/60">Turno ✓</div><div className="text-[8px] opacity-40 mt-0.5">🔒 Sola lettura</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div className="font-semibold">Turno ✓</div><div className="text-[8px] text-green-600 font-semibold mt-0.5">❄️ Congela</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div className="font-semibold text-white/60">Turno ✓</div><div className="text-[0.5rem] opacity-40 mt-0.5">🔒 Sola lettura</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div className="font-semibold">Turno ✓</div><div className="text-[0.5rem] text-green-600 font-semibold mt-0.5">❄️ Congela</div></PreviewCard>,
     },
     export_pdf: {
       title: 'Download PDF',
-      off: <PreviewCard label="Spento"><div className="text-[8px] opacity-40 line-through mt-0.5">⬇️ Scarica PDF</div><div className="text-[8px]">Assente</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div className="rounded border border-accent/40 text-accent text-[8px] text-center py-0.5 font-semibold mt-0.5">⬇️ Scarica PDF</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div className="text-[0.5rem] opacity-40 line-through mt-0.5">⬇️ Scarica PDF</div><div className="text-[0.5rem]">Assente</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div className="rounded border border-accent/40 text-accent text-[0.5rem] text-center py-0.5 font-semibold mt-0.5">⬇️ Scarica PDF</div></PreviewCard>,
     },
     // ── Altro ──
     view_stats: {
       title: 'Ore nella scheda Presenze',
-      off: <PreviewCard label="Spento"><div>Presenze</div><div className="text-[8px] opacity-40 mt-0.5">Sezione Ore nascosta</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>Presenze</div><div className="text-[8px] font-semibold mt-0.5">📊 Ore visibili</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div>Presenze</div><div className="text-[0.5rem] opacity-40 mt-0.5">Sezione Ore nascosta</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div>Presenze</div><div className="text-[0.5rem] font-semibold mt-0.5">📊 Ore visibili</div></PreviewCard>,
     },
     view_estimated_cost: {
       title: 'Costo stimato lavoro',
-      off: <PreviewCard label="Spento"><div>Ore totali</div><div className="text-[8px] opacity-40 line-through mt-0.5">€ — —</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>Ore totali</div><div className="text-[8px] font-bold text-green-600 mt-0.5">€ 1.240 stimato</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div>Ore totali</div><div className="text-[0.5rem] opacity-40 line-through mt-0.5">€ — —</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div>Ore totali</div><div className="text-[0.5rem] font-bold text-green-600 mt-0.5">€ 1.240 stimato</div></PreviewCard>,
     },
     profile_readonly: {
       title: 'PC come telefono',
-      off: <PreviewCard label="Spento"><div>🖥️ Browser</div><div className="text-[8px] mt-0.5">Tab standard</div><div className="text-[8px] text-blue-500">Tutte cliccabili</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>🖥️ Browser</div><div className="text-[8px] mt-0.5">Come telefono</div><div className="text-[8px] font-semibold">↑ Scorri schede</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div>🖥️ Browser</div><div className="text-[0.5rem] mt-0.5">Tab standard</div><div className="text-[0.5rem] text-blue-500">Tutte cliccabili</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div>🖥️ Browser</div><div className="text-[0.5rem] mt-0.5">Come telefono</div><div className="text-[0.5rem] font-semibold">↑ Scorri schede</div></PreviewCard>,
     },
     // ── Permessi Operativi ──
     can_request_holidays: {
       title: 'Richiedi Ferie',
-      off: <PreviewCard label="Spento"><div>🌴 Ferie</div><div className="text-[8px] opacity-40 mt-0.5">+ assente</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>🌴 Ferie</div><div className="text-[8px] font-semibold mt-0.5">+ Nuova richiesta</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div>🌴 Ferie</div><div className="text-[0.5rem] opacity-40 mt-0.5">+ assente</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div>🌴 Ferie</div><div className="text-[0.5rem] font-semibold mt-0.5">+ Nuova richiesta</div></PreviewCard>,
     },
     can_punch_from_app: {
       title: 'Timbratura da App',
-      off: <PreviewCard label="Spento"><div>Dashboard</div><div className="text-[8px] opacity-40 line-through mt-0.5">⏱ Timbra</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>Dashboard</div><div className="rounded bg-accent/20 text-accent text-[8px] text-center py-0.5 font-bold mt-0.5">⏱ Timbra</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div>Dashboard</div><div className="text-[0.5rem] opacity-40 line-through mt-0.5">⏱ Timbra</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div>Dashboard</div><div className="rounded bg-accent/20 text-accent text-[0.5rem] text-center py-0.5 font-bold mt-0.5">⏱ Timbra</div></PreviewCard>,
     },
     can_create_shifts: {
       title: 'Crea Turni',
-      off: <PreviewCard label="Spento"><div>📅 Tabellone</div><div className="text-[8px] opacity-40 mt-0.5">Cella bloccata</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>📅 Tabellone</div><div className="text-[8px] font-semibold text-accent mt-0.5">+ Nuovo turno</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div>📅 Tabellone</div><div className="text-[0.5rem] opacity-40 mt-0.5">Cella bloccata</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div>📅 Tabellone</div><div className="text-[0.5rem] font-semibold text-accent mt-0.5">+ Nuovo turno</div></PreviewCard>,
     },
     can_manage_drafts: {
       title: 'Gestisci Bozze',
-      off: <PreviewCard label="Spento"><div>📋 Turno</div><div className="text-[8px] opacity-40 mt-0.5">Bozze nascoste</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>📋 Turno</div><div className="mt-0.5"><span className="bg-amber-100 text-amber-700 rounded px-0.5 text-[8px] font-bold">BOZZA</span></div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div>📋 Turno</div><div className="text-[0.5rem] opacity-40 mt-0.5">Bozze nascoste</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div>📋 Turno</div><div className="mt-0.5"><span className="bg-amber-100 text-amber-700 rounded px-0.5 text-[0.5rem] font-bold">BOZZA</span></div></PreviewCard>,
     },
     can_approve_shifts: {
       title: 'Approva Turni',
-      off: <PreviewCard label="Spento"><div>Turno ✓</div><div className="text-[8px] opacity-40 mt-0.5">Non approvabile</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>Turno ✓</div><div className="text-[8px] font-semibold text-green-600 mt-0.5">✅ Approva</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div>Turno ✓</div><div className="text-[0.5rem] opacity-40 mt-0.5">Non approvabile</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div>Turno ✓</div><div className="text-[0.5rem] font-semibold text-green-600 mt-0.5">✅ Approva</div></PreviewCard>,
     },
     can_view_total_hours: {
       title: 'Ore Totali Team',
-      off: <PreviewCard label="Spento"><div>📊 Tabellone</div><div className="text-[8px] opacity-40 mt-0.5">Col. TOTALE nascosta</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>📊 Tabellone</div><div className="text-[8px] font-semibold mt-0.5">Col. TOTALE visibile</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div>📊 Tabellone</div><div className="text-[0.5rem] opacity-40 mt-0.5">Col. TOTALE nascosta</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div>📊 Tabellone</div><div className="text-[0.5rem] font-semibold mt-0.5">Col. TOTALE visibile</div></PreviewCard>,
     },
     can_edit_staff_pins: {
       title: 'Modifica PIN Staff',
-      off: <PreviewCard label="Spento"><div>👤 Profilo</div><div className="text-[8px] opacity-40 line-through mt-0.5">Cambia PIN</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>👤 Profilo</div><div className="text-[8px] font-semibold mt-0.5">🔑 Cambia PIN</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div>👤 Profilo</div><div className="text-[0.5rem] opacity-40 line-through mt-0.5">Cambia PIN</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div>👤 Profilo</div><div className="text-[0.5rem] font-semibold mt-0.5">🔑 Cambia PIN</div></PreviewCard>,
     },
     team_schedule_visible: {
       title: 'Visibile in tabellone',
-      off: <PreviewCard label="Spento"><div>📅 Tabellone</div><div className="text-[8px] opacity-40 mt-0.5">Riga nascosta</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>📅 Tabellone</div><div className="text-[8px] font-semibold mt-0.5">Riga visibile ✓</div></PreviewCard>,
+      off: <PreviewCard label="Spento"><div>📅 Tabellone</div><div className="text-[0.5rem] opacity-40 mt-0.5">Riga nascosta</div></PreviewCard>,
+      on:  <PreviewCard label="Attivo" active><div>📅 Tabellone</div><div className="text-[0.5rem] font-semibold mt-0.5">Riga visibile ✓</div></PreviewCard>,
     },
   };
 
@@ -539,7 +539,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
 
     const ShiftCell = ({ planned, active }: { planned: boolean; active: boolean }) => (
       <div
-        className={`rounded-lg border px-2.5 py-2 text-[10px] leading-tight space-y-0.5 transition-colors ${
+        className={`rounded-lg border px-2.5 py-2 text-[0.625rem] leading-tight space-y-0.5 transition-colors ${
  active
  ? 'border-accent/40 bg-accent/[0.06]'
  : 'border-neutral-500 bg-white/8'
@@ -547,31 +547,31 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
         style={{ minWidth: 110 }}
       >
         {/* header */}
-        <div className="text-[9px] font-bold uppercase tracking-wider text-white/50 mb-1">
+        <div className="text-[0.5625rem] font-bold uppercase tracking-wider text-white/50 mb-1">
           {planned ? 'Attivo' : 'Spento'}
         </div>
         {/* orario pianificato — sempre visibile */}
         <div className="flex items-center gap-1 font-semibold text-white/80">
-          <span className="text-[9px] text-green-500 font-bold">✓</span>
+          <span className="text-[0.5625rem] text-green-500 font-bold">✓</span>
           09:00 – 17:00
         </div>
         {/* dati nascosti quando planned */}
         {!planned && (
           <>
             <div className="flex items-center gap-1 text-white/60">
-              <span className="text-[9px]">⏱</span> 08:31 timb.
+              <span className="text-[0.5625rem]">⏱</span> 08:31 timb.
             </div>
             <div className="flex items-center gap-1 text-amber-600">
-              <span className="text-[9px]">Δ</span> −29m
+              <span className="text-[0.5625rem]">Δ</span> −29m
             </div>
             <div className="flex items-center gap-1 text-white/50">
-              <span className="inline-block w-2 h-2 rounded-sm bg-purple-400/60 text-[7px] text-center leading-[8px]">!</span>
+              <span className="inline-block w-2 h-2 rounded-sm bg-purple-400/60 text-[0.4375rem] text-center leading-[0.5rem]">!</span>
               badge audit
             </div>
           </>
         )}
         {planned && (
-          <div className="text-white/50 text-[10px] mt-0.5 italic">
+          <div className="text-white/50 text-[0.625rem] mt-0.5 italic">
             delta e timbrature nascosti
           </div>
         )}
@@ -582,7 +582,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       <div>
         {/* Label + hint */}
         <div className="flex items-center gap-1.5">
-          <span className="text-[13px] text-white/80">
+          <span className="text-[0.8125rem] text-white/80">
             {tv.admin_timesheet_grid_planned_only_label ?? 'Presenze: solo orario pianificato'}
           </span>
           {!anyActive && (
@@ -597,7 +597,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             </button>
           )}
         </div>
-        <div className="mt-0.5 max-w-[220px]">
+        <div className="mt-0.5 max-w-[13.75rem]">
           <AnimatePresence initial={false}>
             {hintExpanded ? (
               <motion.div
@@ -608,7 +608,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                 transition={{ duration: 0.18 }}
                 className="overflow-hidden"
               >
-                <span className="text-[11px] text-white/50 leading-snug">
+                <span className="text-[0.6875rem] text-white/50 leading-snug">
                   {tv.admin_timesheet_grid_planned_only_hint ?? 'Nasconde timbrature, delta e totali grezzi: l\'utente vede solo orari pianificati pubblicati e, per turni congelati, le ore approvate.'}
                 </span>
               </motion.div>
@@ -620,7 +620,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.12 }}
               >
-                <span className="text-[11px] text-white/50">
+                <span className="text-[0.6875rem] text-white/50">
                   Nasconde timbrature, delta e totali grezzi
                 </span>
               </motion.div>
@@ -630,7 +630,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             <button
               type="button"
               onClick={() => setHintExpanded(v => !v)}
-              className="text-[10px] font-semibold text-accent/70 hover:text-accent transition-colors mt-0.5 leading-none active:text-accent"
+              className="text-[0.625rem] font-semibold text-accent/70 hover:text-accent transition-colors mt-0.5 leading-none active:text-accent"
             >
               {hintExpanded ? '↑ meno' : '↓ di più'}
             </button>
@@ -648,9 +648,9 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                 exit={{ opacity: 0, y: 4, scale: 0.97 }}
                 transition={{ duration: 0.15 }}
                 style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 99999 }}
-                className="rounded-2xl border border-neutral-500 bg-[#0d1f3c]/95 shadow-xl p-3 w-[280px] font-sans"
+                className="rounded-2xl border border-neutral-500 bg-[#0d1f3c]/95 shadow-xl p-3 w-[17.5rem] font-sans"
               >
-                <p className="text-[10px] font-bold uppercase tracking-wider text-white/60 mb-2">
+                <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/60 mb-2">
                   Anteprima cella presenze
                 </p>
                 <div className="flex gap-2">
@@ -672,8 +672,8 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   }) => (
     <div className="flex items-center justify-between px-4 py-3 gap-3">
       <div className="flex-1 min-w-0">
-        <div className="text-[13px] text-white/80 leading-snug">{label}</div>
-        {sublabel && <div className="text-[11px] text-white/50 mt-0.5 leading-snug">{sublabel}</div>}
+        <div className="text-[0.8125rem] text-white/80 leading-snug">{label}</div>
+        {sublabel && <div className="text-[0.6875rem] text-white/50 mt-0.5 leading-snug">{sublabel}</div>}
       </div>
       <button
         type="button"
@@ -690,7 +690,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
 
   const MobileSectionHeader = ({ title }: { title: string }) => (
     <div className="px-4 py-2 bg-white/5 border-y border-white/10">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">{title}</span>
+      <span className="text-[0.625rem] font-bold uppercase tracking-widest text-white/50">{title}</span>
     </div>
   );
 
@@ -708,11 +708,11 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
               onClick={() => setMobileSelectedUserId(u.id)}
               className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl border-2 transition-colors ${isSelected ? 'border-accent bg-white/20' : 'border border-neutral-500 bg-white/8'}`}
             >
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-[11px] font-bold" style={{ backgroundColor: color }}>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-[0.6875rem] font-bold" style={{ backgroundColor: color }}>
                 {initials(u)}
               </div>
-              <span className="text-[11px] font-semibold text-white/80 leading-none">{u.first_name}</span>
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white leading-none" style={{ backgroundColor: color }}>
+              <span className="text-[0.6875rem] font-semibold text-white/80 leading-none">{u.first_name}</span>
+              <span className="text-[0.5625rem] font-bold px-1.5 py-0.5 rounded-full text-white leading-none" style={{ backgroundColor: color }}>
                 {roleBadgeLabel(u.role, t as Record<string, string>)}
               </span>
             </button>
@@ -729,7 +729,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             return (
               <MobileRow
                 key={key}
-                label={<>{FEATURE_LABELS_TAB_FIRST[key]}{key === 'home_tab' && <span className="ml-1 text-[10px] text-white/50"> sempre attiva</span>}</>}
+                label={<>{FEATURE_LABELS_TAB_FIRST[key]}{key === 'home_tab' && <span className="ml-1 text-[0.625rem] text-white/50"> sempre attiva</span>}</>}
                 enabled={(userFeatures[mobileUser.id]?.[key]) === true}
                 locked={locked}
                 onToggle={() => toggleFeature(mobileUser.id, key)}
@@ -825,17 +825,17 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                     <div className="flex flex-col items-center gap-1">
                       {/* Avatar */}
                       <div
-                        className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-[11px] font-bold shrink-0"
+                        className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-[0.6875rem] font-bold shrink-0"
                         style={{ backgroundColor: color }}
                       >
                         {initials(u)}
                       </div>
                       {/* Nome */}
-                      <span className="text-[11px] font-semibold text-white/80 leading-tight text-center max-w-[76px] truncate" title={u.first_name}>{u.first_name}
+                      <span className="text-[0.6875rem] font-semibold text-white/80 leading-tight text-center max-w-[4.75rem] truncate" title={u.first_name}>{u.first_name}
                       </span>
                       {/* Ruolo */}
                       <span
-                        className="text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white leading-none"
+                        className="text-[0.5625rem] font-bold px-1.5 py-0.5 rounded-full text-white leading-none"
                         style={{ backgroundColor: color }}
                       >
                         {badge}
@@ -854,10 +854,10 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             {ROLE_TEMPLATE_FEATURE_SECTIONS.find((s) => s.id === 'tabs_nav')?.rows.map(({ key }) => (
               <tr key={key} className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/8 transition-colors active:bg-white/8/80">
                 <td className="sticky left-0 z-10 bg-[#0d1f3c] px-4 py-2.5">
-                  <div className="flex items-center gap-0.5 text-[13px] text-white/80">
+                  <div className="flex items-center gap-0.5 text-[0.8125rem] text-white/80">
                     {FEATURE_LABELS_TAB_FIRST[key]}
                     {key === 'home_tab' && (
-                      <span className="ml-1 text-[10px] text-white/50">sempre attiva</span>
+                      <span className="ml-1 text-[0.625rem] text-white/50">sempre attiva</span>
                     )}
                     {PERM_PREVIEWS[key] && (
                       <PermInfoButton
@@ -889,7 +889,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             {ROLE_TEMPLATE_FEATURE_SECTIONS.find((s) => s.id === 'shift_ops')?.rows.map(({ key }) => (
               <tr key={key} className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/8 transition-colors active:bg-white/8/80">
                 <td className="sticky left-0 z-10 bg-[#0d1f3c] px-4 py-2.5">
-                  <div className="flex items-center gap-0.5 text-[13px] text-white/80">
+                  <div className="flex items-center gap-0.5 text-[0.8125rem] text-white/80">
                     {FEATURE_LABELS[key]}
                     {PERM_PREVIEWS[key] && (
                       <PermInfoButton
@@ -916,7 +916,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             {ROLE_TEMPLATE_FEATURE_SECTIONS.find((s) => s.id === 'other')?.rows.map(({ key }) => (
               <tr key={key} className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/8 transition-colors active:bg-white/8/80">
                 <td className="sticky left-0 z-10 bg-[#0d1f3c] px-4 py-2.5">
-                  <div className="flex items-center gap-0.5 text-[13px] text-white/80">
+                  <div className="flex items-center gap-0.5 text-[0.8125rem] text-white/80">
                     {FEATURE_LABELS[key]}
                     {PERM_PREVIEWS[key] && (
                       <PermInfoButton
@@ -960,7 +960,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             {permRows.map((perm) => (
               <tr key={perm.key} className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/8 transition-colors active:bg-white/8/80">
                 <td className="sticky left-0 z-10 bg-[#0d1f3c] px-4 py-2.5">
-                  <div className="flex items-center gap-0.5 text-[13px] text-white/80">
+                  <div className="flex items-center gap-0.5 text-[0.8125rem] text-white/80">
                     {perm.label}
                     {PERM_PREVIEWS[perm.key] && (
                       <PermInfoButton
@@ -971,7 +971,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                     )}
                   </div>
                   {perm.description && (
-                    <div className="text-[11px] text-white/50 leading-snug mt-0.5 max-w-[220px]">
+                    <div className="text-[0.6875rem] text-white/50 leading-snug mt-0.5 max-w-[13.75rem]">
                       {perm.description}
                     </div>
                   )}
@@ -991,7 +991,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             <SectionHeader title="Visibilità nel Tabellone Turni" icon={<Users className="h-3 w-3" />} />
             <tr className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/8 transition-colors active:bg-white/8/80">
               <td className="sticky left-0 z-10 bg-[#0d1f3c] px-4 py-2.5">
-                <div className="flex items-center gap-0.5 text-[13px] text-white/80">
+                <div className="flex items-center gap-0.5 text-[0.8125rem] text-white/80">
                   {t.settings_visible_on_schedule_row}
                   <PermInfoButton
                     previewTitle={PERM_PREVIEWS.team_schedule_visible.title}
@@ -999,7 +999,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                     on={PERM_PREVIEWS.team_schedule_visible.on}
                   />
                 </div>
-                <div className="text-[11px] text-white/50 leading-snug mt-0.5">
+                <div className="text-[0.6875rem] text-white/50 leading-snug mt-0.5">
                   Appare nel tabellone turni e nelle presenze di squadra
                 </div>
               </td>
@@ -1017,12 +1017,12 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             <SectionHeader title="Moduli Scheda Admin (globale)" />
             {ADMIN_MODULE_KEYS.map((key) => (
               <tr key={key} className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/8 transition-colors active:bg-white/8/80">
-                <td className="sticky left-0 z-10 bg-[#0d1f3c] px-4 py-2.5 text-[13px] text-white/85">
+                <td className="sticky left-0 z-10 bg-[#0d1f3c] px-4 py-2.5 text-[0.8125rem] text-white/85">
                   {getAdminModuleLabel(key, t as Record<string, string>)}
                 </td>
                 <td colSpan={nonAdminUsers.length} className="px-3 py-2.5">
                   <div className="flex items-center justify-center gap-3">
-                    <span className="text-[11px] text-white/50">Globale</span>
+                    <span className="text-[0.6875rem] text-white/50">Globale</span>
                     <MatrixToggle
                       enabled={mods[key] === true}
                       onToggle={() => toggleMod(key)}
@@ -1043,7 +1043,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             type="button"
             onClick={resetMods}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/60 hover:bg-white/8 transition-colors disabled:opacity-50 active:bg-white/8/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/60 hover:bg-white/8 transition-colors disabled:opacity-50 active:bg-white/8/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           >
             <RotateCcw className="w-3 h-3" />
             Reset moduli
@@ -1052,7 +1052,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             type="button"
             onClick={() => void handleResetAll()}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/40 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-red-400 hover:bg-red-500/15 transition-colors disabled:opacity-50 active:bg-red-500/80"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/40 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-red-400 hover:bg-red-500/15 transition-colors disabled:opacity-50 active:bg-red-500/80"
           >
             <RotateCcw className="w-3 h-3" />
             Azzera tutto

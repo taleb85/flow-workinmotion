@@ -71,7 +71,7 @@ export default function TopTabBar({ activeTab, onTabChange, visibleTabs }: TopTa
                 flex: '1 1 0',
                 minWidth: 0,
                 padding: '11px 4px',
-                fontSize: 12,
+                fontSize: '0.75rem',
                 fontWeight: 500,
                 textAlign: 'center' as const,
                 textTransform: 'uppercase',
