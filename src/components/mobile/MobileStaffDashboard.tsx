@@ -8,11 +8,6 @@ import type { User, Shift, PunchRecord, Language } from '../../types';
 import { useAppUser } from '../../context/appSliceContexts';
 import { useAppData } from '../../context/appSliceContexts';
 import { useAppConfig } from '../../context/appSliceContexts';
-import { PATH_PROFILO } from '../../config/appPaths';
-import { APP_SESSION_STORAGE_KEY } from '../../constants/appSession';
-import { persistStoredUiLanguage } from '../../utils/uiLanguagePreference';
-import { applyUnauthenticatedDocumentTheme } from '../../utils/theme';
-import { useNavigate } from 'react-router-dom';
 import { useAppOverlay } from '../../context/appSliceContexts';
 import { getTranslations, getDateLocale } from '../../utils/translations';
 import { usePunchPresenceVerification } from '../../hooks/usePunchPresenceVerification';
@@ -55,7 +50,6 @@ export default function MobileStaffDashboard({
   now,
   myShifts,
   punchRecords,
-  onTabChange,
   greetingText,
   activeTab,
   weeklyMinutes: weeklyMinutesProp,
@@ -70,8 +64,6 @@ export default function MobileStaffDashboard({
   const { users } = useAppUser();
   const { updatePunchRecord, shifts: allShifts } = useAppData();
   const { showError, showSuccess } = useAppOverlay();
-  const navigate = useNavigate();
-  const { setCurrentUser, setIsSessionElevated } = useAppUser();
   const { featureFlags, breakRules } = useAppConfig();
   const { requestProof, modal: presenceModal } = usePunchPresenceVerification(language);
   const [tick, setTick] = useState(0);
