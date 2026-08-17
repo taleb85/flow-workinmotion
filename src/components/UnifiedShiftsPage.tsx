@@ -27,13 +27,11 @@ export default function UnifiedShiftsPage() {
         </div>
       )}
 
-      {/* Unified Grid — riempie tutto lo spazio */}
-      <div className="flex-none min-h-0 rounded-xl border border-white/10 bg-transparent p-0 shadow-sm overflow-hidden flex flex-col md:flex-1 md:p-2">
-        <UnifiedShiftGrid
-          mode="realtime"
-          onModeChange={() => {}}
-        />
-      </div>
+      {/* Unified Grid — riempie tutto lo spazio (senza wrapper card) */}
+      <UnifiedShiftGrid
+        mode="realtime"
+        onModeChange={() => {}}
+      />
     </motion.div>
   );
 }

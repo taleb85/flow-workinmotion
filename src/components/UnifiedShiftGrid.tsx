@@ -509,9 +509,46 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const gridRootRef = useRef<HTMLDivElement>(null);
   const contentAboveRef = useRef<HTMLDivElement>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
+  const toolbarBandRef = useRef<HTMLDivElement>(null);
   const [tableScrolled, setTableScrolled] = useState(false);
   const [hScrolled, setHScrolled] = useState(false);
   const [tableMaxHeight, setTableMaxHeight] = useState<number | null>(null);
+  /**
+   * Toolbar sovrapposta al contenuto (sticky attaccata in alto mentre la pagina scorre).
+   * Su mobile attiva il glass stile bottom nav; baseline = posizione naturale a scroll 0.
+   */
+  const [toolbarOverlapping, setToolbarOverlapping] = useState(false);
+  useLayoutEffect(() => {
+    const band = toolbarBandRef.current;
+    if (!band) return;
+    let scroller: HTMLElement | null = null;
+    let node = band.parentElement;
+    while (node) {
+      const oy = getComputedStyle(node).overflowY;
+      if (oy === 'auto' || oy === 'scroll' || oy === 'overlay') { scroller = node; break; }
+      node = node.parentElement;
+    }
+    let initialTop: number | null = null;
+    const update = () => {
+      const top = band.getBoundingClientRect().top;
+      if (initialTop === null || (scroller && scroller.scrollTop <= 1)) {
+        initialTop = top;
+        setToolbarOverlapping(false);
+        return;
+      }
+      setToolbarOverlapping(top < initialTop - 1);
+    };
+    update();
+    scroller?.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    const ro = new ResizeObserver(update);
+    ro.observe(band);
+    return () => {
+      scroller?.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      ro.disconnect();
+    };
+  }, []);
   useLayoutEffect(() => {
     const root = gridRootRef.current;
     const above = contentAboveRef.current;
@@ -520,7 +557,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       const rootRect = root.getBoundingClientRect();
       const aboveRect = above.getBoundingClientRect();
       const usedAbove = aboveRect.bottom - rootRect.top;
-      const bottomGap = 4;
+      // Il contenitore deve terminare SOPRA la bottom nav (altezza nav ~40px + safe-area),
+      // così la riga "In turno" (sticky bottom-0) chiude la tabella senza finire sotto la nav
+      // e senza lasciare spazio vuoto sotto di sé.
+      const bottomGap = 64;
       setTableMaxHeight(Math.max(200, window.innerHeight - rootRect.top - usedAbove - bottomGap));
     };
     update();
@@ -760,7 +800,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     targetSlot: 'lunch' | 'evening';
     targetTimeRange: string;
     presets: { start: string; end: string }[];
+    /** Indice del preset selezionato; -1 = mantieni gli orari originali del turno trascinato. */
     selectedPresetIdx: number;
+    origStart: string;
+    origEnd: string;
   } | null>(null);
 
   // ── Template state ──
@@ -1020,6 +1063,33 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     }
     return set;
   }, [dayGroupsByUserDate]);
+
+  /**
+   * Persone in turno per giorno, divise per fascia pranzo/cena (riepilogo in fondo alla tabella).
+   * Conta gli utenti DISTINTI per fascia e data, limitandosi ai dipendenti visibili nella griglia.
+   */
+  const peopleOnShiftByDate = useMemo(() => {
+    const byDate = new Map<string, { lunch: Set<string>; evening: Set<string> }>();
+    const visibleIds = new Set(visibleUsers.map(u => u.id));
+    for (const [key, groups] of dayGroupsByUserDate) {
+      const idx = key.indexOf('|');
+      if (idx <= 0) continue;
+      const uid = key.slice(0, idx);
+      if (!visibleIds.has(uid)) continue;
+      const dateStr = key.slice(idx + 1);
+      let entry = byDate.get(dateStr);
+      if (!entry) {
+        entry = { lunch: new Set(), evening: new Set() };
+        byDate.set(dateStr, entry);
+      }
+      for (const g of groups) {
+        const slot = getShiftSlotFromStartTime(g.shift.start_time ?? '10:00');
+        if (slot === 'lunch') entry.lunch.add(uid);
+        else entry.evening.add(uid);
+      }
+    }
+    return byDate;
+  }, [dayGroupsByUserDate, visibleUsers]);
 
   const handlePublishWeek = useCallback(async () => {
     if (!confirm(t.confirm_publish_week ?? 'Pubblicare tutti i turni della settimana?')) return;
@@ -1525,11 +1595,18 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     const origStart = firstShift?.start_time?.slice(0, 5);
     const origEnd = firstShift?.end_time?.slice(0, 5);
     const selectedPresetIdx = presets.findIndex(p => p.start === origStart && p.end === origEnd);
-    const effectiveIdx = selectedPresetIdx >= 0 ? selectedPresetIdx : 0;
-    const pick = presets[effectiveIdx] ?? (slot === 'lunch' ? { start: '10:00', end: '16:00' } : { start: '18:00', end: '23:00' });
-    const targetTimeRange = `${pick.start}–${pick.end}`;
-    const targetLabel = targetUser ? `${targetUser.first_name} — ${targetDate} (${slotLabel})` : `${targetDate} (${slotLabel})`;
-    setDropConfirm({ shiftIds: filtered, targetUserId, targetDate, targetLabel, targetSlot: slot, targetTimeRange, presets, selectedPresetIdx: effectiveIdx });
+    // Se gli orari del turno non coincidono con nessun preset, mantieni gli orari
+    // originali del turno (selectedPresetIdx = -1) invece di ripiegare sul primo preset.
+    const effectiveIdx = selectedPresetIdx >= 0 ? selectedPresetIdx : -1;
+    const pick = effectiveIdx >= 0
+      ? presets[effectiveIdx]
+      : { start: origStart ?? '', end: origEnd ?? '' };
+    const targetTimeRange = pick.start && pick.end ? `${pick.start}–${pick.end}` : '';
+    // Data nel label di conferma in formato gg-mm-aaaa (es. 22-08-2026)
+    const [yPart, mPart, dPart] = targetDate.split('-');
+    const prettyDate = yPart && mPart && dPart ? `${dPart}-${mPart}-${yPart}` : targetDate;
+    const targetLabel = targetUser ? `${targetUser.first_name} — ${prettyDate} (${slotLabel})` : `${prettyDate} (${slotLabel})`;
+    setDropConfirm({ shiftIds: filtered, targetUserId, targetDate, targetLabel, targetSlot: slot, targetTimeRange, presets, selectedPresetIdx: effectiveIdx, origStart: origStart ?? '', origEnd: origEnd ?? '' });
   }, [handleDropOnCell, handleDropCopyOnCell, allShifts, users, selectedShiftIds]);
 
   /** Deseleziona/seleziona un turno (Shift+click o checkbox) con identità stabile. */
@@ -1745,7 +1822,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 .wst-header-scrolled th div { color: #ffffff !important; }
 .wst-header-scrolled .text-accent { color: #ffffff !important; }
 .wst-col-scrolled.wst-col-scrolled { background-color: rgba(10, 10, 10, 0.55) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
-.wst-col-scrolled th { color: #ffffff !important; }`}</style>
+.wst-col-scrolled th { color: #ffffff !important; }
+/* Toolbar Presenze mobile: vetro trasparente (solo blur, nessun colore) quando sovrapposta */
+@media (max-width: 767px) {
+  .toolbar-band-over-content {
+    background: transparent;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+  }
+}`}</style>
       {mode === 'planning' && (
         <style>{`
           [data-theme="dark"][data-toolbar-mode="planning"] button[class*="uppercase"][class*="tracking-wider"] {
@@ -1759,8 +1844,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
       {/* ── Sezione superiore fissa (toolbar + selezioni + mobile view) ── */}
       <div ref={contentAboveRef}>
-      {/* Toolbar sticky in tutte le viewport */}
-       <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mb-3 w-full min-w-0 md:sticky md:top-[3.125rem] md:z-50 py-2"
+       {/* Toolbar sticky; su mobile glass stile bottom nav quando sovrapposta al contenuto */}
+       <div ref={toolbarBandRef}
+        className={`ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mb-3 w-full min-w-0 sticky top-[var(--app-sticky-header-offset,5rem)] z-50 py-2 md:top-[3.125rem] ${toolbarOverlapping ? 'toolbar-band-over-content' : ''}`}
         data-toolbar-mode={mode}>
         {/* MOBILE: ◀ e ▶ occupano lo spazio ai lati; Oggi + data al centro */}
         <div className="flex w-full min-w-0 items-center gap-1.5 md:hidden">
@@ -1795,6 +1881,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           >
             {(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
             <span className="hidden md:inline"> — {(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}</span>
+          </span>
+          <span className="hidden md:inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 text-[0.5625rem] font-bold uppercase tracking-wider text-white/70">
+            <span className="rounded-md border border-white/25 bg-white/10 px-1 py-px font-black text-white">Shift</span>
+            + rotellina = scroll orizzontale
           </span>
           {selectedShiftIds.size > 0 && (
             <div className="flex items-center gap-1.5 ml-auto">
@@ -2153,14 +2243,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       </div>
 
       {/* ── Desktop Grid ── */}
-      {isPeriodView && (
-        <p className="hidden md:block mb-2 text-[0.625rem] font-medium text-white/40">
-          {t.period_scroll_hint ?? 'Scorri orizzontalmente per vedere tutti i giorni del periodo.'}
-        </p>
-      )}
       <div
         ref={tableScrollRef}
-        className="hidden md:flex flex-col min-h-0 overflow-auto rounded-2xl border border-white/10"
+        className="hidden md:flex flex-col min-h-0 overflow-auto overscroll-contain rounded-2xl border border-white/10"
         style={tableMaxHeight ? { maxHeight: tableMaxHeight } : { flex: '1 1 0', minHeight: 0 }}
         data-table-container
       >
@@ -2233,8 +2318,37 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               />
             ))}
           </tbody>
+          {/* ── Riepilogo persone in turno (divise pranzo/cena) — solo vista settimanale ── */}
+          {!isPeriodView && (
+          <tfoot className="sticky bottom-0 z-20 bg-transparent backdrop-blur-lg">
+            <tr>
+              <th className={`sticky left-0 z-30 text-left px-2 py-1.5 text-[0.625rem] font-bold uppercase tracking-wider text-white/50 border-t border-white/10 bg-transparent backdrop-blur-lg`}>
+                {t.people_on_shift ?? 'In turno'}
+              </th>
+              {weekDays.map((day, i) => {
+                const entry = peopleOnShiftByDate.get(weekDateStrings[i]);
+                const lunch = entry?.lunch.size ?? 0;
+                const evening = entry?.evening.size ?? 0;
+                const weekEnd = isPeriodView && day.getDay() === 0;
+                return (
+                  <td key={i} className={`px-1 py-1.5 text-center border-t border-white/10 ${weekEnd ? 'border-r-2 border-r-white/20' : ''}`}>
+                    <div className="flex items-center justify-center gap-1">
+                      <span className={`uppercase text-[0.6875rem] font-bold tabular-nums leading-none ${lunch > 0 ? 'text-amber-300' : 'text-white/25'}`}>
+                        {t.lunch_label ?? 'Pranzo'} {lunch}
+                      </span>
+                      <span className="text-[0.6875rem] font-bold tabular-nums leading-none text-white/30">/</span>
+                      <span className={`uppercase text-[0.6875rem] font-bold tabular-nums leading-none ${evening > 0 ? 'text-sky-300' : 'text-white/25'}`}>
+                        {t.dinner_label ?? 'Cena'} {evening}
+                      </span>
+                    </div>
+                  </td>
+                );
+              })}
+              <td className="px-1 py-1.5 text-center border-t border-white/10" />
+            </tr>
+          </tfoot>
+          )}
         </table>
-        <div className="h-12 shrink-0" />
       </div>
 
       {/* ── Detail Drawer ── */}
@@ -2816,22 +2930,37 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               <span className="text-white/80 font-semibold">{dropConfirm.targetLabel}</span>
             </p>
 
-            {/* Preset selezionabili */}
+            {/* Preset: un click copia in automatico il turno con gli orari del preset */}
             <div className="flex flex-wrap gap-1.5 mb-4">
               {dropConfirm.presets.map((p, i) => (
                 <button
                   key={i}
                   type="button"
-                  onClick={() =>
-                    setDropConfirm(prev =>
-                      prev ? { ...prev, selectedPresetIdx: i, targetTimeRange: `${p.start}–${p.end}` } : prev
-                    )
-                  }
+                  onClick={() => {
+                    // Copia automatica con gli orari del preset selezionato
+                    if (dropConfirm.shiftIds.length > 1) {
+                      // Batch: ogni turno mantiene i propri orari
+                      for (const id of dropConfirm.shiftIds) {
+                        void handleDropCopyOnCell(id, dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot);
+                      }
+                    } else {
+                      void handleDropCopyOnCell(
+                        dropConfirm.shiftIds[0],
+                        dropConfirm.targetUserId,
+                        dropConfirm.targetDate,
+                        dropConfirm.targetSlot,
+                        p.start + ':00',
+                        p.end + ':00'
+                      );
+                    }
+                    setSelectedShiftIds(new Set());
+                    setDropConfirm(null);
+                  }}
                   className={`rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold tabular-nums transition-colors ${
- i === dropConfirm.selectedPresetIdx
- ? 'ring-2 ring-accent/70 bg-accent/15 text-accent shadow-md'
- : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
- }`}
+                    i === dropConfirm.selectedPresetIdx
+                      ? 'ring-2 ring-accent/70 bg-accent/15 text-accent shadow-md'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+                  }`}
                 >
                   {p.start}–{p.end}
                 </button>
@@ -2842,14 +2971,24 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               <button
                 type="button"
                 onClick={() => {
-                  const p = dropConfirm.presets[dropConfirm.selectedPresetIdx];
+                  const keepOriginal = dropConfirm.selectedPresetIdx === -1;
+                  const p = keepOriginal
+                    ? { start: dropConfirm.origStart, end: dropConfirm.origEnd }
+                    : dropConfirm.presets[dropConfirm.selectedPresetIdx];
                   if (dropConfirm.shiftIds.length > 1) {
                     // Batch: ogni turno mantiene i propri orari
                     for (const id of dropConfirm.shiftIds) {
                       void handleDropOnCell(id, dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot);
                     }
                   } else {
-                    void handleDropOnCell(dropConfirm.shiftIds[0], dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot, p.start + ':00', p.end + ':00');
+                    void handleDropOnCell(
+                      dropConfirm.shiftIds[0],
+                      dropConfirm.targetUserId,
+                      dropConfirm.targetDate,
+                      dropConfirm.targetSlot,
+                      keepOriginal ? undefined : p.start + ':00',
+                      keepOriginal ? undefined : p.end + ':00'
+                    );
                   }
                   setSelectedShiftIds(new Set());
                   setDropConfirm(null);
@@ -2861,14 +3000,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               <button
                 type="button"
                 onClick={() => {
-                  const p = dropConfirm.presets[dropConfirm.selectedPresetIdx];
+                  // La copia replica SEMPRE il turno con i suoi orari originali,
+                  // indipendentemente dal preset eventualmente selezionato nel modal.
                   if (dropConfirm.shiftIds.length > 1) {
                     // Batch: ogni turno mantiene i propri orari
                     for (const id of dropConfirm.shiftIds) {
                       void handleDropCopyOnCell(id, dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot);
                     }
                   } else {
-                    void handleDropCopyOnCell(dropConfirm.shiftIds[0], dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot, p.start + ':00', p.end + ':00');
+                    void handleDropCopyOnCell(dropConfirm.shiftIds[0], dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot);
                   }
                   setSelectedShiftIds(new Set());
                   setDropConfirm(null);
