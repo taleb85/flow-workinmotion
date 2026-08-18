@@ -856,7 +856,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       {/* ── Bottom Tab Bar ── */}
       {!noNavTabs && (
         <div
-          className="fixed bottom-0 left-0 right-0 z-[10040] shrink-0"
+          className="fixed bottom-0 left-0 right-0 z-[10040] shrink-0 bottom-nav-glass-edge"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
           <TopTabBar
