@@ -2422,23 +2422,15 @@ td, th {
   opacity: 1 !important;
 }
 
-/* ── Bottom nav: vetro che arriva fino al bordo (safe-area incluso) ─────
-   Il wrapper fixed contiene il padding del safe-area iOS: applicando lo
-   sfondo glass al wrapper (la tabbar interna resta trasparente), su iPhone
-   la barra arriva visivamente fino al fondo, con le icone sopra la home
-   indicator. Su browser/iframe (safe-area 0) resta una barra flush.
-   Tinta derivata dal tema corrente via --app-bg-r/g/b (tutti scuri). */
+/* ── Bottom nav: vetro trasparente fino al bordo (safe-area incluso) ───
+   Il wrapper fixed contiene il padding del safe-area iOS: applicando il
+   blur al wrapper (la tabbar interna resta trasparente), su iPhone la barra
+   arriva visivamente fino al fondo, con le icone sopra la home indicator.
+   Nessuna tinta: solo trasparenza + blur, come l'header (.app-header). */
 .bottom-nav-glass-edge {
-  background: rgba(
-    var(--app-bg-r, 10),
-    var(--app-bg-g, 10),
-    var(--app-bg-b, 14),
-    0.72
-  );
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: 0 -4px 16px -4px rgba(0, 0, 0, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* I figli restano senza effetti (stesso pattern di .app-header *):
