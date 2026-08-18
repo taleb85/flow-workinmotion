@@ -917,6 +917,17 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const dayColMinWidth = isPeriodView ? 88 : 120;
   const tableMinWidth = employeeColWidth + totalColWidth + dayCount * dayColMinWidth;
   const dayColCalc = `calc((100% - ${employeeColWidth + totalColWidth}px) / ${dayCount})`;
+  /**
+   * Regola "l'app occupa tutto lo schermo adattando il contenuto alla risoluzione":
+   * la griglia settimanale non forza mai lo scroll orizzontale — la larghezza
+   * minima non supera il contenitore (`min(1008px, 100%)`), così le colonne si
+   * restringono proporzionalmente (dayColCalc) su finestre desktop strette.
+   * La vista periodo (2+ settimane) resta scrollabile: le colonne giornaliere
+   * non sarebbero leggibili se compresse in una sola schermata.
+   */
+  const tableWidthStyle = isPeriodView
+    ? { minWidth: tableMinWidth, width: tableMinWidth }
+    : { minWidth: `min(${tableMinWidth}px, 100%)` };
   const slotRowHeight = isPeriodView ? 28 : dayCount > 7 ? 28 : 36;
   const slotCellHeight = slotRowHeight * 2 + 16;
   const extraRowHeight = 16;
@@ -2251,7 +2262,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       >
         <table
           className={`table-fixed border-collapse ${isPeriodView ? '' : 'w-full'}`}
-          style={{ minWidth: tableMinWidth, width: isPeriodView ? tableMinWidth : undefined }}
+          style={tableWidthStyle}
         >
           <colgroup>
             <col style={{ width: employeeColWidth }} />
