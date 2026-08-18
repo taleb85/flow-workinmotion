@@ -162,6 +162,13 @@ body {
   flex-direction: column;
   overflow-y: auto;
   overscroll-behavior-y: none;
+  /* iOS: #root con overflow-y:auto computa overflow-x come `hidden` (spec:
+     clip → hidden se l'altro asse non è visible/clip), e WebKit ignora
+     overflow-x:hidden sugli scroller touch → la pagina si trascina in
+     orizzontale (rubber-band) su tutte le viste. overscroll-behavior-x:none
+     blocca il rimbalzo/scroll laterale mantenendo attivi gli scroller
+     orizzontali interni (.scroll-x-only, overflow-x-auto). */
+  overscroll-behavior-x: none;
   -webkit-overflow-scrolling: touch;
 }
 
