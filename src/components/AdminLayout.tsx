@@ -93,7 +93,7 @@ export default function AdminLayout() {
             <button
               type="button"
               onClick={() => navigate('/app')}
-              className="flex items-center gap-1.5 min-h-[2.25rem] px-2 -ml-1 rounded-xl text-white/70 hover:text-white hover:bg-white/10 font-medium text-sm transition-colors shrink-0 active:text-white"
+              className="flex items-center gap-1.5 h-9 px-2 -ml-1 rounded-xl text-white/70 hover:text-white hover:bg-white/10 font-medium text-sm transition-colors shrink-0 active:text-white"
             >
               <ArrowLeft className="w-4 h-4 shrink-0 text-accent/70" />
               <span className="hidden md:inline">{t.admin_back_to_app}</span>
@@ -108,7 +108,7 @@ export default function AdminLayout() {
                     type="button"
                     onClick={() => handleTabChange(key)}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                    className={`flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
  isActive
  ? 'bg-accent text-white shadow-sm'
  : 'text-white/60 hover:bg-white/10 hover:text-white active:text-white'
