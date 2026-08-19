@@ -87,13 +87,13 @@ export default function AdminLayout() {
   return (
     <div className="relative min-h-screen min-h-[100dvh] w-full text-white font-sans antialiased flex flex-col safe-area-pad overflow-x-clip overflow-y-auto page-depth-bg" style={{ background: bgTheme.appBg }}>
       <DeepAuroraShell theme={bgTheme} />
-      <header className="sticky top-0 z-40 shrink-0 pt-[max(4px,env(safe-area-inset-top,0px))] app-horizontal-pad pb-1.5 md:pb-2">
+      <header className="sticky top-0 z-40 shrink-0 pt-[max(12px,env(safe-area-inset-top,0px))] md:pt-[max(6px,env(safe-area-inset-top,0px))] app-horizontal-pad pb-2">
         <div className={`${adminHeaderCardClass}`}>
-          <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-1.5 md:py-2">
+          <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-2">
             <button
               type="button"
               onClick={() => navigate('/app')}
-              className="flex items-center gap-1.5 min-h-[2rem] md:min-h-[2.25rem] px-2 -ml-1 rounded-xl text-white/70 hover:text-white hover:bg-white/10 font-medium text-sm transition-colors shrink-0 active:text-white"
+              className="flex items-center gap-1.5 min-h-[2.25rem] px-2 -ml-1 rounded-xl text-white/70 hover:text-white hover:bg-white/10 font-medium text-sm transition-colors shrink-0 active:text-white"
             >
               <ArrowLeft className="w-4 h-4 shrink-0 text-accent/70" />
               <span className="hidden md:inline">{t.admin_back_to_app}</span>
