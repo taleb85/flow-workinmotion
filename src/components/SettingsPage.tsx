@@ -1106,8 +1106,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             storageKey="osteria_settings_acc_departments"
             title={t.settings_departments_section_title}
             defaultOpen={false}
+            attached
           >
-            <div className="p-4 rounded-xl space-y-4 border border-neutral-500" style={{ background: 'transparent' }}>
+            <div className="p-4 space-y-4">
               <p className="text-[0.6875rem] text-white/55 leading-snug">{t.settings_departments_cloud_hint}</p>
               {/* Lista reparti */}
               <div className="flex flex-wrap gap-2">
