@@ -1066,6 +1066,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             subtitle={t.settings_role_permissions_subtitle ?? 'Configura le funzionalità accessibili per Manager, Capo e Staff'}
             defaultOpen={false}
             accentBorder="rgba(255,255,255,0.35)"
+            attached
           >
             <RoleFeatureTemplatesPanel variant="embedded" />
           </SettingsAccordionSection>
@@ -1404,6 +1405,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             title={t.settings_violation_rules_title}
             subtitle={t.settings_violation_rules_subtitle}
             defaultOpen={false}
+            attached
           >
             <div className="fluid-grid fluid-grid-2 gap-3">
               {/* Critico */}
@@ -1545,6 +1547,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 : t.settings_break_empty
             }
             defaultOpen={false}
+            attached
           >
             <div className="fluid-grid fluid-grid-2 gap-3">
               {breakRules.map((rule) => {
@@ -1635,6 +1638,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 ? `${shiftTemplates.length} template`
                 : (t.template_no_templates ?? 'Nessun template salvato')
             }
+            attached
           >
             <div className="space-y-3">
               <p className="text-[0.75rem] text-white/55 leading-relaxed">
@@ -1722,8 +1726,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               return `${format(s, 'dd/MM/yy')} → ${format(e, 'dd/MM/yy')} · ${periodCfg.numWeeks} sett.`;
             })()}
             defaultOpen={false}
+            attached
           >
-            <div className="rounded-xl border border-neutral-500 depth-card p-4 space-y-4">
+            <div className="p-4 space-y-4">
 
               {/* Periodo attivo + bozza */}
               <div className="grid grid-cols-2 gap-3">
@@ -1905,8 +1910,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             title={t.settings_presence_accordion_title}
             subtitle={t.settings_presence_accordion_subtitle}
             defaultOpen={true}
+            attached
           >
-            <div className="rounded-xl border border-neutral-500 depth-card p-4">
+            <div className="p-4">
               <p className="text-[0.6875rem] text-white/55 mb-3 leading-snug">{t.settings_presence_section_hint}</p>
               {(() => {
                 const effectiveTok = resolveEffectiveVerificationToken(presenceVerificationConfig);
@@ -2001,8 +2007,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             title="Email richieste ferie"
             subtitle={holidayEmail ? holidayEmail : 'Nessuna email configurata'}
             defaultOpen={false}
+            attached
           >
-            <div className="rounded-xl border border-neutral-500 depth-card p-4 space-y-4">
+            <div className="p-4 space-y-4">
               <div className="flex items-start gap-3">
                 <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-mid/10 text-[#2255BB]">
                   <Mail className="h-4 w-4" />
@@ -2071,6 +2078,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             title={t.settings_master_panel_title}
             subtitle={t.settings_master_panel_sub}
             defaultOpen={false}
+            attached
           >
             {/* Feature flag cards */}
             <div className="fluid-grid fluid-grid-2 gap-3 mb-4">
@@ -2217,9 +2225,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             storageKey="osteria_settings_acc_admin_advanced"
             title={t.settings_advanced_tools_admin}
             defaultOpen={false}
+            attached
           >
-            <div className="rounded-xl border border-neutral-500 overflow-hidden">
-              <div className="space-y-3 p-4">
+            <div className="space-y-3 p-4">
                 <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">{t.settings_backup_data_section}</p>
 
                 {dataToolsLocked ? (
@@ -2271,7 +2279,6 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                     </div>
                   </div>
                 )}
-              </div>
             </div>
 
             {/* PIN pad per sblocco */}
@@ -2318,11 +2325,10 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
             title="Accesso scheda Admin"
             subtitle="Abilita il tab Admin nella navigazione del profilo"
             defaultOpen={false}
+            attached
           >
-            <div className="rounded-xl border border-neutral-500 overflow-hidden">
-              <div className="p-4">
-                <ElevatedAccessPanel />
-              </div>
+            <div className="p-4">
+              <ElevatedAccessPanel />
             </div>
           </SettingsAccordionSection>
         )}
