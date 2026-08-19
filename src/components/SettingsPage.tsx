@@ -978,43 +978,42 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
         {/* ── SEZIONE: Gestione Profili ── */}
         <div style={view === 'regole' ? { display: 'none' } : undefined}>
         <section className="mb-6">
-          <div className="mb-3">
-            <div className="flex w-full flex-row items-stretch gap-1.5 md:gap-2 mb-2">
-              {canEdit && (
-                <button
-                  type="button"
-                  onClick={() => setShowCreateStaff(true)}
-                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
-                >
-                  <UserPlus className="w-3.5 h-3.5" aria-hidden />
-                  {t.admin_add_employee}
-                </button>
-              )}
-              {canSeeSuspended && (
-                <button
-                  type="button"
-                  onClick={() => setShowSuspended(!showSuspended)}
-                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
-                >
-                  {showSuspended ? t.hide_suspended : t.show_suspended}
-                </button>
-              )}
-            </div>
+          <div className="flex w-full flex-row items-stretch gap-1.5 md:gap-2 mb-3">
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => setShowCreateStaff(true)}
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+              >
+                <UserPlus className="w-3.5 h-3.5" aria-hidden />
+                {t.admin_add_employee}
+              </button>
+            )}
+            {canSeeSuspended && (
+              <button
+                type="button"
+                onClick={() => setShowSuspended(!showSuspended)}
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
+              >
+                {showSuspended ? t.hide_suspended : t.show_suspended}
+              </button>
+            )}
+          </div>
+          <div className="rounded-xl overflow-hidden" style={{ border: '1.5px solid rgba(255,255,255,0.35)' }}>
             <button
               type="button"
               onClick={toggleTeamSectionExpanded}
-              className="flex w-full items-center gap-2 rounded-xl border border-white/30 py-1.5 pl-1 pr-2 text-left transition-colors hover:bg-white/8 active:bg-white/8/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition-colors hover:bg-white/8 active:bg-white/8/80"
               aria-expanded={teamSectionExpanded}
             >
+              <h2 className="text-[0.6875rem] font-semibold uppercase tracking-widest text-white/80">
+                {t.settings_team_section_title}
+              </h2>
               <ChevronDown
                 className={`h-4 w-4 shrink-0 text-white/40 transition-transform ${teamSectionExpanded ? 'rotate-180' : ''}`}
                 aria-hidden
               />
-              <h2 className="text-[0.6875rem] font-semibold uppercase tracking-widest text-white/80">
-                {t.settings_team_section_title}
-              </h2>
             </button>
-          </div>
 
           <AnimatePresence initial={false}>
             {teamSectionExpanded && (
@@ -1025,11 +1024,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 transition={{ duration: 0.22 }}
                 className="overflow-hidden"
               >
+                <div className="border-t border-white/10">
                 <div
-                  className="divide-y divide-white/10 overflow-hidden rounded-xl"
-                  style={
-                    { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)' }
-                  }
+                  className="divide-y divide-white/10"
+                  style={{ background: 'rgba(255,255,255,0.05)' }}
                 >
               {displayUsers.map((user) => (
                 <SettingsUserRow
@@ -1053,9 +1051,11 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 />
               ))}
                 </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
+          </div>
         </section>
 
         {/* Permessi per Ruolo — matrice (solo admin/elevati) */}
