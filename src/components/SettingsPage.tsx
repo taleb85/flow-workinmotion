@@ -1003,7 +1003,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             <button
               type="button"
               onClick={toggleTeamSectionExpanded}
-              className="-ml-1 flex w-full items-center gap-2 rounded-xl border border-white/30 py-1.5 pl-1 pr-2 text-left transition-colors hover:bg-white/8 active:bg-white/8/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              className="flex w-full items-center gap-2 rounded-xl border border-white/30 py-1.5 pl-1 pr-2 text-left transition-colors hover:bg-white/8 active:bg-white/8/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               aria-expanded={teamSectionExpanded}
             >
               <ChevronDown
