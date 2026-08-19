@@ -50,7 +50,7 @@ export function SettingsAccordionSection({
       <button
         type="button"
         onClick={toggle}
-        className="-ml-1 mb-3 flex w-full items-center justify-between gap-2 rounded-xl py-2 pl-3 pr-3 text-left transition-colors"
+        className="mb-3 flex w-full items-center justify-between gap-2 rounded-xl py-2 pl-3 pr-3 text-left transition-colors"
         style={{
           background: 'transparent',
           border: `1.5px solid ${accentBorder ?? 'rgba(255,255,255,0.35)'}`,
