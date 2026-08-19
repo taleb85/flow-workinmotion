@@ -87,7 +87,7 @@ export default function AdminLayout() {
   return (
     <div className="relative min-h-screen min-h-[100dvh] w-full text-white font-sans antialiased flex flex-col safe-area-pad overflow-x-clip overflow-y-auto page-depth-bg" style={{ background: bgTheme.appBg }}>
       <DeepAuroraShell theme={bgTheme} />
-      <header className="sticky top-0 z-40 shrink-0 pt-[max(28px,env(safe-area-inset-top,0px))] md:pt-[max(6px,env(safe-area-inset-top,0px))] app-horizontal-pad pb-2">
+      <header className="sticky top-0 z-40 shrink-0 pt-[max(40px,env(safe-area-inset-top,0px))] md:pt-[max(6px,env(safe-area-inset-top,0px))] app-horizontal-pad pb-2">
         <div className={`${adminHeaderCardClass}`}>
           <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-2">
             <button
