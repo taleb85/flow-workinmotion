@@ -89,7 +89,7 @@ export default function AdminLayout() {
       <DeepAuroraShell theme={bgTheme} />
       <header className="sticky top-0 z-40 shrink-0 pt-[max(20px,env(safe-area-inset-top,0px))] md:pt-[max(6px,env(safe-area-inset-top,0px))] app-horizontal-pad pb-2">
         <div className={`${adminHeaderCardClass}`}>
-          <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-2">
+          <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-3 md:py-2">
             <button
               type="button"
               onClick={() => navigate('/app')}
