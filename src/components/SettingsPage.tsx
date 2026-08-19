@@ -798,7 +798,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 <button
                   type="button"
                   onClick={() => setShowSuspended(!showSuspended)}
-                  className="rounded-xl border border-white/30 px-2 py-1 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
                 >
                   {showSuspended ? t.hide_suspended : t.show_suspended}
                 </button>
@@ -994,7 +994,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 <button
                   type="button"
                   onClick={() => setShowSuspended(!showSuspended)}
-                  className="flex-1 rounded-xl border border-white/30 px-2 py-1 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
                 >
                   {showSuspended ? t.hide_suspended : t.show_suspended}
                 </button>
