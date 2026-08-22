@@ -2477,10 +2477,10 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   }, [markManagementDataTouched]);
 
   // Sincronizza le fasce pausa automatica attive con le Work Rules configurate
-  // (default [6h → 30′]; [] = pausa auto disattivata). Tutti i calcoli pausa le leggono
-  // via getAutoBreakMinutesForGross()/getAutoBreakThresholdMinutes().
+  // (default [6h → 30′]; [] = pausa auto disattivata; toggle autoBreakTiersEnabled spento → fasce vuote).
+  // Tutti i calcoli pausa le leggono via getAutoBreakMinutesForGross()/getAutoBreakThresholdMinutes().
   useEffect(() => {
-    setAutoBreakTiers(workRules.autoBreakTiers);
+    setAutoBreakTiers(workRules.autoBreakTiersEnabled === false ? [] : workRules.autoBreakTiers);
   }, [workRules]);
 
   const setBreakRules = useCallback(async (rules: BreakRule[]) => {

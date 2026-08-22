@@ -24,6 +24,8 @@ export interface WorkRules {
   lateThresholdEnabled: boolean;
   /** Fasce progressive pausa automatica: ≥ minShiftMinutes → breakMinutes (default [6h → 30′]); [] = pausa auto disattivata */
   autoBreakTiers: AutoBreakTier[];
+  /** Attiva/disattiva le fasce progressive pausa automatica (default true) */
+  autoBreakTiersEnabled: boolean;
   /** Abilita violazioni Critico (turno lungo + riposo insufficiente) */
   criticEnabled: boolean;
   /** Abilita violazioni Attenzione (ore giornaliere/settimanali oltre limite) */
@@ -42,6 +44,7 @@ export const DEFAULT_WORK_RULES: WorkRules = {
   lateThresholdMinutes: 10,
   lateThresholdEnabled: true,
   autoBreakTiers: [{ ...DEFAULT_AUTO_BREAK_TIER }],
+  autoBreakTiersEnabled: true,
   criticEnabled: true,
   attentionEnabled: true,
   overlapEnabled: true,

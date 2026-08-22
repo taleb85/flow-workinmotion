@@ -160,42 +160,15 @@ function FeatureFlagCard({
   enabled,
   isMaintenance,
   onToggle,
-  workRules,
-  updateWorkRule,
 }: {
   feature: { slug: string };
   t: Record<string, string>;
   enabled: boolean;
   isMaintenance: boolean;
   onToggle: () => Promise<void>;
-  workRules?: WorkRules;
-  updateWorkRule?: <K extends keyof WorkRules>(key: K, value: WorkRules[K]) => void;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const { label: featureLabel, description: featureDescription, detailLines } = getFeatureStrings(t, feature.slug);
-
-  /* Fasce progressive pausa automatica (solo card violation_rules): ogni riga è
-     "turno ≥ Xh → Y minuti di pausa"; si applica la fascia più alta coperta. */
-  const tiers = workRules?.autoBreakTiers ?? [];
-  const updateTier = (idx: number, patch: Partial<AutoBreakTier>) => {
-    if (!updateWorkRule) return;
-    updateWorkRule('autoBreakTiers', tiers.map((tier, i) => (i === idx ? { ...tier, ...patch } : tier)));
-  };
-  const removeTier = (idx: number) => {
-    if (!updateWorkRule) return;
-    updateWorkRule('autoBreakTiers', tiers.filter((_, i) => i !== idx));
-  };
-  const addTier = () => {
-    if (!updateWorkRule) return;
-    const last = tiers[tiers.length - 1];
-    updateWorkRule('autoBreakTiers', [
-      ...tiers,
-      {
-        minShiftMinutes: Math.round(((last?.minShiftMinutes ?? 6 * 60) + 2 * 60) / 30) * 30,
-        breakMinutes: last?.breakMinutes ?? 30,
-      },
-    ]);
-  };
 
   const iconMap: Record<string, React.ReactNode> = {
     maintenance_mode: <Wrench className="w-4 h-4" />,
@@ -258,69 +231,6 @@ function FeatureFlagCard({
                 </div>
               )}
             </>
-          )}
-          {/* La tabella fasce appare solo con la regola ATTIVA (altrimenti la card
-              mostra solo descrizione + dettagli, come le altre). */}
-          {feature.slug === 'violation_rules' && enabled && workRules && updateWorkRule && (
-            <div className="rounded-xl border border-neutral-500 mt-2 bg-white/5 px-2.5 py-2">
-              <div className="mb-1 flex items-center gap-1.5">
-                <Timer className="h-3.5 w-3.5 flex-shrink-0 text-amber-400" />
-                <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">{t.settings_wr_auto_break_card_title}</p>
-              </div>
-              <p className="mb-2 text-[0.6875rem] leading-relaxed text-white/70">{t.settings_wr_auto_break_tiers_hint}</p>
-              {tiers.length === 0 && (
-                <p className="mb-2 text-[0.6875rem] italic leading-relaxed text-white/45">{t.settings_wr_auto_break_no_tiers}</p>
-              )}
-              <div className="space-y-1.5">
-                {tiers.map((tier, idx) => (
-                  <div key={idx} className="flex items-center gap-1.5">
-                    <input
-                      type="number"
-                      min={0}
-                      max={24}
-                      step={0.5}
-                      value={Math.round(tier.minShiftMinutes / 30) / 2}
-                      onChange={(e) =>
-                        updateTier(idx, { minShiftMinutes: Math.round(Math.max(0, Math.min(24, +e.target.value || 0)) * 60) })
-                      }
-                      aria-label={t.settings_wr_auto_break_tier_min_shift}
-                      className="w-14 rounded-lg border border-neutral-500 bg-white/10 px-2 py-1.5 text-sm font-semibold text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-                    />
-                    <span className="text-[0.625rem] font-semibold uppercase text-white/45">h</span>
-                    <span className="text-white/20">→</span>
-                    <input
-                      type="number"
-                      min={0}
-                      max={180}
-                      step={5}
-                      value={tier.breakMinutes}
-                      onChange={(e) =>
-                        updateTier(idx, { breakMinutes: Math.max(0, Math.min(180, Math.round(+e.target.value || 0))) })
-                      }
-                      aria-label={t.settings_wr_auto_break_tier_break}
-                      className="w-14 rounded-lg border border-neutral-500 bg-white/10 px-2 py-1.5 text-sm font-semibold text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-                    />
-                    <span className="text-[0.625rem] font-semibold uppercase text-white/45">min</span>
-                    <button
-                      type="button"
-                      onClick={() => removeTier(idx)}
-                      aria-label={t.settings_wr_auto_break_remove_tier}
-                      className="ml-auto flex h-6 w-6 items-center justify-center rounded-lg text-white/40 transition-colors hover:bg-red-500/15 hover:text-red-500 active:text-red-500"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={addTier}
-                className="mt-2 flex items-center gap-1 text-[0.6875rem] font-semibold text-accent transition-colors hover:text-white active:text-white"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                {t.settings_wr_auto_break_add_tier}
-              </button>
-            </div>
           )}
         </div>
       </div>
@@ -733,6 +643,26 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
     setWorkRules(next);
     showSuccess?.(t.settings_work_rule_synced);
   }, [workRules, setWorkRules, showSuccess, t.settings_work_rule_synced]);
+
+  /* Fasce progressive pausa automatica (card Regole violazioni): ogni riga è
+     "turno ≥ Xh → Y minuti di pausa"; si applica la fascia più alta coperta. */
+  const autoBreakTiers = workRules.autoBreakTiers ?? [];
+  const updateAutoBreakTier = useCallback((idx: number, patch: Partial<AutoBreakTier>) => {
+    updateWorkRule('autoBreakTiers', autoBreakTiers.map((tier, i) => (i === idx ? { ...tier, ...patch } : tier)));
+  }, [autoBreakTiers, updateWorkRule]);
+  const removeAutoBreakTier = useCallback((idx: number) => {
+    updateWorkRule('autoBreakTiers', autoBreakTiers.filter((_, i) => i !== idx));
+  }, [autoBreakTiers, updateWorkRule]);
+  const addAutoBreakTier = useCallback(() => {
+    const last = autoBreakTiers[autoBreakTiers.length - 1];
+    updateWorkRule('autoBreakTiers', [
+      ...autoBreakTiers,
+      {
+        minShiftMinutes: Math.round(((last?.minShiftMinutes ?? 6 * 60) + 2 * 60) / 30) * 30,
+        breakMinutes: last?.breakMinutes ?? 30,
+      },
+    ]);
+  }, [autoBreakTiers, updateWorkRule]);
 
   const handleSaveBreakRule = useCallback((rule: BreakRule) => {
     const exists = breakRules.some((r) => r.id === rule.id);
@@ -1622,6 +1552,83 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   </button>
                 </div>
               </div>
+
+              {/* Pausa automatica — fasce progressive (soglia durata turno) */}
+              <div className="rounded-xl border border-neutral-500 depth-card flex flex-col gap-3 p-4">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/15">
+                    <Timer className="w-4 h-4 text-amber-400" />
+                  </span>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-white">{t.settings_wr_auto_break_card_title}</h3>
+                </div>
+                <p className="text-[0.6875rem] text-white/55 leading-snug">{t.settings_wr_auto_break_tiers_hint}</p>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={workRules.autoBreakTiersEnabled !== false}
+                    onClick={() => updateWorkRule('autoBreakTiersEnabled', workRules.autoBreakTiersEnabled === false)}
+                    className={`relative w-11 h-6 rounded-full transition-all duration-200 ${workRules.autoBreakTiersEnabled !== false ? 'bg-accent' : ''}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${workRules.autoBreakTiersEnabled !== false ? 'translate-x-5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+                {workRules.autoBreakTiersEnabled !== false && (
+                  <div className="space-y-1.5 border-t border-white/10 pt-2">
+                    {autoBreakTiers.length === 0 && (
+                      <p className="text-[0.6875rem] italic leading-relaxed text-white/45">{t.settings_wr_auto_break_no_tiers}</p>
+                    )}
+                    {autoBreakTiers.map((tier, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5">
+                        <input
+                          type="number"
+                          min={0}
+                          max={24}
+                          step={0.5}
+                          value={Math.round(tier.minShiftMinutes / 30) / 2}
+                          onChange={(e) =>
+                            updateAutoBreakTier(idx, { minShiftMinutes: Math.round(Math.max(0, Math.min(24, +e.target.value || 0)) * 60) })
+                          }
+                          aria-label={t.settings_wr_auto_break_tier_min_shift}
+                          className="w-14 rounded-lg border border-neutral-500 bg-white/10 px-2 py-1.5 text-sm font-semibold text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                        />
+                        <span className="text-[0.625rem] font-semibold uppercase text-white/45">h</span>
+                        <span className="text-white/20">→</span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={180}
+                          step={5}
+                          value={tier.breakMinutes}
+                          onChange={(e) =>
+                            updateAutoBreakTier(idx, { breakMinutes: Math.max(0, Math.min(180, Math.round(+e.target.value || 0))) })
+                          }
+                          aria-label={t.settings_wr_auto_break_tier_break}
+                          className="w-14 rounded-lg border border-neutral-500 bg-white/10 px-2 py-1.5 text-sm font-semibold text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                        />
+                        <span className="text-[0.625rem] font-semibold uppercase text-white/45">min</span>
+                        <button
+                          type="button"
+                          onClick={() => removeAutoBreakTier(idx)}
+                          aria-label={t.settings_wr_auto_break_remove_tier}
+                          className="ml-auto flex h-6 w-6 items-center justify-center rounded-lg text-white/40 transition-colors hover:bg-red-500/15 hover:text-red-500 active:text-red-500"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addAutoBreakTier}
+                      className="flex items-center gap-1 text-[0.6875rem] font-semibold text-accent transition-colors hover:text-white active:text-white"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      {t.settings_wr_auto_break_add_tier}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </SettingsAccordionSection>
         )}
@@ -2182,8 +2189,6 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     t={t}
                     enabled={enabled}
                     isMaintenance={isMaintenance}
-                    workRules={workRules}
-                    updateWorkRule={updateWorkRule}
                     onToggle={async () => {
                       await setFeatureFlag(feature.slug, !enabled);
                       showSuccess?.(formatTrans(enabled ? t.settings_feature_toggle_off : t.settings_feature_toggle_on, { name: getFeatureStrings(t, feature.slug).label }));
