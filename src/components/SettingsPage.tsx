@@ -2871,9 +2871,9 @@ function BreakRuleModal({
                 </div>
               </div>
 
-              {/* Retribuita / Non retribuita */}
-              <div>
-                <label className={labelClass}>{t.settings_break_type_label}</label>
+              {/* Retribuita / Non retribuita — tutto su una sola riga */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wide text-white/55">{t.settings_break_type_label}</label>
                 <div className="flex gap-2">
                   <button type="button" onClick={() => setPaid(false)} className={chipClass(!paid)}>
                     {t.settings_break_unpaid_btn}
@@ -2882,9 +2882,7 @@ function BreakRuleModal({
                     {t.settings_break_paid_btn}
                   </button>
                 </div>
-                <p className="text-[0.6875rem] text-white/60 mt-1.5">
-                  {paid ? t.settings_break_paid_hint : t.settings_break_unpaid_hint}
-                </p>
+                <p className="text-[0.6875rem] text-white/60">{paid ? t.settings_break_paid_hint : t.settings_break_unpaid_hint}</p>
               </div>
             </div>
           )}
