@@ -7,6 +7,7 @@ import { useProfileLeaveGuardRef } from '../context/ProfileLeaveGuardContext';
 import { useT } from '../hooks/useT';
 import { getDeviceUiLanguage, persistStoredUiLanguage, readStoredUiLanguage, clearStoredUiLanguage } from '../utils/uiLanguagePreference';
 import { NotificationPermissionButton } from './NotificationPermissionButton';
+import SavedToast from './ui/SavedToast';
 
 import { isManagementRole, isAdminOnly } from '../utils/permissions';
 import { translateRole } from '../utils/roles';
@@ -69,7 +70,7 @@ export default function ProfileNavTabPanel({
   const [isSaving, setIsSaving] = useState(false);
   const [showSavedToast, setShowSavedToast] = useState(false);
   const [_toastField, _setToastField] = useState<string | null>(null);
-  const [toastPos, setToastPos] = useState<{ top: number; left: number } | null>(null);
+  const [toastAnchor, setToastAnchor] = useState<HTMLElement | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
 
   // PIN gate per Area Gestionale
@@ -150,17 +151,15 @@ export default function ProfileNavTabPanel({
       if (serializeProfileForm(formData) !== savedSnapshotRef.current) {
         void performProfileSave().then(() => {
           _setToastField(field);
-          // Calcola posizione del campo
+          // Aggancia il fumetto al campo modificato
           if (field) {
             const el = document.querySelector(`[data-save-field="${field}"]`);
             if (el) {
               const input = el.querySelector('input, select') ?? el;
-              const rect = input.getBoundingClientRect();
-              setToastPos({ top: rect.bottom - 2, left: rect.right - 100 });
+              setToastAnchor(input as HTMLElement);
             }
           }
           setShowSavedToast(true);
-          setTimeout(() => setShowSavedToast(false), 2000);
         });
       }
     }, 1200);
@@ -376,12 +375,9 @@ export default function ProfileNavTabPanel({
     if (!_langSaved) return;
     const el = document.querySelector('[data-save-field="lang"]');
     if (el) {
-      const rect = el.getBoundingClientRect();
-      setToastPos({ top: rect.bottom - 2, left: rect.right - 100 });
+      setToastAnchor(el as HTMLElement);
     }
     setShowSavedToast(true);
-    const id = setTimeout(() => setShowSavedToast(false), 2000);
-    return () => clearTimeout(id);
   }, [_langSaved]);
 
   if (!currentUser) return null;
@@ -712,29 +708,13 @@ export default function ProfileNavTabPanel({
         )}
       </AnimatePresence>
 
-      {/* Toast "Salvato" — fixed sopra il campo modificato */}
-      <AnimatePresence>
-        {showSavedToast && toastPos && (
-          <motion.div
-            initial={{ opacity: 0, y: 6, scale: 0.92 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.92 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="fixed z-[9999] pointer-events-none"
-            style={{
-              top: `${toastPos.top}px`,
-              left: `${toastPos.left}px`,
-              transform: 'translate(-100%, 0)',
-            }}
-          >
-            <span className="relative inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-xl shadow-emerald-500/30" style={{ marginTop: '0.375rem' }}>
-              <span className="absolute -top-[0.3125rem] right-3 w-0 h-0 border-l-[0.3125rem] border-r-[0.3125rem] border-b-[0.375rem] border-l-transparent border-r-transparent border-b-emerald-500" />
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              {t.wst_sync_saved ?? 'Salvato'}
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Toast "Salvato" — fumetto verde agganciato al campo modificato, segue lo scroll */}
+      <SavedToast
+        open={showSavedToast}
+        anchor={toastAnchor}
+        message={t.wst_sync_saved ?? 'Salvato'}
+        onClose={() => setShowSavedToast(false)}
+      />
     </div>
   );
 }
