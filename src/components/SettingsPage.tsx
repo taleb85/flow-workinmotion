@@ -2891,9 +2891,9 @@ function BreakRuleModal({
           {activeTab === 'assign' && (
             <div className="flex flex-wrap items-start gap-x-6 gap-y-3">
               <div className="w-40 flex-none">
-                <label className={labelClass}>
-                  {t.settings_break_label_depts}{' '}
-                  <span className="font-normal normal-case tracking-normal text-white/40">{t.settings_break_none_means_all}</span>
+                <label className="mb-1.5 flex items-baseline gap-1 text-xs font-semibold uppercase tracking-wide text-white/55">
+                  {t.settings_break_label_depts}
+                  <span className="min-w-0 flex-1 truncate whitespace-nowrap font-normal normal-case tracking-normal text-white/40">{t.settings_break_none_means_all}</span>
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {getDepartments().map((d) => (
@@ -2909,9 +2909,9 @@ function BreakRuleModal({
                 </div>
               </div>
               <div className="min-w-0 flex-1">
-                <label className={labelClass}>
-                  {t.settings_break_label_roles}{' '}
-                  <span className="font-normal normal-case tracking-normal text-white/40">{t.settings_break_none_means_all}</span>
+                <label className="mb-1.5 flex items-baseline gap-1 text-xs font-semibold uppercase tracking-wide text-white/55">
+                  {t.settings_break_label_roles}
+                  <span className="min-w-0 flex-1 truncate whitespace-nowrap font-normal normal-case tracking-normal text-white/40">{t.settings_break_none_means_all}</span>
                 </label>
                 <div className="flex flex-wrap gap-1">
                   {roleGroups.map(([label, codes]) => {
@@ -2996,9 +2996,9 @@ function BreakRuleModal({
 
               {/* Giorni settimana */}
               <div>
-                <label className={labelClass}>
-                  {t.settings_break_weekdays}{' '}
-                  <span className="font-normal normal-case tracking-normal text-white/40">{t.settings_break_none_means_all}</span>
+                <label className="mb-1.5 flex items-baseline gap-1 text-xs font-semibold uppercase tracking-wide text-white/55">
+                  {t.settings_break_weekdays}
+                  <span className="min-w-0 flex-1 truncate whitespace-nowrap font-normal normal-case tracking-normal text-white/40">{t.settings_break_none_means_all}</span>
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {weekdayOptions.map((d) => (
