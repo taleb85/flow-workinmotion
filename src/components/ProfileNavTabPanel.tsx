@@ -527,19 +527,21 @@ export default function ProfileNavTabPanel({
             )}
           </div>
 
-          {/* Name + role/dept */}
+          {/* Name + reparto */}
           <div className="flex flex-col items-center gap-0.5">
             <h2 className="text-base font-bold tracking-tight" style={{ color: '#ffffff' }}>
               {displayName}
             </h2>
-            <p className="text-[0.6875rem]" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              {roleDisplay}{deptLabel && deptLabel !== roleDisplay ? ` · ${deptLabel}` : ''}
-            </p>
+            {deptLabel && (
+              <p className="text-[0.6875rem]" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                {deptLabel}
+              </p>
+            )}
           </div>
 
-          {/* Status badges */}
+          {/* Status badges: ruolo + reparto + attivo */}
           <div className="flex gap-2">
-            {[roleDisplay, t.status_active].filter(Boolean).map((label, i) => (
+            {[roleDisplay, deptLabel !== roleDisplay ? deptLabel : null, t.status_active].filter(Boolean).map((label, i) => (
               <span
                 key={i}
                 className="text-[0.6875rem] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider"
