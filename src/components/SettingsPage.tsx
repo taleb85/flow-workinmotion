@@ -2745,6 +2745,20 @@ function BreakRuleModal({
 
   /* Tab per sezione: il contenuto si espande con la tab attiva */
   const [activeTab, setActiveTab] = useState<'general' | 'assign' | 'apply'>('general');
+
+  /* Altezza massima dei contenuti: la modale resta centrata e l'header fermo */
+  const tabContentRef = useRef<HTMLDivElement>(null);
+  const [maxTabContentHeight, setMaxTabContentHeight] = useState<number | null>(null);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const el = tabContentRef.current;
+      if (!el) return;
+      const h = el.scrollHeight;
+      setMaxTabContentHeight((prev) => (prev === null || h > prev ? h : prev));
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [activeTab]);
+
   const tabOptions = [
     { id: 'general' as const, label: t.settings_break_section_general },
     { id: 'assign' as const, label: t.settings_break_assign_section },
@@ -2789,7 +2803,7 @@ function BreakRuleModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-4 backdrop-blur-sm md:items-start md:pt-[7dvh]"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-4 backdrop-blur-sm md:items-center"
       onClick={onClose}
     >
       <motion.form
@@ -2843,8 +2857,12 @@ function BreakRuleModal({
           </div>
         </div>
 
-        {/* Contenuto — si apre come un cassetto al cambio tab */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+        {/* Contenuto — si apre come un cassetto al cambio tab (altezza minima = max contenuto) */}
+        <div
+          ref={tabContentRef}
+          className="min-h-0 flex-1 overflow-y-auto px-5 py-5"
+          style={maxTabContentHeight !== null ? { minHeight: maxTabContentHeight } : undefined}
+        >
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={activeTab}
