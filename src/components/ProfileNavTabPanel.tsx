@@ -600,7 +600,7 @@ export default function ProfileNavTabPanel({
           </div>
 
           {/* Lingua */}
-          <div className="rounded-xl overflow-hidden border border-neutral-500">
+          <div className="overflow-hidden">
             <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('lang')}>
               <span className={rowLabelCls}>{t.language ?? 'Lingua'}</span>
               <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'lang' ? 'rotate-90' : ''}`} />
