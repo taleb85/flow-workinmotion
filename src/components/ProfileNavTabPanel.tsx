@@ -599,8 +599,8 @@ export default function ProfileNavTabPanel({
             </AnimatePresence>
           </div>
 
-          {/* Lingua — bordo solo da chiusa, sparisce quando il contenuto si apre */}
-          <div className={expanded === 'lang' ? 'overflow-hidden' : 'rounded-xl overflow-hidden border border-neutral-500'}>
+          {/* Lingua — bordo unico che si espande e mostra il contenuto */}
+          <div className="rounded-xl overflow-hidden border border-neutral-500">
             <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('lang')}>
               <span className={rowLabelCls}>{t.language ?? 'Lingua'}</span>
               <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'lang' ? 'rotate-90' : ''}`} />
