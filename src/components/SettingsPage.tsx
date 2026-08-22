@@ -2890,7 +2890,7 @@ function BreakRuleModal({
           {/* ── Assegna a ── */}
           {activeTab === 'assign' && (
             <div className="flex flex-wrap items-start gap-x-6 gap-y-3">
-              <div className="min-w-0 flex-1">
+              <div className="w-40 flex-none">
                 <label className={labelClass}>
                   {t.settings_break_label_depts}{' '}
                   <span className="font-normal normal-case tracking-normal text-white/40">{t.settings_break_none_means_all}</span>
@@ -2913,7 +2913,7 @@ function BreakRuleModal({
                   {t.settings_break_label_roles}{' '}
                   <span className="font-normal normal-case tracking-normal text-white/40">{t.settings_break_none_means_all}</span>
                 </label>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1">
                   {roleGroups.map(([label, codes]) => {
                     const groupSelected = codes.every((c) => roles.includes(c));
                     const toggleGroup = () =>
@@ -2926,7 +2926,7 @@ function BreakRuleModal({
                         key={codes.join(',')}
                         type="button"
                         onClick={toggleGroup}
-                        className={chipClass(groupSelected)}
+                        className={`${chipClass(groupSelected)} !px-2`}
                         title={codes.join(', ')}
                       >
                         {label}
