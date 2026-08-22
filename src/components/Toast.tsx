@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle, AlertTriangle, Info, X } from 'lucide-react';
@@ -6,18 +6,52 @@ interface ToastProps {
   message: string;
   type?: 'error' | 'success' | 'info';
   onClose: () => void;
+  /** Sezione di origine: il fumetto si aggancia ad essa e la segue durante lo scroll */
+  anchor?: HTMLElement | null;
 }
 
 
 /**
- * Banner globale sul lato destro dello schermo.
- * Scompare automaticamente dopo 10 secondi.
+ * Fumetto di notifica. Se `anchor` è presente si posiziona vicino alla sezione
+ * che ha generato l'azione (seguendola anche durante lo scroll), altrimenti
+ * resta nel banner globale in alto a destra.
+ * Scompare automaticamente dopo 3 secondi.
  */
-export default function Toast({ message, type = 'error', onClose }: ToastProps) {
+export default function Toast({ message, type = 'error', onClose, anchor }: ToastProps) {
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const t = setTimeout(onClose, 3000);
     return () => clearTimeout(t);
   }, [onClose]);
+
+  /* Calcola la posizione relativa alla sezione e la riaggiorna a ogni scroll/resize */
+  useLayoutEffect(() => {
+    if (!anchor) {
+      setPos(null);
+      return;
+    }
+    const update = () => {
+      const rect = anchor.getBoundingClientRect();
+      const el = innerRef.current;
+      const toastH = el?.offsetHeight ?? 48;
+      const toastW = el?.offsetWidth ?? 220;
+      const margin = 10;
+      let top = rect.top - toastH - margin;
+      if (top < margin) top = rect.bottom + margin; // sotto la sezione se sopra non c'è spazio
+      let left = rect.left + rect.width / 2 - toastW / 2;
+      left = Math.max(margin, Math.min(left, window.innerWidth - toastW - margin));
+      setPos({ top, left });
+    };
+    update();
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
+  }, [anchor]);
 
   const isSuccess = type === 'success';
   const isError = type === 'error';
@@ -27,14 +61,19 @@ export default function Toast({ message, type = 'error', onClose }: ToastProps) 
 
   const el = (
     <motion.div
+      ref={innerRef}
       role="status"
       aria-live="polite"
       initial={{ x: 40, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 40, opacity: 0 }}
       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-      className="fixed right-4 z-[99999]"
-      style={{ top: 'calc(env(safe-area-inset-top, 0px) + 60px)' }}
+      className="fixed z-[99999]"
+      style={
+        pos
+          ? { top: pos.top, left: pos.left }
+          : { top: 'calc(env(safe-area-inset-top, 0px) + 60px)', right: '1rem' }
+      }
     >
       <div
         className="flex max-w-[min(80vw,18rem)] items-center gap-1.5 rounded-lg px-2.5 py-1.5 backdrop-blur-xl"

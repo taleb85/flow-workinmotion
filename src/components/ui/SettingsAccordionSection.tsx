@@ -52,7 +52,7 @@ export function SettingsAccordionSection({
   const borderColor = accentBorder ?? 'rgba(255,255,255,0.35)';
 
   return (
-    <section className={className}>
+    <section className={className} data-toast-anchor>
       <div
         className={attached ? 'rounded-xl overflow-hidden' : undefined}
         style={attached ? { border: `1.5px solid ${borderColor}` } : undefined}

@@ -283,7 +283,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 }
 
 function AppProviderInner({ children }: { children: ReactNode }) {
-  const { showError, showSuccess, toastMessage, toastType, clearToast } = useToast();
+  const { showError, showSuccess, toastMessage, toastType, toastAnchor, clearToast } = useToast();
   const {
     currentUser, setCurrentUser, users, setUsers,
     isSessionElevated, setIsSessionElevated,
@@ -3031,6 +3031,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
                     key={`${toastType}:${toastMessage.slice(0, 80)}`}
                     message={toastMessage}
                     type={toastType || undefined}
+                    anchor={toastAnchor}
                     onClose={clearToast}
                   />
                 )}
