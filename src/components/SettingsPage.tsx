@@ -2799,10 +2799,10 @@ function BreakRuleModal({
         transition={{ type: 'spring', damping: 28, stiffness: 380 }}
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
-        className="modal-glass-panel w-full max-w-2xl rounded-2xl font-sans"
+        className="modal-glass-panel flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-2xl font-sans"
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-app-bg/80 px-5 pt-5 pb-4 backdrop-blur-md">
+        <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-white/10 bg-app-bg/80 px-5 pt-5 pb-4 backdrop-blur-md">
           <h2 className="text-base font-bold text-white">
             {isEdit ? t.settings_break_modal_edit_title : t.settings_break_modal_new_title}
           </h2>
@@ -2816,9 +2816,9 @@ function BreakRuleModal({
           </button>
         </div>
 
-        <div className="px-5 py-5">
-          {/* Tab per sezione */}
-          <div className="mb-4 flex gap-1 rounded-xl border border-neutral-500 bg-white/5 p-1">
+        {/* Tab per sezione — fisse in alto, contenuto sotto scrollabile */}
+        <div className="shrink-0 px-5 pt-4">
+          <div className="flex gap-1 rounded-xl border border-neutral-500 bg-white/5 p-1">
             {tabOptions.map((tab) => (
               <button
                 key={tab.id}
@@ -2832,7 +2832,10 @@ function BreakRuleModal({
               </button>
             ))}
           </div>
+        </div>
 
+        {/* Contenuto — si adatta e scorre sotto le tab */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
           {/* ── Generale ── */}
           {activeTab === 'general' && (
             <div className="space-y-3">
