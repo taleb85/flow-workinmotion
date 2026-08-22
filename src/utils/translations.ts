@@ -1672,8 +1672,6 @@ const baseIt = {
   settings_cloud_sync_paused:
     'Sincronizzazione cloud disattivata. Rimuovi VITE_APP_CLOUD_SYNC=false dall’ambiente e riavvia l’app per riattivarla.',
   ui_ellipsis: '…',
-  settings_break_modal_edit_title: 'Modifica regola pausa',
-  settings_break_modal_new_title: 'Nuova regola pausa',
   settings_break_section_general: 'Generale',
   settings_break_label_title: 'Titolo',
   settings_break_title_placeholder: 'es. Pausa pranzo, Pausa cena…',
@@ -3321,8 +3319,6 @@ const baseEn: Record<string, string> = {
   settings_cloud_sync_paused:
     'Cloud sync is disabled. Remove VITE_APP_CLOUD_SYNC=false from your environment and restart the app to enable it.',
   ui_ellipsis: '…',
-  settings_break_modal_edit_title: 'Edit break rule',
-  settings_break_modal_new_title: 'New break rule',
   settings_break_section_general: 'General',
   settings_break_label_title: 'Title',
   settings_break_title_placeholder: 'e.g. Lunch break, Dinner break…',
@@ -4967,8 +4963,6 @@ const baseEs: Record<string, string> = {
   settings_cloud_sync_paused:
     'Sincronización en la nube desactivada. Quita VITE_APP_CLOUD_SYNC=false del entorno y reinicia la app para activarla.',
   ui_ellipsis: '…',
-  settings_break_modal_edit_title: 'Editar regla de pausa',
-  settings_break_modal_new_title: 'Nueva regla de pausa',
   settings_break_section_general: 'General',
   settings_break_label_title: 'Título',
   settings_break_title_placeholder: 'p. ej. Pausa comida, Pausa cena…',
@@ -6011,8 +6005,6 @@ const baseFr: Record<string, string> = {
   settings_cloud_sync_paused:
     'Synchronisation cloud désactivée. Retirez VITE_APP_CLOUD_SYNC=false de l’environnement et redémarrez l’app pour la réactiver.',
   ui_ellipsis: '…',
-  settings_break_modal_edit_title: 'Modifier la règle de pause',
-  settings_break_modal_new_title: 'Nouvelle règle de pause',
   settings_break_section_general: 'Général',
   settings_break_label_title: 'Titre',
   settings_break_title_placeholder: 'ex. Pause déjeuner, Pause dîner…',

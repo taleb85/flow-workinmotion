@@ -2801,11 +2801,22 @@ function BreakRuleModal({
         onSubmit={handleSubmit}
         className="modal-glass-panel flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-2xl font-sans"
       >
-        {/* Header — con azioni (Annulla / Crea regola) accanto alla X */}
-        <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-app-bg/80 px-5 pt-4 pb-4 backdrop-blur-md">
-          <h2 className="min-w-0 flex-1 truncate text-base font-bold text-white">
-            {isEdit ? t.settings_break_modal_edit_title : t.settings_break_modal_new_title}
-          </h2>
+        {/* Header — tab per sezione + azioni (Crea regola / X) */}
+        <div className="sticky top-0 z-10 flex shrink-0 items-center gap-3 border-b border-white/10 bg-app-bg/80 px-5 pt-4 pb-4 backdrop-blur-md">
+          <div className="flex min-w-0 flex-1 items-center gap-1 rounded-xl border border-neutral-500 bg-white/5 p-1">
+            {tabOptions.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                  activeTab === tab.id ? 'bg-accent text-white' : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="submit"
@@ -2830,24 +2841,6 @@ function BreakRuleModal({
                 {t.close}
               </span>
             </button>
-          </div>
-        </div>
-
-        {/* Tab per sezione */}
-        <div className="shrink-0 px-5 pt-4">
-          <div className="flex gap-1 rounded-xl border border-neutral-500 bg-white/5 p-1">
-            {tabOptions.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
-                  activeTab === tab.id ? 'bg-accent text-white' : 'text-white/60 hover:text-white'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
           </div>
         </div>
 
