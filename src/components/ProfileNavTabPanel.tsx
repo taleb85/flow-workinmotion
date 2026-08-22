@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, ChevronRight, Trash2, Settings2 } from 'lucide-react';
+import { Camera, ChevronRight, Trash2, Settings2, Fingerprint, Loader2, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppUser, useAppOverlay } from '../context/AppContext';
 import { useProfileLeaveGuardRef } from '../context/ProfileLeaveGuardContext';
@@ -14,7 +14,7 @@ import { translateRole } from '../utils/roles';
 import { translateDepartmentValue } from '../utils/departmentLabels';
 import { isFeatureEnabled } from '../utils/enabledFeatures';
 import { PinPadModal } from './ui/PinPadModal';
-// import { hasPinUnlockCredential, authenticatePinUnlockCredential } from '../utils/pinUnlockWebAuthn'; // unused
+import { hasPlatformBiometricAuthenticator } from '../utils/pinUnlockWebAuthn';
 import { ProfileFormSelf, type ProfileFormSelfData } from './UserProfile';
 import BackgroundGallery from './BackgroundGallery';
 import ProfilePhotoSourceSheet from './profile/ProfilePhotoSourceSheet';
@@ -51,7 +51,7 @@ export default function ProfileNavTabPanel({
   onGoToSettings?: () => void;
 }) {
   const { currentUser, effectiveLanguage, setLanguage, clearLanguage, updateUser, isSessionElevated } = useAppUser();
-  const { showError } = useAppOverlay();
+  const { showError, showSuccess, registerPinUnlockDevice, pinUnlockDeviceRegistered, removePinUnlockDevice } = useAppOverlay();
   const profileLeaveGuardRef = useProfileLeaveGuardRef();
   const navigate = useNavigate();
   const t = useT();
@@ -337,8 +337,55 @@ export default function ProfileNavTabPanel({
     };
   }, [profileLeaveGuardRef, isDirty, performProfileSave]);
 
-  const [expanded, setExpanded] = useState<'settings' | 'notif' | 'lang' | null>(null);
+  const [expanded, setExpanded] = useState<'settings' | 'notif' | 'lang' | 'security' | null>(null);
   const toggleSection = (s: typeof expanded) => setExpanded(prev => prev === s ? null : s);
+
+  // ── Accesso con Face ID / impronta (per ogni profilo) ──────────────────────
+  const [bioAvailable, setBioAvailable] = useState(false);
+  useEffect(() => {
+    let mounted = true;
+    hasPlatformBiometricAuthenticator()
+      .then((ok) => { if (mounted) setBioAvailable(ok); })
+      .catch(() => { if (mounted) setBioAvailable(false); });
+    return () => { mounted = false; };
+  }, []);
+  const [showBioPinPad, setShowBioPinPad] = useState(false);
+  const [bioPin, setBioPin] = useState('');
+  const [bioPinError, setBioPinError] = useState('');
+  const [bioBusy, setBioBusy] = useState(false);
+
+  const handleBioEnableConfirm = useCallback(async () => {
+    if (!currentUser || bioBusy) return;
+    setBioBusy(true);
+    try {
+      const r = await registerPinUnlockDevice(bioPin);
+      if (r.wrongPin) {
+        setBioPinError(tv.profile_tab_security_wrong_pin ?? 'PIN non valido');
+        setBioPin('');
+      } else if (r.ok) {
+        setShowBioPinPad(false);
+        setBioPin('');
+        setBioPinError('');
+        showSuccess(tv.profile_tab_security_enabled_ok ?? 'Accesso con Face ID / impronta attivato.');
+      } else {
+        setBioPinError(tv.profile_tab_security_register_failed ?? 'Impossibile attivare. Riprova.');
+      }
+    } finally {
+      setBioBusy(false);
+    }
+  }, [currentUser, bioBusy, registerPinUnlockDevice, bioPin, showSuccess, tv]);
+
+  const handleBioDisable = useCallback(() => {
+    if (!currentUser || bioBusy) return;
+    setBioBusy(true);
+    try {
+      const ok = removePinUnlockDevice();
+      if (ok) showSuccess(tv.profile_tab_security_disabled_ok ?? 'Accesso con Face ID / impronta disattivato.');
+      else showError(tv.profile_tab_security_remove_failed ?? 'Impossibile disattivare. Riprova.');
+    } finally {
+      setBioBusy(false);
+    }
+  }, [currentUser, bioBusy, removePinUnlockDevice, showSuccess, showError, tv]);
 
   const [savedLang, setSavedLang] = useState<import('../types').Language | null>(() => readStoredUiLanguage());
   const [pendingLang, setPendingLang] = useState<import('../types').Language | null>(() => readStoredUiLanguage());
@@ -648,6 +695,65 @@ export default function ProfileNavTabPanel({
             <BackgroundGallery userId={currentUser?.id} variant="profile-row" />
           </div>
 
+          {/* Sicurezza — accesso con Face ID / impronta per ogni profilo */}
+          <div className="rounded-xl overflow-hidden border border-neutral-500">
+            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('security')}>
+              <span className={rowLabelCls}>{tv.profile_tab_group_security ?? 'Sicurezza'}</span>
+              <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'security' ? 'rotate-90' : ''}`} />
+            </button>
+            <AnimatePresence initial={false}>
+              {expanded === 'security' && (
+                <motion.div key="security-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
+                  <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.12)' }} className="px-4 py-4">
+                    {bioAvailable ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                          <Fingerprint className="w-4.5 h-4.5" style={{ color: 'rgba(255,255,255,0.85)' }} strokeWidth={1.75} aria-hidden />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>
+                            {tv.profile_tab_security_biometric_title ?? 'Accedi con Face ID / impronta'}
+                          </p>
+                          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                            {pinUnlockDeviceRegistered
+                              ? (tv.profile_tab_security_enabled ?? 'Attivo su questo dispositivo')
+                              : (tv.profile_tab_security_disabled ?? 'Non attivo su questo dispositivo')}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={pinUnlockDeviceRegistered}
+                          aria-label={tv.profile_tab_security_biometric_title ?? 'Accedi con Face ID / impronta'}
+                          disabled={bioBusy}
+                          onClick={() => (pinUnlockDeviceRegistered ? handleBioDisable() : setShowBioPinPad(true))}
+                          className="relative w-12 h-7 rounded-full transition-colors disabled:opacity-50 flex-shrink-0"
+                          style={pinUnlockDeviceRegistered
+                            ? { background: 'rgba(52, 211, 153, 0.85)' }
+                            : { background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)' }}
+                        >
+                          <span
+                            className="absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all duration-200"
+                            style={{ left: pinUnlockDeviceRegistered ? 'calc(100% - 1.5rem)' : '0.25rem' }}
+                          />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                          <ShieldCheck className="w-4.5 h-4.5" style={{ color: 'rgba(255,255,255,0.4)' }} strokeWidth={1.75} aria-hidden />
+                        </div>
+                        <p className="text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                          {tv.profile_tab_security_unavailable ?? 'Face ID / impronta non disponibile su questo dispositivo.'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* Pannello Admin — visibile solo per ruoli autorizzati */}
           {(hasAdminAccess || _isMgmt) && (
             <button
@@ -701,6 +807,25 @@ export default function ProfileNavTabPanel({
               setMgmtPin('');
               openMgmtArea();
             }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* PIN pad modal attivazione Face ID / impronta */}
+      <AnimatePresence>
+        {showBioPinPad && currentUser && (
+          <PinPadModal
+            title={tv.profile_tab_security_enable_title ?? 'Attiva Face ID / impronta'}
+            subtitle={tv.profile_tab_security_enable_subtitle ?? 'Conferma il PIN per collegare questo dispositivo.'}
+            pinLabel="PIN"
+            pin={bioPin}
+            onPinChange={(v) => { setBioPinError(''); setBioPin(v); }}
+            error={bioPinError}
+            onConfirm={() => void handleBioEnableConfirm()}
+            onCancel={() => { setShowBioPinPad(false); setBioPin(''); setBioPinError(''); }}
+            confirmLabel={tv.profile_tab_security_enable_confirm ?? 'Attiva'}
+            isLoading={bioBusy}
+            userId={currentUser.id}
           />
         )}
       </AnimatePresence>

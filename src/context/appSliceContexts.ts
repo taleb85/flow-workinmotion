@@ -170,6 +170,7 @@ export interface OverlaySlice {
   cancelRefreshLock: () => void;
   registerPinUnlockDevice: (pin: string) => Promise<{ ok: boolean; wrongPin: boolean }>;
   pinUnlockDeviceRegistered: boolean;
+  removePinUnlockDevice: () => boolean;
   pendingOrderIds: string[] | null;
   pendingPublishWeekStart: string | null;
   requestConfirmAndSaveOrder: (orderedIds: string[]) => void;

@@ -153,6 +153,7 @@ import { withTimeout, TimeoutError } from '../utils/promiseTimeout';
 import { authenticatePinUnlockCredential,
   hasPinUnlockCredential,
   registerPinUnlockCredential,
+  removePinUnlockCredential,
 } from '../utils/pinUnlockWebAuthn';
 import { pinMatchesStored, findActiveUserWithSamePin } from '../utils/loginIdentifier';
 import { isAppCloudSyncEnabled } from '../utils/appCloudSync';
@@ -2832,6 +2833,13 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     [currentUser, users]
   );
 
+  const removePinUnlockDevice = useCallback((): boolean => {
+    if (!currentUser) return false;
+    const removed = removePinUnlockCredential(currentUser.id);
+    if (removed) setPinUnlockDeviceTick((n) => n + 1);
+    return removed;
+  }, [currentUser]);
+
   const pinUnlockDeviceRegistered = useMemo(
     () => (currentUser ? hasPinUnlockCredential(currentUser.id) : false),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- pinUnlockDeviceTick busts memo dopo registrazione WebAuthn
@@ -2950,6 +2958,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     unlockAfterRefresh, unlockAfterRefreshWithDevice,
     cancelRefreshLock,
     registerPinUnlockDevice, pinUnlockDeviceRegistered,
+    removePinUnlockDevice,
     pendingOrderIds, pendingPublishWeekStart,
     requestConfirmAndSaveOrder, requestConfirmAndPublishWeek,
   }), [
@@ -2960,6 +2969,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     unlockAfterRefresh, unlockAfterRefreshWithDevice,
     cancelRefreshLock,
     registerPinUnlockDevice, pinUnlockDeviceRegistered,
+    removePinUnlockDevice,
     pendingOrderIds, pendingPublishWeekStart,
     requestConfirmAndSaveOrder, requestConfirmAndPublishWeek,
   ]);
@@ -2970,7 +2980,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     addShift, updateShift, approveShift, deleteShift, deleteShifts, copyShift, bulkCopyPreviousWeek,
     publishWeekShifts, publishDayShifts, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
     updateUser, createUser, deleteUser, reorderUsers, setUsersSortOrder, updateUserPreferences, effectiveLanguage, setLanguage, clearLanguage, showError, showSuccess, forceGlobalRefresh, hardResetTestData, seedDemoProfileForUser, silentRefreshData, hardReloadFromDatabase, isGlobalRefreshing, syncStage, dataSyncInProgress,
-    postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, unlockAfterRefreshWithDevice, registerPinUnlockDevice, pinUnlockDeviceRegistered, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
+    postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, unlockAfterRefreshWithDevice, registerPinUnlockDevice, pinUnlockDeviceRegistered, removePinUnlockDevice, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
     featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,
     presenceVerificationConfig, savePresenceVerificationConfig,
     workRules, setWorkRules, breakRules, setBreakRules,
@@ -2986,7 +2996,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     addShift, updateShift, approveShift, deleteShift, deleteShifts, copyShift, bulkCopyPreviousWeek,
     publishWeekShifts, publishDayShifts, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
     updateUser, createUser, deleteUser, reorderUsers, setUsersSortOrder, updateUserPreferences, effectiveLanguage, setLanguage, clearLanguage, showError, showSuccess, forceGlobalRefresh, hardResetTestData, seedDemoProfileForUser, silentRefreshData, hardReloadFromDatabase, isGlobalRefreshing, syncStage, dataSyncInProgress,
-    postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, unlockAfterRefreshWithDevice, registerPinUnlockDevice, pinUnlockDeviceRegistered, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
+    postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, unlockAfterRefreshWithDevice, registerPinUnlockDevice, pinUnlockDeviceRegistered, removePinUnlockDevice, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
     featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,
     presenceVerificationConfig, savePresenceVerificationConfig,
     workRules, setWorkRules, breakRules, setBreakRules,

@@ -60,6 +60,8 @@ export interface AppContextType {
   registerPinUnlockDevice: (pin: string) => Promise<{ ok: boolean; wrongPin: boolean }>;
   /** True se per l’utente corrente esiste già una credenziale WebAuthn su questo host. */
   pinUnlockDeviceRegistered: boolean;
+  /** Rimuove la credenziale di questo dispositivo per l'utente corrente. */
+  removePinUnlockDevice: () => boolean;
   cancelRefreshLock: () => void;
   /** Ordine in attesa di conferma PIN (mostra overlay e alla conferma salva su DB e aggiorna app). */
   pendingOrderIds: string[] | null;

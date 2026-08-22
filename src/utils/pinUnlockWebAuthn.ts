@@ -81,6 +81,20 @@ export function hasPinUnlockCredential(userId: string): boolean {
   return entry.rpId === window.location.hostname;
 }
 
+/**
+ * Rimuove la credenziale salvata per questo utente su questo dispositivo.
+ * Non cancella la passkey dal keychain di sistema (non è possibile via WebAuthn),
+ * ma la rimuove dallo storage dell'app: il dispositivo smette di essere "collegato".
+ */
+export function removePinUnlockCredential(userId: string): boolean {
+  if (typeof window === 'undefined') return false;
+  const store = readStore();
+  if (!store[userId]) return false;
+  delete store[userId];
+  writeStore(store);
+  return true;
+}
+
 export async function registerPinUnlockCredential(
   userId: string,
   displayName: string,
@@ -107,7 +121,9 @@ export async function registerPinUnlockCredential(
       authenticatorSelection: {
         authenticatorAttachment: 'platform',
         userVerification: 'required',
-        residentKey: 'preferred',
+        // Non-discoverable: niente passkey sincronizzata/iCloud — solo Face ID/Touch ID diretti
+        residentKey: 'discouraged',
+        requireResidentKey: false,
       },
       timeout: 60000,
       attestation: 'none',
