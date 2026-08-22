@@ -99,7 +99,7 @@ import {
   loadBreakRulesFromSupabase,
   getBreakMinutesForShift,
   getActiveBreakRules,
-  setAutoBreakThresholdMinutes,
+  setAutoBreakTiers,
 } from '../utils/breakRules';
 import {
   mergeShiftsDeductExclusionsFromLocal,
@@ -2476,10 +2476,11 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     if (rev != null) writeAckClientSyncRevision(rev);
   }, [markManagementDataTouched]);
 
-  // Sincronizza la soglia pausa automatica attiva con le Work Rules configurate
-  // (default 6h; 0 = nessuna soglia). Tutti i calcoli pausa la leggono via getAutoBreakThresholdMinutes().
+  // Sincronizza le fasce pausa automatica attive con le Work Rules configurate
+  // (default [6h → 30′]; [] = pausa auto disattivata). Tutti i calcoli pausa le leggono
+  // via getAutoBreakMinutesForGross()/getAutoBreakThresholdMinutes().
   useEffect(() => {
-    setAutoBreakThresholdMinutes(workRules.autoBreakThresholdMinutes);
+    setAutoBreakTiers(workRules.autoBreakTiers);
   }, [workRules]);
 
   const setBreakRules = useCallback(async (rules: BreakRule[]) => {

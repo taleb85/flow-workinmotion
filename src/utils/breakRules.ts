@@ -198,26 +198,71 @@ export function flowMealExclusionId(meal: 'lunch' | 'dinner'): string {
   return meal === 'lunch' ? FLOW_MEAL_EXCLUSION_LUNCH : FLOW_MEAL_EXCLUSION_DINNER;
 }
 
-/** Soglia turno per pausa automatica — DEFAULT: 6 ore in minuti (configurabile da Impostazioni). */
+/** Soglia turno per pausa automatica — DEFAULT: 6 ore in minuti (prima fascia predefinita). */
 export const AUTO_BREAK_THRESHOLD_MINUTES = 6 * 60;
 
-/**
- * Soglia pausa automatica ATTIVA nell'app: parte dal default (6h) e viene aggiornata
- * dalle Work Rules (`autoBreakThresholdMinutes`) quando l'utente la modifica in Impostazioni.
- * 0 = nessuna soglia (la pausa automatica si applica a qualsiasi durata, se coperta da fasce pasto).
- */
-let currentAutoBreakThresholdMinutes = AUTO_BREAK_THRESHOLD_MINUTES;
-
-export function getAutoBreakThresholdMinutes(): number {
-  return currentAutoBreakThresholdMinutes;
+/** Fascia progressiva di pausa automatica: turni ≥ `minShiftMinutes` → `breakMinutes` di pausa. */
+export interface AutoBreakTier {
+  minShiftMinutes: number;
+  breakMinutes: number;
 }
 
-export function setAutoBreakThresholdMinutes(minutes: number): void {
-  const v = Number.isFinite(minutes) ? Math.round(minutes) : AUTO_BREAK_THRESHOLD_MINUTES;
-  const clamped = v >= 0 ? v : AUTO_BREAK_THRESHOLD_MINUTES;
-  if (clamped !== currentAutoBreakThresholdMinutes) {
-    currentAutoBreakThresholdMinutes = clamped;
+/** Fascia predefinita (6h → 30′): replica il comportamento storico della soglia singola. */
+export const DEFAULT_AUTO_BREAK_TIER: AutoBreakTier = {
+  minShiftMinutes: AUTO_BREAK_THRESHOLD_MINUTES,
+  breakMinutes: DEFAULT_AUTO_BREAK_MINUTES,
+};
+
+/**
+ * Fasce pausa automatica ATTIVE nell'app: aggiornate dalle Work Rules
+ * (`autoBreakTiers`) quando l'admin le modifica in Impostazioni.
+ * [] = pausa automatica disattivata.
+ */
+let currentAutoBreakTiers: AutoBreakTier[] = [{ ...DEFAULT_AUTO_BREAK_TIER }];
+
+export function sanitizeAutoBreakTiers(tiers: AutoBreakTier[] | null | undefined): AutoBreakTier[] {
+  if (!Array.isArray(tiers)) return [{ ...DEFAULT_AUTO_BREAK_TIER }];
+  const cleaned = tiers
+    .filter((t) => t && Number.isFinite(t.minShiftMinutes) && Number.isFinite(t.breakMinutes))
+    .map((t) => ({
+      minShiftMinutes: Math.max(0, Math.round(t.minShiftMinutes)),
+      breakMinutes: Math.max(0, Math.round(t.breakMinutes)),
+    }))
+    .sort((a, b) => a.minShiftMinutes - b.minShiftMinutes);
+  return cleaned.length > 0 ? cleaned : [];
+}
+
+export function setAutoBreakTiers(tiers: AutoBreakTier[] | null | undefined): void {
+  currentAutoBreakTiers = sanitizeAutoBreakTiers(tiers);
+}
+
+export function getAutoBreakTiers(): AutoBreakTier[] {
+  return currentAutoBreakTiers;
+}
+
+/**
+ * Minuti di pausa per la fascia più alta coperta dal turno.
+ * Es. fasce [6h→30, 8h→45, 10h→60]: turno da 9h → 45; da 5h → 0.
+ * 0 = nessuna fascia applicabile (o fasce vuote → pausa auto disattivata).
+ */
+export function getAutoBreakMinutesForGross(grossMinutes: number): number {
+  let minutes = 0;
+  for (const tier of currentAutoBreakTiers) {
+    if (grossMinutes >= tier.minShiftMinutes && tier.breakMinutes > minutes) {
+      minutes = tier.breakMinutes;
+    }
   }
+  return minutes;
+}
+
+/**
+ * Soglia pausa automatica minima ATTIVA nell'app: il minore tra le `minShiftMinutes`
+ * delle fasce configurate (usata per etichette e check "può avere pausa").
+ * 0 = nessuna soglia minima (fasce che partono da 0, o fasce vuote).
+ */
+export function getAutoBreakThresholdMinutes(): number {
+  if (currentAutoBreakTiers.length === 0) return 0;
+  return Math.min(...currentAutoBreakTiers.map((t) => t.minShiftMinutes));
 }
 
 /** Solo regole con `enabled !== false` (default = attiva). */
@@ -323,14 +368,16 @@ export function getBreakMinutesForShift(
   if (startStr && endStr && endMinutes <= toMinutes(startStr)) {
     return 0;
   }
-  if (grossMinutes < getAutoBreakThresholdMinutes()) {
+  /* Fasce progressive: si applica la fascia più alta coperta dal turno (0 = nessuna fascia → nessuna pausa auto). */
+  const tierBreakMinutes = getAutoBreakMinutesForGross(grossMinutes);
+  if (tierBreakMinutes <= 0) {
     return 0;
   }
   const mealKeys = getBreakLabels(startStr, endStr);
   if (mealKeys.length > 0) {
     const ex = new Set(shift.deduct_excluded_rule_ids ?? []);
     const active = mealKeys.filter((k) => !ex.has(flowMealExclusionId(k)));
-    return active.length * DEFAULT_AUTO_BREAK_MINUTES;
+    return active.length * tierBreakMinutes;
   }
   if (options?.autoBreaksFeatureEnabled === false) {
     return 0;
@@ -415,12 +462,14 @@ export function getBreakDeductionDisplayItems(
   const startStr = (options?.breakRuleWindow?.start ?? shift.start_time ?? '').slice(0, 5);
   const endStr = (options?.breakRuleWindow?.end ?? shift.end_time ?? '').slice(0, 5);
   const endMinutesCheck = endStr === '00:00' ? 1440 : toMinutes(endStr);
+  /* Fasce progressive: minuti per la fascia più alta coperta dal turno (0 = nessuna fascia). */
+  const autoBreakMins = getAutoBreakMinutesForGross(grossMinutes);
   /** Pranzo/cena (fasce) con interruttori separati — allineate a getBreakMinutesForShift (anche con `autoBreaksFeatureEnabled: false` per fasce). */
   if (
     startStr &&
     endStr &&
     endMinutesCheck > toMinutes(startStr) &&
-    grossMinutes >= getAutoBreakThresholdMinutes() &&
+    autoBreakMins > 0 &&
     shift.is_auto_break !== false &&
     !(shift.break_minutes != null && shift.break_minutes > 0 && shift.is_auto_break !== true)
   ) {
@@ -428,7 +477,7 @@ export function getBreakDeductionDisplayItems(
     if (mealKeys.length > 0) {
       return mealKeys.map((k) => ({
         title: k === 'lunch' ? i18n.lunch : i18n.dinner,
-        minutes: DEFAULT_AUTO_BREAK_MINUTES,
+        minutes: autoBreakMins,
         ruleId: flowMealExclusionId(k),
       }));
     }
@@ -443,7 +492,7 @@ export function getBreakDeductionDisplayItems(
     startStr &&
     endStr &&
     endMinutesCheck > toMinutes(startStr) &&
-    grossMinutes >= getAutoBreakThresholdMinutes()
+    autoBreakMins > 0
   ) {
     if (shift.is_auto_break === false) {
       return [];

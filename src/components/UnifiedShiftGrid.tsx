@@ -18,7 +18,7 @@ import { it } from 'date-fns/locale';
 import { getTranslations, getDateLocale, getIntlLocale } from '../utils/translations';
 import { translateDepartmentValue } from '../utils/departmentLabels';
 import { formatMinutesToHoursAndMinutes, calculateShiftMinutesGross, getBreakLabels, hasShiftConflictSameDay } from '../utils/timeCalculations';
-import { getBreakMinutesForShift, DEFAULT_AUTO_BREAK_MINUTES, getAutoBreakThresholdMinutes } from '../utils/breakRules';
+import { getBreakMinutesForShift, getAutoBreakThresholdMinutes, getAutoBreakMinutesForGross, getAutoBreakTiers } from '../utils/breakRules';
 import { shiftPastPlannedEndWithoutClockIn, punchTimeHHMM, getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
 import { exportSchedulePDF } from '../utils/exportSchedulePDF';
 import { TimeInputField } from './ui/TimeInputField';
@@ -1018,15 +1018,16 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         const breakMins = getBreakMinutesForShift(shift, plannedMins, null, breakRules);
         const actualBreakMins = (() => {
           const gross = Math.round(actualMins);
-          if (gross < getAutoBreakThresholdMinutes()) return 0;
           if (shift.deduct_break === false) return 0;
           const st = (shift.start_time || '').slice(0, 5);
           const en = (shift.end_time || '').slice(0, 5);
           if (!st || !en) return 0;
           const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
           if (toMin(en) <= toMin(st)) return 0;
+          const tierBreakMins = getAutoBreakMinutesForGross(gross);
+          if (tierBreakMins <= 0) return 0;
           const mealKeys = getBreakLabels(st, en);
-          return mealKeys.length > 0 ? mealKeys.length * DEFAULT_AUTO_BREAK_MINUTES : 0;
+          return mealKeys.length > 0 ? mealKeys.length * tierBreakMins : 0;
         })();
         const actualNet = Math.max(0, Math.round(actualMins) - actualBreakMins);
         const plannedNet = Math.max(0, plannedMins - breakMins);
@@ -2584,23 +2585,27 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 const breakMins = getBreakMinutesForShift({ ...selectedShift, deduct_break: deductBreak }, grossMins, shiftUser ?? null, breakRules,
                   editIn && editOut ? { breakRuleWindow: { start: editIn, end: editOut } } : undefined);
                 const netMins = Math.max(0, grossMins - breakMins);
-                const _hasAutoBreak = grossMins >= getAutoBreakThresholdMinutes() && isAutoBreak;
+                const canAutoBreak = getAutoBreakMinutesForGross(grossMins) > 0;
+                const _hasAutoBreak = canAutoBreak && isAutoBreak;
                 // Mostra le opzioni pausa solo se il turno può averne una:
-                // rientra nella soglia pausa automatica, ha una pausa calcolata
+                // rientra in una fascia pausa automatica, ha una pausa calcolata
                 // (es. regole admin) o una pausa manuale impostata.
                 const showBreakOptions =
-                  grossMins >= getAutoBreakThresholdMinutes() ||
+                  canAutoBreak ||
                   breakMins > 0 ||
                   (selectedShift.break_minutes ?? 0) > 0;
-                // Etichetta pausa automatica con la soglia ATTIVA configurata (es. "Pausa automatica (≥4h)");
-                // senza soglia (0) mostra solo "Pausa automatica".
+                // Etichetta pausa automatica con la fascia ATTIVA applicabile al turno
+                // (es. "Pausa automatica (≥8h · 45′)"); senza fasce solo "Pausa automatica".
                 const autoBreakLabel = (() => {
-                  const th = getAutoBreakThresholdMinutes();
                   const raw = t.ts_deduct_break_auto ?? 'Pausa automatica (≥6h)';
                   const base = raw.replace(/\s*\(≥[^)]*\)\s*$/, '').trim() || 'Pausa automatica';
+                  const tier = getAutoBreakTiers()
+                    .filter((t2) => grossMins >= t2.minShiftMinutes)
+                    .sort((a, b) => b.minShiftMinutes - a.minShiftMinutes)[0];
+                  const th = tier?.minShiftMinutes ?? getAutoBreakThresholdMinutes();
                   if (th <= 0) return base;
                   const hh = th % 60 === 0 ? `${th / 60}h` : `${th}min`;
-                  return `${base} (≥${hh})`;
+                  return tier ? `${base} (≥${hh} · ${tier.breakMinutes}′)` : `${base} (≥${hh})`;
                 })();
                 const frozen = isFrozen(selectedShift);
                 return (
