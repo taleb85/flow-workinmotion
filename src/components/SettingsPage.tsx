@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell, Timer, Utensils, Pizza, Soup, Salad, Sandwich, Cake, Cookie, GlassWater, Wine, Sun, Moon, type LucideIcon } from 'lucide-react';
+import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell, Timer, Sun, Moon, type LucideIcon } from 'lucide-react';
 import { database } from '../lib/database';
 import { supabase } from '../lib/supabase';
 import { PinPadModal } from './ui/PinPadModal';
@@ -68,24 +68,18 @@ import { buildSignedPresenceQrPayload } from '../utils/presenceProofVerification
 
 const SETTINGS_TEAM_EXPANDED_KEY = 'osteria_settings_team_expanded';
 
-/* Icone disponibili per le regole pausa (chiave → componente lucide) */
+/* Icone disponibili per le regole pausa (pranzo = sole, cena = luna) */
 const BREAK_RULE_ICONS: Record<string, LucideIcon> = {
-  coffee: Coffee,
-  utensils: Utensils,
-  pizza: Pizza,
-  soup: Soup,
-  salad: Salad,
-  sandwich: Sandwich,
-  cake: Cake,
-  cookie: Cookie,
-  glasswater: GlassWater,
-  wine: Wine,
   sun: Sun,
   moon: Moon,
 };
 
+function getBreakRuleIconLabel(key: string, t: Record<string, string>): string {
+  return key === 'moon' ? (t.settings_break_icon_dinner ?? 'Cena') : (t.settings_break_icon_lunch ?? 'Pranzo');
+}
+
 function getBreakRuleIconComponent(iconKey?: string): LucideIcon {
-  return (iconKey && BREAK_RULE_ICONS[iconKey]) || Coffee;
+  return (iconKey && BREAK_RULE_ICONS[iconKey]) || Sun;
 }
 
 function _readTeamSectionExpanded(): boolean {
@@ -2907,8 +2901,8 @@ function BreakRuleModal({
                       key={key}
                       type="button"
                       onClick={() => setIcon(key)}
-                      aria-label={key}
-                      title={key}
+                      aria-label={getBreakRuleIconLabel(key, t)}
+                      title={getBreakRuleIconLabel(key, t)}
                       className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
                         icon === key
                           ? 'border-accent bg-accent/20 text-accent'
