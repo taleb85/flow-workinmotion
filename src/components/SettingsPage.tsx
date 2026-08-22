@@ -2808,15 +2808,8 @@ function BreakRuleModal({
           </h2>
           <div className="flex shrink-0 items-center gap-2">
             <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl bg-white/10 px-3 py-2 text-xs font-bold text-white/80 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-            >
-              {t.cancel}
-            </button>
-            <button
               type="submit"
-              className="flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-accent-hover active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              className="flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-xs font-bold text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)] active:brightness-95"
             >
               <Check className="h-3.5 w-3.5" />
               {isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
