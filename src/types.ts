@@ -137,6 +137,8 @@ export interface User {
   secondary_pin?: string | null;
   /** Ruolo effettivo concesso quando si usa il secondary_pin (session-only). */
   elevated_role?: UserRole | null;
+  /** Se true: i link di accesso condivisi (/i/:slug) non autocompilano più le credenziali. */
+  invite_revoked?: boolean;
 }
 
 export interface Shift {

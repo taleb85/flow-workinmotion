@@ -6,13 +6,13 @@
  * Persistenza: updateUser -> database.users.update (tabella `users`), campo `department` incluso.
  */
 import { useMemo, useCallback, useState, useRef } from 'react';
-import { User, Mail, Lock, Shield, CheckCircle, AlertTriangle, Euro, Share2, Phone, Calendar } from 'lucide-react';
+import { User, Mail, Lock, Shield, ShieldCheck, ShieldOff, CheckCircle, AlertTriangle, Euro, Share2, Phone, Calendar, RefreshCw } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppConfig } from '../context/appSliceContexts';
 import { useAppOverlay } from '../context/appSliceContexts';
 import { useT } from '../hooks/useT';
 import { getTranslations, formatTrans } from '../utils/translations';
-import { buildProfiloAccessLink } from '../config/appPaths';
+import { buildShortInviteLink } from '../config/appPaths';
 import { PUBLIC_APP_ORIGIN } from '../config/publicAppUrl';
 import type { User as UserType, Language, Department } from '../types';
 import { isPurelyManagementRole, isAdminOnly, isManagementRole, canUserEdit } from '../utils/permissions';
@@ -29,6 +29,11 @@ import { DEFAULT_PHONE_PREFIX, PHONE_PREFIX_OPTIONS } from '../utils/phonePrefix
 import StaffOperationalPermissionsEditor from './StaffOperationalPermissionsEditor';
 import { OPERATIONAL_STAFF_ROLES_FOR_DELEGATE } from '../utils/operationalStaffRoles';
 const _LANGS: Language[] = ['it', 'en', 'es', 'fr'];
+
+/** PIN casuale a 4 cifre (1000-9999) — usato per rigenerare le credenziali. */
+function generateRandomPin(): string {
+  return String(Math.floor(1000 + Math.random() * 9000));
+}
 
 export type ProfileFormSelfData = {
   first_name: string;
@@ -427,6 +432,8 @@ export type ProfileFormAdminData = {
   /** yyyy-MM-dd o stringa vuota */
   employment_start_date: string;
   employment_end_date: string;
+  /** Link di accesso condiviso revocato (non autocompila più le credenziali). */
+  invite_revoked: boolean;
 };
 
 const inputClass =
@@ -464,7 +471,7 @@ export function ProfileFormAdmin({
   /** Creazione dipendente da delegato: solo ruoli operativi sala/cucina/bar. */
   operationalRolesOnly?: boolean;
 }) {
-  const { effectiveLanguage, isSessionElevated } = useAppUser();
+  const { effectiveLanguage, isSessionElevated, users } = useAppUser();
   const { departmentsRevision } = useAppConfig();
   const { showSuccess, showError } = useAppOverlay();
   void departmentsRevision;
@@ -484,20 +491,26 @@ export function ProfileFormAdmin({
   // Option B: InviteRedirect risolve lo slug globalmente, trova il tenant e codifica
   // il tenantSlug nel token → redirige a /profilo?t=<token-con-tenantSlug>.
   // Non serve includere il tenantSlug nel link breve: è InviteRedirect a gestirlo.
+  // Il destinatario atterra sulla pagina di installazione (salta se app già installata).
   const accessLink = useMemo(
-    () =>
-      buildProfiloAccessLink(
-        user.id,
-        { pin: formData.pin, displayName: `${formData.first_name} ${formData.last_name ?? ''}`.trim() },
-        PUBLIC_APP_ORIGIN
-      ),
-    [user.id, formData.pin, formData.first_name, formData.last_name]
+    () => buildShortInviteLink(user, users, PUBLIC_APP_ORIGIN),
+    [user, users]
   );
 
   /** Condivisione: link con URL separato per AirDrop + WhatsApp/SMS/Telegram. */
   const handleShareInviteSimple = useCallback(async () => {
     const name = `${formData.first_name} ${formData.last_name ?? ''}`.trim();
-    const shareText = `Ciao ${name}! 👋\n\nApri questo link per attivare il tuo account FLOW. Imposta il tuo PIN personale di 4 cifre.`;
+    // Messaggio nella lingua del dispositivo (fallback italiano)
+    const raw = (typeof navigator !== 'undefined' ? navigator.language : '') || '';
+    const lang = (['it', 'en', 'es', 'fr'] as const).includes(raw.slice(0, 2) as 'it' | 'en' | 'es' | 'fr')
+      ? (raw.slice(0, 2) as import('../types').Language)
+      : 'it';
+    const te = getTranslations(lang) as Record<string, string>;
+    const shareText = formatTrans(
+      te.share_access_message ??
+        'Ciao {name}! 👋\n\nApri questo link, installa l\'app FLOW e accedi per attivare il tuo account.',
+      { name }
+    );
 
     if (navigator.share) {
       try {
@@ -526,6 +539,30 @@ export function ProfileFormAdmin({
     readOnly || (isPurelyManagementRole(user.role) && !isAdminOnly(currentUser));
   const showEmploymentEndField =
     formData.status === 'suspended' || formData.status === 'inactive';
+
+  /** Rigenera il PIN (es. dopo un accesso di prova): il vecchio PIN smetterà
+   *  di funzionare appena il modulo viene salvato. */
+  const handleResetPin = useCallback(() => {
+    if (!window.confirm(tv.pin_reset_confirm ?? 'Generare un nuovo PIN? Quello attuale smetterà di funzionare dopo il salvataggio.')) return;
+    const newPin = generateRandomPin();
+    setFormData((prev) => ({ ...prev, pin: newPin }));
+    showSuccess?.(
+      formatTrans(tv.pin_reset_generated ?? 'Nuovo PIN generato: {pin} — salva per applicarlo.', { pin: newPin })
+    );
+  }, [tv, setFormData, showSuccess]);
+
+  /** Revoca/riattiva il link di accesso condiviso: blocca l'autocompilazione
+   *  delle credenziali nei link già inviati (applicato al salvataggio). */
+  const handleToggleInviteRevoke = useCallback(() => {
+    if (!formData.invite_revoked) {
+      if (!window.confirm(tv.invite_revoke_confirm ?? 'Revocare il link di accesso condiviso? Chi lo apre non riceverà più le credenziali precompilate.')) return;
+      setFormData((prev) => ({ ...prev, invite_revoked: true }));
+      showSuccess?.(tv.invite_revoke_done ?? 'Link revocato — salva per applicare.');
+    } else {
+      setFormData((prev) => ({ ...prev, invite_revoked: false }));
+      showSuccess?.(tv.invite_reactivate_done ?? 'Link riattivato — salva per applicare.');
+    }
+  }, [formData.invite_revoked, tv, setFormData, showSuccess]);
 
   return (
     <>
@@ -630,19 +667,32 @@ export function ProfileFormAdmin({
               <Lock className="w-3.5 h-3.5 inline mr-1.5 text-white/45" />
               {t.pin_4_digits}
             </label>
-            <input
-              type="text"
-              value={formData.pin}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                setFormData((prev) => ({ ...prev, pin: value }));
-              }}
-              className={`${inputClass} ${activePinConflictMessage ? 'border-red-400 ring-1 ring-red-200' : ''}`}
-              placeholder="1234"
-              maxLength={4}
-              aria-invalid={activePinConflictMessage ? true : undefined}
-              disabled={readOnly}
-            />
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={formData.pin}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                  setFormData((prev) => ({ ...prev, pin: value }));
+                }}
+                className={`${inputClass} min-w-0 flex-1 ${activePinConflictMessage ? 'border-red-400 ring-1 ring-red-200' : ''}`}
+                placeholder="1234"
+                maxLength={4}
+                aria-invalid={activePinConflictMessage ? true : undefined}
+                disabled={readOnly}
+              />
+              {!readOnly && (
+                <button
+                  type="button"
+                  onClick={handleResetPin}
+                  title={tv.pin_reset_btn ?? 'Rigenera PIN'}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-neutral-500 px-3 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" aria-hidden />
+                  {tv.pin_reset_btn ?? 'Rigenera PIN'}
+                </button>
+              )}
+            </div>
             {activePinConflictMessage && !readOnly ? (
               <p className="mt-1.5 text-[0.6875rem] font-medium text-red-600 font-sans leading-snug">
                 {activePinConflictMessage}
@@ -812,6 +862,32 @@ export function ProfileFormAdmin({
               <Share2 className="w-5 h-5" aria-hidden />
               <span>Invia accesso</span>
             </button>
+
+            {/* Stato link + revoca/riattivazione */}
+            {formData.invite_revoked && (
+              <p className="text-[0.6875rem] font-medium text-red-400 font-sans text-center leading-snug">
+                ⚠️ {tv.invite_revoked_chip ?? 'Link revocato: chi apre un link già condiviso non riceverà più le credenziali.'}
+              </p>
+            )}
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={handleToggleInviteRevoke}
+                className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold font-sans transition-colors hover:opacity-90"
+                style={
+                  formData.invite_revoked
+                    ? { background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.45)', color: '#86efac' }
+                    : { background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.40)', color: '#fca5a5' }
+                }
+              >
+                {formData.invite_revoked
+                  ? <ShieldCheck style={{ width: 18, height: 18 }} aria-hidden />
+                  : <ShieldOff style={{ width: 18, height: 18 }} aria-hidden />}
+                {formData.invite_revoked
+                  ? (tv.invite_reactivate_btn ?? 'Riattiva link')
+                  : (tv.invite_revoke_btn ?? 'Revoca link')}
+              </button>
+            )}
 
           </div>
         )}

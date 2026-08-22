@@ -59,6 +59,7 @@ export default function EditStaffModal({ isOpen, onClose, user, readOnly = false
     hourly_rate_eur: hourlyStr,
     employment_start_date: userDateToInput(user.employment_start_date),
     employment_end_date: userDateToInput(user.employment_end_date),
+    invite_revoked: user.invite_revoked === true,
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -80,6 +81,7 @@ export default function EditStaffModal({ isOpen, onClose, user, readOnly = false
         hourly_rate_eur: hr,
         employment_start_date: userDateToInput(user.employment_start_date),
         employment_end_date: userDateToInput(user.employment_end_date),
+        invite_revoked: user.invite_revoked === true,
       });
     }
   }, [isOpen, user]);
@@ -120,6 +122,7 @@ export default function EditStaffModal({ isOpen, onClose, user, readOnly = false
         employment_start_date: dateToDbYmd(formData.employment_start_date),
         employment_end_date:
           formData.status === 'active' ? null : dateToDbYmd(formData.employment_end_date),
+        invite_revoked: formData.invite_revoked,
       });
       if (!ok) {
         setIsSaving(false);

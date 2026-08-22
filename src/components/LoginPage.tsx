@@ -74,6 +74,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
     () => (inviteUserId ? users.find((u) => u.id === inviteUserId) : undefined),
     [inviteUserId, users]
   );
+  /** Link di accesso revocato dall'admin (?revoked=1) — nessuna autocompilazione. */
+  const revokedLink = searchParams.get('revoked') === '1';
   const isInviteLink = Boolean(inviteUserId || inviteNameFromUrl || invitePinFromUrl);
   const pinInputRef = useRef<HTMLInputElement>(null);
   const staffNameInputRef = useRef<HTMLInputElement>(null);
@@ -670,6 +672,13 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
             {isInviteLink && (
               <div className="rounded-xl px-3 py-2.5 text-xs text-white/80 space-y-1" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)' }}>
                 <p className="font-semibold text-white">✅ Dati salvati. Accedi con nome e PIN.</p>
+              </div>
+            )}
+
+            {/* Link revocato — avviso (nessun invito attivo) */}
+            {revokedLink && !isInviteLink && (
+              <div className="rounded-xl px-3 py-2.5 text-xs text-white/80 space-y-1" style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.35)' }}>
+                <p className="font-semibold text-white/90">⚠️ {t.invite_revoked_banner ?? 'Questo link di accesso non è più valido. Contatta un amministratore.'}</p>
               </div>
             )}
 

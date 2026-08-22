@@ -41,6 +41,11 @@
         if (navigator.standalone === true) return;
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
 
+        // Esclusione pagine di installazione/invito: la landing /install (e i link /i/ che
+        // vi reindirizzano) deve essere visibile anche da browser non-installato.
+        var p = window.location.pathname || '/';
+        if (p.startsWith('/install') || p.startsWith('/i/')) return;
+
         document.documentElement.style.overflow = 'hidden';
         document.addEventListener('DOMContentLoaded', function() {
           var root = document.getElementById('root');

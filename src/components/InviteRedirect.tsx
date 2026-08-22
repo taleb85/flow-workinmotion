@@ -1,13 +1,13 @@
 /**
  * Risolve /i/:slug → dipendente, salva nome + PIN,
- * poi reindirizza:
- * - Su iOS (iPhone/iPad): alla pagina /install con userId e firstName
- * - Altri dispositivi: direttamente al login via /profilo?t=TOKEN
+ * poi reindirizza alla pagina di installazione (/install) con userId, firstName e PIN:
+ * da lì "Vai all'app" porta al login via /profilo?t=TOKEN.
  */
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { buildUserInviteSlug, buildProfiloAccessLink, PATH_PROFILO } from '../config/appPaths';
+import { isAppInstalled } from '../utils/isAppInstalled';
 
 function cleanSlug(s: string | null | undefined): string {
   return (s ?? '')
@@ -24,6 +24,7 @@ type SlimUser = {
   last_name?: string | null;
   pin?: string | null;
   tenant_id?: string | null;
+  invite_revoked?: boolean | null;
 };
 
 export default function InviteRedirect() {
@@ -47,7 +48,7 @@ export default function InviteRedirect() {
 
         const usersRes = await supabase
           .from('users')
-          .select('id, first_name, last_name, pin, tenant_id')
+          .select('id, first_name, last_name, pin, tenant_id, invite_revoked')
           .eq('status', 'active');
 
         if (cancelled) return;
@@ -74,15 +75,37 @@ export default function InviteRedirect() {
         }
 
         if (matched) {
-          // Login diretto con token
-          const pin = matched.pin?.replace(/\D/g, '').slice(0, 4);
-          const tokenUrl = buildProfiloAccessLink(matched.id, {
-            pin: pin && pin.length === 4 ? pin : undefined,
-            displayName: `${matched.first_name ?? ''} ${matched.last_name ?? ''}`.trim(),
-          });
+          // Link REVOCATO → nessuna autocompilazione: login normale senza token
+          if (matched.invite_revoked) {
+            if (!cancelled && !redirected) {
+              redirected = true;
+              window.location.href = `${PATH_PROFILO}?revoked=1`;
+            }
+            return;
+          }
+
+          const pin = (matched.pin ?? '').replace(/\D/g, '').slice(0, 4);
+
+          // App GIÀ installata → salta la pagina di installazione, login diretto
+          if (isAppInstalled()) {
+            const tokenUrl = buildProfiloAccessLink(matched.id, {
+              pin: pin.length === 4 ? pin : undefined,
+              displayName: `${matched.first_name ?? ''} ${matched.last_name ?? ''}`.trim(),
+            });
+            if (!cancelled && !redirected) {
+              redirected = true;
+              window.location.href = tokenUrl;
+            }
+            return;
+          }
+
+          // App NON installata → pagina di installazione come landing:
+          // da lì "Vai all'app" costruisce il token e va al login (/profilo?t=TOKEN)
+          const firstName = encodeURIComponent(matched.first_name ?? '');
+          const pinParam = pin.length === 4 ? `&pin=${pin}` : '';
           if (!cancelled && !redirected) {
             redirected = true;
-            window.location.href = tokenUrl;
+            window.location.href = `/install?userId=${matched.id}&firstName=${firstName}${pinParam}`;
           }
           return;
         }

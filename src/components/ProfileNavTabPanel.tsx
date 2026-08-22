@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, ChevronRight, Trash2, Settings2, Fingerprint, Loader2, ShieldCheck } from 'lucide-react';
+import { Camera, ChevronRight, Trash2, Settings2, Fingerprint, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppUser, useAppOverlay } from '../context/AppContext';
 import { useProfileLeaveGuardRef } from '../context/ProfileLeaveGuardContext';
@@ -729,8 +729,8 @@ export default function ProfileNavTabPanel({
                           onClick={() => (pinUnlockDeviceRegistered ? handleBioDisable() : setShowBioPinPad(true))}
                           className="relative w-12 h-7 rounded-full transition-colors disabled:opacity-50 flex-shrink-0"
                           style={pinUnlockDeviceRegistered
-                            ? { background: 'rgba(52, 211, 153, 0.85)' }
-                            : { background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)' }}
+                            ? { background: '#34d399', boxShadow: '0 0 12px rgba(52, 211, 153, 0.45)' }
+                            : { background: 'rgba(255,149,0,0.30)', border: '1px solid rgba(255,149,0,0.55)' }}
                         >
                           <span
                             className="absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all duration-200"
@@ -741,7 +741,7 @@ export default function ProfileNavTabPanel({
                     ) : (
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                          <ShieldCheck className="w-4.5 h-4.5" style={{ color: 'rgba(255,255,255,0.4)' }} strokeWidth={1.75} aria-hidden />
+                          <ShieldCheck className="w-4.5 h-4.5" style={{ color: 'rgba(255,149,0,0.9)' }} strokeWidth={1.75} aria-hidden />
                         </div>
                         <p className="text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.5)' }}>
                           {tv.profile_tab_security_unavailable ?? 'Face ID / impronta non disponibile su questo dispositivo.'}

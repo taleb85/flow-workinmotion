@@ -51,6 +51,7 @@ const emptyForm = (): ProfileFormAdminData => ({
   hourly_rate_eur: '',
   employment_start_date: '',
   employment_end_date: '',
+  invite_revoked: false,
 });
 
 interface CreateStaffModalProps {

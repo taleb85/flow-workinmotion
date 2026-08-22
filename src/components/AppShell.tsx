@@ -22,6 +22,7 @@ import PostUnlockRestartOverlay from '../components/PostUnlockRestartOverlay';
 
 import HomePage from '../components/HomePage';
 import LoginPage from '../components/LoginPage';
+import InstallPage from '../components/InstallPage';
 import InviteRedirect from '../components/InviteRedirect';
 import { RotateCw, Cloud, CloudOff, Lock, Unlock, ShieldCheck, ShieldOff, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
@@ -98,6 +99,26 @@ function LoginRoute() {
         <AnimatePresence mode="wait">
           <LoginPage key="login" onLogin={handleLogin} onBack={handleBack} />
         </AnimatePresence>
+      </div>
+    </RouteErrorBoundary>
+  );
+}
+
+// ─── Install Route ─────────────────────────────────────────────────────────────
+function InstallRoute() {
+  const [bgTheme, setBgTheme] = useState<BackgroundTheme>(getStoredTheme);
+
+  useEffect(() => {
+    const handler = (e: Event) => setBgTheme(getThemeById((e as CustomEvent<string>).detail));
+    window.addEventListener('flow-bg-change', handler);
+    return () => window.removeEventListener('flow-bg-change', handler);
+  }, []);
+
+  return (
+    <RouteErrorBoundary sectionName="Install">
+      <div role="region" aria-label="Installazione app" className="relative min-h-screen min-h-[100dvh] w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
+        <DeepAuroraShell theme={bgTheme} />
+        <InstallPage />
       </div>
     </RouteErrorBoundary>
   );
@@ -1031,6 +1052,7 @@ function AppContent() {
     <main role="main" aria-label="Contenuto principale">
       <Routes>
         <Route path="/i/:slug" element={<InviteRedirect />} />
+        <Route path="/install" element={<InstallRoute />} />
         <Route path={PATH_PROFILO} element={<LoginRoute />} />
         <Route path="/login" element={<Navigate to={PATH_PROFILO} replace />} />
         <Route path="/" element={<Navigate to={PATH_PROFILO} replace />} />
