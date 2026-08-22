@@ -2799,7 +2799,7 @@ function BreakRuleModal({
         transition={{ type: 'spring', damping: 28, stiffness: 380 }}
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
-        className="modal-glass-panel w-full max-w-4xl rounded-2xl font-sans"
+        className="modal-glass-panel w-full max-w-2xl rounded-2xl font-sans"
       >
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-app-bg/80 px-5 pt-5 pb-4 backdrop-blur-md">
