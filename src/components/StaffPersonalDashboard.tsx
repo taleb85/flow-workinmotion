@@ -12,6 +12,7 @@ import { getTimesheetGridPrivacyMode } from '../utils/timesheetGridPrivacy';
 import { getNetShiftMinutes } from '../utils/breakRules';
 import { getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
 import { getTranslations, getDateLocale } from '../utils/translations';
+import { readStoredUiLanguage } from '../utils/uiLanguagePreference';
 import {
   getVisibleStaffTabs,
   getUnifiedNavTabs,
@@ -215,7 +216,9 @@ export default function StaffPersonalDashboard({
   activeTab,
   onTabChange,
 }: StaffPersonalDashboardProps) {
-  const { setCurrentUser, users, effectiveLanguage, setLanguage } = useAppUser();
+  const { setCurrentUser, users, effectiveLanguage, setLanguage, clearLanguage } = useAppUser();
+  /* Lingua AUTO = nessuna preferenza esplicita salvata (segue il dispositivo) */
+  const isAutoLanguage = readStoredUiLanguage() === null;
   const { breakRules, featureFlags, roleTemplatesRevision } = useAppConfig();
   const { showSuccess, showError } = useAppOverlay();
   const { seedDemoProfileForUser } = useAppData();
@@ -640,7 +643,7 @@ export default function StaffPersonalDashboard({
             label={t.language}
             action={
               <div className="min-w-0 max-w-full md:max-w-xs">
-                <LanguageToggleGrid effectiveLanguage={effectiveLanguage} setLanguage={setLanguage} />
+                <LanguageToggleGrid effectiveLanguage={effectiveLanguage} setLanguage={setLanguage} isAuto={isAutoLanguage} onSetAuto={clearLanguage} />
               </div>
             }
           />

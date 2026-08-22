@@ -23,13 +23,19 @@ const LABELS_SHORT: Record<Language, string> = {
 interface LanguageToggleGridProps {
   effectiveLanguage: Language;
   setLanguage: (lang: Language) => void;
+  /** true se la lingua è in modalità AUTO (nessuna preferenza esplicita) */
+  isAuto?: boolean;
+  /** Azione per attivare la modalità AUTO (rimuove la preferenza) */
+  onSetAuto?: () => void;
   /** Layout più compatto per PWA / header mobile */
   dense?: boolean;
 }
 
 /** Stessa griglia lingue della scheda Profilo staff — riutilizzabile nell'header gestionale. */
-const LanguageToggleGrid = memo(function LanguageToggleGrid({ effectiveLanguage, setLanguage, dense = false }: LanguageToggleGridProps) {
+const LanguageToggleGrid = memo(function LanguageToggleGrid({ effectiveLanguage, setLanguage, isAuto = false, onSetAuto, dense = false }: LanguageToggleGridProps) {
   const deviceLang = getDeviceUiLanguage();
+  const autoActiveCls = 'bg-accent text-white';
+  const autoIdleCls = 'bg-slate-100 text-white/70 active:bg-slate-200';
 
   if (dense) {
     return (
@@ -37,10 +43,10 @@ const LanguageToggleGrid = memo(function LanguageToggleGrid({ effectiveLanguage,
         {/* AUTO — usa lingua dispositivo */}
         <button
           type="button"
-          onClick={() => setLanguage(deviceLang)}
+          onClick={onSetAuto ?? (() => setLanguage(deviceLang))}
           title={`Auto → ${deviceLang.toUpperCase()}`}
           aria-label={`Auto (${deviceLang.toUpperCase()})`}
-          className="flex flex-col items-center justify-center gap-0.5 py-1.5 px-0.5 rounded-lg font-semibold transition-colors min-h-[2.75rem] min-w-0 bg-slate-100 text-white/70 active:bg-slate-200"
+          className={`flex flex-col items-center justify-center gap-0.5 py-1.5 px-0.5 rounded-lg font-semibold transition-colors min-h-[2.75rem] min-w-0 ${isAuto ? autoActiveCls : autoIdleCls}`}
         >
           <span className="text-[0.8125rem] leading-none" aria-hidden>⚙︎</span>
           <span className="text-[0.6875rem] leading-tight text-center truncate w-full tracking-tight">AUTO</span>
@@ -53,8 +59,8 @@ const LanguageToggleGrid = memo(function LanguageToggleGrid({ effectiveLanguage,
             title={LABELS[lang]}
             aria-label={LABELS[lang]}
             className={`flex flex-col items-center justify-center gap-0.5 py-1.5 px-0.5 rounded-lg font-semibold transition-colors min-h-[2.75rem] min-w-0 ${
- effectiveLanguage === lang ? 'bg-accent text-white' : 'bg-slate-100 text-white/70 active:bg-slate-200'
- }`}
+              effectiveLanguage === lang ? 'bg-accent text-white' : 'bg-slate-100 text-white/70 active:bg-slate-200'
+            }`}
           >
             <span className="text-[0.9375rem] leading-none" aria-hidden>
               {FLAGS[lang]}
@@ -71,9 +77,9 @@ const LanguageToggleGrid = memo(function LanguageToggleGrid({ effectiveLanguage,
       {/* AUTO — usa lingua dispositivo */}
       <button
         type="button"
-        onClick={() => setLanguage(deviceLang)}
+        onClick={onSetAuto ?? (() => setLanguage(deviceLang))}
         title={`Auto → ${deviceLang.toUpperCase()}`}
-        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-colors min-h-[2.75rem] bg-slate-100 text-white/70 hover:bg-slate-200 active:bg-slate-200/80"
+        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-colors min-h-[2.75rem] ${isAuto ? autoActiveCls : autoIdleCls}`}
       >
         <span className="text-xs font-bold">AUTO</span>
       </button>
