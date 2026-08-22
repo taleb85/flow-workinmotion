@@ -22,13 +22,26 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [toastType, setToastType] = useState<'success' | 'error' | ''>('');
   const [toastAnchor, setToastAnchor] = useState<HTMLElement | null>(null);
 
-  /* Ultima sezione cliccata (elemento con data-toast-anchor): il fumetto si aggancia alla
-     sezione che ha generato l'azione, seguendola anche durante lo scroll. */
+  /* Ultimo controllo cliccato: il fumetto si aggancia all'elemento che ha generato
+     l'azione (sezione con data-toast-anchor, altrimenti il bottone/controllo stesso),
+     seguendolo anche durante lo scroll. */
   const lastClickedAnchor = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
-      lastClickedAnchor.current = target?.closest?.('[data-toast-anchor]') ?? null;
+      if (!target?.closest) {
+        lastClickedAnchor.current = null;
+        return;
+      }
+      const sectionAnchor = target.closest('[data-toast-anchor]') as HTMLElement | null;
+      if (sectionAnchor) {
+        lastClickedAnchor.current = sectionAnchor;
+        return;
+      }
+      const control = target.closest(
+        'button, a, [role="switch"], input, select, textarea, label'
+      ) as HTMLElement | null;
+      lastClickedAnchor.current = control ?? target;
     };
     document.addEventListener('click', handler, true);
     return () => document.removeEventListener('click', handler, true);

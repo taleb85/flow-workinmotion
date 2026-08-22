@@ -28,20 +28,35 @@ export default function Toast({ message, type = 'error', onClose, anchor }: Toas
 
   /* Calcola la posizione relativa alla sezione e la riaggiorna a ogni scroll/resize */
   useLayoutEffect(() => {
-    if (!anchor) {
+    if (!anchor || !anchor.isConnected) {
       setPos(null);
       return;
     }
     const update = () => {
+      if (!anchor.isConnected) {
+        setPos(null);
+        return;
+      }
       const rect = anchor.getBoundingClientRect();
       const el = innerRef.current;
       const toastH = el?.offsetHeight ?? 48;
       const toastW = el?.offsetWidth ?? 220;
       const margin = 10;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      let left = rect.left + rect.width / 2 - toastW / 2;
+      left = Math.max(margin, Math.min(left, vw - toastW - margin));
+      // Se la sezione è completamente uscita dallo schermo, il fumetto resta al bordo corrispondente
+      if (rect.bottom < 0) {
+        setPos({ top: margin, left });
+        return;
+      }
+      if (rect.top > vh) {
+        setPos({ top: vh - toastH - margin, left });
+        return;
+      }
       let top = rect.top - toastH - margin;
       if (top < margin) top = rect.bottom + margin; // sotto la sezione se sopra non c'è spazio
-      let left = rect.left + rect.width / 2 - toastW / 2;
-      left = Math.max(margin, Math.min(left, window.innerWidth - toastW - margin));
       setPos({ top, left });
     };
     update();
