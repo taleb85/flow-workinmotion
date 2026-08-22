@@ -599,8 +599,8 @@ export default function ProfileNavTabPanel({
             </AnimatePresence>
           </div>
 
-          {/* Lingua — bordo esterno solo quando il pannello è aperto (include il contenuto) */}
-          <div className={expanded === 'lang' ? 'rounded-xl overflow-hidden border border-neutral-500' : 'overflow-hidden'}>
+          {/* Lingua — bordo unico che si espande con il contenuto */}
+          <div className="rounded-xl overflow-hidden border border-neutral-500">
             <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('lang')}>
               <span className={rowLabelCls}>{t.language ?? 'Lingua'}</span>
               <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'lang' ? 'rotate-90' : ''}`} />
@@ -608,7 +608,7 @@ export default function ProfileNavTabPanel({
             <AnimatePresence initial={false}>
               {expanded === 'lang' && (
                 <motion.div key="lang-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
-                  <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.12)' }} className="px-4 py-3 space-y-3" data-save-field="lang">
+                  <div className="px-4 py-3 space-y-3" data-save-field="lang">
                     <div className="flex gap-1 rounded-xl p-1 border border-neutral-500" style={{ background: 'transparent' }}>
                       {(() => {
                         const deviceLang = getDeviceUiLanguage();
