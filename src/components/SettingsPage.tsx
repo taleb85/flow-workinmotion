@@ -2834,8 +2834,8 @@ function BreakRuleModal({
           </div>
         </div>
 
-        {/* Contenuto — si adatta e scorre sotto le tab */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+        {/* Contenuto — altezza minima stabile così le tab non si muovono; scorre se più alto */}
+        <div className="min-h-[20rem] flex-1 overflow-y-auto px-5 py-5">
           {/* ── Generale ── */}
           {activeTab === 'general' && (
             <div className="space-y-3">
