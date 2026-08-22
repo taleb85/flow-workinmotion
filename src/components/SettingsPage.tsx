@@ -2799,7 +2799,7 @@ function BreakRuleModal({
         transition={{ type: 'spring', damping: 28, stiffness: 380 }}
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
-        className="modal-glass-panel flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-2xl font-sans"
+        className="modal-glass-panel flex h-[min(90dvh,40rem)] w-full max-w-2xl flex-col rounded-2xl font-sans"
       >
         {/* Header */}
         <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-white/10 bg-app-bg/80 px-5 pt-5 pb-4 backdrop-blur-md">
@@ -2834,8 +2834,8 @@ function BreakRuleModal({
           </div>
         </div>
 
-        {/* Contenuto — altezza minima stabile così le tab non si muovono; scorre se più alto */}
-        <div className="min-h-[20rem] flex-1 overflow-y-auto px-5 py-5">
+        {/* Contenuto — altezza fissa (riempie lo spazio residuo), scorre internamente */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
           {/* ── Generale ── */}
           {activeTab === 'general' && (
             <div className="space-y-3">
