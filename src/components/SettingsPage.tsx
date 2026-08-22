@@ -2843,9 +2843,17 @@ function BreakRuleModal({
           </div>
         </div>
 
-        {/* Contenuto + footer — si espandono con la tab attiva (header e tab fisse) */}
+        {/* Contenuto — si apre come un cassetto al cambio tab */}
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-          {activeTab === 'general' && (
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 28 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 380 }}
+            >
+              {activeTab === 'general' && (
             <div className="space-y-3">
               {/* Titolo */}
               <div>
@@ -3024,6 +3032,8 @@ function BreakRuleModal({
               </div>
             </div>
           )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </motion.form>
     </div>
