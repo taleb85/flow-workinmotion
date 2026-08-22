@@ -2802,7 +2802,7 @@ function BreakRuleModal({
         className="modal-glass-panel flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-2xl font-sans"
       >
         {/* Header — tab + azioni in un unico elemento */}
-        <div className="sticky top-0 z-10 flex shrink-0 items-center border-b border-white/10 bg-app-bg/80 px-5 pt-4 pb-4 backdrop-blur-md">
+        <div className="sticky top-0 z-10 flex shrink-0 items-center bg-app-bg/80 px-5 pt-4 pb-4 backdrop-blur-md">
           <div className="flex w-full items-center gap-1 rounded-xl border border-neutral-500 bg-white/5 p-1">
             {tabOptions.map((tab) => (
               <button
