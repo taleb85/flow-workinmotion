@@ -2809,18 +2809,26 @@ function BreakRuleModal({
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="submit"
-              className="flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-xs font-bold text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)] active:brightness-95"
+              title={isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
+              aria-label={isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
+              className="group flex items-center gap-0 overflow-hidden rounded-xl bg-accent p-2 text-white transition-all duration-200 hover:gap-1.5 hover:pr-2.5 active:brightness-95"
             >
-              <Check className="h-3.5 w-3.5" />
-              {isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
+              <Check className="h-4 w-4 shrink-0" />
+              <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[8rem]">
+                {isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
+              </span>
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               aria-label={t.close}
+              title={t.close}
+              className="group flex items-center gap-0 overflow-hidden rounded-xl bg-white/10 p-2 text-white/55 transition-all duration-200 hover:gap-1.5 hover:bg-white/15 hover:text-white hover:pr-2.5 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
             >
-              <X className="h-4 w-4 text-white/55" aria-hidden />
+              <X className="h-4 w-4 shrink-0" />
+              <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[4rem]">
+                {t.close}
+              </span>
             </button>
           </div>
         </div>
