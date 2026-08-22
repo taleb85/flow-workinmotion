@@ -721,7 +721,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                 disabled={isRefreshing || dataSyncInProgress}
                 title={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso...' : 'Sincronizza dati'}
                 aria-label={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso' : 'Sincronizza dati'}
-                className={`flex h-9 w-9 md:h-7 md:w-7 shrink-0 items-center justify-center rounded-xl md:rounded-lg text-xs md:text-[0.6875rem] font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
+                className={`group flex items-center gap-0 overflow-hidden rounded-xl p-2 text-xs md:text-[0.6875rem] font-bold transition-all duration-200 touch-manipulation liquid-glass hover:gap-1.5 hover:pr-2.5 ${
                   isRefreshing || dataSyncInProgress
                     ? 'text-amber-500 liquid-glass-amber'
                     : isSynced
@@ -730,15 +730,18 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                 }`}
               >
                 {isRefreshing || dataSyncInProgress ? (
-                  <RotateCw className="h-4 w-4 md:h-3.5 md:w-3.5 animate-spin" strokeWidth={2.5} aria-hidden />
+                  <RotateCw className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0 animate-spin" strokeWidth={2.5} aria-hidden />
                 ) : isSynced ? (
-                  <span className="relative inline-flex" aria-hidden>
+                  <span className="relative inline-flex shrink-0" aria-hidden>
                     <Cloud className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2.5} />
                     <span className="absolute -bottom-0.5 -right-1 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-emerald-500 text-white" style={{ fontSize: '0.4375rem' }}>✓</span>
                   </span>
                 ) : (
-                  <CloudOff className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2.5} aria-hidden />
+                  <CloudOff className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
                 )}
+                <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[10.5rem]">
+                  {isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso...' : 'Sincronizza dati'}
+                </span>
               </button>
               {featureFlags['unlock_with_pin'] !== false && currentUser && isManagement && (
                 <button
@@ -746,15 +749,18 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   onClick={() => setShowPinMenu(true)}
                   title={globalPinSessionId ? 'Sessione PIN attiva' : 'Sblocca sessione PIN'}
                   aria-label={globalPinSessionId ? 'Gestisci sessione PIN' : 'Sblocca sessione PIN'}
-                  className={`flex h-9 w-9 md:h-7 md:w-7 shrink-0 items-center justify-center rounded-xl md:rounded-lg text-xs md:text-[0.6875rem] font-bold transition-colors duration-200 touch-manipulation liquid-glass ${
+                  className={`group flex items-center gap-0 overflow-hidden rounded-xl p-2 text-xs md:text-[0.6875rem] font-bold transition-all duration-200 touch-manipulation liquid-glass hover:gap-1.5 hover:pr-2.5 ${
                     globalPinSessionId
                       ? 'text-emerald-500 liquid-glass-green'
                       : 'text-red-500 liquid-glass-red'
                   }`}
                 >
                   {globalPinSessionId
-                    ? <Unlock className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2.5} aria-hidden />
-                    : <Lock className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2.5} aria-hidden />}
+                    ? <Unlock className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
+                    : <Lock className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />}
+                  <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[8rem]">
+                    {globalPinSessionId ? 'Sessione PIN attiva' : 'Sblocca sessione PIN'}
+                  </span>
                 </button>
               )}
             </div>

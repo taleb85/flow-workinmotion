@@ -172,10 +172,13 @@ export default function MobileProfileHeader({
             onClick={() => { triggerHapticFeedback('click'); onLogout?.(); }}
             title={t.header_logout}
             aria-label={t.header_logout}
-            style={{ background: 'rgba(255, 255, 255, 0.16)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.15s', flexShrink: 0 }}
-            className="h-9 w-9 md:h-7 md:w-7 rounded-[0.625rem] md:rounded-[0.4375rem] text-white/70 hover:bg-white/15 hover:text-white touch-manipulation"
+            style={{ background: 'rgba(255, 255, 255, 0.16)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s', flexShrink: 0 }}
+            className="group items-center gap-0 overflow-hidden rounded-xl p-2 text-white/70 transition-all duration-200 touch-manipulation hover:gap-1.5 hover:bg-white/15 hover:text-white hover:pr-2.5"
           >
-            <LogOut className="h-4 w-4 md:h-3.5 md:w-3.5" strokeWidth={2} color="#ef4444" aria-hidden />
+            <LogOut className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2} color="#ef4444" aria-hidden />
+            <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[4rem]">
+              {t.header_logout}
+            </span>
           </button>
         )}
       </div>
