@@ -2743,12 +2743,23 @@ function BreakRuleModal({
   const [validTo, setValidTo] = useState(rule?.validTo ?? '');
   const [daysOfWeek, setDaysOfWeek] = useState<DayOfWeek[]>(rule?.daysOfWeek ?? []);
 
+  /* Tab per sezione: una alla volta per non affollare la modale */
+  const [activeTab, setActiveTab] = useState<'general' | 'assign' | 'apply'>('general');
+  const tabOptions = [
+    { id: 'general' as const, label: t.settings_break_section_general },
+    { id: 'assign' as const, label: t.settings_break_assign_section },
+    { id: 'apply' as const, label: t.settings_break_apply_section },
+  ];
+
   const toggleChip = <T,>(arr: T[], val: T): T[] =>
     arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !breakStart || !breakEnd) return;
+    if (!title.trim() || !breakStart || !breakEnd) {
+      setActiveTab('general');
+      return;
+    }
     onSave({
       id: rule?.id ?? makeId(),
       title: title.trim(),
@@ -2806,10 +2817,24 @@ function BreakRuleModal({
         </div>
 
         <div className="px-5 py-5">
-          <div className="grid grid-cols-3 gap-6">
+          {/* Tab per sezione */}
+          <div className="mb-4 flex gap-1 rounded-xl border border-neutral-500 bg-white/5 p-1">
+            {tabOptions.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                  activeTab === tab.id ? 'bg-accent text-white' : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           {/* ── Generale ── */}
-          <div>
-            <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_section_general}</p>
+          {activeTab === 'general' && (
             <div className="space-y-3">
               {/* Titolo */}
               <div>
@@ -2862,11 +2887,10 @@ function BreakRuleModal({
                 </p>
               </div>
             </div>
-          </div>
+          )}
 
           {/* ── Assegna a ── */}
-          <div>
-            <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_assign_section}</p>
+          {activeTab === 'assign' && (
             <div className="space-y-3">
               <div>
                 <label className={labelClass}>
@@ -2914,11 +2938,10 @@ function BreakRuleModal({
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* ── Applica a ── */}
-          <div>
-            <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_apply_section}</p>
+          {activeTab === 'apply' && (
             <div className="space-y-3">
               {/* Soglia turno: condizione di applicazione (durata minima del turno) */}
               <div className="space-y-3 rounded-xl border border-white/10 bg-white/5/70 p-3">
@@ -2993,11 +3016,10 @@ function BreakRuleModal({
                 </div>
               </div>
             </div>
-          </div>
-          </div>
+          )}
 
           {/* Footer buttons */}
-          <div className="flex gap-2 pt-1">
+          <div className="mt-4 flex gap-2 border-t border-white/10 pt-3">
             <button
               type="submit"
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-accent hover:bg-accent-hover text-white font-bold text-sm transition-colors active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
