@@ -2801,19 +2801,35 @@ function BreakRuleModal({
         onSubmit={handleSubmit}
         className="modal-glass-panel flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-2xl font-sans"
       >
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-white/10 bg-app-bg/80 px-5 pt-5 pb-4 backdrop-blur-md">
-          <h2 className="text-base font-bold text-white">
+        {/* Header — con azioni (Annulla / Crea regola) accanto alla X */}
+        <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-app-bg/80 px-5 pt-4 pb-4 backdrop-blur-md">
+          <h2 className="min-w-0 flex-1 truncate text-base font-bold text-white">
             {isEdit ? t.settings_break_modal_edit_title : t.settings_break_modal_new_title}
           </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-            aria-label={t.close}
-          >
-            <X className="h-4 w-4 text-white/55" aria-hidden />
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-white/10 px-3 py-2 text-xs font-bold text-white/80 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+            >
+              {t.cancel}
+            </button>
+            <button
+              type="submit"
+              className="flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-accent-hover active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+            >
+              <Check className="h-3.5 w-3.5" />
+              {isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              aria-label={t.close}
+            >
+              <X className="h-4 w-4 text-white/55" aria-hidden />
+            </button>
+          </div>
         </div>
 
         {/* Tab per sezione */}
@@ -3015,24 +3031,6 @@ function BreakRuleModal({
               </div>
             </div>
           )}
-
-          {/* Footer buttons — espandono insieme al contenuto */}
-          <div className="mt-4 flex gap-2 border-t border-white/10 pt-3">
-            <button
-              type="submit"
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-accent hover:bg-accent-hover text-white font-bold text-sm transition-colors active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
-            >
-              <Check className="w-4 h-4" />
-              {isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-white/80 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-            >
-              {t.cancel}
-            </button>
-          </div>
         </div>
       </motion.form>
     </div>
