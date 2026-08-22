@@ -152,22 +152,25 @@ function DepartmentColorPicker({
   );
 }
 
-/** Card feature flag del Master Control Panel — componente con il proprio stato
- *  (useState non può essere chiamato dentro `.map()`: violerebbe le rules of hooks). */
+/** Card feature flag del Master Control Panel — stato espansione dettagli condiviso
+ *  dal padre (useState non può essere chiamato dentro `.map()`: violerebbe le rules of hooks). */
 function FeatureFlagCard({
   feature,
   t,
   enabled,
   isMaintenance,
   onToggle,
+  detailsOpen,
+  onToggleDetails,
 }: {
   feature: { slug: string };
   t: Record<string, string>;
   enabled: boolean;
   isMaintenance: boolean;
   onToggle: () => Promise<void>;
+  detailsOpen: boolean;
+  onToggleDetails: () => void;
 }) {
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const { label: featureLabel, description: featureDescription, detailLines } = getFeatureStrings(t, feature.slug);
 
   const iconMap: Record<string, React.ReactNode> = {
@@ -218,7 +221,7 @@ function FeatureFlagCard({
           </div>
           {detailLines.length > 0 && (
             <>
-              <button type="button" aria-expanded={detailsOpen} onClick={() => setDetailsOpen(!detailsOpen)} className="mt-2 flex items-center gap-1 text-[0.6875rem] font-semibold text-white transition-colors">
+              <button type="button" aria-expanded={detailsOpen} onClick={onToggleDetails} className="mt-2 flex items-center gap-1 text-[0.6875rem] font-semibold text-white transition-colors">
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${detailsOpen ? 'rotate-180' : ''}`} />
                 {t.impostazioni_detail_label || 'Dettagli'}
               </button>
@@ -617,6 +620,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
   }, [geofenceEffectiveConfig]);
   const [editingBreakRule, setEditingBreakRule] = useState<BreakRule | null>(null);
   const [creatingBreakRule, setCreatingBreakRule] = useState(false);
+  /** Master Control Panel: i pannelli «Cosa fa questo interruttore» si aprono/chiudono tutti insieme. */
+  const [masterDetailsOpen, setMasterDetailsOpen] = useState(false);
   const [departments, setDepts] = useState<Department[]>(() => getDepartments());
   const [hiddenBuiltins, setHiddenBuiltins] = useState<string[]>(() => getHiddenBuiltinValues());
   useEffect(() => {
@@ -2190,6 +2195,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     t={t}
                     enabled={enabled}
                     isMaintenance={isMaintenance}
+                    detailsOpen={masterDetailsOpen}
+                    onToggleDetails={() => setMasterDetailsOpen((v) => !v)}
                     onToggle={async () => {
                       await setFeatureFlag(feature.slug, !enabled);
                       showSuccess?.(formatTrans(enabled ? t.settings_feature_toggle_off : t.settings_feature_toggle_on, { name: getFeatureStrings(t, feature.slug).label }));
