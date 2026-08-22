@@ -2178,7 +2178,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             attached
           >
             {/* Feature flag cards */}
-            <div className="fluid-grid fluid-grid-2 gap-3 mb-4">
+            {/* Griglia feature flag: righe uniformi (auto-rows-fr) così tutte le card hanno la stessa altezza */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 auto-rows-fr">
               {FEATURE_DEFINITIONS.filter((f) => !['kiosk_active', 'staff_requests', 'unlock_with_pin'].includes(f.slug)).map((feature) => {
                 const enabled = featureFlags[feature.slug] !== false;
                 const isMaintenance = feature.slug === 'maintenance_mode';
