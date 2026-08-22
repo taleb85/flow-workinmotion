@@ -1584,7 +1584,7 @@ const baseIt = {
   feature_department_creation_label: 'Creazione Reparti',
   feature_department_creation_desc: 'Permetti la creazione e gestione dei reparti nella scheda Admin.',
   feature_violation_rules_label: 'Regole Violazioni',
-  feature_violation_rules_desc: 'Gestisci le funzioni e le visualizzazioni dei bordi colorati sui turni.',
+  feature_violation_rules_desc: 'Gestisci i bordi colorati sui turni e la soglia di pausa automatica (fasce ≥Xh → Ymin).',
   feature_master_control_panel_label: 'Master Control Panel',
   feature_master_control_panel_desc: 'Le modifiche sono immediate · salvate in DB o localStorage.',
   settings_features_toggle_intro:
@@ -1619,7 +1619,7 @@ const baseIt = {
   feature_department_creation_detail:
     'Se disattivo, in Profili non vedi più la sezione Reparti né gli strumenti per creare e rinominare i reparti (badge sala, cucina, …).\nPer utenti gestionali non-Admin serve anche il modulo «Creazione Reparti» attivo nei template.\nLe assegnazioni reparto già salvate nei turni non vengono cancellate.',
   feature_violation_rules_detail:
-    'Se disattivo, le regole su durata turni, riposi e sovrapposizioni non si applicano nel tabellone e le sezioni collegate in Profili spariscono.\nServe anche il modulo «Regole Violazioni» attivo nei template per Manager/Proprietario.\nRiattivando, tornano avvisi e bordi colorati secondo le impostazioni salvate.',
+    'Se disattivo, le regole su durata turni, riposi e sovrapposizioni non si applicano nel tabellone e le sezioni collegate in Profili spariscono.\nServe anche il modulo «Regole Violazioni» attivo nei template per Manager/Proprietario.\nRiattivando, tornano avvisi e bordi colorati secondo le impostazioni salvate.\nNella sezione «Regole violazioni» in Profili si configurano anche le fasce di pausa automatica (≥Xh → Ymin): per ogni turno si applica la fascia più alta coperta dalle ore lavorate.',
   feature_master_control_panel_detail:
     'Flag globale elencato nel Master Control Panel in Profili insieme a manutenzione, kiosk, richieste ferie, ecc.\nÈ allineato al modulo «Master Control Panel» mostrato nei dettagli utente per i gestionali.\nLe singole funzioni (es. manutenzione) hanno comunque il proprio interruttore nel pannello Profili.',
   feature_auto_breaks_detail:
@@ -3234,7 +3234,7 @@ const baseEn: Record<string, string> = {
   feature_department_creation_label: 'Department creation',
   feature_department_creation_desc: 'Allow creating and managing departments in the Admin area.',
   feature_violation_rules_label: 'Violation rules',
-  feature_violation_rules_desc: 'Manage coloured borders and violation indicators on shifts.',
+  feature_violation_rules_desc: 'Manage coloured borders on shifts and the automatic break threshold (tiers ≥Xh → Ymin).',
   feature_master_control_panel_label: 'Master control panel',
   feature_master_control_panel_desc: 'Changes apply immediately · saved to DB or localStorage.',
   settings_features_toggle_intro:
@@ -3269,7 +3269,7 @@ const baseEn: Record<string, string> = {
   feature_department_creation_detail:
     'When off, the Departments section and tools to create or rename departments (floor, kitchen, …) are hidden in Profiles.\nNon-admin management users also need the “Department creation” module on in the templates.\nDepartment tags already stored on shifts are not deleted.',
   feature_violation_rules_detail:
-    'When off, rules for shift length, rest, and overlaps are not applied on the board and related sections in Profiles are hidden.\nThe “Violation rules” module must also be on in templates for Owner/Manager where applicable.\nWhen turned back on, warnings and coloured borders return according to saved settings.',
+    'When off, rules for shift length, rest, and overlaps are not applied on the board and related sections in Profiles are hidden.\nThe “Violation rules” module must also be on in templates for Owner/Manager where applicable.\nWhen turned back on, warnings and coloured borders return according to saved settings.\nIn the “Violation rules” section in Profiles you can also configure automatic break tiers (≥Xh → Ymin): each shift uses the highest tier covered by the hours worked.',
   feature_master_control_panel_detail:
     'Global flag listed in the Master Control Panel in Profiles together with maintenance, kiosk, leave requests, etc.\nAligned with the “Master Control Panel” module shown in management user details.\nEach function (e.g. maintenance) still has its own switch in the Profiles panel.',
   feature_auto_breaks_detail:
@@ -4880,7 +4880,7 @@ const baseEs: Record<string, string> = {
   feature_department_creation_label: 'Creación de departamentos',
   feature_department_creation_desc: 'Permite crear y gestionar departamentos en el área Admin.',
   feature_violation_rules_label: 'Reglas de violaciones',
-  feature_violation_rules_desc: 'Gestiona los bordes de color y avisos de incumplimiento en los turnos.',
+  feature_violation_rules_desc: 'Gestiona los bordes de color en los turnos y el umbral de pausa automática (franjas ≥Xh → Ymin).',
   feature_master_control_panel_label: 'Panel de control maestro',
   feature_master_control_panel_desc: 'Los cambios son inmediatos · guardados en BD o localStorage.',
   settings_features_toggle_intro:
@@ -4915,7 +4915,7 @@ const baseEs: Record<string, string> = {
   feature_department_creation_detail:
     'Si está desactivado, no verás la sección Departamentos ni las herramientas para crear o renombrar departamentos en Perfiles.\nLos usuarios de gestión no administradores también necesitan el módulo «Creación de departamentos» activo en las plantillas.\nLas asignaciones de departamento ya guardadas en los turnos no se borran.',
   feature_violation_rules_detail:
-    'Si está desactivado, no se aplican las reglas de duración, descansos y solapamientos en el tablero y desaparecen las secciones relacionadas en Perfiles.\nTambién hace falta el módulo «Reglas de violaciones» en las plantillas para Propietario/Manager cuando corresponda.\nAl reactivarlo, vuelven avisos y bordes de color según la configuración guardada.',
+    'Si está desactivado, no se aplican las reglas de duración, descansos y solapamientos en el tablero y desaparecen las secciones relacionadas en Perfiles.\nTambién hace falta el módulo «Reglas de violaciones» en las plantillas para Propietario/Manager cuando corresponda.\nAl reactivarlo, vuelven avisos y bordes de color según la configuración guardada.\nEn la sección «Reglas de violaciones» de Perfiles también se configuran las franjas de pausa automática (≥Xh → Ymin): se aplica la franja más alta cubierta por las horas trabajadas.',
   feature_master_control_panel_detail:
     'Flag global listado en el Panel de control maestro en Perfiles junto con mantenimiento, kiosk, solicitudes, etc.\nAlineado con el módulo «Panel de control maestro» en el detalle de usuarios de gestión.\nCada función (p. ej. mantenimiento) tiene su propio interruptor en el panel de Perfiles.',
   feature_auto_breaks_detail:
@@ -5902,7 +5902,7 @@ const baseFr: Record<string, string> = {
   feature_department_creation_label: 'Création de départements',
   feature_department_creation_desc: 'Permet de créer et gérer les départements dans la zone Admin.',
   feature_violation_rules_label: 'Règles de violations',
-  feature_violation_rules_desc: 'Gère les bordures colorées et les indicateurs sur les shifts.',
+  feature_violation_rules_desc: 'Gère les bordures colorées sur les shifts et le seuil de pause automatique (tranches ≥Xh → Ymin).',
   feature_master_control_panel_label: 'Panneau de contrôle maître',
   feature_master_control_panel_desc: 'Modifications immédiates · enregistrées en base ou localStorage.',
   settings_features_toggle_intro:
@@ -5937,7 +5937,7 @@ const baseFr: Record<string, string> = {
   feature_department_creation_detail:
     'Désactivé : la section Départements et les outils de création/renommage disparaissent dans Profils.\nLes profils de gestion non-admin ont aussi besoin du module « Création de départements » dans les modèles.\nLes affectations déjà enregistrées sur les shifts ne sont pas effacées.',
   feature_violation_rules_detail:
-    'Désactivé : les règles de durée, repos et chevauchements ne s’appliquent plus au planning et les sections liées dans Profils disparaissent.\nLe module « Règles de violations » doit aussi être actif dans les modèles pour Propriétaire/Manager le cas échéant.\nRéactivé : alertes et bordures colorées reviennent selon les réglages enregistrés.',
+    'Désactivé : les règles de durée, repos et chevauchements ne s’appliquent plus au planning et les sections liées dans Profils disparaissent.\nLe module « Règles de violations » doit aussi être actif dans les modèles pour Propriétaire/Manager le cas échéant.\nRéactivé : alertes et bordures colorées reviennent selon les réglages enregistrés.\nDans la section « Règles de violations » de Profils se configurent aussi les tranches de pause automatique (≥Xh → Ymin) : la tranche la plus élevée couverte par les heures travaillées s’applique.',
   feature_master_control_panel_detail:
     'Indicateur global listé dans le Master Control sous Profils avec maintenance, kiosk, demandes, etc.\nAligné sur le module « Panneau de contrôle maître » dans le détail des utilisateurs de gestion.\nChaque fonction (ex. maintenance) a son propre interrupteur dans le panneau Profils.',
   feature_auto_breaks_detail:
