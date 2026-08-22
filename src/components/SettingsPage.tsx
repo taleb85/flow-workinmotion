@@ -2743,12 +2743,23 @@ function BreakRuleModal({
   const [validTo, setValidTo] = useState(rule?.validTo ?? '');
   const [daysOfWeek, setDaysOfWeek] = useState<DayOfWeek[]>(rule?.daysOfWeek ?? []);
 
+  /* Tab per sezione: il contenuto si espande con la tab attiva */
+  const [activeTab, setActiveTab] = useState<'general' | 'assign' | 'apply'>('general');
+  const tabOptions = [
+    { id: 'general' as const, label: t.settings_break_section_general },
+    { id: 'assign' as const, label: t.settings_break_assign_section },
+    { id: 'apply' as const, label: t.settings_break_apply_section },
+  ];
+
   const toggleChip = <T,>(arr: T[], val: T): T[] =>
     arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !breakStart || !breakEnd) return;
+    if (!title.trim() || !breakStart || !breakEnd) {
+      setActiveTab('general');
+      return;
+    }
     onSave({
       id: rule?.id ?? makeId(),
       title: title.trim(),
@@ -2805,11 +2816,28 @@ function BreakRuleModal({
           </button>
         </div>
 
-        {/* Contenuto — scheda unica: le sezioni si espandono verso il basso e scorrono */}
+        {/* Tab per sezione */}
+        <div className="shrink-0 px-5 pt-4">
+          <div className="flex gap-1 rounded-xl border border-neutral-500 bg-white/5 p-1">
+            {tabOptions.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                  activeTab === tab.id ? 'bg-accent text-white' : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Contenuto — si espande con la tab attiva (cap 90vh con scroll se serve) */}
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-          {/* ── Generale ── */}
-          <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_section_general}</p>
-          <div className="space-y-3">
+          {activeTab === 'general' && (
+            <div className="space-y-3">
               {/* Titolo */}
               <div>
                 <label className={labelClass}>{t.settings_break_label_title}</label>
@@ -2859,10 +2887,10 @@ function BreakRuleModal({
                 <p className="text-[0.6875rem] text-white/60">{paid ? t.settings_break_paid_hint : t.settings_break_unpaid_hint}</p>
               </div>
             </div>
+          )}
 
-          {/* ── Assegna a ── */}
-          <p className="mt-6 text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_assign_section}</p>
-          <div className="flex flex-wrap items-start gap-x-6 gap-y-3">
+          {activeTab === 'assign' && (
+            <div className="flex flex-wrap items-start gap-x-6 gap-y-3">
               <div className="flex-1 min-w-0">
                 <label className="mb-1.5 flex items-baseline gap-1 text-xs font-semibold uppercase tracking-wide text-white/55">
                   {t.settings_break_label_depts}
@@ -2909,10 +2937,10 @@ function BreakRuleModal({
                 </div>
               </div>
             </div>
+          )}
 
-          {/* ── Applica a ── */}
-          <p className="mt-6 text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_apply_section}</p>
-          <div className="space-y-3">
+          {activeTab === 'apply' && (
+            <div className="space-y-3">
               {/* Soglia turno: condizione di applicazione (durata minima del turno) */}
               <div className="space-y-3 rounded-xl border border-white/10 bg-white/5/70 p-3">
                 <div className="flex items-center justify-between gap-3">
@@ -2986,7 +3014,8 @@ function BreakRuleModal({
                 </div>
               </div>
             </div>
-          </div>
+          )}
+        </div>
 
         {/* Footer buttons — fissi sotto il contenuto */}
         <div className="shrink-0 px-5 pb-5">
