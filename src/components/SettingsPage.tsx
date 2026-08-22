@@ -2717,6 +2717,19 @@ function BreakRuleModal({
     }));
   }, [t]);
 
+  /* Ruoli raggruppati per etichetta tradotta: waiter+server → "Cameriere", cook+chef → "Cuoco".
+     Un solo chip per gruppo; selezionarlo attiva tutti i codici del gruppo. */
+  const roleGroups = useMemo(() => {
+    const byLabel = new Map<string, string[]>();
+    for (const code of BREAK_MODAL_ROLE_VALUES) {
+      const label = translateRole(code, effectiveLanguage);
+      const group = byLabel.get(label) ?? [];
+      group.push(code);
+      byLabel.set(label, group);
+    }
+    return Array.from(byLabel.entries());
+  }, [effectiveLanguage]);
+
   const isEdit = !!rule;
   const [title, setTitle] = useState(rule?.title ?? '');
   const [breakStart, setBreakStart] = useState(rule?.breakStart ?? '12:00');
@@ -2833,43 +2846,6 @@ function BreakRuleModal({
                 </div>
               </div>
 
-              {/* Soglia turno: attivabile/disattivabile */}
-              <div className="space-y-3 rounded-xl border border-white/10 bg-white/5/70 p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-white/80">{t.settings_break_shift_threshold_title}</p>
-                    <p className="text-[0.6875rem] text-white/55 mt-0.5 leading-snug">
-                      {minShiftThresholdOn ? t.settings_break_shift_threshold_on : t.settings_break_shift_threshold_off}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={minShiftThresholdOn}
-                    onClick={() => setMinShiftThresholdOn((v) => !v)}
-                    className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 ${minShiftThresholdOn ? 'bg-accent' : ''}`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${minShiftThresholdOn ? 'translate-x-5' : 'translate-x-0'}`} />
-                  </button>
-                </div>
-                {minShiftThresholdOn && (
-                  <div className="flex items-center gap-3 border-t border-white/10/90 pt-1">
-                    <span className="shrink-0 text-[0.6875rem] font-semibold uppercase text-white/55">{t.settings_break_min_label}</span>
-                    <button
-                      type="button"
-                      onClick={() => setMinHours((h) => Math.max(0.5, Math.round((h - 0.5) * 10) / 10))}
-                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-neutral-500 font-bold text-white/80 surface-ghost-interactive"
-                    >−</button>
-                    <span className="w-16 text-center text-sm font-bold text-white">{minHours}h</span>
-                    <button
-                      type="button"
-                      onClick={() => setMinHours((h) => Math.min(12, Math.round((h + 0.5) * 10) / 10))}
-                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-neutral-500 font-bold text-white/80 surface-ghost-interactive"
-                    >+</button>
-                  </div>
-                )}
-              </div>
-
               {/* Retribuita / Non retribuita */}
               <div>
                 <label className={labelClass}>{t.settings_break_type_label}</label>
@@ -2916,16 +2892,25 @@ function BreakRuleModal({
                   <span className="font-normal normal-case tracking-normal text-white/40">{t.settings_break_none_means_all}</span>
                 </label>
                 <div className="flex flex-wrap gap-1.5">
-                  {BREAK_MODAL_ROLE_VALUES.map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setRoles((prev) => toggleChip(prev, r))}
-                      className={chipClass(roles.includes(r))}
-                    >
-                      {translateRole(r, effectiveLanguage)}
-                    </button>
-                  ))}
+                  {roleGroups.map(([label, codes]) => {
+                    const groupSelected = codes.every((c) => roles.includes(c));
+                    const toggleGroup = () =>
+                      setRoles((prev) => {
+                        const without = prev.filter((r) => !codes.includes(r));
+                        return groupSelected ? without : [...without, ...codes];
+                      });
+                    return (
+                      <button
+                        key={codes.join(',')}
+                        type="button"
+                        onClick={toggleGroup}
+                        className={chipClass(groupSelected)}
+                        title={codes.join(', ')}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -2935,6 +2920,43 @@ function BreakRuleModal({
           <div>
             <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-3">{t.settings_break_apply_section}</p>
             <div className="space-y-3">
+              {/* Soglia turno: condizione di applicazione (durata minima del turno) */}
+              <div className="space-y-3 rounded-xl border border-white/10 bg-white/5/70 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-white/80">{t.settings_break_shift_threshold_title}</p>
+                    <p className="text-[0.6875rem] text-white/55 mt-0.5 leading-snug">
+                      {minShiftThresholdOn ? t.settings_break_shift_threshold_on : t.settings_break_shift_threshold_off}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={minShiftThresholdOn}
+                    onClick={() => setMinShiftThresholdOn((v) => !v)}
+                    className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 ${minShiftThresholdOn ? 'bg-accent' : ''}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${minShiftThresholdOn ? 'translate-x-5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+                {minShiftThresholdOn && (
+                  <div className="flex items-center gap-3 border-t border-white/10/90 pt-1">
+                    <span className="shrink-0 text-[0.6875rem] font-semibold uppercase text-white/55">{t.settings_break_min_label}</span>
+                    <button
+                      type="button"
+                      onClick={() => setMinHours((h) => Math.max(0.5, Math.round((h - 0.5) * 10) / 10))}
+                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-neutral-500 font-bold text-white/80 surface-ghost-interactive"
+                    >−</button>
+                    <span className="w-16 text-center text-sm font-bold text-white">{minHours}h</span>
+                    <button
+                      type="button"
+                      onClick={() => setMinHours((h) => Math.min(12, Math.round((h + 0.5) * 10) / 10))}
+                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-neutral-500 font-bold text-white/80 surface-ghost-interactive"
+                    >+</button>
+                  </div>
+                )}
+              </div>
+
               {/* Date range */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
