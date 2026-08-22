@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell } from 'lucide-react';
+import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell, Timer } from 'lucide-react';
 import { database } from '../lib/database';
 import { supabase } from '../lib/supabase';
 import { PinPadModal } from './ui/PinPadModal';
@@ -160,12 +160,16 @@ function FeatureFlagCard({
   enabled,
   isMaintenance,
   onToggle,
+  workRules,
+  updateWorkRule,
 }: {
   feature: { slug: string };
   t: Record<string, string>;
   enabled: boolean;
   isMaintenance: boolean;
   onToggle: () => Promise<void>;
+  workRules?: WorkRules;
+  updateWorkRule?: <K extends keyof WorkRules>(key: K, value: WorkRules[K]) => void;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const { label: featureLabel, description: featureDescription, detailLines } = getFeatureStrings(t, feature.slug);
@@ -231,6 +235,28 @@ function FeatureFlagCard({
                 </div>
               )}
             </>
+          )}
+          {feature.slug === 'violation_rules' && workRules && updateWorkRule && (
+            <div className="rounded-xl border border-neutral-500 mt-2 bg-white/5 px-2.5 py-2">
+              <div className="mb-1 flex items-center gap-1.5">
+                <Timer className="h-3.5 w-3.5 flex-shrink-0 text-amber-400" />
+                <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">{t.settings_wr_auto_break_card_title}</p>
+              </div>
+              <p className="mb-1.5 text-[0.6875rem] leading-relaxed text-white/70">{t.settings_wr_auto_break_threshold_hint}</p>
+              <label className="mb-0.5 block text-[0.6875rem] font-semibold text-white/55">{t.settings_wr_auto_break_threshold}</label>
+              <input
+                type="number"
+                min={0}
+                max={720}
+                step={15}
+                value={workRules.autoBreakThresholdMinutes ?? 360}
+                onChange={(e) =>
+                  updateWorkRule('autoBreakThresholdMinutes', Math.max(0, Math.min(720, Math.round(+e.target.value || 0))))
+                }
+                placeholder="0"
+                className="w-full rounded-xl border border-neutral-500 bg-white/10 px-3 py-2 text-base font-semibold text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+              />
+            </div>
           )}
         </div>
       </div>
@@ -2092,6 +2118,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     t={t}
                     enabled={enabled}
                     isMaintenance={isMaintenance}
+                    workRules={workRules}
+                    updateWorkRule={updateWorkRule}
                     onToggle={async () => {
                       await setFeatureFlag(feature.slug, !enabled);
                       showSuccess?.(formatTrans(enabled ? t.settings_feature_toggle_off : t.settings_feature_toggle_on, { name: getFeatureStrings(t, feature.slug).label }));
