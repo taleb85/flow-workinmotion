@@ -92,6 +92,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const [staffName, setStaffName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showPinHelp, setShowPinHelp] = useState(false);
   const [pinFocused, setPinFocused] = useState(false);
   const [error, setError] = useState('');
   const [deviceSuccess, setDeviceSuccess] = useState('');
@@ -788,6 +789,40 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               >
                 {showPassword ? <EyeOff className="w-4 h-4" aria-hidden /> : <Eye className="w-4 h-4" aria-hidden />}
               </button>
+            </div>
+
+            {/* Non ricordi il PIN? — aiuto recupero credenziali */}
+            <div className="-mt-1 flex flex-col items-center">
+              <button
+                type="button"
+                onClick={() => setShowPinHelp((v) => !v)}
+                className="text-xs text-white/45 hover:text-white/80 transition-colors underline underline-offset-4 decoration-white/25 hover:decoration-white/70 focus:outline-none focus:ring-2 focus:ring-white/40 rounded px-1 py-0.5"
+                aria-expanded={showPinHelp}
+              >
+                {t.login_forgot_pin ?? 'Non ricordi il PIN?'}
+              </button>
+              <AnimatePresence initial={false}>
+                {showPinHelp && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, y: -4 }}
+                    animate={{ opacity: 1, height: 'auto', y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -4 }}
+                    transition={{ duration: 0.22, ease: 'easeOut' }}
+                    className="overflow-hidden w-full"
+                  >
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ delay: 0.08 }}
+                      className="mt-1.5 text-xs text-white/70 leading-snug text-center rounded-xl px-3 py-2.5"
+                      style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)' }}
+                    >
+                      {t.login_forgot_pin_hint}
+                    </motion.p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Error */}
