@@ -2889,8 +2889,8 @@ function BreakRuleModal({
 
           {/* ── Assegna a ── */}
           {activeTab === 'assign' && (
-            <div className="space-y-3">
-              <div>
+            <div className="flex flex-wrap items-start gap-x-6 gap-y-3">
+              <div className="min-w-0 flex-1">
                 <label className={labelClass}>
                   {t.settings_break_label_depts}{' '}
                   <span className="font-normal normal-case tracking-normal text-white/40">{t.settings_break_none_means_all}</span>
@@ -2908,7 +2908,7 @@ function BreakRuleModal({
                   ))}
                 </div>
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <label className={labelClass}>
                   {t.settings_break_label_roles}{' '}
                   <span className="font-normal normal-case tracking-normal text-white/40">{t.settings_break_none_means_all}</span>
