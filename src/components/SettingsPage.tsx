@@ -2801,9 +2801,9 @@ function BreakRuleModal({
         onSubmit={handleSubmit}
         className="modal-glass-panel flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-2xl font-sans"
       >
-        {/* Header — tab per sezione + azioni (Crea regola / X) */}
-        <div className="sticky top-0 z-10 flex shrink-0 items-center gap-3 border-b border-white/10 bg-app-bg/80 px-5 pt-4 pb-4 backdrop-blur-md">
-          <div className="flex min-w-0 flex-1 items-center gap-1 rounded-xl border border-neutral-500 bg-white/5 p-1">
+        {/* Header — tab + azioni in un unico elemento */}
+        <div className="sticky top-0 z-10 flex shrink-0 items-center border-b border-white/10 bg-app-bg/80 px-5 pt-4 pb-4 backdrop-blur-md">
+          <div className="flex w-full items-center gap-1 rounded-xl border border-neutral-500 bg-white/5 p-1">
             {tabOptions.map((tab) => (
               <button
                 key={tab.id}
@@ -2816,13 +2816,12 @@ function BreakRuleModal({
                 {tab.label}
               </button>
             ))}
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
+            <div className="mx-1 h-5 w-px shrink-0 bg-white/15" aria-hidden />
             <button
               type="submit"
               title={isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
               aria-label={isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
-              className="group flex items-center gap-0 overflow-hidden rounded-xl bg-accent p-2 text-white transition-all duration-200 hover:gap-1.5 hover:pr-2.5 active:brightness-95"
+              className="group flex items-center gap-0 overflow-hidden rounded-lg bg-accent p-2 text-white transition-all duration-200 hover:gap-1.5 hover:pr-2.5 active:brightness-95"
             >
               <Check className="h-4 w-4 shrink-0" />
               <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[8rem]">
@@ -2834,7 +2833,7 @@ function BreakRuleModal({
               onClick={onClose}
               aria-label={t.close}
               title={t.close}
-              className="group flex items-center gap-0 overflow-hidden rounded-xl bg-white/10 p-2 text-white/55 transition-all duration-200 hover:gap-1.5 hover:bg-white/15 hover:text-white hover:pr-2.5 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              className="group flex items-center gap-0 overflow-hidden rounded-lg bg-white/10 p-2 text-white/55 transition-all duration-200 hover:gap-1.5 hover:bg-white/15 hover:text-white hover:pr-2.5 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
             >
               <X className="h-4 w-4 shrink-0" />
               <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[4rem]">
