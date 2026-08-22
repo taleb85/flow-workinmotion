@@ -259,7 +259,9 @@ function FeatureFlagCard({
               )}
             </>
           )}
-          {feature.slug === 'violation_rules' && workRules && updateWorkRule && (
+          {/* La tabella fasce appare solo con la regola ATTIVA (altrimenti la card
+              mostra solo descrizione + dettagli, come le altre). */}
+          {feature.slug === 'violation_rules' && enabled && workRules && updateWorkRule && (
             <div className="rounded-xl border border-neutral-500 mt-2 bg-white/5 px-2.5 py-2">
               <div className="mb-1 flex items-center gap-1.5">
                 <Timer className="h-3.5 w-3.5 flex-shrink-0 text-amber-400" />
