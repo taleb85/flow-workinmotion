@@ -17,7 +17,7 @@ import type { Locale } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { getTranslations, getDateLocale, getIntlLocale } from '../utils/translations';
 import { translateDepartmentValue } from '../utils/departmentLabels';
-import { formatMinutesToHoursAndMinutes, calculateShiftMinutesGross, getBreakLabels, hasShiftConflictSameDay } from '../utils/timeCalculations';
+import { formatMinutesToHoursAndMinutes, calculateShiftMinutesGross, hasShiftConflictSameDay } from '../utils/timeCalculations';
 import { getBreakMinutesForShift, getAutoBreakThresholdMinutes, getAutoBreakMinutesForGross, getAutoBreakTiers } from '../utils/breakRules';
 import { shiftPastPlannedEndWithoutClockIn, punchTimeHHMM, getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
 import { exportSchedulePDF } from '../utils/exportSchedulePDF';
@@ -1007,6 +1007,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     for (const [key, shifts] of shiftsByUserDate) {
       const groups = shifts.map(shift => {
         const { in: punchIn, out: punchOut } = getPunchForShift(shift);
+        const shiftUser = users.find(u => u.id === shift.user_id) ?? null;
         const plannedMins = calculateShiftMinutesGross(shift.start_time ?? '', shift.end_time ?? '');
         const actualMins = punchIn && punchOut
           ? (() => {
@@ -1015,7 +1016,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               if (endMs <= startMs) endMs += 24 * 60 * 60 * 1000;
               return (endMs - startMs) / 60000;
             })() : 0;
-        const breakMins = getBreakMinutesForShift(shift, plannedMins, null, breakRules);
+        const breakMins = getBreakMinutesForShift(shift, plannedMins, shiftUser, breakRules);
         const actualBreakMins = (() => {
           const gross = Math.round(actualMins);
           if (shift.deduct_break === false) return 0;
@@ -1024,10 +1025,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           if (!st || !en) return 0;
           const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
           if (toMin(en) <= toMin(st)) return 0;
-          const tierBreakMins = getAutoBreakMinutesForGross(gross);
-          if (tierBreakMins <= 0) return 0;
-          const mealKeys = getBreakLabels(st, en);
-          return mealKeys.length > 0 ? mealKeys.length * tierBreakMins : 0;
+          // Finestra effettiva dalle timbrature quando disponibili, altrimenti quella pianificata
+          let wStart = st;
+          let wEnd = en;
+          if (punchIn && punchOut) {
+            const fmt = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+            wStart = fmt(punchIn.calculated_time || punchIn.timestamp);
+            wEnd = fmt(punchOut.calculated_time || punchOut.timestamp);
+          }
+          return getBreakMinutesForShift(shift, gross, shiftUser, breakRules, { breakRuleWindow: { start: wStart, end: wEnd } });
         })();
         const actualNet = Math.max(0, Math.round(actualMins) - actualBreakMins);
         const plannedNet = Math.max(0, plannedMins - breakMins);
@@ -1050,7 +1056,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       cache.set(key, groups);
     }
     return cache;
-  }, [shiftsByUserDate, shiftsByUser, weekPunchIndex, weekDateStrings, breakRules, violationChromeEnabled, effectiveWorkRules, getPunchForShift]);
+  }, [shiftsByUserDate, shiftsByUser, weekPunchIndex, weekDateStrings, breakRules, violationChromeEnabled, effectiveWorkRules, getPunchForShift, users]);
 
   /**
    * Totali (pianificato/effettivo) per utente, calcolati UNA volta per dataset.
