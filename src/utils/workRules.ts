@@ -16,6 +16,8 @@ export interface WorkRules {
   /** Soglia ritardo tollerato in minuti prima di mostrare l'alert (default 10) */
   lateThresholdMinutes: number;
   lateThresholdEnabled: boolean;
+  /** Soglia durata turno per pausa automatica, in minuti (default 360 = 6h; 0 = nessuna soglia) */
+  autoBreakThresholdMinutes: number;
   /** Abilita violazioni Critico (turno lungo + riposo insufficiente) */
   criticEnabled: boolean;
   /** Abilita violazioni Attenzione (ore giornaliere/settimanali oltre limite) */
@@ -33,6 +35,7 @@ export const DEFAULT_WORK_RULES: WorkRules = {
   minRestHoursEnabled: true,
   lateThresholdMinutes: 10,
   lateThresholdEnabled: true,
+  autoBreakThresholdMinutes: 6 * 60,
   criticEnabled: true,
   attentionEnabled: true,
   overlapEnabled: true,

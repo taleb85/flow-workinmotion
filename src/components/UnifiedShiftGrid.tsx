@@ -18,7 +18,7 @@ import { it } from 'date-fns/locale';
 import { getTranslations, getDateLocale, getIntlLocale } from '../utils/translations';
 import { translateDepartmentValue } from '../utils/departmentLabels';
 import { formatMinutesToHoursAndMinutes, calculateShiftMinutesGross, getBreakLabels, hasShiftConflictSameDay } from '../utils/timeCalculations';
-import { getBreakMinutesForShift, DEFAULT_AUTO_BREAK_MINUTES, AUTO_BREAK_THRESHOLD_MINUTES } from '../utils/breakRules';
+import { getBreakMinutesForShift, DEFAULT_AUTO_BREAK_MINUTES, getAutoBreakThresholdMinutes } from '../utils/breakRules';
 import { shiftPastPlannedEndWithoutClockIn, punchTimeHHMM, getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
 import { exportSchedulePDF } from '../utils/exportSchedulePDF';
 import { TimeInputField } from './ui/TimeInputField';
@@ -512,6 +512,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const toolbarBandRef = useRef<HTMLDivElement>(null);
   const [tableScrolled, setTableScrolled] = useState(false);
   const [hScrolled, setHScrolled] = useState(false);
+  /** True se la tabella è davvero scrollabile in orizzontale (overflow reale): guida l'hint "Shift + rotellina". */
+  const [hasHScroll, setHasHScroll] = useState(false);
   const [tableMaxHeight, setTableMaxHeight] = useState<number | null>(null);
   /**
    * Toolbar sovrapposta al contenuto (sticky attaccata in alto mentre la pagina scorre).
@@ -623,6 +625,18 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     }
     return eachDayOfInterval({ start: parseISO(weekStartStr), end: parseISO(weekEndStr) });
   }, [viewMode, periodStartStr, periodEndStr, weekStartStr, weekEndStr]);
+
+  /** Rileva l'overflow orizzontale reale della tabella (scrollWidth > clientWidth),
+      anche al cambio di vista/larghezza (ResizeObserver). Guida l'hint "Shift + rotellina". */
+  useLayoutEffect(() => {
+    const el = tableScrollRef.current;
+    if (!el) return;
+    const check = () => setHasHScroll(el.scrollWidth > el.clientWidth + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [weekDays.length, viewMode, tableMaxHeight]);
 
   const [showPeriodPopover, setShowPeriodPopover] = useState(false);
   const [periodPopoverYear, setPeriodPopoverYear] = useState(today.getFullYear());
@@ -764,9 +778,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setDrawerOpen(false);
   }, [hasUnsavedChanges]);
 
-  // ── Selection / Bulk edit ──
-  const [selectedShiftIds, setSelectedShiftIds] = useState<Set<string>>(new Set());
-
   // ── ESC annulla azione corrente ──
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -778,12 +789,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         setDrawerOpen(false);
         setSelectedShift(null);
       }
-      // Deseleziona turni
-      if (selectedShiftIds.size > 0) setSelectedShiftIds(new Set());
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [drawerOpen, selectedShiftIds, hasUnsavedChanges]);
+  }, [drawerOpen, hasUnsavedChanges]);
 
   // ── Drag & Drop ──
   // Usiamo una ref per draggedShiftId per evitare stale closure nei drag handler
@@ -1009,7 +1018,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         const breakMins = getBreakMinutesForShift(shift, plannedMins, null, breakRules);
         const actualBreakMins = (() => {
           const gross = Math.round(actualMins);
-          if (gross < AUTO_BREAK_THRESHOLD_MINUTES) return 0;
+          if (gross < getAutoBreakThresholdMinutes()) return 0;
           if (shift.deduct_break === false) return 0;
           const st = (shift.start_time || '').slice(0, 5);
           const en = (shift.end_time || '').slice(0, 5);
@@ -1587,8 +1596,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setDraggedShiftId(null);
     setDropTargetKey(null);
     setDragCopyMode(false);
-    // Se il turno trascinato è parte della selezione, usa TUTTI gli ID selezionati
-    const ids = selectedShiftIds.has(shiftId) ? [...selectedShiftIds] : [shiftId];
+    // Trascinamento singolo: il turno trascinato è sempre l'unico coinvolto
+    const ids = [shiftId];
     // Filtra eventuali turni già sulla stessa cella
     const filtered = ids.filter(id => {
       const s = allShifts.find(x => x.id === id);
@@ -1618,16 +1627,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     const prettyDate = yPart && mPart && dPart ? `${dPart}-${mPart}-${yPart}` : targetDate;
     const targetLabel = targetUser ? `${targetUser.first_name} — ${prettyDate} (${slotLabel})` : `${prettyDate} (${slotLabel})`;
     setDropConfirm({ shiftIds: filtered, targetUserId, targetDate, targetLabel, targetSlot: slot, targetTimeRange, presets, selectedPresetIdx: effectiveIdx, origStart: origStart ?? '', origEnd: origEnd ?? '' });
-  }, [handleDropOnCell, handleDropCopyOnCell, allShifts, users, selectedShiftIds]);
-
-  /** Deseleziona/seleziona un turno (Shift+click o checkbox) con identità stabile. */
-  const toggleSelectShift = useCallback((id: string) => {
-    setSelectedShiftIds(prev => {
-      const n = new Set(prev);
-      if (n.has(id)) n.delete(id); else n.add(id);
-      return n;
-    });
-  }, []);
+  }, [handleDropOnCell, handleDropCopyOnCell, allShifts, users]);
 
   /** Reset stato drag&drop: identità stabile (prima era una closure inline ricreata a ogni render). */
   const handleDragEnd = useCallback(() => {
@@ -1658,46 +1658,30 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       const label = formatShiftTimeRangeFull(ex.shift.start_time, ex.shift.end_time);
       const title = `${t.extra_shift ?? 'Turno aggiuntivo'}: ${label}`;
       const compactLabel = formatShiftTimeRangeCompact(ex.shift.start_time, ex.shift.end_time);
-      const isChecked = selectedShiftIds.has(ex.shift.id);
-      const handleClick = (e: React.MouseEvent) => {
-        if (e.shiftKey) {
-          toggleSelectShift(ex.shift.id);
-        } else {
-          handleOpenDrawer(ex.shift, { isExtra: true });
-        }
-      };
       return (
         <button
           key={ex.shift.id}
           type="button"
           title={title}
           aria-label={title}
-          onClick={handleClick}
+          onClick={() => handleOpenDrawer(ex.shift, { isExtra: true })}
           onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
           draggable={canEdit}
           onDragStart={(e) => handleDragStart(e, ex.shift.id)}
           onDragEnd={handleDragEnd}
           className={
             stacked
-              ? `w-full relative flex shrink-0 items-center justify-center gap-0.5 rounded-md border-2 border-dashed px-1 text-[0.625rem] font-extrabold tabular-nums leading-none text-white shadow-[0_1px_4px_rgba(0,0,0,0.35)] ${isChecked ? 'border-white/80 bg-white/20' : 'border-accent bg-accent'}`
-              : `w-full rounded-lg border-2 border-dashed px-2 py-1.5 text-[0.6875rem] font-extrabold tabular-nums text-white ${isChecked ? 'border-white/80 bg-white/20' : 'border-accent bg-accent/80'}`
+              ? `w-full relative flex shrink-0 items-center justify-center gap-0.5 rounded-md border-2 border-dashed px-1 text-[0.625rem] font-extrabold tabular-nums leading-none text-white shadow-[0_1px_4px_rgba(0,0,0,0.35)] border-accent bg-accent`
+              : `w-full rounded-lg border-2 border-dashed px-2 py-1.5 text-[0.6875rem] font-extrabold tabular-nums text-white border-accent bg-accent/80`
           }
           style={stacked ? { height: extraRowHeight, minHeight: extraRowHeight } : undefined}
         >
-          {stacked ? (
-            <>
-              <input type="checkbox" checked={isChecked} readOnly
-                className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-colors ${isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} />
-              <Plus className="h-2.5 w-2.5 shrink-0 stroke-[3]" aria-hidden />
-            </>
-          ) : (
-            <Plus className="h-3 w-3 shrink-0" aria-hidden />
-          )}
+          <Plus className={stacked ? 'h-2.5 w-2.5 shrink-0 stroke-[3]' : 'h-3 w-3 shrink-0'} aria-hidden />
           <span className="truncate">{stacked ? compactLabel : label}</span>
         </button>
       );
     });
-  }, [t, selectedShiftIds, toggleSelectShift, handleOpenDrawer, handleDragStart, handleDragEnd, canEdit, extraRowHeight]);
+  }, [t, handleOpenDrawer, handleDragStart, handleDragEnd, canEdit, extraRowHeight]);
 
   const renderGroupButton = useCallback((g: DayShiftGroup, layout: 'desktop' | 'mobile', compact = false, extraGroups: DayShiftGroup[] = []) => {
     const isDraft = g.shift.approval_status === 'draft';
@@ -1733,18 +1717,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       </span>
     );
 
-    const handleShiftClick = (e: React.MouseEvent) => {
-      if (e.shiftKey) {
-        toggleSelectShift(g.shift.id);
-      } else {
-        handleOpenDrawer(g.shift);
-      }
-    };
-
     if (layout === 'mobile') {
       return (
         <div className="flex flex-col gap-1">
-          <button type="button" onClick={handleShiftClick} title={display.title}
+          <button type="button" onClick={() => handleOpenDrawer(g.shift)} title={display.title}
             onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
@@ -1779,7 +1755,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           <button
             type="button"
             title={display.title ?? formatShiftTimeRangeFull(g.shift.start_time, g.shift.end_time)}
-            onClick={handleShiftClick}
+            onClick={() => handleOpenDrawer(g.shift)}
             onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
             draggable={canEdit}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
@@ -1795,14 +1771,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     }
     return (
       <div className={`flex w-full min-w-0 flex-col ${hasExtras ? 'gap-0.5 justify-center' : ''}`}>
-        <button type="button" onClick={handleShiftClick} title={display.title}
+        <button type="button" onClick={() => handleOpenDrawer(g.shift)} title={display.title}
           onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
           draggable={canEdit}
           onDragStart={(e) => handleDragStart(e, g.shift.id)}
           onDragEnd={handleDragEnd}
           className={`relative w-full min-w-0 text-left rounded-lg border ${borderColor} ${bgColor} ${glow} transition-colors ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''} px-0.5 py-0.5`}>
-          <input type="checkbox" checked={selectedShiftIds.has(g.shift.id)} onChange={() => toggleSelectShift(g.shift.id)}
-            className={`absolute left-0.5 top-0.5 z-10 w-3 h-3 rounded border-white/30 accent-accent transition-colors ${selectedShiftIds.has(g.shift.id) ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} onClick={e => e.stopPropagation()} />
           <div
             className="flex items-end justify-center w-full gap-1 px-2 whitespace-nowrap overflow-hidden"
             style={{ minHeight: mainRowHeight, height: mainRowHeight }}
@@ -1819,7 +1793,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         {renderExtraShiftRows(extraGroups, 'desktop')}
       </div>
     );
-  }, [t, mode, weekPunchRecords, isPeriodView, selectedShiftIds, toggleSelectShift, handleOpenDrawer, handleShiftContextMenu, handleDragStart, handleDragEnd, canEdit, extraRowHeight, slotRowHeight, renderExtraShiftRows]);
+  }, [t, mode, weekPunchRecords, isPeriodView, handleOpenDrawer, handleShiftContextMenu, handleDragStart, handleDragEnd, canEdit, extraRowHeight, slotRowHeight, renderExtraShiftRows]);
 
   return (
     <div ref={gridRootRef} className="w-full flex-none min-h-0 flex flex-col font-sans md:flex-1">
@@ -1862,22 +1836,31 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         {/* MOBILE: ◀ e ▶ occupano lo spazio ai lati; Oggi + data al centro */}
         <div className="flex w-full min-w-0 items-center gap-1.5 md:hidden">
           <button type="button" onClick={prevWeek} aria-label="Settimana precedente"
-            className="flex flex-1 items-center justify-center rounded-lg bg-white/10 px-3 py-2 text-white/60 hover:text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-5 w-5" /></button>
-          <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
-            <button type="button" onClick={goToday}
-              className="rounded-lg bg-white/10 px-2.5 py-2 text-white/60 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">{t.today_btn ?? 'Oggi'}</button>
+            className="flex min-w-0 flex-1 items-center justify-center rounded-lg bg-white/10 px-3 py-2 text-white/60 hover:text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-5 w-5" /></button>
+          {/* Mobile: data inizio — Oggi — data fine, affiancate e centrate insieme.
+              Il gruppo centrale resta alla larghezza naturale (shrink-0): i pulsanti
+              ◀ ▶ si allargano solo nello spazio libero, senza mai accavallarsi. */}
+          <div className="flex shrink-0 items-center justify-center gap-1.5">
             <span
-              className="min-w-0 max-w-full truncate text-sm font-semibold text-white/50 tabular-nums"
+              className="min-w-0 max-w-[5rem] shrink-0 truncate text-sm font-semibold text-white/50 tabular-nums"
               title={`${(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()} — ${(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()}`}
             >
               {(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
             </span>
+            <button type="button" onClick={goToday}
+              className="rounded-lg bg-white/10 px-2.5 py-2 text-white/60 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">{t.today_btn ?? 'Oggi'}</button>
+            <span
+              className="min-w-0 max-w-[5rem] shrink-0 truncate text-sm font-semibold text-white/50 tabular-nums"
+              title={`${(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()} — ${(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()}`}
+            >
+              {(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
+            </span>
           </div>
           <button type="button" onClick={nextWeek} aria-label="Settimana successiva"
-            className="flex flex-1 items-center justify-center rounded-lg bg-white/10 px-3 py-2 text-white/60 hover:text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5" /></button>
+            className="flex min-w-0 flex-1 items-center justify-center rounded-lg bg-white/10 px-3 py-2 text-white/60 hover:text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5" /></button>
         </div>
-        {/* DESKTOP: come prima */}
-        <div className="hidden md:flex w-full min-w-0 items-center gap-1.5 md:gap-2">
+        {/* DESKTOP: navigazione + data (unica riga con i filtri, vedi sotto) */}
+        <div className="hidden md:flex md:w-auto min-w-0 items-center gap-1.5 md:gap-2">
           <div className="flex shrink-0 items-center gap-1">
             <button type="button" onClick={prevWeek} aria-label="Settimana precedente"
               className="rounded-lg bg-white/10 px-3 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-5 w-5 md:h-4 md:w-4" /></button>
@@ -1893,36 +1876,17 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             {(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
             <span className="hidden md:inline"> — {(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}</span>
           </span>
-          <span className="hidden md:inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 text-[0.5625rem] font-bold uppercase tracking-wider text-white/70">
-            <span className="rounded-md border border-white/25 bg-white/10 px-1 py-px font-black text-white">Shift</span>
-            + rotellina = scroll orizzontale
-          </span>
-          {selectedShiftIds.size > 0 && (
-            <div className="flex items-center gap-1.5 ml-auto">
-              <span className="text-xs font-bold text-white/60 whitespace-nowrap">{selectedShiftIds.size} selezionati</span>
-              <button type="button" onClick={async () => {
-                if (!sessionActive) {
-                  showError(t.require_pin_session ?? 'Attiva la sessione PIN per eliminare in massa.');
-                  return;
-                }
-                for (const id of selectedShiftIds) {
-                  const s = allShifts.find(x => x.id === id);
-                  if (!s || !canDeleteShift(s)) continue;
-                  if (isFrozen(s)) authorizeFrozenDelete(id);
-                  try { await deleteShift(id); } catch { /* toast già mostrato */ }
-                }
-                setSelectedShiftIds(new Set());
-              }}
-                className="rounded-lg bg-rose-600/20 px-2.5 py-1.5 text-rose-300 hover:bg-rose-600/30 transition-colors">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
+          {hasHScroll && (
+            <span className="hidden md:inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 text-[0.5625rem] font-bold uppercase tracking-wider text-white/70">
+              <span className="rounded-md border border-white/25 bg-white/10 px-1 py-px font-black text-white">Shift</span>
+              + rotellina = scroll orizzontale
+            </span>
           )}
         </div>
 
         {/* Mobile: filtri su una riga sola (filtro | sett/periodo | data periodo);
             desktop: riga flessibile allineata a destra */}
-        <div className="flex w-full min-w-0 items-center gap-1.5 md:ml-auto md:h-10 md:max-h-10 md:flex-nowrap md:justify-end md:gap-2">
+        <div className="flex w-full min-w-0 items-center gap-1.5 md:ml-auto md:h-10 md:max-h-10 md:w-auto md:flex-nowrap md:justify-end md:gap-2">
           {departments.length > 1 && (
             <div className="shrink-0 md:flex-none relative">
               <button ref={deptTriggerRef} type="button" onClick={toggleDeptDropdown}
@@ -2425,13 +2389,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             {/* Riga principale: nome/data (mobile: sotto i pulsanti) */}
             <div className="flex items-center justify-between gap-2 mb-3">
               <div className="min-w-0 flex flex-wrap items-baseline gap-x-1.5">
-                <h3 className="text-base md:text-sm font-bold text-white">{selectedUser?.first_name ?? ''} {selectedUser?.last_name ?? ''}</h3>
+                <h3 className="text-lg md:text-base font-bold text-white">{selectedUser?.first_name ?? ''} {selectedUser?.last_name ?? ''}</h3>
                 {drawerIsExtraShift && (
                   <span className="inline-block mt-0.5 rounded-md bg-accent/20 px-1.5 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-accent">
                     {t.extra_shift ?? 'Turno aggiuntivo'}
                   </span>
                 )}
-                <p className="text-xs md:text-[0.6875rem] text-white font-semibold uppercase">· {format(parseISO(selectedShift.date), 'EEEE d MMMM', { locale })} — {selectedShift.start_time?.slice(0, 5)}-{selectedShift.end_time?.slice(0, 5)}</p>
+                <p className="text-lg md:text-base text-white font-semibold uppercase">· {format(parseISO(selectedShift.date), 'EEEE d MMMM', { locale })} — {selectedShift.start_time?.slice(0, 5)}-{selectedShift.end_time?.slice(0, 5)}</p>
               </div>
               <div className="hidden md:flex shrink-0 items-center gap-2">
                 {reviewQueue && (
@@ -2441,33 +2405,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     <button type="button" disabled={reviewIdx >= reviewQueue.length - 1} onClick={() => { const next = reviewIdx + 1; if (next < reviewQueue.length) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-4 w-4" /></button>
                   </>
                 )}
-                {/* Desktop: chip turni + azioni a icona */}
+                {/* Desktop: azioni a icona (l'orario del turno è già visibile a sinistra) */}
                 <div className="flex items-center gap-2">
-                  {(() => {
-                    const dayShifts = weekShifts
-                      .filter(s => s.user_id === selectedShift.user_id && s.date === selectedShift.date)
-                      .sort((a, b) => (a.start_time ?? '').localeCompare(b.start_time ?? ''));
-                    if (dayShifts.length <= 1) return null;
-                    return (
-                      <div className="flex flex-wrap gap-1">
-                        {dayShifts.map(s => {
-                          const isActive = s.id === selectedShift.id;
-                          return (
-                            <div
-                              key={s.id}
-                              className={`rounded-md px-2 py-1 text-[0.625rem] font-bold tabular-nums ${isActive ? 'bg-accent text-white' : 'bg-white/10 text-white/60'}`}
-                            >
-                              {formatShiftTimeRangeFull(s.start_time, s.end_time)}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })()}
                   {canDeleteShift(selectedShift) && !drawerDeleteConfirm && (
                     <button type="button" onClick={() => setDrawerDeleteConfirm(true)}
-                      className="rounded-lg bg-rose-600/20 p-2 text-rose-300 hover:bg-rose-600/30 transition-colors" title={t.delete ?? 'Elimina'}>
-                      <Trash2 className="h-4 w-4" />
+                      className="group flex items-center gap-0 overflow-hidden rounded-lg bg-rose-600/20 p-2 text-rose-300 transition-all duration-200 hover:gap-1.5 hover:bg-rose-600/30 hover:pr-2.5" title={t.delete ?? 'Elimina'}>
+                      <Trash2 className="h-4 w-4 shrink-0" />
+                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[5rem]">
+                        {t.delete ?? 'Elimina'}
+                      </span>
                     </button>
                   )}
                   {canDeleteShift(selectedShift) && drawerDeleteConfirm && (
@@ -2484,20 +2430,34 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   )}
                   {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
                     <button type="button" onClick={() => handleFreezeShift(selectedShift)}
-                      className="rounded-lg bg-emerald-600/20 p-2 text-emerald-300 hover:bg-emerald-600/30 transition-colors" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
-                      <Unlock className="h-4 w-4" />
+                      className="group flex items-center gap-0 overflow-hidden rounded-lg bg-emerald-600/20 p-2 text-emerald-300 transition-all duration-200 hover:gap-1.5 hover:bg-emerald-600/30 hover:pr-2.5" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
+                      <Unlock className="h-4 w-4 shrink-0" />
+                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[5rem]">
+                        {t.ts_drawer_freeze_btn ?? 'Congela'}
+                      </span>
                     </button>
                   )}
                   {isAdminOnly(currentUser) && shiftAuditEntries && shiftAuditEntries.length > 0 && (
                     <button type="button" onClick={() => setShowShiftAuditModal(true)}
-                      className="rounded-lg bg-white/10 p-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+                      className="group flex items-center gap-0 overflow-hidden rounded-lg bg-white/10 p-2 text-white/50 transition-all duration-200 hover:gap-1.5 hover:text-white hover:bg-white/20 hover:pr-2.5 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                       title={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
                       aria-label={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}>
-                      <History className="h-4 w-4" />
+                      <History className="h-4 w-4 shrink-0" />
+                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[6rem]">
+                        {(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
+                      </span>
                     </button>
                   )}
                 </div>
-                <button type="button" onClick={handleCloseDrawer} className="rounded-lg bg-white/10 p-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><X className="h-4 w-4" /></button>
+                <button type="button" onClick={handleCloseDrawer}
+                  className="group flex items-center gap-0 overflow-hidden rounded-lg bg-white/10 p-2 text-white/50 transition-all duration-200 hover:gap-1.5 hover:text-white hover:bg-white/20 hover:pr-2.5 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+                  aria-label={t.cancel ?? 'Chiudi'}
+                  title={t.cancel ?? 'Chiudi'}>
+                  <X className="h-4 w-4 shrink-0" />
+                  <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[4rem]">
+                    {t.cancel ?? 'Chiudi'}
+                  </span>
+                </button>
               </div>
             </div>
             </div>
@@ -2624,23 +2584,40 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 const breakMins = getBreakMinutesForShift({ ...selectedShift, deduct_break: deductBreak }, grossMins, shiftUser ?? null, breakRules,
                   editIn && editOut ? { breakRuleWindow: { start: editIn, end: editOut } } : undefined);
                 const netMins = Math.max(0, grossMins - breakMins);
-                const _hasAutoBreak = grossMins >= AUTO_BREAK_THRESHOLD_MINUTES && isAutoBreak;
+                const _hasAutoBreak = grossMins >= getAutoBreakThresholdMinutes() && isAutoBreak;
+                // Mostra le opzioni pausa solo se il turno può averne una:
+                // rientra nella soglia pausa automatica, ha una pausa calcolata
+                // (es. regole admin) o una pausa manuale impostata.
+                const showBreakOptions =
+                  grossMins >= getAutoBreakThresholdMinutes() ||
+                  breakMins > 0 ||
+                  (selectedShift.break_minutes ?? 0) > 0;
+                // Etichetta pausa automatica con la soglia ATTIVA configurata (es. "Pausa automatica (≥4h)");
+                // senza soglia (0) mostra solo "Pausa automatica".
+                const autoBreakLabel = (() => {
+                  const th = getAutoBreakThresholdMinutes();
+                  const raw = t.ts_deduct_break_auto ?? 'Pausa automatica (≥6h)';
+                  const base = raw.replace(/\s*\(≥[^)]*\)\s*$/, '').trim() || 'Pausa automatica';
+                  if (th <= 0) return base;
+                  const hh = th % 60 === 0 ? `${th / 60}h` : `${th}min`;
+                  return `${base} (≥${hh})`;
+                })();
                 const frozen = isFrozen(selectedShift);
                 return (
                   <div className="col-span-1 md:col-span-2">
-                    <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-pink-600/10 px-3 py-2">
-                      <div className="flex min-h-[2.375rem] items-center justify-between gap-3">
+                    <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-pink-600/10 px-2.5 py-1.5">
+                      <div className="flex min-h-[1.875rem] items-center justify-between gap-3">
                         {/* Lato sinistro: riepilogo ore */}
                         <div className="flex min-w-0 items-center gap-2">
-                          <span className="text-sm font-bold text-white tabular-nums" title={t.gross_hours ?? 'Ore lorde'}>{formatMinutesToHoursAndMinutes(grossMins)}</span>
-                          <span className="text-sm text-white/25">→</span>
-                          <span className="text-sm font-black text-emerald-400 tabular-nums" title={t.net_hours ?? 'Ore nette'}>{formatMinutesToHoursAndMinutes(netMins)}</span>
+                          <span className="text-xs font-bold text-white tabular-nums" title={t.gross_hours ?? 'Ore lorde'}>{formatMinutesToHoursAndMinutes(grossMins)}</span>
+                          <span className="text-xs text-white/25">→</span>
+                          <span className="text-xs font-black text-emerald-400 tabular-nums" title={t.net_hours ?? 'Ore nette'}>{formatMinutesToHoursAndMinutes(netMins)}</span>
                           {breakMins > 0 && (
-                            <span className="text-sm font-bold text-amber-400 tabular-nums" title={t.break_deduction ?? 'Detrazione pausa'}>−{breakMins}'</span>
+                            <span className="text-xs font-bold text-amber-400 tabular-nums" title={t.break_deduction ?? 'Detrazione pausa'}>−{breakMins}'</span>
                           )}
                         </div>
                         {/* Lato destro: pulsante Salva (affianco alla spunta) + toggle pausa */}
-                        {!frozen && (
+                        {!frozen && showBreakOptions && (
                           <div className="flex shrink-0 items-center gap-3">
                             <AnimatePresence>
                               {breakUnsaved && (
@@ -2658,7 +2635,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             </AnimatePresence>
                             <label className="flex items-center gap-2 cursor-pointer" aria-label={t.deduct_break_label ?? 'Detrae pausa'}>
                               <input type="checkbox" checked={deductBreak} onChange={handleDeductBreakToggle}
-                                className="w-4 h-4 rounded border-white/30 bg-white/10 accent-accent" />
+                                className="w-3.5 h-3.5 rounded border-white/30 bg-white/10 accent-accent" />
                               {breakUnsaved ? (
                                 <button
                                   type="button"
@@ -2669,14 +2646,14 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                                   {saving ? (t.saving ?? 'Salvataggio...') : <><Check className="h-3 w-3 inline-block mr-1" />{t.save ?? 'Salva'}</>}
                                 </button>
                               ) : (
-                                <span className="text-sm font-bold text-white whitespace-nowrap">{t.deduct_break_label ?? 'Detrae pausa'}</span>
+                                <span className="text-xs font-bold text-white whitespace-nowrap">{t.deduct_break_label ?? 'Detrae pausa'}</span>
                               )}
                             </label>
                             {deductBreak && _hasAutoBreak && (
-                              <label className="flex items-center gap-2 cursor-pointer" aria-label={t.auto_break_label ?? 'Pausa automatica (≥6h)'}>
+                              <label className="flex items-center gap-2 cursor-pointer" aria-label={autoBreakLabel}>
                                 <input type="checkbox" checked={isAutoBreak} onChange={handleAutoBreakToggle}
-                                  className="w-4 h-4 rounded border-white/30 bg-white/10 accent-accent" />
-                                <span className="text-[0.625rem] font-bold text-amber-400 whitespace-nowrap">{t.auto_break_label ?? 'Pausa automatica (≥6h)'}</span>
+                                  className="w-3.5 h-3.5 rounded border-white/30 bg-white/10 accent-accent" />
+                                <span className="text-[0.625rem] font-bold text-amber-400 whitespace-nowrap">{autoBreakLabel}</span>
                               </label>
                             )}
                           </div>
@@ -2964,7 +2941,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                         p.end + ':00'
                       );
                     }
-                    setSelectedShiftIds(new Set());
                     setDropConfirm(null);
                   }}
                   className={`rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold tabular-nums transition-colors ${
@@ -3001,7 +2977,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       keepOriginal ? undefined : p.end + ':00'
                     );
                   }
-                  setSelectedShiftIds(new Set());
                   setDropConfirm(null);
                 }}
                 className="flex-1 rounded-lg bg-amber-600/20 px-4 py-2.5 text-[0.6875rem] font-bold text-amber-300 hover:bg-amber-600/30 transition-colors uppercase tracking-wider"
@@ -3021,7 +2996,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   } else {
                     void handleDropCopyOnCell(dropConfirm.shiftIds[0], dropConfirm.targetUserId, dropConfirm.targetDate, dropConfirm.targetSlot);
                   }
-                  setSelectedShiftIds(new Set());
                   setDropConfirm(null);
                 }}
                 className="flex-1 rounded-lg bg-blue-600/20 px-4 py-2.5 text-[0.6875rem] font-bold text-blue-300 hover:bg-blue-600/30 transition-colors uppercase tracking-wider"

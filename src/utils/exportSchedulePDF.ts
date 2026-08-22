@@ -112,7 +112,23 @@ export async function exportSchedulePDF(
   } = options;
   const { jsPDF } = await import('jspdf');
 
-  const scheduleUsers = activeUsers.filter((u) => !isPurelyManagementRole(u.role));
+  // L'admin (ruolo puramente gestionale) compare nel PDF solo se ha turni assegnati
+  // nel periodo esportato — coerente con la visibilità nella griglia (isUserVisibleOnTeamSchedule).
+  const weekRangeStartStr = weekDays.length > 0 ? format(weekDays[0], 'yyyy-MM-dd') : null;
+  const weekRangeEndStr =
+    weekDays.length > 0
+      ? format(addDays(weekDays[weekDays.length - 1], 1), 'yyyy-MM-dd')
+      : null;
+  const userIdsWithShiftsInWeek = new Set<string>(
+    weekRangeStartStr && weekRangeEndStr
+      ? shifts
+          .filter((s) => s.date >= weekRangeStartStr && s.date < weekRangeEndStr)
+          .map((s) => s.user_id)
+      : []
+  );
+  const scheduleUsers = activeUsers.filter(
+    (u) => !isPurelyManagementRole(u.role) || userIdsWithShiftsInWeek.has(u.id)
+  );
   const { rowHeight, shiftFontSize, nameFontSize } = layoutForEmployeeCount(scheduleUsers.length);
 
   const weekChunks: Date[][] = [];

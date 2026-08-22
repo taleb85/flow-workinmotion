@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell } from 'lucide-react';
+import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell, Timer } from 'lucide-react';
 import { database } from '../lib/database';
 import { supabase } from '../lib/supabase';
 import { PinPadModal } from './ui/PinPadModal';
@@ -1549,6 +1549,31 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             defaultOpen={false}
             attached
           >
+            {/* Soglia durata turno per la pausa automatica (minuti; 0 = nessuna soglia) */}
+            <div className="rounded-xl border border-neutral-500 depth-card flex flex-col gap-3 p-4 mb-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/15">
+                  <Timer className="w-4 h-4 text-amber-400" />
+                </span>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-white">{t.settings_wr_auto_break_card_title}</h3>
+              </div>
+              <p className="text-[0.6875rem] text-white/55 leading-snug">{t.settings_wr_auto_break_threshold_hint}</p>
+              <div className="border-t border-white/10 pt-2">
+                <label className="block text-[0.6875rem] font-semibold text-white/55 mb-0.5">{t.settings_wr_auto_break_threshold}</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={720}
+                  step={15}
+                  value={workRules.autoBreakThresholdMinutes ?? 360}
+                  onChange={(e) =>
+                    updateWorkRule('autoBreakThresholdMinutes', Math.max(0, Math.min(720, Math.round(+e.target.value || 0))))
+                  }
+                  placeholder="0"
+                  className="w-full rounded-xl border border-neutral-500 px-2 py-1 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-accent/30"
+                />
+              </div>
+            </div>
             <div className="fluid-grid fluid-grid-2 gap-3">
               {breakRules.map((rule) => {
                 const isEnabled = rule.enabled !== false;

@@ -198,8 +198,27 @@ export function flowMealExclusionId(meal: 'lunch' | 'dinner'): string {
   return meal === 'lunch' ? FLOW_MEAL_EXCLUSION_LUNCH : FLOW_MEAL_EXCLUSION_DINNER;
 }
 
-/** Soglia turno per pausa automatica: 6 ore in minuti. */
+/** Soglia turno per pausa automatica — DEFAULT: 6 ore in minuti (configurabile da Impostazioni). */
 export const AUTO_BREAK_THRESHOLD_MINUTES = 6 * 60;
+
+/**
+ * Soglia pausa automatica ATTIVA nell'app: parte dal default (6h) e viene aggiornata
+ * dalle Work Rules (`autoBreakThresholdMinutes`) quando l'utente la modifica in Impostazioni.
+ * 0 = nessuna soglia (la pausa automatica si applica a qualsiasi durata, se coperta da fasce pasto).
+ */
+let currentAutoBreakThresholdMinutes = AUTO_BREAK_THRESHOLD_MINUTES;
+
+export function getAutoBreakThresholdMinutes(): number {
+  return currentAutoBreakThresholdMinutes;
+}
+
+export function setAutoBreakThresholdMinutes(minutes: number): void {
+  const v = Number.isFinite(minutes) ? Math.round(minutes) : AUTO_BREAK_THRESHOLD_MINUTES;
+  const clamped = v >= 0 ? v : AUTO_BREAK_THRESHOLD_MINUTES;
+  if (clamped !== currentAutoBreakThresholdMinutes) {
+    currentAutoBreakThresholdMinutes = clamped;
+  }
+}
 
 /** Solo regole con `enabled !== false` (default = attiva). */
 export function getActiveBreakRules(rules: BreakRule[] | null | undefined): BreakRule[] {
@@ -304,7 +323,7 @@ export function getBreakMinutesForShift(
   if (startStr && endStr && endMinutes <= toMinutes(startStr)) {
     return 0;
   }
-  if (grossMinutes < AUTO_BREAK_THRESHOLD_MINUTES) {
+  if (grossMinutes < getAutoBreakThresholdMinutes()) {
     return 0;
   }
   const mealKeys = getBreakLabels(startStr, endStr);
@@ -401,7 +420,7 @@ export function getBreakDeductionDisplayItems(
     startStr &&
     endStr &&
     endMinutesCheck > toMinutes(startStr) &&
-    grossMinutes >= AUTO_BREAK_THRESHOLD_MINUTES &&
+    grossMinutes >= getAutoBreakThresholdMinutes() &&
     shift.is_auto_break !== false &&
     !(shift.break_minutes != null && shift.break_minutes > 0 && shift.is_auto_break !== true)
   ) {
@@ -424,7 +443,7 @@ export function getBreakDeductionDisplayItems(
     startStr &&
     endStr &&
     endMinutesCheck > toMinutes(startStr) &&
-    grossMinutes >= AUTO_BREAK_THRESHOLD_MINUTES
+    grossMinutes >= getAutoBreakThresholdMinutes()
   ) {
     if (shift.is_auto_break === false) {
       return [];
