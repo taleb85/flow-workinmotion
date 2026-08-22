@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, useLayoutEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell, Timer } from 'lucide-react';
 import { database } from '../lib/database';
@@ -2751,6 +2751,23 @@ function BreakRuleModal({
     { id: 'apply' as const, label: t.settings_break_apply_section },
   ];
 
+  /* Misura l'altezza delle tre tab (anche quelle invisibili): su desktop la modale
+     resta fissa all'altezza massima (barra tab immobile); su mobile si espande. */
+  const panelRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [maxPanelHeight, setMaxPanelHeight] = useState<number | null>(null);
+  const setPanelRef = (id: string) => (el: HTMLDivElement | null) => {
+    panelRefs.current[id] = el;
+  };
+
+  useLayoutEffect(() => {
+    let max = 0;
+    for (const id of Object.keys(panelRefs.current)) {
+      const el = panelRefs.current[id];
+      if (el) max = Math.max(max, el.scrollHeight);
+    }
+    setMaxPanelHeight((prev) => (prev === max ? prev : max));
+  });
+
   const toggleChip = <T,>(arr: T[], val: T): T[] =>
     arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val];
 
@@ -2834,10 +2851,16 @@ function BreakRuleModal({
           </div>
         </div>
 
-        {/* Contenuto — si espande con la tab attiva (cap 90vh con scroll se serve) */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-          {activeTab === 'general' && (
-            <div className="space-y-3">
+        {/* Contenuto — su desktop altezza fissa alla tab più alta (barra tab immobile);
+            su mobile il contenuto si espande verso il basso */}
+        <div
+          className="min-h-0 flex-1 overflow-y-auto px-5 py-5 md:min-h-[var(--max-panel)]"
+          style={{ '--max-panel': maxPanelHeight ? `${maxPanelHeight}px` : undefined } as React.CSSProperties}
+        >
+          <div className="relative">
+            {/* ── Generale ── */}
+            <div ref={setPanelRef('general')} className={activeTab === 'general' ? undefined : 'invisible absolute inset-x-0 top-0'}>
+              <div className="space-y-3">
               {/* Titolo */}
               <div>
                 <label className={labelClass}>{t.settings_break_label_title}</label>
@@ -2887,10 +2910,11 @@ function BreakRuleModal({
                 <p className="text-[0.6875rem] text-white/60">{paid ? t.settings_break_paid_hint : t.settings_break_unpaid_hint}</p>
               </div>
             </div>
-          )}
+            </div>
 
-          {activeTab === 'assign' && (
-            <div className="flex flex-wrap items-start gap-x-6 gap-y-3">
+            {/* ── Assegna a ── */}
+            <div ref={setPanelRef('assign')} className={activeTab === 'assign' ? undefined : 'invisible absolute inset-x-0 top-0'}>
+              <div className="flex flex-wrap items-start gap-x-6 gap-y-3">
               <div className="flex-1 min-w-0">
                 <label className="mb-1.5 flex items-baseline gap-1 text-xs font-semibold uppercase tracking-wide text-white/55">
                   {t.settings_break_label_depts}
@@ -2937,10 +2961,11 @@ function BreakRuleModal({
                 </div>
               </div>
             </div>
-          )}
+            </div>
 
-          {activeTab === 'apply' && (
-            <div className="space-y-3">
+            {/* ── Applica a ── */}
+            <div ref={setPanelRef('apply')} className={activeTab === 'apply' ? undefined : 'invisible absolute inset-x-0 top-0'}>
+              <div className="space-y-3">
               {/* Soglia turno: condizione di applicazione (durata minima del turno) */}
               <div className="space-y-3 rounded-xl border border-white/10 bg-white/5/70 p-3">
                 <div className="flex items-center justify-between gap-3">
@@ -3014,7 +3039,8 @@ function BreakRuleModal({
                 </div>
               </div>
             </div>
-          )}
+            </div>
+          </div>
         </div>
 
         {/* Footer buttons — fissi sotto il contenuto */}
