@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell, Timer } from 'lucide-react';
+import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell, Timer, Utensils, Pizza, Soup, Salad, Sandwich, Cake, Cookie, GlassWater, Wine, Sun, Moon, type LucideIcon } from 'lucide-react';
 import { database } from '../lib/database';
 import { supabase } from '../lib/supabase';
 import { PinPadModal } from './ui/PinPadModal';
@@ -67,6 +67,26 @@ import { generatePresenceQrDataUrl, openPresenceQrPrintWindow } from '../utils/q
 import { buildSignedPresenceQrPayload } from '../utils/presenceProofVerification';
 
 const SETTINGS_TEAM_EXPANDED_KEY = 'osteria_settings_team_expanded';
+
+/* Icone disponibili per le regole pausa (chiave → componente lucide) */
+const BREAK_RULE_ICONS: Record<string, LucideIcon> = {
+  coffee: Coffee,
+  utensils: Utensils,
+  pizza: Pizza,
+  soup: Soup,
+  salad: Salad,
+  sandwich: Sandwich,
+  cake: Cake,
+  cookie: Cookie,
+  glasswater: GlassWater,
+  wine: Wine,
+  sun: Sun,
+  moon: Moon,
+};
+
+function getBreakRuleIconComponent(iconKey?: string): LucideIcon {
+  return (iconKey && BREAK_RULE_ICONS[iconKey]) || Coffee;
+}
 
 function _readTeamSectionExpanded(): boolean {
   if (typeof window === 'undefined') return true;
@@ -1671,7 +1691,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   >
                     <div className="flex items-center gap-2">
                       <span className="w-8 h-8 rounded-xl bg-amber-500/15 flex items-center justify-center flex-shrink-0">
-                        <Coffee className="w-4 h-4 text-amber-400" />
+                        {(() => {
+                          const RuleIcon = getBreakRuleIconComponent(rule.icon);
+                          return <RuleIcon className="w-4 h-4 text-amber-400" />;
+                        })()}
                       </span>
                       <h3
                         className={`flex-1 truncate text-xs font-bold uppercase tracking-wider ${isEnabled ? 'text-white' : 'text-white/40'}`}
@@ -2742,6 +2765,7 @@ function BreakRuleModal({
   const [validFrom, setValidFrom] = useState(rule?.validFrom ?? '');
   const [validTo, setValidTo] = useState(rule?.validTo ?? '');
   const [daysOfWeek, setDaysOfWeek] = useState<DayOfWeek[]>(rule?.daysOfWeek ?? []);
+  const [icon, setIcon] = useState(rule?.icon ?? 'coffee');
 
   /* Tab per sezione: il contenuto si espande con la tab attiva */
   const [activeTab, setActiveTab] = useState<'general' | 'assign' | 'apply'>('general');
@@ -2777,6 +2801,7 @@ function BreakRuleModal({
     onSave({
       id: rule?.id ?? makeId(),
       title: title.trim(),
+      icon,
       breakStart,
       breakEnd,
       minShiftMinutes: Math.round(minHours * 60),
@@ -2873,6 +2898,28 @@ function BreakRuleModal({
             >
               {activeTab === 'general' && (
             <div className="space-y-3">
+              {/* Icona */}
+              <div>
+                <label className={labelClass}>{t.settings_break_icon_label}</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {Object.entries(BREAK_RULE_ICONS).map(([key, Icon]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setIcon(key)}
+                      aria-label={key}
+                      title={key}
+                      className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
+                        icon === key
+                          ? 'border-accent bg-accent/20 text-accent'
+                          : 'border-neutral-500 text-white/60 surface-ghost-interactive hover:border-accent hover:text-accent'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </button>
+                  ))}
+                </div>
+              </div>
               {/* Titolo */}
               <div>
                 <label className={labelClass}>{t.settings_break_label_title}</label>

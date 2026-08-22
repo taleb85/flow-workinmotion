@@ -7,6 +7,8 @@ export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export interface BreakRule {
   id: string;
   title: string;
+  /** Chiave icona associata alla regola (es. 'coffee', 'utensils'); assente = default */
+  icon?: string;
   /** Inizio finestra pausa (HH:mm) */
   breakStart: string;
   /** Fine finestra pausa (HH:mm) */
