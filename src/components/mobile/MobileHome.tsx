@@ -68,14 +68,6 @@ function punchHHMM(ts?: string | null): string | null {
     return null;
   }
 }
-/** Stato approvazione turno → badge design */
-function approvalBadge(status: string, t: Record<string, string>): { label: string; cls: string } | null {
-  if (status === 'approved' || status === 'confirmed') return { label: t.home_status_approved ?? 'Confermato', cls: 'flow-badge-success' };
-  if (status === 'draft') return { label: t.status_draft ?? 'Bozza', cls: 'flow-badge-neutral' };
-  if (status === 'absent') return { label: t.status_absent ?? 'Assente', cls: 'flow-badge-error' };
-  return null;
-}
-
 export default function MobileHome({
   greetingText,
   todayLabel,
@@ -263,7 +255,6 @@ export default function MobileHome({
           <div className="flex flex-col gap-2 mt-3">
             {todayWorkShifts.map((s) => {
               const isActive = inProgress?.shift.id === s.id;
-              const badge = approvalBadge(s.approval_status, t);
               return (
                 <div
                   key={s.id}
@@ -278,7 +269,6 @@ export default function MobileHome({
                       <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-white/50">
                         {s.type === 'lunch' ? 'Pranzo' : 'Cena'}
                       </span>
-                      {badge && <span className={`flow-badge ${badge.cls}`}>{badge.label}</span>}
                     </span>
                   </div>
                   {isActive && (
