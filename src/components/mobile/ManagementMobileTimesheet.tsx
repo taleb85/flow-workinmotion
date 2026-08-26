@@ -4,7 +4,7 @@ import {
   format, startOfWeek, endOfWeek, isSameWeek,
   eachDayOfInterval, isToday, parseISO,
   addWeeks, startOfDay, endOfDay, isWithinInterval, getISOWeek,
-  startOfMonth, endOfMonth,
+  startOfMonth, endOfMonth, addDays,
 } from 'date-fns';
 import { it, es, enUS } from 'date-fns/locale';
 import { Clock, ChevronLeft, ChevronRight, Users, Check, X } from 'lucide-react';
@@ -653,6 +653,19 @@ export default function ManagementMobileTimesheet({
 
   const range = useMemo(() => getRange(navMode, navOffset), [getRange, navMode, navOffset]);
 
+  /** Limita la navigazione al mese corrente (stessa regola della vista staff). */
+  const navLimits = useMemo(() => {
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+    const prev = { end: addDays(range.end, -7) };
+    const next = { start: addDays(range.start, 7) };
+    return {
+      disablePrev: prev.end < monthStart,
+      disableNext: next.start > monthEnd,
+    };
+  }, [range]);
+
   const rangeLabel = navMode === 'week'
     ? `S.${getISOWeek(range.start)} · ${format(range.start, 'd MMM', { locale })} – ${format(range.end, 'd MMM', { locale })}`
     : `${format(range.start, 'd MMM', { locale })} – ${format(range.end, 'd MMM yy', { locale })}`;
@@ -758,16 +771,16 @@ export default function ManagementMobileTimesheet({
           {t.today}
         </button>
         <div className="flex items-center border border-white/40 rounded-2xl overflow-hidden flex-1 min-w-0" style={{ background: 'transparent' }}>
-          <button type="button" onClick={() => setNavOffset(o => o - 1)}
-            className="flex items-center justify-center h-8 md:h-9 w-8 md:w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-r border-white/20 active:bg-white/80">
+          <button type="button" onClick={() => setNavOffset(o => o - 1)} disabled={navLimits.disablePrev}
+            className="flex items-center justify-center h-8 md:h-9 w-8 md:w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-r border-white/20 active:bg-white/80 disabled:opacity-30 disabled:pointer-events-none">
             <ChevronLeft className="h-3.5 md:h-4 w-3.5 md:w-4" />
           </button>
           <div className="flex-1 flex items-center justify-center gap-1 px-1.5 md:px-2 min-w-0" style={{ color: '#ffffff' }}>
             <Clock className="h-2.5 md:h-3 w-2.5 md:w-3 shrink-0" />
             <span className="text-[0.625rem] md:text-[0.6875rem] font-bold tabular-nums truncate" title={rangeLabel}>{rangeLabel}</span>
           </div>
-          <button type="button" onClick={() => setNavOffset(o => o + 1)}
-            className="flex items-center justify-center h-8 md:h-9 w-8 md:w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-l border-white/20 active:bg-white/80">
+          <button type="button" onClick={() => setNavOffset(o => o + 1)} disabled={navLimits.disableNext}
+            className="flex items-center justify-center h-8 md:h-9 w-8 md:w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-l border-white/20 active:bg-white/80 disabled:opacity-30 disabled:pointer-events-none">
             <ChevronRight className="h-3.5 md:h-4 w-3.5 md:w-4" />
           </button>
         </div>
