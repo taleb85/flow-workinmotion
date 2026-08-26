@@ -148,12 +148,12 @@ body {
   padding-right: 0 !important;
 }
 
-/* ═══════════════ BOTTOM NAV (vetro a tutta larghezza — come da design) ═══════════════ */
+/* ═══════════════ BOTTOM NAV (trasparente — nessun vetro) ═══════════════ */
 .bottom-nav-glass-edge {
-  background: var(--flow-navbar-bg) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-  backdrop-filter: blur(28px) saturate(180%) !important;
-  border-top: 1px solid var(--flow-border) !important;
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border-top: none !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
   padding-bottom: env(safe-area-inset-bottom, 0px) !important;
@@ -235,12 +235,6 @@ h1, h2, h3, .text-2xl, .text-xl, .text-lg, .font-bold { letter-spacing: -0.02em 
 *:focus-visible {
   outline: 2px solid var(--flow-ring) !important;
   outline-offset: 2px !important;
-}
-
-/* ═══════════════ iOS: blur ridotti ═══════════════ */
-html[data-ios="1"] .bottom-nav-glass-edge .top-tabbar {
-  -webkit-backdrop-filter: blur(14px) !important;
-  backdrop-filter: blur(14px) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
