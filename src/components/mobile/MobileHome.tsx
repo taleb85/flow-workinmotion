@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useState } from 'react';
-import { Play, LogOut, RotateCcw, ChevronRight } from 'lucide-react';
+import { Play, LogOut, RotateCcw } from 'lucide-react';
 import { useT } from '../../hooks/useT';
 import { useAppUser } from '../../context/AppContext';
 import { getDateLocale } from '../../utils/translations';
@@ -40,7 +40,6 @@ export interface MobileHomeProps {
   punchBusy: boolean;
   onStart: () => void;
   onEnd: () => void;
-  onSeeAllShifts?: () => void;
   todayWorkShifts: Shift[];
   /** Full list of user shifts — used to build the weekly preview */
   myShifts?: Shift[];
@@ -101,7 +100,6 @@ export default function MobileHome({
   punchBusy,
   onStart,
   onEnd,
-  onSeeAllShifts,
   onRefresh,
   todayWorkShifts,
   myShifts = [],
@@ -294,13 +292,6 @@ export default function MobileHome({
           </div>
         ) : (
           <p className="text-base font-medium text-white/50 mt-2">{noShiftsHint}</p>
-        )}
-
-        {onSeeAllShifts && (
-          <button type="button" onClick={onSeeAllShifts} className="flow-btn-ghost-link">
-            Vedi tutti i turni
-            <ChevronRight className="w-4 h-4" />
-          </button>
         )}
       </section>
 

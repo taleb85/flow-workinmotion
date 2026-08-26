@@ -86,7 +86,7 @@ export default function MobileStaffDashboard({
   monthDaysWorked: monthDaysWorkedProp,
   weekCapMinutes: weekCapMinutesProp,
   onRefresh,
-  onTabChange,
+  onTabChange: _onTabChange,
 }: MobileStaffDashboardProps) {
   const t = getTranslations(language);
   const tv = t as Record<string, string>;
@@ -262,7 +262,6 @@ export default function MobileStaffDashboard({
             punchBusy={punchBusy}
             onStart={() => { heavyHaptic(); void smartExecute(); }}
             onEnd={demo ? () => {} : () => void smartExecute()}
-            onSeeAllShifts={() => onTabChange?.('turni')}
             onRefresh={onRefresh}
             todayWorkShifts={demo ? demo.todayShifts : todayWorkShifts}
             myShifts={demo ? demo.shifts : myShifts}
