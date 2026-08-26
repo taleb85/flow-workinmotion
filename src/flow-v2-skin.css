@@ -199,6 +199,17 @@ body {
   }
 }
 
+/* ═══════════════ STAFF HOME: card trasparenti (niente vetro) ═══════════════
+   Direzione "chiaro": le sezioni della home staff usano superfici trasparenti
+   con bordo sottile, senza sfondo glass/blur/ombra. */
+.staff-home-screen .flow-card {
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
 /* ═══════════════ CARD (vetro Apple) ═══════════════ */
 body .bg-white:not(input):not(textarea):not(select):not([class*="modal"]):not([class*="pin"]):not([class*="kiosk"]) {
   background: var(--flow-card) !important;

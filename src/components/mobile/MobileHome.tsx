@@ -176,7 +176,7 @@ export default function MobileHome({
 
   return (
     <div
-      className="flex flex-col gap-4 px-4 py-3 pb-12 relative shift-mobile-safe"
+      className="flex flex-col gap-4 px-4 py-3 pb-12 relative shift-mobile-safe staff-home-screen"
       style={{ transform: pullDistance > 0 ? `translateY(${pullDistance}px)` : undefined, transition: pullDistance === 0 ? 'transform 0.25s ease-out' : undefined }}
     >
       {/* Pull-to-refresh indicator */}
