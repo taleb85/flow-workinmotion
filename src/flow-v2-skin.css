@@ -148,11 +148,11 @@ body {
   padding-right: 0 !important;
 }
 
-/* ═══════════════ BOTTOM NAV (trasparente — nessun vetro) ═══════════════ */
+/* ═══════════════ BOTTOM NAV (vetro dinamico — effetto solo in sovrapposizione) ═══════════════ */
 .bottom-nav-glass-edge {
   background: transparent !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
+  -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+  backdrop-filter: blur(18px) saturate(180%) !important;
   border-top: none !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
