@@ -270,7 +270,10 @@ export default function MobileHome({
         </div>
       </section>
 
-      {/* ── Turno di oggi ───────────────────────────────────────────── */}
+      {/* ── Turno di oggi ─────────────────────────────────────────────
+          Nascosta quando sei in turno: il turno è già mostrato nella card
+          Timbratura (orario + tipo), evitando la ripetizione. */}
+      {!inProgress && (
       <section className="flow-card" aria-label="Turno di oggi">
         <span className="flow-section-label">Turno di oggi</span>
         {shiftRange ? (
@@ -315,6 +318,7 @@ export default function MobileHome({
           </button>
         )}
       </section>
+      )}
 
       {/* ── Prossimi turni ──────────────────────────────────────────── */}
       <section className="flow-card" aria-label="Prossimi turni">
