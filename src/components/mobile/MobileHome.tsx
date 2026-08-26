@@ -31,7 +31,6 @@ export interface MobileHomeProps {
   todayWorkShiftsCount: number;
   noShiftsHint: string;
   tapStartHint: string;
-  shiftTimeHint: string | null;
   inProgressLabel: string;
   savingLabel: string;
   startLabel: string;
@@ -93,7 +92,6 @@ export default function MobileHome({
   todayWorkShiftsCount,
   noShiftsHint,
   tapStartHint,
-  shiftTimeHint,
   inProgressLabel,
   savingLabel,
   startLabel,
@@ -125,10 +123,6 @@ export default function MobileHome({
   const clockHHMM = `${String(clock.getHours()).padStart(2, '0')}:${String(clock.getMinutes()).padStart(2, '0')}`;
 
   const today = todayStr ?? format(new Date(), 'yyyy-MM-dd');
-  const firstShift = todayWorkShifts[0];
-  const shiftRange = firstShift
-    ? `${firstShift.start_time.slice(0, 5)} → ${firstShift.end_time?.slice(0, 5) ?? '…'}`
-    : null;
 
   // ── KPI ────────────────────────────────────────────────────────────
   const todayMinutes = todayWorkShifts.reduce((sum, s) => {
@@ -165,8 +159,6 @@ export default function MobileHome({
         : 'Nessun turno oggi';
 
   const bigClock = inProgress && elapsedLabel ? elapsedLabel : clockHHMM;
-
-  const shiftBadge = firstShift ? approvalBadge(firstShift.approval_status, t) : null;
 
   const dayLabel = (dateStr: string) => {
     const d = parseISO(dateStr);
@@ -266,43 +258,40 @@ export default function MobileHome({
         </div>
       </section>
 
-      {/* ── Turno di oggi ─────────────────────────────────────────────
-          Nascosta quando sei in turno: il turno è già mostrato nella card
-          Timbratura (orario + tipo), evitando la ripetizione. */}
-      {!inProgress && (
+      {/* ── Turno di oggi: tutti i turni, evidenziato quello in corso ── */}
       <section className="flow-card" aria-label="Turno di oggi">
         <span className="flow-section-label">Turno di oggi</span>
-        {shiftRange ? (
-          <>
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              {firstShift && (
-                <span className="flow-badge flow-badge-neutral">
-                  {firstShift.type === 'lunch' ? 'Pranzo' : 'Cena'}
-                </span>
-              )}
-              <span className="flow-time text-white">{shiftRange}</span>
-              {shiftBadge && <span className={`flow-badge ${shiftBadge.cls}`}>{shiftBadge.label}</span>}
-            </div>
-            {shiftTimeHint && (
-              <p className="flow-label mt-1.5">{shiftTimeHint}</p>
-            )}
-
-            {/* Turni extra oggi (se più di uno) */}
-            {!inProgress && todayWorkShifts.length > 1 && (
-              <div className="flex flex-col gap-1.5 mt-3">
-                {todayWorkShifts.slice(1).map((s) => (
-                  <div key={s.id} className="flex items-center justify-between py-2 border-t border-white/10">
-                    <span className="text-base font-medium text-white tabular-nums">
+        {todayWorkShifts.length > 0 ? (
+          <div className="flex flex-col gap-2 mt-3">
+            {todayWorkShifts.map((s) => {
+              const isActive = inProgress?.shift.id === s.id;
+              const badge = approvalBadge(s.approval_status, t);
+              return (
+                <div
+                  key={s.id}
+                  className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 ${isActive ? '' : 'border-white/10'}`}
+                  style={isActive ? { borderColor: 'rgba(10, 132, 255, 0.6)', background: 'rgba(10, 132, 255, 0.10)' } : undefined}
+                >
+                  <div className="min-w-0">
+                    <span className="block text-base font-semibold text-white tabular-nums">
                       {s.start_time.slice(0, 5)} – {s.end_time?.slice(0, 5) ?? '…'}
                     </span>
-                    <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-white/50">
-                      {s.type === 'lunch' ? 'Pranzo' : 'Cena'}
+                    <span className="mt-0.5 flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-white/50">
+                        {s.type === 'lunch' ? 'Pranzo' : 'Cena'}
+                      </span>
+                      {badge && <span className={`flow-badge ${badge.cls}`}>{badge.label}</span>}
                     </span>
                   </div>
-                ))}
-              </div>
-            )}
-          </>
+                  {isActive && (
+                    <span className="flow-badge flow-badge-info shrink-0">
+                      {t.legend_in_progress ?? 'In corso'}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         ) : (
           <p className="text-base font-medium text-white/50 mt-2">{noShiftsHint}</p>
         )}
@@ -314,7 +303,6 @@ export default function MobileHome({
           </button>
         )}
       </section>
-      )}
 
       {/* ── Prossimi turni ──────────────────────────────────────────── */}
       <section className="flow-card" aria-label="Prossimi turni">

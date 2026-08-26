@@ -229,11 +229,6 @@ export default function MobileStaffDashboard({
     };
   }, [demoMode, todayStr, user.id]);
 
-  const shiftTimeHint =
-    inProgress && elapsedLabel
-      ? `${inProgress.shift.start_time.slice(0, 5)} – ${inProgress.shift.end_time?.slice(0, 5) ?? '…'} · ${inProgress.shift.type === 'lunch' ? t.lunch : t.dinner}`
-      : null;
-
   const tabSpinner = (
     <div className="flex items-center justify-center min-h-[12.5rem]">
       <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -258,7 +253,6 @@ export default function MobileStaffDashboard({
             todayWorkShiftsCount={demo ? demo.todayShifts.length : todayWorkShifts.length}
             noShiftsHint={t.no_shifts_scheduled}
             tapStartHint={tv.mobile_dash_tap_start ?? 'Tocca Inizia per timbrare l’entrata.'}
-            shiftTimeHint={demo ? '08:00 – 13:00 · Pranzo' : shiftTimeHint}
             inProgressLabel={t.home_status_in_shift}
             savingLabel={t.saving}
             startLabel={tv.mobile_dash_start ?? 'Inizia'}
