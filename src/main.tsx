@@ -23,6 +23,8 @@ import App from './App.tsx';
 import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { TenantProvider } from './context/TenantContext';
 import './index.css';
+// FLOW v2 · Skin Apple (System dark) — layer di layout sopra index.css
+import './flow-v2-skin.css';
 
 // ── Rilevamento aggiornamento Service Worker ─────────────────────────────────
 // Quando un nuovo SW prende il controllo (dopo un deploy):

@@ -1,0 +1,234 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FLOW v2 · Skin Apple (System dark) — applicata sopra index.css
+   Non modifica la logica dell'app: ridefinisce token, sfondo, superfici,
+   header, bottom nav e componenti principali.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: dark;
+
+  /* ── Superfici Apple (dark) ─────────────────────────── */
+  --flow-background: #1c1c1e;
+  --flow-foreground: #f5f5f7;
+  --flow-card: rgba(44, 44, 46, 0.72);
+  --flow-card-foreground: #f5f5f7;
+  --flow-popover: rgba(44, 44, 46, 0.92);
+  --flow-popover-foreground: #f5f5f7;
+  --flow-muted: rgba(120, 120, 128, 0.24);
+  --flow-muted-foreground: #98989d;
+  --flow-surface-2: rgba(120, 120, 128, 0.3);
+  --flow-border: rgba(255, 255, 255, 0.14);
+  --flow-input: rgba(120, 120, 128, 0.2);
+  --flow-ring: #0a84ff;
+
+  /* ── Brand (Apple blue) ─────────────────────────────── */
+  --flow-primary: #0a84ff;
+  --flow-primary-foreground: #ffffff;
+  --flow-primary-hover: #409cff;
+  --flow-primary-soft: rgba(10, 132, 255, 0.18);
+  --flow-primary-softer: rgba(10, 132, 255, 0.1);
+
+  /* ── Stati semantici Apple ──────────────────────────── */
+  --state-success: #30d158;
+  --state-warning: #ffd60a;
+  --state-error: #ff453a;
+  --state-info: #0a84ff;
+  --flow-success-soft: rgba(48, 209, 88, 0.16);
+  --flow-warning-soft: rgba(255, 214, 10, 0.14);
+  --flow-error-soft: rgba(255, 69, 58, 0.14);
+  --flow-info-soft: rgba(10, 132, 255, 0.16);
+
+  /* ── Chrome app (vetro) ─────────────────────────────── */
+  --flow-header-bg: rgba(28, 28, 30, 0.72);
+  --flow-navbar-bg: rgba(28, 28, 30, 0.78);
+
+  /* ── Raggi Apple ────────────────────────────────────── */
+  --flow-radius-sm: 8px;
+  --flow-radius-md: 12px;
+  --flow-radius-lg: 16px;
+  --flow-radius-pill: 999px;
+
+  /* ── Tipografia SF Pro ──────────────────────────────── */
+  --flow-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+
+  /* ── Mesh di sfondo (dark) ──────────────────────────── */
+  --flow-mesh:
+    radial-gradient(at 12% 8%, rgba(120, 60, 140, 0.32) 0, transparent 45%),
+    radial-gradient(at 88% 12%, rgba(40, 90, 160, 0.32) 0, transparent 45%),
+    radial-gradient(at 78% 88%, rgba(150, 80, 50, 0.26) 0, transparent 45%),
+    radial-gradient(at 20% 82%, rgba(80, 60, 140, 0.26) 0, transparent 45%);
+
+  /* ── Ombre ──────────────────────────────────────────── */
+  --flow-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -14px rgba(0, 0, 0, 0.5);
+  --flow-shadow-float: 0 28px 56px -18px rgba(0, 0, 0, 0.6);
+
+  /* ── Mappa token esistenti app → palette Apple ──────── */
+  --bg-primary: #1c1c1e;
+  --bg-surface: transparent;
+  --bg-surface-hover: rgba(120, 120, 128, 0.24);
+  --bg-surface-solid: rgba(120, 120, 128, 0.18);
+  --bg-popover-solid: rgb(28, 28, 30);
+  --border-color: rgba(255, 255, 255, 0.14);
+  --text-primary: #f5f5f7;
+  --text-secondary: #f5f5f7;
+  --text-muted: #98989d;
+  --text-on-glass: #f5f5f7;
+  --text-on-glass-secondary: rgba(245, 245, 247, 0.62);
+
+  --brand: #0a84ff;
+  --brand-from: #0a84ff;
+  --brand-to: #409cff;
+  --brand-gradient: #0a84ff;
+  --brand-rgb: 10 132 255;
+  --brand-500: #0a84ff;
+  --brand-600: #0071e3;
+  --brand-hover: #409cff;
+  --brand-dark: #0071e3;
+  --brand-light: #64b1ff;
+  --brand-muted: rgba(10, 132, 255, 0.18);
+  --accent: #0a84ff;
+  --accent-hover: #409cff;
+  --accent-dark: #0071e3;
+  --accent-light: #64b1ff;
+  --color-accent: #0a84ff;
+  --accent-blue: #0a84ff;
+  --ring: #0a84ff;
+  --ring-color: #0a84ff;
+
+  font-family: var(--flow-font-sans);
+}
+
+html {
+  background: var(--flow-background) !important;
+  background-image: var(--flow-mesh) !important;
+  background-attachment: fixed !important;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--flow-background) !important;
+  background-image: var(--flow-mesh) !important;
+  background-attachment: fixed !important;
+  color-scheme: dark;
+  font-family: var(--flow-font-sans);
+}
+
+#root { background: transparent !important; }
+
+/* ── Nasconde l'aurora animata, sostituita dal mesh ── */
+.pointer-events-none.fixed.inset-0.z-0.overflow-hidden { display: none !important; }
+
+/* ── Aree principali: sfondo mesh coerente ── */
+[aria-label="Accesso"],
+[aria-label="Installazione app"],
+[aria-label="Applicazione"],
+[aria-label="Caricamento in corso"] {
+  background-color: var(--flow-background) !important;
+  background-image: var(--flow-mesh) !important;
+  background-attachment: fixed !important;
+}
+
+/* ═══════════════ HEADER (iOS) ═══════════════ */
+.app-header {
+  background: transparent !important;
+  border-bottom: none !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+.app-header .flow-brand-header {
+  background: var(--flow-header-bg) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
+  backdrop-filter: blur(22px) saturate(180%) !important;
+  border: 1px solid var(--flow-border) !important;
+  border-radius: var(--flow-radius-lg) !important;
+  box-shadow: var(--flow-shadow-card) !important;
+  padding-left: 0.875rem !important;
+  padding-right: 0.875rem !important;
+}
+
+/* ═══════════════ BOTTOM NAV (iOS pill) ═══════════════ */
+.bottom-nav-glass-edge {
+  background: transparent !important;
+  border-top: none !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem) !important;
+}
+.bottom-nav-glass-edge .top-tabbar {
+  background: var(--flow-navbar-bg) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
+  backdrop-filter: blur(22px) saturate(180%) !important;
+  border: 1px solid var(--flow-border) !important;
+  border-radius: 999px !important;
+  box-shadow: var(--flow-shadow-card) !important;
+  padding: 0.25rem !important;
+}
+.top-tabbar .top-tab {
+  background: transparent !important;
+  border-radius: 999px !important;
+  border-top: none !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  color: var(--flow-muted-foreground) !important;
+  gap: 4px;
+  transition: background 0.18s ease, color 0.18s ease !important;
+}
+.top-tabbar .top-tab[style*="color: white"],
+.top-tabbar .top-tab[style*="borderTop: 1px solid white"] {
+  background: var(--flow-primary-soft) !important;
+  color: var(--flow-primary) !important;
+  border-top: none !important;
+}
+
+/* ═══════════════ CARD (vetro Apple) ═══════════════ */
+body .bg-white:not(input):not(textarea):not(select):not([class*="modal"]):not([class*="pin"]):not([class*="kiosk"]) {
+  background: var(--flow-card) !important;
+  border: 1px solid var(--flow-border) !important;
+  border-radius: var(--flow-radius-lg) !important;
+  box-shadow: var(--flow-shadow-card) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+}
+body .bg-slate-50:not(input):not(textarea):not(select) { background-color: var(--flow-muted) !important; }
+body .bg-slate-100:not(input):not(textarea):not(select) { background-color: var(--flow-surface-2) !important; }
+body .bg-gray-50:not(input):not(textarea):not(select) { background-color: var(--flow-muted) !important; }
+body .bg-gray-100:not(input):not(textarea):not(select) { background-color: var(--flow-surface-2) !important; }
+
+.liquid-glass {
+  background: var(--flow-card) !important;
+  border: 1px solid var(--flow-border) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  box-shadow: var(--flow-shadow-card) !important;
+}
+
+/* ═══════════════ PULSANTI ═══════════════ */
+.bg-accent, .bg-brand, .bg-primary {
+  background-color: var(--brand) !important;
+  color: #ffffff !important;
+  border-radius: var(--flow-radius-pill) !important;
+}
+.text-accent, .text-brand { color: var(--brand) !important; }
+.border-accent, .border-brand { border-color: var(--brand) !important; }
+
+/* Bottoni ghost/secondari → pill glass */
+button.rounded-xl,
+button.rounded-lg,
+button[class*="rounded-"] {
+  border-radius: var(--flow-radius-pill) !important;
+}
+
+/* ═══════════════ TESTI ═══════════════ */
+h1, h2, h3, .text-2xl, .text-xl, .text-lg, .font-bold { letter-spacing: -0.02em !important; }
+
+*:focus-visible {
+  outline: 2px solid var(--flow-ring) !important;
+  outline-offset: 2px !important;
+}
+
+/* ═══════════════ iOS: blur ridotti ═══════════════ */
+html[data-ios="1"] .app-header .flow-brand-header,
+html[data-ios="1"] .bottom-nav-glass-edge .top-tabbar {
+  -webkit-backdrop-filter: blur(14px) !important;
+  backdrop-filter: blur(14px) !important;
+}
