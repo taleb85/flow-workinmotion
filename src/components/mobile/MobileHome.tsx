@@ -355,6 +355,7 @@ export default function MobileHome({
           monthWorkedMins={monthlyMinutes}
           monthDaysWorked={monthDaysWorked}
           hoursFormat="hhmm"
+          hideWeek
           labels={{
             title: statsLabels.title,
             week: t.ts_period_week ?? 'Settimana',

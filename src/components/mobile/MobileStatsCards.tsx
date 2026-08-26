@@ -21,6 +21,8 @@ export interface MobileStatsCardsProps {
   monthWorkedMins: number;
   monthDaysWorked: number;
   hoursFormat?: 'short' | 'hhmm';
+  /** Nasconde la card settimana (quando la settimana è già mostrata altrove). */
+  hideWeek?: boolean;
   labels: {
     title: string;
     week: string;
@@ -35,6 +37,7 @@ export default function MobileStatsCards({
   monthWorkedMins,
   monthDaysWorked,
   hoursFormat = 'short',
+  hideWeek = false,
   labels,
 }: MobileStatsCardsProps) {
   const pct = weekCapMins > 0 ? Math.min(100, Math.round((weekWorkedMins / weekCapMins) * 100)) : 0;
@@ -43,22 +46,24 @@ export default function MobileStatsCards({
   const sizeCls = hoursFormat === 'hhmm' ? 'text-lg' : 'text-xl';
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className={`grid gap-4 ${hideWeek ? 'grid-cols-1' : 'grid-cols-2'}`}>
       {/* CARD SETTIMANA */}
-      <div className="p-5 rounded-2xl border border-neutral-500" style={{ background: 'transparent' }}>
-        <p className="text-xs font-medium text-white/50 uppercase mb-1">
-          {labels.week}
-        </p>
-        <p className={`${sizeCls} font-bold text-white mb-3 tabular-nums whitespace-nowrap`}>
-          {fmt(weekWorkedMins)}
-        </p>
-        <div className="w-full bg-white/15 rounded-full h-2">
-          <div
-            className="h-full rounded-full bg-white/40 transition-[width] duration-700 ease-out"
-            style={{ width: `${pct}%` }}
-          />
+      {!hideWeek && (
+        <div className="p-5 rounded-2xl border border-neutral-500" style={{ background: 'transparent' }}>
+          <p className="text-xs font-medium text-white/50 uppercase mb-1">
+            {labels.week}
+          </p>
+          <p className={`${sizeCls} font-bold text-white mb-3 tabular-nums whitespace-nowrap`}>
+            {fmt(weekWorkedMins)}
+          </p>
+          <div className="w-full bg-white/15 rounded-full h-2">
+            <div
+              className="h-full rounded-full bg-white/40 transition-[width] duration-700 ease-out"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* CARD MESE */}
       <div className="p-5 rounded-2xl border border-neutral-500" style={{ background: 'transparent' }}>
