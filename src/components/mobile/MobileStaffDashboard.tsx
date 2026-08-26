@@ -18,6 +18,7 @@ import MobileStaffShifts from './MobileStaffShifts';
 import { calculateUserStats } from '../../utils/stats';
 import { hapticLight as lightHaptic, hapticHeavy as heavyHaptic } from '../../utils/haptics';
 import { useSmartPunchAction, type EnrichedShift } from '../../hooks/useSmartPunchAction';
+import { isDemoMode } from '../../utils/demoData';
 
 // ══ DATI TEST per anteprima KPI ═══════════════════════════════════════════
 // Attivazione: aggiungi ?demoKpi all'URL oppure localStorage 'flow-demo-kpi'='1'.
@@ -189,14 +190,7 @@ export default function MobileStaffDashboard({
   };
 
   // ── MODALITÀ DEMO KPI (anteprima con dati di test) ─────────────────────
-  const demoMode = useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      return localStorage.getItem('flow-demo-kpi') === '1' || new URLSearchParams(window.location.search).has('demoKpi');
-    } catch {
-      return false;
-    }
-  }, []);
+  const demoMode = isDemoMode();
 
   const demo = useMemo(() => {
     if (!demoMode) return null;

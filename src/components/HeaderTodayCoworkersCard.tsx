@@ -13,6 +13,7 @@ import {
   avatarFocusToObjectPosition,
 } from '../utils/profilePhotoStorage';
 import type { Shift } from '../types';
+import { isDemoMode } from '../utils/demoData';
 
 function startMinutes(s: Shift): number {
   const t = (s.start_time || '00:00').slice(0, 5);
@@ -87,9 +88,38 @@ export default function HeaderTodayCoworkersCard() {
 
   const isVisibleByAdmin = featureFlags?.visibility_management !== false;
 
+  const demoMode = isDemoMode();
+
   const rows = useMemo(() => {
     if (!currentUser || !isVisibleByAdmin) return [];
     const todayStr = format(new Date(), 'yyyy-MM-dd');
+
+    // ── Anteprima demo: colleghi reali con turni di esempio ────────────
+    if (demoMode) {
+      const others = users
+        .filter((u) => u.id !== currentUser.id && isUserVisibleOnTeamSchedule(u))
+        .slice(0, 3);
+      const mkShift = (id: string, userId: string, start: string, end: string, type: 'lunch' | 'dinner'): Shift => ({
+        id,
+        user_id: userId,
+        date: todayStr,
+        start_time: start,
+        end_time: end,
+        type,
+        approval_status: 'confirmed',
+      });
+      return others.map((u, i) => {
+        const shifts: Shift[] = [
+          mkShift(`demo-cw-${u.id}-1`, u.id, i % 2 === 0 ? '08:00' : '11:30', i % 2 === 0 ? '13:30' : '16:00', i % 2 === 0 ? 'lunch' : 'dinner'),
+        ];
+        if (i % 2 === 0) {
+          shifts.push(mkShift(`demo-cw-${u.id}-2`, u.id, '19:00', '23:30', 'dinner'));
+        }
+        const name = (u.first_name ?? '').trim() || u.email?.split('@')[0] || '—';
+        return { userId: u.id, name, shifts, sortOrder: u.sort_order ?? 0 };
+      });
+    }
+
     const byUser = new Map<string, Shift[]>();
     for (const s of shifts) {
       if (s.date !== todayStr) continue;
@@ -114,7 +144,7 @@ export default function HeaderTodayCoworkersCard() {
     // Ordina come la tabella ruota: per sort_order (poi per nome).
     out.sort((a, b) => (a.sortOrder - b.sortOrder) || a.name.localeCompare(b.name));
     return out;
-  }, [currentUser, shifts, users, isVisibleByAdmin]);
+  }, [demoMode, currentUser, shifts, users, isVisibleByAdmin]);
 
   if (!currentUser || !isVisibleByAdmin) return null;
 
