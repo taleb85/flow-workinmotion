@@ -202,7 +202,8 @@ body {
 /* ═══════════════ STAFF HOME: card trasparenti (niente vetro) ═══════════════
    Direzione "chiaro": le sezioni della home staff usano superfici trasparenti
    con bordo sottile, senza sfondo glass/blur/ombra. */
-.staff-home-screen .flow-card {
+.staff-home-screen .flow-card,
+.stats-cards .flow-card {
   background: transparent !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;

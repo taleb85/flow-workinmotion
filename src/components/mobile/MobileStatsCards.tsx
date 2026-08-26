@@ -46,7 +46,7 @@ export default function MobileStatsCards({
   const sizeCls = hoursFormat === 'hhmm' ? 'text-lg' : 'text-xl';
 
   return (
-    <div className={`grid gap-4 ${hideWeek ? 'grid-cols-1' : 'grid-cols-2'}`}>
+    <div className={`grid gap-4 stats-cards ${hideWeek ? 'grid-cols-1' : 'grid-cols-2'}`}>
       {/* CARD SETTIMANA */}
       {!hideWeek && (
         <div className="flow-card">
