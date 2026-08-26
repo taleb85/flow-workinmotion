@@ -495,6 +495,19 @@ export default function StaffPersonalDashboard({
     [getMobileRange, presenceWeekOffset]
   );
 
+  /** Limita la navigazione al mese corrente: le frecce si disabilitano quando
+      la settimana target non si sovrappone più al mese attuale. */
+  const presenceNavLimits = useMemo(() => {
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+    const prev = { start: addDays(presenceWeekRange.start, -7), end: addDays(presenceWeekRange.end, -7) };
+    const next = { start: addDays(presenceWeekRange.start, 7), end: addDays(presenceWeekRange.end, 7) };
+    return {
+      disablePrev: prev.end < monthStart,
+      disableNext: next.start > monthEnd,
+    };
+  }, [presenceWeekRange, now]);
+
   // Turni della settimana — lo staff NON vede le bozze, ma vede i turni
   // pubblicati/approvati/assenti E quelli dove non ha ancora effettuato la timbratura
   const presenceShiftsFiltered = useMemo(
@@ -552,10 +565,15 @@ export default function StaffPersonalDashboard({
     mode = mobileNavTab,
     onOffsetChange = setMobileNavOffset,
     range = mobileRange,
+    disablePrev = false,
+    disableNext = false,
   }: {
     mode?: MobileNavTab;
     onOffsetChange?: (updater: (o: number) => number) => void;
     range?: { start: Date; end: Date };
+    /** Frecce disabilitate quando il periodo target esce dal mese corrente. */
+    disablePrev?: boolean;
+    disableNext?: boolean;
   }) => (
     <div className="flex items-center gap-2 mb-4 px-4">
       {/* Etichetta "Oggi" a sinistra — cliccabile per tornare al periodo corrente */}
@@ -569,7 +587,9 @@ export default function StaffPersonalDashboard({
         <button
           type="button"
           onClick={() => onOffsetChange(o => o - 1)}
-          className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-r border-slate-100 active:bg-slate-50/80"
+          disabled={disablePrev}
+          aria-label={(t as Record<string, string>).nav_prev_period ?? 'Periodo precedente'}
+          className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-r border-slate-100 active:bg-slate-50/80 disabled:opacity-30 disabled:pointer-events-none"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -587,7 +607,9 @@ export default function StaffPersonalDashboard({
         <button
           type="button"
           onClick={() => onOffsetChange(o => o + 1)}
-          className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-l border-slate-100 active:bg-slate-50/80"
+          disabled={disableNext}
+          aria-label={(t as Record<string, string>).nav_next_period ?? 'Periodo successivo'}
+          className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-l border-slate-100 active:bg-slate-50/80 disabled:opacity-30 disabled:pointer-events-none"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -787,7 +809,7 @@ export default function StaffPersonalDashboard({
                           }}
                         />
                       </div>
-                      <MobileNavBar mode="week" onOffsetChange={setPresenceWeekOffset} range={presenceWeekRange} />
+                      <MobileNavBar mode="week" onOffsetChange={setPresenceWeekOffset} range={presenceWeekRange} disablePrev={presenceNavLimits.disablePrev} disableNext={presenceNavLimits.disableNext} />
                       <ManagementMobileTimesheet
                         variant="embedded"
                         hideNavBar
