@@ -135,15 +135,17 @@ body {
   padding-left: 1rem !important;
   padding-right: 1rem !important;
 }
+/* Header trasparente — niente pillola/glass sul contenitore:
+   i singoli bottoni mantengono il proprio vetro (liquid-glass) */
 .app-header .flow-brand-header {
-  background: var(--flow-header-bg) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
-  backdrop-filter: blur(22px) saturate(180%) !important;
-  border: 1px solid var(--flow-border) !important;
-  border-radius: var(--flow-radius-lg) !important;
-  box-shadow: var(--flow-shadow-card) !important;
-  padding-left: 0.875rem !important;
-  padding-right: 0.875rem !important;
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 /* ═══════════════ BOTTOM NAV (iOS pill) ═══════════════ */
@@ -227,7 +229,6 @@ h1, h2, h3, .text-2xl, .text-xl, .text-lg, .font-bold { letter-spacing: -0.02em 
 }
 
 /* ═══════════════ iOS: blur ridotti ═══════════════ */
-html[data-ios="1"] .app-header .flow-brand-header,
 html[data-ios="1"] .bottom-nav-glass-edge .top-tabbar {
   -webkit-backdrop-filter: blur(14px) !important;
   backdrop-filter: blur(14px) !important;
