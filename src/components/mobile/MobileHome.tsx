@@ -254,7 +254,7 @@ export default function MobileHome({
 
       {/* ── Riga KPI ────────────────────────────────────────────────── */}
       <section className="flow-card" aria-label="Riepilogo">
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <div className="min-w-0">
             <span className="flow-label block">Ore oggi</span>
             <span className="flow-kpi text-white block mt-0.5">{fmtHours(todayMinutes)}</span>
@@ -262,10 +262,6 @@ export default function MobileHome({
           <div className="min-w-0">
             <span className="flow-label block">Turni</span>
             <span className="flow-kpi text-white block mt-0.5">{todayWorkShiftsCount}</span>
-          </div>
-          <div className="min-w-0">
-            <span className="flow-label block">Settimana</span>
-            <span className="flow-kpi text-white block mt-0.5">{fmtHours(weeklyMinutes)}</span>
           </div>
         </div>
       </section>
