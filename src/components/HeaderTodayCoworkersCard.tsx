@@ -7,11 +7,6 @@ import { useAppConfig } from '../context/appSliceContexts';
 import { useT } from '../hooks/useT';
 import { formatTrans } from '../utils/translations';
 import { isUserVisibleOnTeamSchedule } from '../utils/permissions';
-import {
-  readProfileAvatarFromStorage,
-  readAvatarFocus,
-  avatarFocusToObjectPosition,
-} from '../utils/profilePhotoStorage';
 import type { Shift } from '../types';
 import { isDemoMode } from '../utils/demoData';
 
@@ -179,36 +174,15 @@ export default function HeaderTodayCoworkersCard() {
             className="smooth-scroll flex min-w-0 flex-1 flex-nowrap gap-2 overflow-x-auto overscroll-contain pb-2 no-scrollbar"
           >
             {rows.map((r) => {
-              const u = users.find((x) => x.id === r.userId);
-              const avatarSrc =
-                (u && (readProfileAvatarFromStorage(r.userId) ?? u.avatar_url ?? null)) || null;
-              const focus = readAvatarFocus(r.userId);
-              const initial = (r.name.charAt(0) || '?').toUpperCase();
               const ringTitle = shiftRingTitle(r.shifts, lunchL, dinnerL, cambioL);
               const intervals = shiftTimeIntervals(r.shifts);
 
               return (
                 <li
                   key={r.userId}
-                  className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] py-1 pl-1 pr-3"
+                  className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] py-1 px-3"
                   title={`${ringTitle}${intervals ? ` · ${intervals}` : ''}`}
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-50">
-                    {avatarSrc ? (
-                      <img
-                        src={avatarSrc}
-                        alt=""
-                        role="presentation"
-                        className="h-full w-full object-cover"
-                        style={{ objectPosition: avatarFocusToObjectPosition(focus) }}
-                        draggable={false}
-                      />
-                    ) : (
-                      <span className="text-base font-bold text-white/60" aria-hidden>
-                        {initial}
-                      </span>
-                    )}
-                  </div>
                   <div className="min-w-0 flex flex-col">
                     <span className="block max-w-[5.5rem] truncate text-[0.6875rem] font-black uppercase tracking-tight leading-tight text-white/80" title={r.name}>{r.name}
                     </span>
