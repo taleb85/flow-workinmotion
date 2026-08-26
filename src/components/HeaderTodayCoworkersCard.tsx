@@ -151,16 +151,16 @@ export default function HeaderTodayCoworkersCard() {
   const cambioL = tv.header_coworkers_cambio_guardia ?? 'Cambio guardia';
 
   return (
-    <section className="w-full px-3 py-2 md:px-4 md:py-3" aria-label={title}>
+    <section className="flow-card" aria-label={title}>
       {rows.length === 0 ? (
-        <div className="flex items-start gap-1.5 px-1">
+        <div className="flex items-start gap-1.5">
           <Users className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/60" strokeWidth={2} aria-hidden />
           <p className="min-w-0 text-[0.6875rem] leading-snug text-white/60">{empty}</p>
         </div>
       ) : (
         <div className="flex w-full min-w-0 flex-col gap-3">
-          <div className="flex items-center justify-between px-1">
-            <p className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-widest">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold text-white/60 uppercase tracking-widest">
               <span className="text-white/60 mr-1">
                 {formatTrans(summaryTpl, { n: String(rows.length) })}
               </span>
@@ -180,14 +180,14 @@ export default function HeaderTodayCoworkersCard() {
               return (
                 <li
                   key={r.userId}
-                  className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] py-1 px-3"
+                  className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] py-1.5 px-3.5"
                   title={`${ringTitle}${intervals ? ` · ${intervals}` : ''}`}
                 >
                   <div className="min-w-0 flex flex-col">
-                    <span className="block max-w-[5.5rem] truncate text-[0.6875rem] font-black uppercase tracking-tight leading-tight text-white/80" title={r.name}>{r.name}
+                    <span className="block max-w-[7rem] truncate text-sm font-bold uppercase tracking-tight leading-tight text-white/85" title={r.name}>{r.name}
                     </span>
                     {intervals ? (
-                      <span className="block max-w-[5.5rem] truncate text-[0.625rem] font-bold tabular-nums leading-tight text-white/50" title={intervals}>{intervals}
+                      <span className="block max-w-[7rem] truncate text-xs font-semibold tabular-nums leading-tight text-white/55" title={intervals}>{intervals}
                       </span>
                     ) : null}
                   </div>
