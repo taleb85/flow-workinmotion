@@ -17,7 +17,35 @@ import MobileHome from './MobileHome';
 import MobileStaffShifts from './MobileStaffShifts';
 import { calculateUserStats } from '../../utils/stats';
 import { hapticLight as lightHaptic, hapticHeavy as heavyHaptic } from '../../utils/haptics';
-import { useSmartPunchAction } from '../../hooks/useSmartPunchAction';
+import { useSmartPunchAction, type EnrichedShift } from '../../hooks/useSmartPunchAction';
+
+// ══ DATI TEST per anteprima KPI ═══════════════════════════════════════════
+// Attivazione: aggiungi ?demoKpi all'URL oppure localStorage 'flow-demo-kpi'='1'.
+function addDaysLocal(dateStr: string, offset: number): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dt = new Date(y, (m ?? 1) - 1, (d ?? 1) + offset);
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+}
+
+function buildDemoShifts(todayStr: string, userId: string): Shift[] {
+  const mk = (id: string, offset: number, start: string, end: string, type: Shift['type'], status: Shift['approval_status']): Shift => ({
+    id,
+    user_id: userId,
+    date: addDaysLocal(todayStr, offset),
+    start_time: start,
+    end_time: end,
+    type,
+    approval_status: status,
+  });
+  return [
+    mk('demo-1', 0, '08:00', '13:00', 'lunch', 'approved'),
+    mk('demo-2', 0, '19:00', '23:30', 'dinner', 'confirmed'),
+    mk('demo-3', 1, '08:00', '13:30', 'lunch', 'approved'),
+    mk('demo-4', 2, '19:00', '23:30', 'dinner', 'approved'),
+    mk('demo-5', 3, '12:00', '17:00', 'lunch', 'approved'),
+    mk('demo-6', 4, '19:00', '23:00', 'dinner', 'absent'),
+  ];
+}
 
 const HolidayRequests = lazy(() => import('../HolidayRequests'));
 const Statistics = lazy(() => import('../Statistics'));
@@ -160,6 +188,53 @@ export default function MobileStaffDashboard({
     daysWorked: tv.mobile_dash_days_worked ?? 'Giorni lavorati',
   };
 
+  // ── MODALITÀ DEMO KPI (anteprima con dati di test) ─────────────────────
+  const demoMode = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return localStorage.getItem('flow-demo-kpi') === '1' || new URLSearchParams(window.location.search).has('demoKpi');
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const demo = useMemo(() => {
+    if (!demoMode) return null;
+    const shifts = buildDemoShifts(todayStr, user.id);
+    const todayShifts = shifts.filter((s) => s.date === todayStr);
+    const first = todayShifts[0];
+    const punchIn: PunchRecord | null = first
+      ? {
+          id: 'demo-punch-in',
+          user_id: user.id,
+          shift_id: first.id,
+          timestamp: `${todayStr}T08:00:00.000Z`,
+          calculated_time: `${todayStr}T08:00:00.000Z`,
+          type: 'in',
+          source: 'kiosk',
+        }
+      : null;
+    return {
+      shifts,
+      todayShifts,
+      inProgress: first && punchIn
+        ? ({
+            shift: first,
+            isLunchSlot: first.type === 'lunch',
+            punchIn,
+            punchOut: undefined,
+            actualStart: punchIn.calculated_time ?? null,
+            actualEnd: null,
+          } satisfies EnrichedShift)
+        : null,
+      elapsed: '05:23:41',
+      weeklyMinutes: 32 * 60 + 45,
+      monthlyMinutes: 128 * 60 + 15,
+      monthDaysWorked: 14,
+      weekCapMinutes: 40 * 60,
+    };
+  }, [demoMode, todayStr, user.id]);
+
   const shiftTimeHint =
     inProgress && elapsedLabel
       ? `${inProgress.shift.start_time.slice(0, 5)} – ${inProgress.shift.end_time?.slice(0, 5) ?? '…'} · ${inProgress.shift.type === 'lunch' ? t.lunch : t.dinner}`
@@ -180,29 +255,29 @@ export default function MobileStaffDashboard({
             todayLabel={safeFormatDate(todayStr, 'EEEE d MMMM', { locale })}
             todayStr={todayStr}
             statsLabels={statsLabels}
-            weeklyMinutes={weeklyMinutesProp ?? stats.weeklyMinutes}
-            monthlyMinutes={monthlyMinutesProp ?? stats.monthlyMinutes}
-            monthDaysWorked={monthDaysWorkedProp ?? stats.monthDaysWorked}
-            weekCapMinutes={weekCapMinutesProp ?? 40 * 60}
-            inProgress={inProgress}
-            elapsedLabel={elapsedLabel}
-            todayWorkShiftsCount={todayWorkShifts.length}
+            weeklyMinutes={demo ? demo.weeklyMinutes : (weeklyMinutesProp ?? stats.weeklyMinutes)}
+            monthlyMinutes={demo ? demo.monthlyMinutes : (monthlyMinutesProp ?? stats.monthlyMinutes)}
+            monthDaysWorked={demo ? demo.monthDaysWorked : (monthDaysWorkedProp ?? stats.monthDaysWorked)}
+            weekCapMinutes={demo ? demo.weekCapMinutes : (weekCapMinutesProp ?? 40 * 60)}
+            inProgress={demo ? demo.inProgress : inProgress}
+            elapsedLabel={demo ? demo.elapsed : elapsedLabel}
+            todayWorkShiftsCount={demo ? demo.todayShifts.length : todayWorkShifts.length}
             noShiftsHint={t.no_shifts_scheduled}
             tapStartHint={tv.mobile_dash_tap_start ?? 'Tocca Inizia per timbrare l’entrata.'}
-            shiftTimeHint={shiftTimeHint}
+            shiftTimeHint={demo ? '08:00 – 13:00 · Pranzo' : shiftTimeHint}
             inProgressLabel={t.home_status_in_shift}
             savingLabel={t.saving}
             startLabel={tv.mobile_dash_start ?? 'Inizia'}
             endLabel={tv.mobile_dash_end ?? 'Fine turno'}
-            canStart={canStart}
-            canEnd={canEnd}
+            canStart={demo ? false : canStart}
+            canEnd={demo ? true : canEnd}
             punchBusy={punchBusy}
             onStart={() => { heavyHaptic(); void smartExecute(); }}
-            onEnd={() => void smartExecute()}
+            onEnd={demo ? () => {} : () => void smartExecute()}
             onSeeAllShifts={() => onTabChange?.('turni')}
             onRefresh={onRefresh}
-            todayWorkShifts={todayWorkShifts}
-            myShifts={myShifts}
+            todayWorkShifts={demo ? demo.todayShifts : todayWorkShifts}
+            myShifts={demo ? demo.shifts : myShifts}
           />
         );
       case 'turni':
