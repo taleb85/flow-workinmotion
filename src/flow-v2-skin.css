@@ -234,7 +234,11 @@ body .bg-gray-100:not(input):not(textarea):not(select) { background-color: var(-
 }
 
 /* ═══════════════ PULSANTI ═══════════════ */
-.bg-accent, .bg-brand, .bg-primary {
+/* CTA accent: target minimo 44px, testo 14px. Esclusi i pulsanti compatti
+   (h-7/h-8/h-9, es. "Oggi" nella nav periodi) che mantengono le proprie misure. */
+.bg-accent:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]),
+.bg-brand:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]),
+.bg-primary:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]) {
   background-color: var(--brand) !important;
   color: #ffffff !important;
   border-radius: var(--flow-radius-pill) !important;
