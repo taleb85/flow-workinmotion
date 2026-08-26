@@ -7,9 +7,9 @@ import {
   startOfMonth, endOfMonth,
 } from 'date-fns';
 import { it, es, enUS } from 'date-fns/locale';
-import { Clock, ChevronLeft, ChevronRight, ChevronDown, Users } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Users, Check, X } from 'lucide-react';
 import type { Shift, PunchRecord, User, Language } from '../../types';
-import { translateDepartmentValue } from '../../utils/departmentLabels';
+import { translateDepartmentValue, formatDepartmentDisplayForProfile } from '../../utils/departmentLabels';
 import { getTranslations } from '../../utils/translations';
 import {
   loadPeriodConfig, getPeriodDateRange,
@@ -468,67 +468,55 @@ function MyTimesheetSection({
   );
 }
 
-/* ── Sezione team — accordion identico alla scheda turni ───────────────── */
-function TeamTimesheetSection({
-  teamShifts, allPunches, users, locale, language, t, plannedOnly,
+/* ── Sezione Team — layout da design FLOW Apple (card dipendente + griglia settimana) ── */
+function TeamTimesheetSectionDesign({
+  teamShifts, users, locale, language, t, range,
 }: {
   teamShifts: Shift[];
-  allPunches: PunchRecord[];
   users: User[];
   locale: typeof it;
   language: string;
   t: Record<string, string>;
-  plannedOnly?: boolean;
+  range: { start: Date; end: Date };
 }) {
-  // Always dark theme
-  const cardBg = { background: 'transparent' };
-  const [openDays, setOpenDays] = useState<Record<string, boolean>>({});
-
   const userMap = useMemo(() => {
     const m: Record<string, User> = {};
     users.forEach(u => { m[u.id] = u; });
     return m;
   }, [users]);
 
-  const punchByUserDay = useMemo(() => {
-    const m: Record<string, PunchRecord[]> = {};
-    allPunches.forEach(p => {
-      const k = `${p.user_id}_${format(parseISO(p.calculated_time ?? p.timestamp), 'yyyy-MM-dd')}`;
-      if (!m[k]) m[k] = [];
-      m[k].push(p);
-    });
-    return m;
-  }, [allPunches]);
+  const days = useMemo(() => eachDayOfInterval({ start: range.start, end: range.end }), [range]);
+  const dayStrs = useMemo(() => days.map(d => format(d, 'yyyy-MM-dd')), [days]);
 
-  // Raggruppa tutti i turni team per giorno, ordinati per data
-  const byDay = useMemo(() => {
-    const map: Record<string, Shift[]> = {};
-    teamShifts.forEach(s => {
-      const k = format(parseISO(s.date), 'yyyy-MM-dd');
-      if (!map[k]) map[k] = [];
-      map[k].push(s);
-    });
-    Object.keys(map).forEach(k => {
-      map[k].sort((a, b) => {
-        const ta = (a.start_time ?? '').slice(0, 5);
-        const tb = (b.start_time ?? '').slice(0, 5);
-        if (ta !== tb) return ta.localeCompare(tb);
-        return (userMap[a.user_id]?.sort_order ?? 9999) - (userMap[b.user_id]?.sort_order ?? 9999);
-      });
-    });
-    return map;
-  }, [teamShifts, userMap]);
+  const rows = useMemo(() => {
+    const m: Record<string, { user: User; minutes: number; cells: ('ok' | 'warn' | 'err' | 'rest')[] }> = {};
+    for (const s of teamShifts) {
+      const u = userMap[s.user_id];
+      if (!u) continue;
+      if (!m[u.id]) {
+        m[u.id] = { user: u, minutes: 0, cells: dayStrs.map(() => 'rest' as const) };
+      }
+      const sm = s.start_time ? parseInt(s.start_time.split(':')[0]) * 60 + parseInt(s.start_time.split(':')[1] || '0', 10) : 0;
+      const em = s.end_time ? parseInt(s.end_time.split(':')[0]) * 60 + parseInt(s.end_time.split(':')[1] || '0', 10) : sm;
+      m[u.id].minutes += Math.max(0, em - sm);
+      const idx = dayStrs.indexOf(s.date);
+      if (idx >= 0) {
+        const cell = m[u.id].cells;
+        if (s.approval_status === 'absent') {
+          if (cell[idx] !== 'err') cell[idx] = 'err';
+        } else if (s.approval_status === 'draft') {
+          if (cell[idx] === 'rest') cell[idx] = 'warn';
+        } else {
+          if (cell[idx] === 'rest' || cell[idx] === 'warn') cell[idx] = 'ok';
+        }
+      }
+    }
+    return Object.values(m).sort((a, b) => (a.user.sort_order ?? 9999) - (b.user.sort_order ?? 9999));
+  }, [teamShifts, userMap, dayStrs]);
 
-  const sortedDays = useMemo(() =>
-    Object.keys(byDay).sort((a, b) => a.localeCompare(b)).map(k => parseISO(k)),
-    [byDay]
-  );
+  const dayLetters = getDayLetters(locale);
 
-  const toggle = useCallback((key: string) => {
-    setOpenDays(prev => ({ ...prev, [key]: !prev[key] }));
-  }, []);
-
-  if (sortedDays.length === 0) {
+  if (rows.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center">
         <Users className="w-6 h-6 text-white/55 mb-2" />
@@ -538,86 +526,59 @@ function TeamTimesheetSection({
   }
 
   return (
-    <div className="flex flex-col gap-1.5">
-      {sortedDays.map(day => {
-        const key = format(day, 'yyyy-MM-dd');
-        const dayShifts = byDay[key] ?? [];
-        const isOpen = !!openDays[key];
-        const isToday_ = isToday(day);
-        const confirmed = dayShifts.filter(s => s.approval_status !== 'absent');
-
+    <div className="flex flex-col gap-3">
+      {rows.map(({ user, minutes, cells }) => {
+        const fullName = `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`;
+        const initials = `${(user.first_name || '')[0] ?? ''}${(user.last_name || '')[0] ?? ''}`.toUpperCase();
+        const dept = formatDepartmentDisplayForProfile(user.department, language as Language);
         return (
-          <div key={key} className="rounded-xl border border-neutral-500 overflow-hidden shadow-sm" style={cardBg}>
-            {/* Header cassetto */}
-            <button
-              type="button"
-              onClick={() => toggle(key)}
-              className="w-full flex items-center justify-between px-3 py-2.5 active:bg-white/8 transition-colors"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className={`text-[0.6875rem] font-black uppercase tracking-widest truncate ${
- isToday_ ? 'text-white' : 'text-white/55'
- }`}>
-                  {format(day, 'EEE d MMM', { locale })}
-                </span>
-                {isToday_ && <span className="h-1.5 w-1.5 rounded-full bg-white/60 shrink-0" />}
+          <div key={user.id} className="flow-card">
+            <div className="flex items-center gap-3">
+              <div
+                className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full border text-[12.5px] font-semibold"
+                style={{ background: 'var(--flow-muted)', borderColor: 'var(--flow-border)', color: 'var(--flow-foreground)' }}
+              >
+                {initials || '—'}
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[0.6875rem] font-black tabular-nums text-white/55">
-                  {confirmed.length} {t.shift_plural ?? 'turni'}
-                </span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 text-white/55 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                  strokeWidth={2.5}
-                />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-semibold text-white">{fullName}</div>
+                <div className="flow-label">{dept}</div>
               </div>
-            </button>
+              <div className="flow-kpi text-white" style={{ fontSize: 20 }}>{minsLabel(minutes)}</div>
+            </div>
 
-            {/* Corpo cassetto */}
-            {isOpen && (
-              <div className="border-t border-white/10 px-3 pb-2 pt-1.5 flex flex-col gap-1">
-                {dayShifts.map(shift => {
-                  const isAbsent = shift.approval_status === 'absent';
-                  const u = userMap[shift.user_id];
-                  const fullName = u ? `${u.first_name}${u.last_name ? ' ' + u.last_name : ''}` : '–';
-                  const dayPunches = plannedOnly ? [] : (punchByUserDay[`${shift.user_id}_${key}`] ?? []);
-                  const pIn  = plannedOnly ? null : dayPunches.find(p => p.type === 'in');
-                  const pOut = plannedOnly ? null : dayPunches.find(p => p.type === 'out');
+            <div className="mt-3 grid grid-cols-7 gap-1">
+              {dayLetters.slice(0, 7).map((l) => (
+                <div key={l} className="pb-1 text-center text-[0.625rem] font-bold uppercase tracking-wider text-white/40">
+                  {l}
+                </div>
+              ))}
+              {cells.map((c, i) => {
+                const base = 'flex h-8 items-center justify-center rounded-lg';
+                if (c === 'ok') {
                   return (
-                    <div key={shift.id}
-                      className={`flex items-center justify-between rounded-lg px-2.5 py-2 border ${
- isAbsent
- ? 'border-red-500/30 bg-red-500/15'
- : 'border-neutral-500'
- }`}
-                      style={isAbsent ? undefined : cardBg}
-                    >
-                      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                        <p className="text-[0.6875rem] font-black uppercase tracking-wide text-white/85 truncate" title={fullName}>{fullName}
-                        </p>
-                        <p className={`font-black tabular-nums text-sm leading-none ${
- isAbsent ? 'text-white/40 line-through' : 'text-white'
- }`}>
-                          {shift.start_time.slice(0, 5)} – {shift.end_time?.slice(0, 5) ?? '…'}
-                        </p>
-                        {!plannedOnly && !isAbsent && (pIn || pOut) && (
-                          <p className="text-[0.6875rem] tabular-nums text-white/55 mt-0.5 flex items-center gap-1">
-                            <Clock className="w-2.5 h-2.5 shrink-0" />
-                            {pIn ? punchLabel(pIn) : '–'} → {pOut ? punchLabel(pOut) : '–'}
-                          </p>
-                        )}
-                        {shift.department && (
-                          <p className="text-[0.6875rem] font-bold uppercase tracking-widest text-white/55 mt-0.5">
-                            {translateDepartmentValue(shift.department, language as Language)}
-                          </p>
-                        )}
-                      </div>
-                      <ShiftStatusBadge shift={shift} t={t} />
+                    <div key={i} className={`${base} bg-[rgba(48,209,88,0.14)]`}>
+                      <Check className="h-4 w-4 text-[#30d158]" strokeWidth={3} />
                     </div>
                   );
-                })}
-              </div>
-            )}
+                }
+                if (c === 'err') {
+                  return (
+                    <div key={i} className={`${base} bg-[rgba(255,69,58,0.14)]`}>
+                      <X className="h-4 w-4 text-[#ff453a]" strokeWidth={3} />
+                    </div>
+                  );
+                }
+                if (c === 'warn') {
+                  return (
+                    <div key={i} className={`${base} bg-[rgba(255,214,10,0.14)]`}>
+                      <span className="h-2 w-2 rounded-full bg-[#ffd60a]" />
+                    </div>
+                  );
+                }
+                return <div key={i} className={`${base} bg-white/[0.04]`} />;
+              })}
+            </div>
           </div>
         );
       })}
@@ -712,7 +673,6 @@ export default function ManagementMobileTimesheet({
   const myShifts   = useMemo(() => filteredShifts.filter(s => s.user_id === currentUserId), [filteredShifts, currentUserId]);
   const myPunches  = useMemo(() => filteredPunches.filter(p => p.user_id === currentUserId), [filteredPunches, currentUserId]);
   const teamShifts = useMemo(() => filteredShifts.filter(s => s.user_id !== currentUserId), [filteredShifts, currentUserId]);
-  const teamPunches = useMemo(() => filteredPunches.filter(p => p.user_id !== currentUserId), [filteredPunches, currentUserId]);
 
   // ── Statistiche personali (per MobileStatsCards) ──────────────────────────
   const statsData = useMemo(() => {
@@ -832,7 +792,7 @@ export default function ManagementMobileTimesheet({
             <span className="text-[0.6875rem] font-black uppercase tracking-widest text-white/55">Team</span>
             {teamShifts.length > 0 && <span className="text-[0.6875rem] font-black tabular-nums text-white/70">({teamShifts.length})</span>}
           </div>
-          <TeamTimesheetSection teamShifts={teamShifts} allPunches={teamPunches} users={users} locale={locale} language={language} t={t} plannedOnly={plannedOnly} />
+          <TeamTimesheetSectionDesign teamShifts={teamShifts} users={users} locale={locale} language={language} t={t} range={range} />
         </section>
         )}
 

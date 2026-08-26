@@ -148,36 +148,38 @@ body {
   padding-right: 0 !important;
 }
 
-/* ═══════════════ BOTTOM NAV (iOS pill) ═══════════════ */
+/* ═══════════════ BOTTOM NAV (vetro a tutta larghezza — come da design) ═══════════════ */
 .bottom-nav-glass-edge {
-  background: transparent !important;
-  border-top: none !important;
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem) !important;
+  background: var(--flow-navbar-bg) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  border-top: 1px solid var(--flow-border) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
 }
 .bottom-nav-glass-edge .top-tabbar {
-  background: var(--flow-navbar-bg) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
-  backdrop-filter: blur(22px) saturate(180%) !important;
-  border: 1px solid var(--flow-border) !important;
-  border-radius: 999px !important;
-  box-shadow: var(--flow-shadow-card) !important;
-  padding: 0.25rem !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  height: 64px;
 }
 .top-tabbar .top-tab {
   background: transparent !important;
-  border-radius: 999px !important;
+  border-radius: 0 !important;
   border-top: none !important;
   text-transform: none !important;
   font-weight: 600 !important;
+  font-size: 13.5px !important;
   color: var(--flow-muted-foreground) !important;
   gap: 4px;
-  transition: background 0.18s ease, color 0.18s ease !important;
+  transition: color 0.15s ease !important;
 }
 .top-tabbar .top-tab[style*="color: white"],
 .top-tabbar .top-tab[style*="borderTop: 1px solid white"] {
-  background: var(--flow-primary-soft) !important;
+  background: transparent !important;
   color: var(--flow-primary) !important;
   border-top: none !important;
 }
@@ -209,16 +211,23 @@ body .bg-gray-100:not(input):not(textarea):not(select) { background-color: var(-
   background-color: var(--brand) !important;
   color: #ffffff !important;
   border-radius: var(--flow-radius-pill) !important;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 600;
 }
 .text-accent, .text-brand { color: var(--brand) !important; }
 .border-accent, .border-brand { border-color: var(--brand) !important; }
 
-/* Bottoni ghost/secondari → pill glass */
+/* Bottoni ghost/secondari → pill vetro */
 button.rounded-xl,
 button.rounded-lg,
 button[class*="rounded-"] {
   border-radius: var(--flow-radius-pill) !important;
 }
+
+/* Pulsanti-icona e avatar → rotondi */
+button[class*="h-9"], button[class*="h-10"] { border-radius: 999px !important; }
+[class*="rounded-full"] { -webkit-tap-highlight-color: transparent; }
 
 /* ═══════════════ TESTI ═══════════════ */
 h1, h2, h3, .text-2xl, .text-xl, .text-lg, .font-bold { letter-spacing: -0.02em !important; }
@@ -233,3 +242,245 @@ html[data-ios="1"] .bottom-nav-glass-edge .top-tabbar {
   -webkit-backdrop-filter: blur(14px) !important;
   backdrop-filter: blur(14px) !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   FLOW v2 · Skin Apple — ESTENSIONE componenti (input, modali, sezioni)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── INPUT / SELECT / TEXTAREA: campi vetro Apple ── */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  background: rgba(120, 120, 128, 0.18) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 12px !important;
+  color: #f5f5f7 !important;
+  min-height: 44px;
+  padding-left: 14px;
+  padding-right: 14px;
+  font-size: 14px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+textarea { min-height: 88px; padding-top: 10px; padding-bottom: 10px; }
+input[type="date"], input[type="time"] { -webkit-appearance: none; appearance: none; }
+input::placeholder, textarea::placeholder {
+  color: rgba(245, 245, 247, 0.38) !important;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  border-color: #0a84ff !important;
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25), inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+select option { background: #1c1c1e !important; color: #f5f5f7 !important; }
+
+/* ── MODALI: sheet Apple ── */
+.modal-glass-panel {
+  background: rgba(44, 44, 46, 0.84) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 28px 56px -18px rgba(0, 0, 0, 0.65), 0 0 0 0.5px rgba(255, 255, 255, 0.06) !important;
+}
+/* Backdrop modali: più scuro e sfocato */
+.z-50.fixed.inset-0 {
+  background: rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+/* Input dentro modali: leggermente più chiari per contrasto */
+.modal-glass-panel input,
+.modal-glass-panel select,
+.modal-glass-panel textarea {
+  background: rgba(120, 120, 128, 0.24) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+/* ── SUPERFICI NAVY VECCHIE → vetro Apple ── */
+.bg-\[\#0d1f3c\],
+.bg-\[\#1a2744\],
+.bg-\[\#0a0a0c\],
+.bg-\[\#0a0a0e\],
+.bg-\[\#101014\],
+.bg-\[\#15151c\] {
+  background-color: rgba(44, 44, 46, 0.6) !important;
+  background-image: none !important;
+}
+
+/* ── CARD accessorie (varianti glass) ── */
+.glass-card-flex,
+.card-factorial {
+  background: var(--flow-card) !important;
+  border: 1px solid var(--flow-border) !important;
+  border-radius: var(--flow-radius-lg) !important;
+  box-shadow: var(--flow-shadow-card) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+}
+
+/* ── CHIP / BADGE / STATO TURNO: pill vetro ── */
+.ui-toolbar-chip,
+[class*="badge"],
+.shift-status-off,
+[class*="status-chip"] {
+  background: rgba(120, 120, 128, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 999px !important;
+  color: #f5f5f7 !important;
+}
+
+/* ── DIVISORI più morbidi ── */
+[class*="divide-"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+hr { border-color: rgba(255, 255, 255, 0.1) !important; }
+
+/* ── SCROLLBAR discreta ── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(120, 120, 128, 0.4); border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ── Selezione testo (blu Apple) ── */
+::selection { background: rgba(10, 132, 255, 0.35); }
+
+/* ── Tap highlight iOS ── */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   FORZA BRAND BLU APPLE — override del rebranding JS (TenantContext)
+   L'app imposta --brand/--accent/--flow-primary a #ffffff via inline;
+   !important vince sullo stile inline, quindi il blu Apple resta attivo.
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  --flow-primary: #0a84ff !important;
+  --brand: #0a84ff !important;
+  --brand-rgb: 10 132 255 !important;
+  --accent: #0a84ff !important;
+  --color-accent: #0a84ff !important;
+  --brand-hover: #409cff !important;
+  --accent-hover: #409cff !important;
+  --brand-dark: #0071e3 !important;
+  --brand-light: #64b1ff !important;
+  --accent-dark: #0071e3 !important;
+  --accent-light: #64b1ff !important;
+  --brand-muted: rgba(10, 132, 255, 0.18) !important;
+
+  --brand-50:  #eaf3ff !important;
+  --brand-100: #d5e8ff !important;
+  --brand-200: #add2ff !important;
+  --brand-300: #7db8ff !important;
+  --brand-400: #4a9cff !important;
+  --brand-500: #0a84ff !important;
+  --brand-600: #0071e3 !important;
+  --brand-700: #005ac1 !important;
+  --brand-800: #004499 !important;
+  --brand-900: #003166 !important;
+
+  --brand-nav-from: rgba(10, 132, 255, 0.92) !important;
+  --brand-nav-to: rgba(0, 113, 227, 0.88) !important;
+  --brand-nav-dark-from: rgba(10, 132, 255, 0.88) !important;
+  --brand-nav-dark-to: rgba(0, 90, 193, 0.84) !important;
+
+  --shadow-card-accent: 0 4px 16px -4px rgba(10, 132, 255, 0.22), 0 2px 8px -4px rgba(15, 23, 42, 0.08) !important;
+
+  --rdp-accent-color: #0a84ff !important;
+  --rdp-accent-background-color: rgba(10, 132, 255, 0.16) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM FLOW (dal progetto Canva) — classi riutilizzabili
+   ═══════════════════════════════════════════════════════════════════ */
+.flow-card {
+  background: var(--flow-card) !important;
+  border: 1px solid var(--flow-border) !important;
+  border-radius: var(--flow-radius-lg) !important;
+  padding: 16px;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  box-shadow: var(--flow-shadow-card) !important;
+}
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.page-subtitle {
+  font-size: 13px;
+  color: var(--flow-muted-foreground);
+  margin-top: 4px;
+}
+.flow-section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--flow-muted-foreground);
+}
+.flow-kpi {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.flow-label {
+  font-size: 12px;
+  color: var(--flow-muted-foreground);
+}
+.flow-time {
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.punch-time {
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin: 8px 0 6px;
+}
+.flow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: var(--flow-radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.flow-badge-success { color: var(--state-success) !important; background: var(--flow-success-soft) !important; }
+.flow-badge-warning { color: var(--state-warning) !important; background: var(--flow-warning-soft) !important; }
+.flow-badge-error   { color: var(--state-error)   !important; background: var(--flow-error-soft) !important; }
+.flow-badge-info    { color: var(--state-info)    !important; background: var(--flow-info-soft) !important; }
+.flow-badge-neutral { color: var(--flow-muted-foreground) !important; background: var(--flow-muted) !important; }
+.flow-btn-ghost-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--flow-radius-pill);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--flow-primary) !important;
+  background: transparent;
+  border: 1px solid var(--flow-border);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.flow-btn-ghost-link:hover { background: var(--flow-muted); }

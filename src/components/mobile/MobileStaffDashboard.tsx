@@ -57,6 +57,7 @@ export default function MobileStaffDashboard({
   monthDaysWorked: monthDaysWorkedProp,
   weekCapMinutes: weekCapMinutesProp,
   onRefresh,
+  onTabChange,
 }: MobileStaffDashboardProps) {
   const t = getTranslations(language);
   const tv = t as Record<string, string>;
@@ -177,6 +178,7 @@ export default function MobileStaffDashboard({
           <MobileHome
             greetingText={greetingText}
             todayLabel={safeFormatDate(todayStr, 'EEEE d MMMM', { locale })}
+            todayStr={todayStr}
             statsLabels={statsLabels}
             weeklyMinutes={weeklyMinutesProp ?? stats.weeklyMinutes}
             monthlyMinutes={monthlyMinutesProp ?? stats.monthlyMinutes}
@@ -188,10 +190,7 @@ export default function MobileStaffDashboard({
             noShiftsHint={t.no_shifts_scheduled}
             tapStartHint={tv.mobile_dash_tap_start ?? 'Tocca Inizia per timbrare l’entrata.'}
             shiftTimeHint={shiftTimeHint}
-            statusInShift={t.home_status_in_shift}
-            todayShiftLabel={t.home_todays_shifts}
-            inProgressLabel={t.legend_in_progress}
-            nextShiftLabel={t.home_next_shift}
+            inProgressLabel={t.home_status_in_shift}
             savingLabel={t.saving}
             startLabel={tv.mobile_dash_start ?? 'Inizia'}
             endLabel={tv.mobile_dash_end ?? 'Fine turno'}
@@ -200,6 +199,7 @@ export default function MobileStaffDashboard({
             punchBusy={punchBusy}
             onStart={() => { heavyHaptic(); void smartExecute(); }}
             onEnd={() => void smartExecute()}
+            onSeeAllShifts={() => onTabChange?.('turni')}
             onRefresh={onRefresh}
             todayWorkShifts={todayWorkShifts}
             myShifts={myShifts}

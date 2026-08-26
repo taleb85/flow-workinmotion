@@ -18,11 +18,21 @@ const STAFF_VISIBLE_STATUSES = new Set(['approved', 'confirmed', 'absent']);
 function fmtTime(time?: string): string {
   return (time ?? '').slice(0, 5);
 }
+function timeToMin(t?: string): number {
+  const [h, m] = (t || '00:00').slice(0, 5).split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+function fmtHours(mins: number): string {
+  const h = Math.floor(mins / 60);
+  return `${h}h`;
+}
+function cap(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 /**
- * Vista settimanale "I miei turni" per la dashboard mobile dello staff.
- * Sostituisce WeeklyShiftsTable (eliminata): lista leggera dei propri turni
- * della settimana con navigazione, raggruppati per giorno.
+ * Vista settimanale "I tuoi turni" — layout da design FLOW Apple:
+ * titolo, selettore settimana a pillola, KPI (ore/turni/riposi), lista turni.
  */
 export default function MobileStaffShifts({ user, myShifts, language, todayStr }: MobileStaffShiftsProps) {
   const t = getTranslations(language);
@@ -49,104 +59,148 @@ export default function MobileStaffShifts({ user, myShifts, language, todayStr }
 
   const isCurrentWeek = isSameDay(weekStart, startOfWeek(today, { weekStartsOn: 1 }));
 
-  const statusLabel: Record<string, string> = {
-    draft: t.status_draft,
-    confirmed: t.status_confirmed,
-    approved: t.status_approved,
-    absent: t.status_absent,
-  };
-  const statusColor: Record<string, string> = {
-    approved: 'bg-accent/15 text-accent',
-    confirmed: 'bg-sky-500/15 text-sky-300',
-    absent: 'bg-white/10 text-white/50',
+  // ── KPI settimana ────────────────────────────────────────────────
+  const weekMinutes = weekShifts.reduce((sum, s) => {
+    const start = timeToMin(s.start_time);
+    const end = s.end_time ? timeToMin(s.end_time) : start;
+    return sum + Math.max(0, end - start);
+  }, 0);
+  const daysWithShifts = new Set(weekShifts.map((s) => s.date)).size;
+  const restDays = Math.max(0, 7 - daysWithShifts);
+
+  const badgeFor = (s: Shift): { label: string; cls: string } => {
+    if (s.approval_status === 'approved' || s.approval_status === 'confirmed') {
+      return { label: t.status_confirmed ?? 'Confermato', cls: 'flow-badge-success' };
+    }
+    if (s.approval_status === 'draft') {
+      return { label: t.status_draft ?? 'Bozza', cls: 'flow-badge-warning' };
+    }
+    if (s.approval_status === 'absent') {
+      return { label: t.status_absent ?? 'Assente', cls: 'flow-badge-error' };
+    }
+    return { label: s.approval_status, cls: 'flow-badge-neutral' };
   };
 
   return (
-    <div className="px-3 pb-8">
-      {/* Navigazione settimana */}
-      <div className="sticky top-0 z-10 mb-3 -mx-3 flex items-center justify-between gap-2 border-b border-white/10 bg-[#0a0a0c]/95 px-3 py-2.5 backdrop-blur">
+    <div className="flex flex-col gap-4 px-4 py-3 pb-10">
+      {/* Titolo */}
+      <div className="px-1 mt-4">
+        <h1 className="page-title text-white">{t.my_shifts_title ?? 'I tuoi turni'}</h1>
+        <p className="page-subtitle">
+          {format(weekStart, 'd MMMM', { locale })} – {format(addDays(weekStart, 6), 'd MMMM', { locale })}
+        </p>
+      </div>
+
+      {/* Selettore settimana (pillola) */}
+      <div className="flow-card period-selector flex items-center justify-between py-2" role="group" aria-label={t.week_selector ?? 'Selettore settimana'}>
         <button
           type="button"
           onClick={() => setWeekStart((d) => addWeeks(d, -1))}
           aria-label={t.previous_week ?? 'Settimana precedente'}
-          className="rounded-xl p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20 touch-manipulation"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20 touch-manipulation"
         >
-          <ChevronLeft className="h-5 w-5" aria-hidden />
+          <ChevronLeft className="h-[18px] w-[18px]" aria-hidden />
         </button>
-        <div className="flex min-w-0 flex-col items-center">
-          <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/70">
-            {t.timesheet_my_week ?? 'La tua settimana'}
-          </span>
-          <span className="text-xs text-white/50">
-            {format(weekStart, 'd MMM', { locale })} – {format(addDays(weekStart, 6), 'd MMM', { locale })}
-          </span>
-        </div>
+        <span className="text-sm font-semibold text-white">
+          {format(weekStart, 'd MMM', { locale })} – {format(addDays(weekStart, 6), 'd MMM', { locale })}
+        </span>
         <button
           type="button"
           onClick={() => setWeekStart((d) => addWeeks(d, 1))}
           aria-label={t.next_week ?? 'Settimana successiva'}
-          className="rounded-xl p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20 touch-manipulation"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20 touch-manipulation"
         >
-          <ChevronRight className="h-5 w-5" aria-hidden />
+          <ChevronRight className="h-[18px] w-[18px]" aria-hidden />
         </button>
       </div>
 
+      {/* Torna alla settimana corrente */}
       {!isCurrentWeek && (
         <button
           type="button"
           onClick={() => setWeekStart(startOfWeek(today, { weekStartsOn: 1 }))}
-          className="mb-3 w-full rounded-xl bg-white/10 py-2 text-xs font-bold text-white/70 transition-colors hover:bg-white/15 active:bg-white/80 touch-manipulation"
+          className="flow-btn-ghost-link !mt-0"
         >
           {t.today ?? 'Oggi'}
         </button>
       )}
 
-      {weekShifts.length === 0 ? (
-        <p className="py-10 text-center text-sm text-white/40">{t.no_shifts_scheduled}</p>
-      ) : (
-        <div className="space-y-2">
-          {weekDays.map((day) => {
-            const dateStr = format(day, 'yyyy-MM-dd');
-            const dayShifts = weekShifts.filter((s) => s.date === dateStr);
-            if (dayShifts.length === 0) return null;
-            const dayIsToday = isSameDay(day, today);
-            return (
-              <div key={dateStr} className="overflow-hidden rounded-2xl border border-white/10">
-                <div
-                  className={`flex items-center justify-between gap-2 px-3 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider ${
-                    dayIsToday ? 'bg-accent/15 text-accent' : 'bg-white/5 text-white/60'
-                  }`}
-                >
-                  <span className="truncate">{format(day, 'EEEE d MMMM', { locale })}</span>
-                  {dayIsToday && <span className="shrink-0">{t.today ?? 'Oggi'}</span>}
-                </div>
-                {dayShifts.map((s) => (
-                  <div
-                    key={s.id}
-                    className="flex items-center justify-between gap-2 border-t border-white/10 px-3 py-2.5"
-                  >
-                    <div className="flex min-w-0 items-center gap-2">
-                      <span className="text-sm font-bold text-white">
-                        {fmtTime(s.start_time)}–{fmtTime(s.end_time)}
-                      </span>
-                      <span className="text-[0.6875rem] text-white/45">
-                        {s.type === 'lunch' ? t.lunch : t.dinner}
-                      </span>
-                    </div>
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-[0.625rem] font-bold ${
-                        statusColor[s.approval_status] ?? 'bg-white/10 text-white/60'
-                      }`}
-                    >
-                      {statusLabel[s.approval_status] ?? s.approval_status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            );
-          })}
+      {/* KPI settimana */}
+      <div className="grid grid-cols-3 gap-2" aria-label={t.week_summary ?? 'Riepilogo della settimana'}>
+        <div className="flow-card flex flex-col items-center py-3">
+          <span className="flow-kpi text-white">{fmtHours(weekMinutes)}</span>
+          <span className="flow-label mt-0.5">{t.week_hours ?? 'Ore settimana'}</span>
         </div>
-      )}
+        <div className="flow-card flex flex-col items-center py-3">
+          <span className="flow-kpi text-white">{weekShifts.length}</span>
+          <span className="flow-label mt-0.5">{t.shifts_plural ?? 'Turni'}</span>
+        </div>
+        <div className="flow-card flex flex-col items-center py-3">
+          <span className="flow-kpi text-white">{restDays}</span>
+          <span className="flow-label mt-0.5">{t.rest_days ?? 'Riposi'}</span>
+        </div>
+      </div>
+
+      {/* Lista turni */}
+      <section className="flow-card" aria-label={t.shift_list ?? 'Elenco turni'}>
+        {weekShifts.length === 0 && weekDays.every((d) => hiddenDates.has(format(d, 'yyyy-MM-dd'))) ? (
+          <p className="py-6 text-center text-sm text-white/40">{t.no_shifts_scheduled}</p>
+        ) : (
+          <div className="flex flex-col">
+            {weekDays.map((day, idx) => {
+              const dateStr = format(day, 'yyyy-MM-dd');
+              const dayShifts = weekShifts.filter((s) => s.date === dateStr);
+              const isHidden = hiddenDates.has(dateStr);
+              const dayIsToday = isSameDay(day, today);
+
+              if (isHidden) return null;
+
+              if (dayShifts.length === 0) {
+                return (
+                  <div key={dateStr}>
+                    {idx > 0 && <hr className="flow-divider" aria-hidden="true" />}
+                    <div className="shift-item flex items-center justify-between py-3">
+                      <div className="flex items-center gap-3">
+                        <span className="flow-time text-white/35">{cap(format(day, 'EEE d', { locale }))}</span>
+                      </div>
+                      <span className="flow-label">{t.rest_day ?? 'Riposo'}</span>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div key={dateStr}>
+                  {dayShifts.map((s, si) => {
+                    const dayLabel = dayIsToday
+                      ? `Oggi · ${cap(format(day, 'EEEE d', { locale }))}`
+                      : cap(format(day, 'EEE d', { locale }));
+                    const badge = badgeFor(s);
+                    return (
+                      <div key={s.id}>
+                        {(idx > 0 || si > 0) && <hr className="flow-divider" aria-hidden="true" />}
+                        <div className="shift-item flex items-center justify-between gap-3 py-3">
+                          <div className="flex items-baseline gap-1.5 shrink-0">
+                            <span className="flow-time text-white">{fmtTime(s.start_time)}</span>
+                            <span className="flow-label">– {fmtTime(s.end_time)}</span>
+                          </div>
+                          <div className="min-w-0 flex-1 px-2">
+                            <span className="block text-sm font-semibold text-white truncate">{dayLabel}</span>
+                            <span className="flow-label block">
+                              {s.type === 'lunch' ? t.lunch : t.dinner}
+                            </span>
+                          </div>
+                          <span className={`flow-badge ${badge.cls} shrink-0`}>{badge.label}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
