@@ -58,9 +58,9 @@ function shiftRingTitle(
 
 type Row = { userId: string; name: string; shifts: Shift[]; sortOrder: number };
 
-/** Intervalli orari come nella tabella turni: "16:00 – 23:00"; più turni separati da " · ". */
-function shiftTimeIntervals(shifts: Shift[]): string {
-  if (shifts.length === 0) return '';
+/** Intervalli orari come nella tabella turni: "16:00 – 23:00"; più turni restituiti come lista, una riga ciascuno. */
+function shiftTimeIntervals(shifts: Shift[]): string[] {
+  if (shifts.length === 0) return [];
   const intervals = shifts
     .map((s) => {
       const a = (s.start_time || '').slice(0, 5);
@@ -68,7 +68,7 @@ function shiftTimeIntervals(shifts: Shift[]): string {
       return a && b ? `${a} – ${b}` : a || b || '';
     })
     .filter(Boolean);
-  return [...new Set(intervals)].join(' · ');
+  return [...new Set(intervals)];
 }
 
 /**
@@ -176,19 +176,23 @@ export default function HeaderTodayCoworkersCard() {
             {rows.map((r) => {
               const ringTitle = shiftRingTitle(r.shifts, lunchL, dinnerL, cambioL);
               const intervals = shiftTimeIntervals(r.shifts);
+              const intervalsTitle = intervals.join(' · ');
 
               return (
                 <li
                   key={r.userId}
                   className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] py-1.5 px-3.5"
-                  title={`${ringTitle}${intervals ? ` · ${intervals}` : ''}`}
+                  title={`${ringTitle}${intervalsTitle ? ` · ${intervalsTitle}` : ''}`}
                 >
                   <div className="min-w-0 flex flex-col">
                     <span className="block max-w-[7rem] truncate text-sm font-bold uppercase tracking-tight leading-tight text-white/85" title={r.name}>{r.name}
                     </span>
-                    {intervals ? (
-                      <span className="block max-w-[7rem] truncate text-xs font-semibold tabular-nums leading-tight text-white/55" title={intervals}>{intervals}
-                      </span>
+                    {intervals.length > 0 ? (
+                      <div className="flex flex-col">
+                        {intervals.map((iv) => (
+                          <span key={iv} className="block max-w-[7rem] truncate text-xs font-semibold tabular-nums leading-tight text-white/55" title={iv}>{iv}</span>
+                        ))}
+                      </div>
                     ) : null}
                   </div>
                 </li>
