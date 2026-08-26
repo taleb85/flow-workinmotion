@@ -187,11 +187,11 @@ body {
 /* ═══════════════ BOTTOM NAV: altezza ridotta su desktop (≥768px) ═══════════════ */
 @media (min-width: 768px) {
   .bottom-nav-glass-edge .top-tabbar {
-    height: 44px !important;
+    height: 40px !important;
   }
   .top-tabbar .top-tab {
-    padding-top: 3px !important;
-    padding-bottom: 3px !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
     font-size: 12px !important;
   }
   .bottom-nav-glass-edge {
