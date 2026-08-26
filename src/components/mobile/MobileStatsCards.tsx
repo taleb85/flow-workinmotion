@@ -49,7 +49,7 @@ export default function MobileStatsCards({
     <div className={`grid gap-4 ${hideWeek ? 'grid-cols-1' : 'grid-cols-2'}`}>
       {/* CARD SETTIMANA */}
       {!hideWeek && (
-        <div className="p-5 rounded-2xl border border-neutral-500" style={{ background: 'transparent' }}>
+        <div className="flow-card">
           <p className="text-xs font-medium text-white/50 uppercase mb-1">
             {labels.week}
           </p>
@@ -66,7 +66,7 @@ export default function MobileStatsCards({
       )}
 
       {/* CARD MESE */}
-      <div className="p-5 rounded-2xl border border-neutral-500" style={{ background: 'transparent' }}>
+      <div className="flow-card">
         <p className="text-xs font-medium text-white/50 uppercase mb-1">
           {labels.month}
         </p>
