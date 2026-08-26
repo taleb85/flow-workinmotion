@@ -2450,6 +2450,15 @@ td, th {
   opacity: 1 !important;
 }
 
+/* Tab "Impostazioni": davvero nascosta sotto 768px.
+   Il componente applica display:flex inline (vinceva su .hidden di Tailwind),
+   quindi serve un override con !important nella media query mobile. */
+@media (max-width: 767.98px) {
+  .top-tabbar .top-tab.hidden {
+    display: none !important;
+  }
+}
+
 /* iOS: blur ridotto (prestazioni, vedi gruppo modal-glass più sotto) */
 html[data-ios="1"] .bottom-nav-glass-edge {
   -webkit-backdrop-filter: blur(10px) !important;
