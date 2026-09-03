@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, ChevronRight, Trash2, Settings2, Fingerprint, ShieldCheck } from 'lucide-react';
+import { Bell, Camera, ChevronRight, Languages, Settings2, Trash2, Fingerprint, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppUser, useAppOverlay } from '../context/AppContext';
 import { useProfileLeaveGuardRef } from '../context/ProfileLeaveGuardContext';
@@ -16,7 +16,6 @@ import { isFeatureEnabled } from '../utils/enabledFeatures';
 import { PinPadModal } from './ui/PinPadModal';
 import { hasPlatformBiometricAuthenticator } from '../utils/pinUnlockWebAuthn';
 import { ProfileFormSelf, type ProfileFormSelfData } from './UserProfile';
-import BackgroundGallery from './BackgroundGallery';
 import ProfilePhotoSourceSheet from './profile/ProfilePhotoSourceSheet';
 import ProfilePhotoCropperModal from './profile/ProfilePhotoCropperModal';
 import {
@@ -475,8 +474,6 @@ export default function ProfileNavTabPanel({
   };
 
   const _menuRowBase = 'w-full flex items-center justify-between rounded-xl px-4 py-3.5 transition-colors  border border-neutral-500 hover:bg-white/10';
-  const chevronCls = 'text-white/60';
-  const rowLabelCls = 'text-[0.8125rem] font-semibold text-white';
 
   const deptLabel = currentUser.department
     ? translateDepartmentValue(currentUser.department, effectiveLanguage)
@@ -601,110 +598,142 @@ export default function ProfileNavTabPanel({
         <div className="flex flex-col gap-2 px-4 pt-4 pb-8">
 
           {/* Impostazioni profilo */}
-          <div className="rounded-xl overflow-hidden border border-neutral-500">
-            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('settings')}>
-              <span className={rowLabelCls}>{tv.profile_tab_group_settings ?? 'Impostazioni profilo'}</span>
-              <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'settings' ? 'rotate-90' : ''}`} />
-            </button>
-            <AnimatePresence initial={false}>
-              {expanded === 'settings' && (
-                <motion.div key="settings-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
-                  <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.12)' }} className="px-4 py-4 text-white">
-                    <ProfileFormSelf
-                      formData={formData}
-                      setFormData={setFormData}
-                      onSave={handleProfileSave}
-                      isSaving={isSaving}
-                      readOnly={false}
-                      appearance="light"
-                      nameLocked={true}
-                      departmentLocked={true}
-                      roleLocked={true}
-                      showSaveButton={false}
-                      onFieldChange={handleFieldChange}
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <button
+            type="button"
+            onClick={() => toggleSection('settings')}
+            className="w-full flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-colors hover:bg-white/5"
+            style={{
+              background: 'rgba(99, 102, 241, 0.15)',
+              border: '1px solid rgba(99, 102, 241, 0.35)',
+            }}
+          >
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(99, 102, 241, 0.30)' }}>
+              <Settings2 className="w-4 h-4" style={{ color: '#a5b4fc' }} />
+            </div>
+            <span className="flex-1 text-left text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>{tv.profile_tab_group_settings ?? 'Impostazioni profilo'}</span>
+            <ChevronRight className={`w-4 h-4 transition-transform duration-200 flex-shrink-0 ${expanded === 'settings' ? 'rotate-90' : ''}`} style={{ color: 'rgba(165, 180, 252, 0.60)' }} />
+          </button>
+          <AnimatePresence initial={false}>
+            {expanded === 'settings' && (
+              <motion.div key="settings-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
+                <div className="rounded-2xl px-4 py-4 text-white" style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
+                  <ProfileFormSelf
+                    formData={formData}
+                    setFormData={setFormData}
+                    onSave={handleProfileSave}
+                    isSaving={isSaving}
+                    readOnly={false}
+                    appearance="light"
+                    nameLocked={true}
+                    departmentLocked={true}
+                    roleLocked={true}
+                    showSaveButton={false}
+                    onFieldChange={handleFieldChange}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Notifiche */}
-          <div className="rounded-xl overflow-hidden border border-neutral-500">
-            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('notif')}>
-              <span className={rowLabelCls}>{tv.profile_notifications ?? 'Notifiche'}</span>
-              <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'notif' ? 'rotate-90' : ''}`} />
-            </button>
-            <AnimatePresence initial={false}>
-              {expanded === 'notif' && (
-                <motion.div key="notif-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
-                  <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.12)' }} className="px-4 py-3">
-                    <NotificationPermissionButton userId={currentUser?.id} />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <button
+            type="button"
+            onClick={() => toggleSection('notif')}
+            className="w-full flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-colors hover:bg-white/5"
+            style={{
+              background: 'rgba(99, 102, 241, 0.15)',
+              border: '1px solid rgba(99, 102, 241, 0.35)',
+            }}
+          >
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(99, 102, 241, 0.30)' }}>
+              <Bell className="w-4 h-4" style={{ color: '#a5b4fc' }} />
+            </div>
+            <span className="flex-1 text-left text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>{tv.profile_notifications ?? 'Notifiche'}</span>
+            <ChevronRight className={`w-4 h-4 transition-transform duration-200 flex-shrink-0 ${expanded === 'notif' ? 'rotate-90' : ''}`} style={{ color: 'rgba(165, 180, 252, 0.60)' }} />
+          </button>
+          <AnimatePresence initial={false}>
+            {expanded === 'notif' && (
+              <motion.div key="notif-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
+                <div className="rounded-2xl px-4 py-4 text-white" style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
+                  <NotificationPermissionButton userId={currentUser?.id} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* Lingua — bordo unico che si espande e mostra il contenuto */}
-          <div className="rounded-xl overflow-hidden border border-neutral-500">
-            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('lang')}>
-              <span className={rowLabelCls}>{t.language ?? 'Lingua'}</span>
-              <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'lang' ? 'rotate-90' : ''}`} />
-            </button>
-            <AnimatePresence initial={false}>
-              {expanded === 'lang' && (
-                <motion.div key="lang-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
-                  <div className="px-4 py-3 space-y-3" data-save-field="lang">
-                    <div className="flex gap-1 rounded-xl p-1 border border-neutral-500" style={{ background: 'transparent' }}>
-                      {(() => {
-                        const deviceLang = getDeviceUiLanguage();
-                        const isAuto = pendingLang === null;
-                        return (
-                          <button
-                            type="button"
-                            onClick={() => setPendingLang(null)}
-                            className="relative flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors"
-                            style={isAuto ? { background: 'rgba(255,255,255,0.12)', color: '#ffffff', outline: 'none' } : { color: 'rgba(255,255,255,0.55)', outline: 'none' }}
-                            title={`Auto → ${deviceLang.toUpperCase()}`}
-                          >
-                            Auto
-                          </button>
-                        );
-                      })()}
-                      {(['it', 'en', 'es', 'fr'] as const).map((l) => (
+          {/* Lingua — singola pill che si espande e mostra il contenuto */}
+          <button
+            type="button"
+            onClick={() => toggleSection('lang')}
+            className="w-full flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-colors hover:bg-white/5"
+            style={{
+              background: 'rgba(99, 102, 241, 0.15)',
+              border: '1px solid rgba(99, 102, 241, 0.35)',
+            }}
+          >
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(99, 102, 241, 0.30)' }}>
+              <Languages className="w-4 h-4" style={{ color: '#a5b4fc' }} />
+            </div>
+            <span className="flex-1 text-left text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>{t.language ?? 'Lingua'}</span>
+            <ChevronRight className={`w-4 h-4 transition-transform duration-200 flex-shrink-0 ${expanded === 'lang' ? 'rotate-90' : ''}`} style={{ color: 'rgba(165, 180, 252, 0.60)' }} />
+          </button>
+          <AnimatePresence initial={false}>
+            {expanded === 'lang' && (
+              <motion.div key="lang-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
+                <div className="rounded-2xl px-4 py-4 text-white space-y-3" data-save-field="lang" style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
+                  <div className="flex gap-1 rounded-xl p-1 border border-neutral-500" style={{ background: 'transparent' }}>
+                    {(() => {
+                      const deviceLang = getDeviceUiLanguage();
+                      const isAuto = pendingLang === null;
+                      return (
                         <button
-                          key={l}
                           type="button"
-                          onClick={() => setPendingLang(l)}
+                          onClick={() => setPendingLang(null)}
                           className="relative flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors"
-                          style={pendingLang === l ? { background: 'rgba(255,255,255,0.12)', color: '#ffffff', outline: 'none' } : { color: 'rgba(255,255,255,0.55)', outline: 'none' }}
+                          style={isAuto ? { background: 'rgba(255,255,255,0.12)', color: '#ffffff', outline: 'none' } : { color: 'rgba(255,255,255,0.55)', outline: 'none' }}
+                          title={`Auto → ${deviceLang.toUpperCase()}`}
                         >
-                          {l.toUpperCase()}
+                          Auto
                         </button>
-                      ))}
-                    </div>
+                      );
+                    })()}
+                    {(['it', 'en', 'es', 'fr'] as const).map((l) => (
+                      <button
+                        key={l}
+                        type="button"
+                        onClick={() => setPendingLang(l)}
+                        className="relative flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors"
+                        style={pendingLang === l ? { background: 'rgba(255,255,255,0.12)', color: '#ffffff', outline: 'none' } : { color: 'rgba(255,255,255,0.55)', outline: 'none' }}
+                      >
+                        {l.toUpperCase()}
+                      </button>
+                    ))}
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Sfondo */}
-          <div className="rounded-xl overflow-hidden border border-neutral-500">
-            <BackgroundGallery userId={currentUser?.id} variant="profile-row" />
-          </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Sicurezza — accesso con Face ID / impronta per ogni profilo */}
-          <div className="rounded-xl overflow-hidden border border-neutral-500">
-            <button type="button" className="w-full flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" onClick={() => toggleSection('security')}>
-              <span className={rowLabelCls}>{tv.profile_tab_group_security ?? 'Sicurezza'}</span>
-              <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${chevronCls} ${expanded === 'security' ? 'rotate-90' : ''}`} />
-            </button>
-            <AnimatePresence initial={false}>
-              {expanded === 'security' && (
-                <motion.div key="security-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
-                  <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.12)' }} className="px-4 py-4">
+          <button
+            type="button"
+            onClick={() => toggleSection('security')}
+            className="w-full flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-colors hover:bg-white/5"
+            style={{
+              background: 'rgba(99, 102, 241, 0.15)',
+              border: '1px solid rgba(99, 102, 241, 0.35)',
+            }}
+          >
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(99, 102, 241, 0.30)' }}>
+              <ShieldCheck className="w-4 h-4" style={{ color: '#a5b4fc' }} />
+            </div>
+            <span className="flex-1 text-left text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>{tv.profile_tab_group_security ?? 'Sicurezza'}</span>
+            <ChevronRight className={`w-4 h-4 transition-transform duration-200 flex-shrink-0 ${expanded === 'security' ? 'rotate-90' : ''}`} style={{ color: 'rgba(165, 180, 252, 0.60)' }} />
+          </button>
+          <AnimatePresence initial={false}>
+            {expanded === 'security' && (
+              <motion.div key="security-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
+                <div className="rounded-2xl px-4 py-4 text-white" style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
                     {bioAvailable ? (
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}>
@@ -752,7 +781,6 @@ export default function ProfileNavTabPanel({
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
 
           {/* Pannello Admin — visibile solo per ruoli autorizzati */}
           {(hasAdminAccess || _isMgmt) && (

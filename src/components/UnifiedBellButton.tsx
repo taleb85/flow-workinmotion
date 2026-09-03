@@ -108,7 +108,7 @@ export function UnifiedBellButton({
             ? `Errore caricamento notifiche`
             : `Campanella notifiche${totalUnread > 0 ? ` con ${totalUnread} nuovi messaggi` : ''}`
         }
-        className={`group relative flex items-center gap-0 overflow-hidden rounded-xl p-2 transition-all duration-200 touch-manipulation liquid-glass text-accent hover:gap-1.5 hover:pr-2.5 ${
+        className={`group relative flex items-center gap-0 rounded-xl p-2 transition-all duration-200 touch-manipulation liquid-glass text-accent hover:gap-1.5 hover:pr-2.5 ${
           isDisabled
             ? 'opacity-50 cursor-not-allowed'
             : ' '

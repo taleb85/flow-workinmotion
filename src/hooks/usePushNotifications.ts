@@ -173,7 +173,14 @@ export function usePushNotifications(userId?: string, options?: UsePushNotificat
       setIsLoading(true);
       setError(null);
       try {
-        const reg = await navigator.serviceWorker.ready;
+        const reg = await getActiveRegistration();
+        if (!reg) {
+          if (!cancelled) {
+            setError('Notifiche non attivate: nessun service worker attivo — premi "Attiva Notifiche"');
+            setIsLoading(false);
+          }
+          return;
+        }
         const existingSub = await reg.pushManager.getSubscription();
         if (existingSub) {
           if (!cancelled) {
@@ -240,7 +247,12 @@ export function usePushNotifications(userId?: string, options?: UsePushNotificat
       }
 
       // 2. Forza nuova subscription (elimina quella vecchia se c'è, per evitare endpoint scaduti)
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await getActiveRegistration();
+      if (!registration) {
+        setError('Nessun service worker attivo — impossibile attivare le notifiche');
+        setIsLoading(false);
+        return false;
+      }
       const existingSub = await registration.pushManager.getSubscription();
       if (existingSub) {
         await existingSub.unsubscribe();
@@ -270,9 +282,13 @@ export function usePushNotifications(userId?: string, options?: UsePushNotificat
       // ma esiste comunque una subscription (es. ripristinata dal browser),
       // riflette lo stato vero, altrimenti resta "Non iscritto".
       try {
-        const reg = await navigator.serviceWorker.ready;
-        const sub = await reg.pushManager.getSubscription();
-        setIsSubscribed(!!sub);
+        const reg = await getActiveRegistration();
+        if (reg) {
+          const sub = await reg.pushManager.getSubscription();
+          setIsSubscribed(!!sub);
+        } else {
+          setIsSubscribed(false);
+        }
       } catch {
         setIsSubscribed(false);
       }

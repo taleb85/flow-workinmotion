@@ -64,15 +64,12 @@
     </script>
     <script>
       (function(){
+        /* Tema fisso scuro: nessuna preferenza utente (chiaro/scuro) — vedi utils/theme.ts */
         var th = 'dark';
-        try {
-          var s = localStorage.getItem('flow-theme');
-          if (s === 'light' || s === 'dark') th = s;
-        } catch (e) {}
         document.documentElement.setAttribute('data-theme', th);
         if (th === 'dark') document.documentElement.classList.add('dark');
         else document.documentElement.classList.remove('dark');
-        try { localStorage.removeItem('userTheme'); localStorage.removeItem('theme'); } catch(e){}
+        try { localStorage.removeItem('userTheme'); localStorage.removeItem('theme'); localStorage.removeItem('flow-theme'); } catch(e){}
 
         if(location.search.includes('nocache=1')){
           var clr = function(){
