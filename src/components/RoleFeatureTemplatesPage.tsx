@@ -37,9 +37,10 @@ export type RoleFeatureTemplatesPanelVariant = 'page' | 'embedded';
 type Props = { variant?: RoleFeatureTemplatesPanelVariant };
 
 function roleColor(role: string): string {
-  if (role === 'manager') return '#10b981';
-  if (role === 'assistant_manager') return '#D97706';
-  return '#059669';
+  // Varianti scure (700/800) così il testo bianco sopra supera il contrasto AA
+  if (role === 'manager') return '#047857';
+  if (role === 'assistant_manager') return '#B45309';
+  return '#047857';
 }
 
 function roleBadgeLabel(role: string, t: Record<string, string>): string {

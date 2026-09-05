@@ -37,7 +37,7 @@ export interface Department {
 // Reparti built-in: stessi colori “pieni” della palette (bar = verde brand)
 export const BUILTIN_DEPARTMENTS: Department[] = [
   { value: 'sala_bar', label: 'Sala e Bar', color: 'var(--brand)' },
-  { value: 'sala',    label: 'Sala',   color: '#2196F3' },
+  { value: 'sala',    label: 'Sala',   color: '#1976D2' },
   { value: 'bar',     label: 'Bar',    color: 'var(--brand)' },
   { value: 'kitchen', label: 'Cucina', color: '#F44336' },
 ];
@@ -181,7 +181,7 @@ export const DEPARTMENT_COLOR_PRESETS: readonly string[] = [
   '#0099CC', // blue-cyan
   '#00BCD4', // ciano
   '#03A9F4', // azzurro
-  '#2196F3', // blu
+  '#1976D2', // blu (Material 700: testo bianco sopra ≥ AA)
   '#3F51B5', // indaco
   '#673AB7', // viola profondo
   '#9C27B0', // viola
@@ -208,6 +208,33 @@ export function getDepartments(): Department[] {
 export function getDeptColor(value: string): string {
   const dept = getDepartments().find((d) => d.value === value);
   return dept?.color ?? DEFAULT_CUSTOM_COLOR;
+}
+
+/**
+ * Restituisce una variante del colore pieno abbastanza scura perché il testo
+ * bianco sopra rispetti il contrasto AA (≥4.5:1). I colori già scuri (o i token
+ * `var(--brand)`) restano invariati.
+ */
+export function ensureWhiteTextContrast(color: string | null | undefined): string {
+  const c = color ?? DEFAULT_CUSTOM_COLOR;
+  if (!c.startsWith('#') || c.length < 7) return c;
+  const hex = c.slice(1, 7);
+  if (!/^[0-9a-fA-F]{6}$/.test(hex)) return c;
+  const num = parseInt(hex, 16);
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  const lin = (v: number) => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  const TARGET = 0.17; // → bianco sopra ≈ 4.8:1
+  if (L <= TARGET) return c;
+  const k = TARGET / L;
+  const scale = (v: number) => Math.min(255, Math.round(v * k));
+  const to2 = (v: number) => v.toString(16).padStart(2, '0');
+  return `#${to2(scale(r))}${to2(scale(g))}${to2(scale(b))}`;
 }
 
 export function addDepartment(

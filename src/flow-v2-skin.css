@@ -15,7 +15,7 @@
   --flow-popover: rgba(44, 44, 46, 0.92);
   --flow-popover-foreground: #f5f5f7;
   --flow-muted: rgba(120, 120, 128, 0.24);
-  --flow-muted-foreground: #98989d;
+  --flow-muted-foreground: #b1b4ba;
   --flow-surface-2: rgba(120, 120, 128, 0.3);
   --flow-border: rgba(255, 255, 255, 0.14);
   --flow-input: rgba(120, 120, 128, 0.2);
@@ -25,6 +25,9 @@
   --flow-primary: #0a84ff;
   --flow-primary-foreground: #ffffff;
   --flow-primary-hover: #409cff;
+  /* Tinta di RIEMPIMENTO dei CTA pieni: più scura di --flow-primary
+     così il testo bianco sopra supera il contrasto AA (≥4.5:1). */
+  --flow-primary-fill: #0071e3;
   --flow-primary-soft: rgba(10, 132, 255, 0.18);
   --flow-primary-softer: rgba(10, 132, 255, 0.1);
 
@@ -48,8 +51,8 @@
   --flow-radius-lg: 16px;
   --flow-radius-pill: 999px;
 
-  /* ── Tipografia SF Pro ──────────────────────────────── */
-  --flow-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  /* ── Tipografia (stack unico: Inter caricato in index.html) ── */
+  --flow-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 
   /* ── Mesh di sfondo (dark) ──────────────────────────── */
   --flow-mesh:
@@ -100,33 +103,33 @@
 
 html {
   background: var(--flow-background) !important;
-  background-image: var(--flow-mesh) !important;
-  background-attachment: fixed !important;
   color-scheme: dark;
 }
 
 body {
   background: var(--flow-background) !important;
-  background-image: var(--flow-mesh) !important;
-  background-attachment: fixed !important;
   color-scheme: dark;
   font-family: var(--flow-font-sans);
 }
 
-#root { background: transparent !important; }
+/* Lo sfondo (mesh) vive su #root, che è il vero scroller: usa l'attachment di
+   default (non `fixed`), così su iOS lo scroll/overscroll non lascia mai
+   strisce scoperte senza mesh in fondo alla pagina. */
+#root {
+  background-color: var(--flow-background) !important;
+  background-image: var(--flow-mesh) !important;
+}
 
-/* ── Nasconde l'aurora animata, sostituita dal mesh ── */
-.pointer-events-none.fixed.inset-0.z-0.overflow-hidden { display: none !important; }
-
-/* ── Aree principali: sfondo mesh coerente ── */
+/* ── Aree principali: trasparenti, la mesh di #root traspare sotto ── */
 [aria-label="Accesso"],
 [aria-label="Installazione app"],
 [aria-label="Applicazione"],
 [aria-label="Caricamento in corso"] {
-  background-color: var(--flow-background) !important;
-  background-image: var(--flow-mesh) !important;
-  background-attachment: fixed !important;
+  background: transparent !important;
 }
+
+/* ── Nasconde l'aurora animata, sostituita dal mesh ── */
+.pointer-events-none.fixed.inset-0.z-0.overflow-hidden { display: none !important; }
 
 /* ═══════════════ HEADER (iOS) ═══════════════ */
 .app-header {
@@ -199,6 +202,36 @@ body {
   }
 }
 
+/* ═══════════════ BOTTOM NAV: pillola flottante su mobile (≤768px) ═══════════════ */
+@media (max-width: 767.98px) {
+  .bottom-nav-glass-edge {
+    left: 16px !important;
+    right: 16px !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) !important;
+    width: auto !important;
+    border-radius: var(--flow-radius-pill) !important;
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    /* Stesso effetto dell'header: vetro TRASPARENTE + blur (niente tinta).
+       Il blur applicato qui sopra (base .bottom-nav-glass-edge) sfuma il
+       contenuto che scorre sotto; il bordo+ombra definiscono la pillola. */
+    background: transparent !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.28) !important;
+  }
+  /* Fallback: se il browser non supporta backdrop-filter, applica una
+     superficie semitrasparente per mantenere leggibili le icone. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .bottom-nav-glass-edge {
+      background: var(--flow-card) !important;
+    }
+  }
+  /* Mantiene la barra ancorata sopra la pillola anche durante lo scroll */
+  .bottom-nav-glass-edge .top-tabbar {
+    height: 56px !important;
+  }
+}
+
 /* ═══════════════ STAFF HOME: card trasparenti (niente vetro) ═══════════════
    Direzione "chiaro": le sezioni della home staff usano superfici trasparenti
    con bordo sottile, senza sfondo glass/blur/ombra. */
@@ -240,7 +273,7 @@ body .bg-gray-100:not(input):not(textarea):not(select) { background-color: var(-
 .bg-accent:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]):not([role="switch"]),
 .bg-brand:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]):not([role="switch"]),
 .bg-primary:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]):not([role="switch"]) {
-  background-color: var(--brand) !important;
+  background-color: var(--flow-primary-fill, var(--brand)) !important;
   color: #ffffff !important;
   border-radius: var(--flow-radius-pill) !important;
   min-height: 44px;
@@ -262,7 +295,7 @@ button[class*="h-9"], button[class*="h-10"] { border-radius: 999px !important; }
 [class*="rounded-full"] { -webkit-tap-highlight-color: transparent; }
 
 /* ═══════════════ TESTI ═══════════════ */
-h1, h2, h3, .text-2xl, .text-xl, .text-lg, .font-bold { letter-spacing: -0.02em !important; }
+h1, h2, h3, .text-2xl, .text-xl, .text-lg { letter-spacing: -0.02em !important; }
 
 *:focus-visible {
   outline: 2px solid var(--flow-ring) !important;

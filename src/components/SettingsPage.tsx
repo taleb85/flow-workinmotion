@@ -49,6 +49,7 @@ import {
   getHiddenBuiltinValues,
   BUILTIN_DEPARTMENTS,
   DEPARTMENT_COLOR_PRESETS,
+  ensureWhiteTextContrast,
 } from '../utils/departments';
 import { translateDepartmentValue } from '../utils/departmentLabels';
 import type { Department, PermissionCategory } from '../utils/departments';
@@ -1155,6 +1156,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 {departments.map((d) => {
                   const isBuiltin = builtinValues.has(d.value);
                   const badgeColor = d.color ?? 'var(--brand)';
+                  const chipBg = ensureWhiteTextContrast(badgeColor);
                   const isEditingChip = editingDeptValue === d.value;
                   return (
                     <div
@@ -1164,7 +1166,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
  ? 'shadow-md ring-2 ring-white/90 ring-offset-2 ring-offset-slate-100'
  : ''
  }`}
-                      style={{ backgroundColor: badgeColor }}
+                      style={{ backgroundColor: chipBg }}
                     >
                       <span className="truncate max-w-[10rem]" title={translateDepartmentValue(d.value, effectiveLanguage)}>{translateDepartmentValue(d.value, effectiveLanguage)}
                       </span>
@@ -2499,23 +2501,23 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                 </p>
               </div>
             </div>
-            <div className="flex flex-row gap-2 shrink-0">
+            <div className="flex flex-col md:flex-row gap-2 md:shrink-0">
               <button
                 type="button"
                 disabled={pullSyncBusy || pushSyncBusy || dataSyncInProgress}
                 onClick={() => void handlePullSync()}
-                className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80"
+                className="inline-flex w-full md:w-auto min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80 whitespace-nowrap"
               >
-                <RefreshCw className={`h-3.5 w-3.5 ${pullSyncBusy ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${pullSyncBusy ? 'animate-spin' : ''}`} />
                 {pullSyncBusy ? t.ui_ellipsis : 'Sincronizza'}
               </button>
               <button
                 type="button"
                 disabled={pushSyncBusy || settingsCloudPushBusy || pullSyncBusy || dataSyncInProgress}
                 onClick={() => void handlePushSync()}
-                className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80 whitespace-nowrap"
+                className="inline-flex w-full md:w-auto min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80 whitespace-nowrap"
               >
-                <UploadCloud className={`h-5 w-5 text-white ${pushSyncBusy ? 'animate-spin' : ''}`} style={{ color: '#fff' }} />
+                <UploadCloud className={`h-4 w-4 text-white ${pushSyncBusy ? 'animate-spin' : ''}`} style={{ color: '#fff' }} />
                 {pushSyncBusy ? t.ui_ellipsis : 'Carica sul cloud'}
               </button>
             </div>
@@ -2560,7 +2562,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
             <div className="mb-4 flex items-start gap-3">
               <div
                 className="mt-0.5 h-8 w-8 shrink-0 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: deletingDept.color ?? 'var(--brand)' }}
+                style={{ backgroundColor: ensureWhiteTextContrast(deletingDept.color) }}
               >
                 <Trash2 className="h-4 w-4 text-white" />
               </div>
@@ -2571,7 +2573,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                 <p className="mt-0.5 text-xs text-white/55">
                   <span
                     className="inline-block rounded-md px-1.5 py-0.5 text-[0.6875rem] font-semibold text-white"
-                    style={{ backgroundColor: deletingDept.color ?? 'var(--brand)' }}
+                    style={{ backgroundColor: ensureWhiteTextContrast(deletingDept.color) }}
                   >
                     {deletingDept.label}
                   </span>
