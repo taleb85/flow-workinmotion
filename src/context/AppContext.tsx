@@ -23,7 +23,7 @@ import { database, formatSupabaseError } from '../lib/database';
 import { supabase } from '../lib/supabase';
 import { hasShiftConflictSameDay, computeEffectivePunchIn, calculateShiftMinutesGross } from '../utils/timeCalculations';
 import { isShiftPayrollFrozen } from '../utils/timesheetFreezeCriteria';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 // Set di ID turni congelati per cui il PIN è già stato verificato e l'eliminazione è autorizzata.
 const _approvedFrozenDeleteIds = new Set<string>();
@@ -3015,22 +3015,24 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         <DataSliceContext.Provider value={dataSlice}>
           <ConfigSliceContext.Provider value={configSlice}>
             <OverlaySliceContext.Provider value={overlaySlice}>
-              {/* Splash durante boot: senza questo `#root` resta vuoto → “pagina bianca”. */}
-              {isLoading ? (
-                <div
-                  className="fixed inset-0 z-[200] flex items-center justify-center font-sans"
-                  style={{
-                    background:
-                      'radial-gradient(ellipse at 50% 30%, rgba(107,107,107,0.15) 0%, transparent 55%), #0a0a0c',
-                  }}
-                  aria-busy
-                  aria-label="Caricamento"
-                >
-                  <FlowWaveIcon size={120} radius={34} />
-                </div>
-              ) : (
-                children
-              )}
+              {/* Splash durante boot: senza questo `#root` resta vuoto → “pagina bianca”.
+                  Sfondo trasparente: traspare il mesh di `#root`, identico a quello dell'app.
+                  Alla fine del boot si dissolve (fade-out) rivelando l'app. */}
+              <AnimatePresence>
+                {isLoading ? (
+                  <motion.div
+                    key="boot-splash"
+                    className="fixed inset-0 z-[200] flex items-center justify-center font-sans"
+                    initial={{ opacity: 1 }}
+                    exit={{ opacity: 0, transition: { duration: 0.55, ease: 'easeInOut' } }}
+                    aria-busy
+                    aria-label="Caricamento"
+                  >
+                    <FlowWaveIcon size={120} radius={34} />
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+              {!isLoading && children}
 
 
               <DevMissingEnvBanner />

@@ -209,6 +209,10 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
 
   return (
     <div className={`font-sans flex h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem)-3rem)] md:h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem))] w-full flex-col pt-2 ${embedded ? '' : 'pb-content'}`}>
+      {/* Titolo pagina per screen reader */}
+      <h1 className="sr-only">
+        {(t as Record<string, string>).sidebar_holidays ?? 'Ferie'}
+      </h1>
       <motion.div
         className="flex flex-col flex-1 min-h-0"
         initial={{ opacity: 0, y: 16 }}
@@ -403,9 +407,9 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
           {uiW('ferie.calendar') && (
           <div className="group w-full rounded-xl border px-2 py-2 text-left border-neutral-500 flex-1">
             <div className="flex items-center justify-between mb-1">
-              <h3 className="font-semibold text-base" style={{ color: '#ffffff' }}>
+              <h2 className="font-semibold text-base" style={{ color: '#ffffff' }}>
                 {format(now, 'MMMM yyyy', { locale: calLocale })}
-              </h3>
+              </h2>
               <div className="flex items-center gap-1.5 text-[0.625rem]" style={{ color: '#ffffff' }}>
                 <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />{t.pending}</span>
                 <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500 inline-block" />{t.status_approved}</span>

@@ -223,7 +223,7 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
             aria-hidden
           />
           <div className="min-w-0">
-            <h4 className="font-bold text-lg text-white truncate">{user.first_name} {user.last_name?.[0] ?? ''}</h4>
+            <p className="font-bold text-lg text-white truncate">{user.first_name} {user.last_name?.[0] ?? ''}</p>
             {user.department && (
               <p className="text-[0.6875rem] text-white/50 font-medium uppercase tracking-wider">{translateDepartmentValue(user.department ?? '', effectiveLanguage)}</p>
             )}

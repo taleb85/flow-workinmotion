@@ -664,7 +664,6 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       )}
     </AnimatePresence>
     <div
-      role="region" aria-label="Applicazione"
       className="relative w-full min-h-[var(--app-vh,100dvh)] text-white font-sans antialiased safe-area-pad pt-0 flex flex-col"
       style={{ background: bgTheme.appBg }}
     >
@@ -1008,7 +1007,7 @@ function ProtectedApp() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.35 }}
         className="fixed inset-0 flex items-center justify-center font-sans"
-        style={{ background: 'rgba(2, 6, 23, 0.80)' }}
+        style={{ background: 'transparent' }}
   >
         <motion.div
           initial={{ scale: 0.82, opacity: 0 }}
@@ -1049,7 +1048,9 @@ function ProtectedApp() {
 // ─── Root App Content ───────────────────────────────────────────────────────────
 function AppContent() {
   return (
-    <main role="main" aria-label="Contenuto principale">
+    // Wrapper neutro (div, senza ruolo main): ogni rotta dichiara il proprio
+    // landmark main top-level, evitando main annidati duplicati (axe).
+    <div>
       <Routes>
         <Route path="/i/:slug" element={<InviteRedirect />} />
         <Route path="/install" element={<InstallRoute />} />
@@ -1065,7 +1066,7 @@ function AppContent() {
         <Route path="/admin/*" element={<AdminGate><Suspense fallback={null}><AdminLayout /></Suspense></AdminGate>} />
         <Route path="*" element={<Navigate to={PATH_PROFILO} replace />} />
       </Routes>
-    </main>
+    </div>
   );
 }
 

@@ -17,6 +17,10 @@ export default function UnifiedShiftsPage() {
       transition={{ duration: 0.3 }}
       className="w-full min-h-0 flex flex-col mx-auto px-0 pb-2 pt-3 font-sans md:h-full md:px-2"
     >
+      {/* Titolo pagina per screen reader (il design non mostra un h1 visibile) */}
+      <h1 className="sr-only">
+        {(_t as Record<string, string>).timesheet_title ?? 'Presenze'}
+      </h1>
       {/* Admin badge */}
       {isSessionElevated && (
         <div className="flex items-center gap-2 mb-2 shrink-0">

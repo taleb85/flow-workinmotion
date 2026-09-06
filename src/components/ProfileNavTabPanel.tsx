@@ -573,9 +573,9 @@ export default function ProfileNavTabPanel({
 
           {/* Name */}
           <div className="flex flex-col items-center gap-0.5">
-            <h2 className="text-base font-bold tracking-tight" style={{ color: '#ffffff' }}>
+            <h1 className="text-base font-bold tracking-tight" style={{ color: '#ffffff' }}>
               {displayName}
-            </h2>
+            </h1>
           </div>
 
           {/* Status badges: ruolo + reparto + attivo */}

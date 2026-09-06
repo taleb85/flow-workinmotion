@@ -373,7 +373,7 @@ export default memo(function HomeManagerView({
             {uiW('home_mgmt.card_presenze') && (
             <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 cursor-pointer" onClick={() => onNavigateToReports?.()}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-white">{t.home_section_attendance}</h3>
+                <h2 className="font-bold text-white">{t.home_section_attendance}</h2>
                 <TrendingUp className="w-4 h-4 text-white/45" />
               </div>
               <div className="space-y-3">
@@ -400,7 +400,7 @@ export default memo(function HomeManagerView({
             {uiW('home_mgmt.card_ferie') && staffRequestsEnabled && (
             <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 cursor-pointer" onClick={() => onNavigateToHolidays?.()}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold text-white">{t.home_holidays_section}</h3>
+                <h2 className="font-bold text-white">{t.home_holidays_section}</h2>
                 <Palmtree className="w-4 h-4 text-white/60" />
               </div>
               {pendingHolidays.length > 0 && (

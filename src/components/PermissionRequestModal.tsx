@@ -184,7 +184,12 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="permission-modal-title"
+      className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto"
+    >
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -195,7 +200,7 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
         {/* Header */}
         <div className="px-5 pt-6 pb-4 text-center border-b border-white/10">
           <p className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1">Prima di iniziare</p>
-          <h2 className="text-base font-bold text-white/90 font-sans">
+          <h2 id="permission-modal-title" className="text-base font-bold text-white/90 font-sans">
             Abilita le funzionalità
           </h2>
           <p className="text-xs text-white/60 mt-1">

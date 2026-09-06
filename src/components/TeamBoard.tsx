@@ -97,6 +97,8 @@ className="px-3 py-1.5 rounded-xl bg-white/10 text-white/70 text-xs font-semibol
             <div className="flex items-center gap-1 shrink-0">
               <button
                 type="button"
+                aria-label={t.edit ?? 'Modifica'}
+                title={t.edit ?? 'Modifica'}
                 onClick={() => {
                   onBoardDraftChange(boardNote?.text ?? '');
                   onStartEdit();
@@ -108,6 +110,8 @@ className="px-3 py-1.5 rounded-xl bg-white/10 text-white/70 text-xs font-semibol
               {boardNote && (
                 <button
                   type="button"
+                  aria-label={t.delete ?? 'Elimina'}
+                  title={t.delete ?? 'Elimina'}
                   onClick={onClear}
 className="p-1.5 rounded-xl hover:bg-red-50 text-red-400 active:bg-red-50/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                 >

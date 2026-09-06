@@ -109,10 +109,10 @@ export default function AdminLayout() {
                     onClick={() => handleTabChange(key)}
                     aria-current={isActive ? 'page' : undefined}
                     className={`flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
- isActive
- ? 'bg-accent text-white shadow-sm'
- : 'text-white/60 hover:bg-white/10 hover:text-white active:text-white'
- }`}
+                      isActive
+                        ? 'bg-accent text-white shadow-sm'
+                        : 'text-white/60 hover:bg-white/10 hover:text-white active:text-white'
+                    }`}
                   >
                     <Icon className="h-3.5 w-3.5 shrink-0 text-white" aria-hidden />
                     <span>{label}</span>
@@ -125,6 +125,10 @@ export default function AdminLayout() {
       </header>
 
       <main className="flex-1 pb-6">
+        {/* Titolo pagina per screen reader */}
+        <h1 className="sr-only">
+          {(t as Record<string, string>).settings_title ?? 'Impostazioni'}
+        </h1>
         <div className="mx-auto w-full max-w-7xl">
           {activeTab === 'profili' && (
             <SettingsPage view="profili" />
