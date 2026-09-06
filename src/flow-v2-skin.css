@@ -124,7 +124,8 @@ body {
 [aria-label="Accesso"],
 [aria-label="Installazione app"],
 [aria-label="Applicazione"],
-[aria-label="Caricamento in corso"] {
+[aria-label="Caricamento in corso"],
+.app-main-region {
   background: transparent !important;
 }
 
