@@ -90,7 +90,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
   const emptyDays   = Array.from({ length: getDay(monthStart) === 0 ? 6 : getDay(monthStart) - 1 });
   const calLocale = getDateLocale(effectiveLanguage);
   const weekDays = Array.from({ length: 7 }, (_, i) =>
-    format(new Date(2024, 0, 1 + i), 'EEEEE', { locale: calLocale }).toUpperCase()
+    format(new Date(2024, 0, 1 + i), 'EEE', { locale: calLocale }).replace(/\./g, '').toUpperCase()
   );
 
   const calHolidays = isAdmin ? realHolidays : myHolidays;
@@ -407,7 +407,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
           {uiW('ferie.calendar') && (
           <div className="group w-full rounded-xl border px-2 py-2 text-left border-neutral-500">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="font-semibold text-base" style={{ color: '#ffffff' }}>
+              <h2 className="font-semibold text-base uppercase" style={{ color: '#ffffff' }}>
                 {format(now, 'MMMM yyyy', { locale: calLocale })}
               </h2>
               <div className="flex items-center gap-1.5 text-[0.625rem]" style={{ color: '#ffffff' }}>
