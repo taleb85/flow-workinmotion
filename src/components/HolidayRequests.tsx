@@ -208,7 +208,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
   const labelStyle = { color: 'rgba(255,255,255,0.80)' } as React.CSSProperties;
 
   return (
-    <div className={`font-sans flex h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem)-3rem)] md:h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem))] w-full flex-col pt-2 ${embedded ? '' : 'pb-content'}`}>
+    <div className={`font-sans flex min-h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem)-3rem)] md:min-h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem))] w-full flex-col pt-2 ${embedded ? '' : 'pb-content'}`}>
       {/* Titolo pagina per screen reader */}
       <h1 className="sr-only">
         {(t as Record<string, string>).sidebar_holidays ?? 'Ferie'}
@@ -399,13 +399,13 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
         document.body
       )}
 
-      {/* ── Layout ────────────────────────────────────────────────────────── */}
-      <div className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-1 justify-items-center'} gap-6 md:gap-8 md:items-stretch flex-1`}>
+      {/* ── Layout: schede disposte verticalmente ─────────────────────────── */}
+      <div className={`grid grid-cols-1 ${isAdmin ? '' : 'justify-items-center'} gap-6 md:gap-8 flex-1`}>
 
-        {/* Left: calendar + requests affiancati su desktop */}
-        <div className={`${isAdmin ? 'md:col-span-1' : 'w-full max-w-xl'} flex flex-col md:flex-row md:gap-4 h-full`}>
+        {/* Calendario + richieste (in colonna) */}
+        <div className={`${isAdmin ? 'w-full' : 'w-full max-w-xl'} flex flex-col gap-4`}>
           {uiW('ferie.calendar') && (
-          <div className="group w-full rounded-xl border px-2 py-2 text-left border-neutral-500 flex-1">
+          <div className="group w-full rounded-xl border px-2 py-2 text-left border-neutral-500">
             <div className="flex items-center justify-between mb-1">
               <h2 className="font-semibold text-base" style={{ color: '#ffffff' }}>
                 {format(now, 'MMMM yyyy', { locale: calLocale })}
@@ -472,7 +472,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
 
           {/* My requests list (staff only) */}
           {!isAdmin && uiW('ferie.list') && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden flex-1">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden">
               <div className="px-5 py-4">
                 <h3 className="text-white font-semibold text-xl">{(t as Record<string, string>).my_holiday_requests ?? 'Le mie richieste'}</h3>
               </div>
@@ -517,12 +517,12 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
           )}
         </div>
 
-        {/* Right: admin panels */}
-        <div className="md:col-span-2 space-y-4 h-full">
+        {/* Admin panels (in colonna) */}
+        <div className="w-full space-y-4">
 
           {/* Pending (manager) */}
           {isAdmin && uiW('ferie.list') && pendingAll.length > 0 && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden h-full">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden">
               <div className="px-5 py-4 flex items-center justify-between">
                 <h3 className="text-white font-semibold text-xl">{t.pending}</h3>
                 <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/80">{pendingAll.length}</span>
