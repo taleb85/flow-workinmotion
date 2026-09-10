@@ -405,7 +405,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
         {/* Calendario + richieste (in colonna) */}
         <div className={`${isAdmin ? 'w-full' : 'w-full max-w-xl'} flex flex-col gap-4`}>
           {uiW('ferie.calendar') && (
-          <div className="group w-full max-w-md rounded-xl border px-2 py-2 text-left border-neutral-500">
+          <div className="group w-full rounded-xl border px-2 py-2 text-left border-neutral-500">
             <div className="flex items-center justify-between mb-1">
               <h2 className="font-semibold text-base" style={{ color: '#ffffff' }}>
                 {format(now, 'MMMM yyyy', { locale: calLocale })}
