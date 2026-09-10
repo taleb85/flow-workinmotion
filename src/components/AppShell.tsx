@@ -94,7 +94,7 @@ function LoginRoute() {
 
   return (
     <RouteErrorBoundary sectionName="Login">
-      <div role="region" aria-label="Accesso" className="relative min-h-screen min-h-[100dvh] w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
+      <div className="app-auth-region relative min-h-screen min-h-[100dvh] w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
         <DeepAuroraShell theme={bgTheme} />
         <AnimatePresence mode="wait">
           <LoginPage key="login" onLogin={handleLogin} onBack={handleBack} />
@@ -116,7 +116,7 @@ function InstallRoute() {
 
   return (
     <RouteErrorBoundary sectionName="Install">
-      <div role="region" aria-label="Installazione app" className="relative min-h-screen min-h-[100dvh] w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
+      <div className="app-install-region relative min-h-screen min-h-[100dvh] w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
         <DeepAuroraShell theme={bgTheme} />
         <InstallPage />
       </div>

@@ -121,11 +121,10 @@ body {
 }
 
 /* ── Aree principali: trasparenti, la mesh di #root traspare sotto ── */
-[aria-label="Accesso"],
-[aria-label="Installazione app"],
-[aria-label="Applicazione"],
-[aria-label="Caricamento in corso"],
-.app-main-region {
+.app-main-region,
+.app-auth-region,
+.app-install-region,
+[aria-label="Caricamento in corso"] {
   background: transparent !important;
 }
 
