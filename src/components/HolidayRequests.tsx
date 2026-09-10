@@ -446,7 +446,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                   <div
                     key={day.toString()}
                     onClick={() => isPending && isAdmin && setSelectedH(holiday)}
-                    className={`min-h-[2.75rem] min-w-[2.75rem] aspect-square rounded-xl flex items-center justify-center text-xs font-semibold transition-colors select-none touch-target
+                    className={`min-h-[2.75rem] min-w-[2.75rem] rounded-xl flex items-center justify-center text-xs font-semibold transition-colors select-none touch-target
  ${isPending && isAdmin ? 'cursor-pointer hover:opacity-80' : 'cursor-default'} active:opacity-70`}
                     style={dayStyle}
                     onMouseEnter={(e) => {
