@@ -87,6 +87,7 @@ export default function AdminLayout() {
   return (
     <div className="app-admin-region relative min-h-screen min-h-[100dvh] w-full text-white font-sans antialiased flex flex-col safe-area-pad overflow-x-clip overflow-y-auto page-depth-bg" style={{ background: bgTheme.appBg }}>
       <DeepAuroraShell theme={bgTheme} />
+      <div className="app-horizontal-pad flex min-h-0 flex-1 flex-col">
       <header className="sticky top-0 z-40 shrink-0 pt-[max(80px,env(safe-area-inset-top,0px))] md:pt-[max(6px,env(safe-area-inset-top,0px))] app-horizontal-pad pb-2">
         <div className={`${adminHeaderCardClass}`}>
           <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-2">
@@ -129,14 +130,14 @@ export default function AdminLayout() {
         <h1 className="sr-only">
           {(t as Record<string, string>).settings_title ?? 'Impostazioni'}
         </h1>
-        <div className="mx-auto w-full max-w-7xl">
+        <div className="w-full">
           {activeTab === 'profili' && (
             <SettingsPage view="profili" />
           )}
           {activeTab === 'impostazioni' && (
             <div className="space-y-4">
               {fullAdminNav && (
-                <div className="rounded-2xl border border-white/[0.12] overflow-hidden mx-[var(--layout-app-px)]">
+                <div className="rounded-2xl border border-white/[0.12] overflow-hidden">
                   <div className="px-4 pt-3 pb-1">
                     <h2 className="text-[0.6875rem] font-semibold uppercase tracking-widest text-white/50">
                       {t.admin_tab_rules}
@@ -149,6 +150,7 @@ export default function AdminLayout() {
           )}
         </div>
       </main>
+      </div>
     </div>
   );
 }
