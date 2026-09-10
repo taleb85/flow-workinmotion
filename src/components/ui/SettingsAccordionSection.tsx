@@ -55,7 +55,7 @@ export function SettingsAccordionSection({
     <section className={className}>
       <div
         className={attached ? 'rounded-xl overflow-hidden' : undefined}
-        style={attached ? { border: `1.5px solid ${borderColor}` } : undefined}
+        style={attached ? { border: `1px solid ${borderColor}` } : undefined}
       >
         <button
           type="button"
@@ -65,7 +65,7 @@ export function SettingsAccordionSection({
               ? 'flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition-colors'
               : 'mb-3 flex w-full items-center justify-between gap-2 rounded-xl py-2 pl-3 pr-3 text-left transition-colors'
           }
-          style={attached ? { background: 'transparent' } : { background: 'transparent', border: `1.5px solid ${borderColor}` }}
+          style={attached ? { background: 'transparent' } : { background: 'transparent', border: `1px solid ${borderColor}` }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backdropFilter = 'blur(12px)'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)'; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.backdropFilter = ''; }}
           aria-expanded={open}

@@ -829,7 +829,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
           <p className="mb-4 text-sm leading-relaxed text-white/70">
             {t.settings_delegated_intro}
           </p>
-          <section className="mb-6">
+          <section className="mb-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-[0.6875rem] font-semibold uppercase tracking-widest text-white/80">
                 {t.settings_team_section_title}
@@ -1017,8 +1017,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
         {/* ── SEZIONE: Gestione Profili ── */}
         <div style={view === 'regole' ? { display: 'none' } : undefined}>
-        <section className="mb-6">
-          <div className="flex w-full flex-row items-stretch gap-1.5 md:gap-2 mb-3">
+        <section className="mb-4">
+          <div className="flex w-full flex-row items-stretch gap-1.5 md:gap-2 mb-4">
             {canEdit && (
               <button
                 type="button"
@@ -1039,7 +1039,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               </button>
             )}
           </div>
-          <div className="rounded-xl overflow-hidden" style={{ border: '1.5px solid rgba(255,255,255,0.35)' }}>
+          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.35)' }}>
             <button
               type="button"
               onClick={toggleTeamSectionExpanded}
@@ -1119,7 +1119,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
         {/* Notifica team */}
         {adminOnly && (
-          <div className="rounded-xl border border-neutral-500 p-4 mb-6">
+          <div className="rounded-xl border border-neutral-500 p-4 mb-4">
             <div className="flex items-center justify-between gap-3 mb-1">
               <h2 className="text-md font-bold flex items-center gap-2">
                 <Bell className="w-4 h-4 text-accent" />

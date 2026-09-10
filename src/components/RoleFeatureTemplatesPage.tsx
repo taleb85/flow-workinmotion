@@ -790,7 +790,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       )}
 
       {/* Footer salva */}
-      <div className="flex items-center justify-end gap-3 border-t border-white/12 bg-white/6 px-4 py-3">
+      <div className="flex items-center justify-end gap-3 border-t border-white/[0.12] bg-white/6 px-4 py-3">
         <button
           type="button"
           disabled={saving}
@@ -1038,7 +1038,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       </div>
 
       {/* Footer */}
-      <div className="flex flex-wrap items-center justify-between border-t border-white/12 bg-white/6 px-4 py-3 gap-3">
+      <div className="flex flex-wrap items-center justify-between border-t border-white/[0.12] bg-white/6 px-4 py-3 gap-3">
         <div className="flex items-center gap-2">
           <button
             type="button"

@@ -13,7 +13,7 @@ import SettingsPage from './SettingsPage';
 type AdminTab = 'profili' | 'impostazioni';
 
 const adminHeaderCardClass =
-  'w-full rounded-2xl border border-white/12 overflow-visible backdrop-blur-[1.25rem] shadow-[0_4px_16px_-4px_rgba(0,0,0,0.3)]';
+  'w-full rounded-2xl border border-white/[0.12] overflow-visible backdrop-blur-[1.25rem] shadow-[0_4px_16px_-4px_rgba(0,0,0,0.3)]';
 
 interface TabDef {
   key: AdminTab;
@@ -124,7 +124,7 @@ export default function AdminLayout() {
         </div>
       </header>
 
-      <main className="flex-1 pb-6">
+      <main className="flex-1 pt-2 pb-6">
         {/* Titolo pagina per screen reader */}
         <h1 className="sr-only">
           {(t as Record<string, string>).settings_title ?? 'Impostazioni'}
@@ -134,9 +134,9 @@ export default function AdminLayout() {
             <SettingsPage view="profili" />
           )}
           {activeTab === 'impostazioni' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {fullAdminNav && (
-                <div className="rounded-2xl border border-white/12 overflow-hidden mx-[var(--layout-app-px)]">
+                <div className="rounded-2xl border border-white/[0.12] overflow-hidden mx-[var(--layout-app-px)]">
                   <div className="px-4 pt-3 pb-1">
                     <h2 className="text-[0.6875rem] font-semibold uppercase tracking-widest text-white/50">
                       {t.admin_tab_rules}
