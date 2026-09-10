@@ -134,14 +134,8 @@ export default function AdminLayout() {
           {activeTab === 'profili' && (
             <SettingsPage view="profili" />
           )}
-          {activeTab === 'impostazioni' && (
-            <div className="space-y-4">
-              {fullAdminNav && (
-                <div className="rounded-2xl border border-white/[0.12] overflow-hidden">
-                  <SettingsPage view="regole" />
-                </div>
-              )}
-            </div>
+          {activeTab === 'impostazioni' && fullAdminNav && (
+            <SettingsPage view="regole" />
           )}
         </div>
       </main>

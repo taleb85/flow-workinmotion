@@ -22,7 +22,7 @@ export function SettingsAccordionSection({
   subtitle,
   defaultOpen = false,
   children,
-  className = 'mb-6',
+  className = 'mb-4',
   accentBorder,
   attached = false,
 }: {
