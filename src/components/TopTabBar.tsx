@@ -90,6 +90,7 @@ export default function TopTabBar({ activeTab, onTabChange, visibleTabs }: TopTa
               }}
             >
               {Icon && <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />}
+              <span className="hidden md:inline truncate">{label}</span>
             </button>
           );
         })}
