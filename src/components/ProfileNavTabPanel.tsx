@@ -595,7 +595,7 @@ export default function ProfileNavTabPanel({
         {/* Management area shortcut rimosso */}
 
         {/* ── Menu accordion ────────────────────────────────────────────── */}
-        <div className="flex flex-col gap-2 px-4 pt-4 pb-8">
+        <div className="flex flex-col gap-4 px-4 pt-4 pb-8">
 
           {/* Impostazioni profilo */}
           <button
