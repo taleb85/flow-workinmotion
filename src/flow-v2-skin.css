@@ -124,6 +124,7 @@ body {
 .app-main-region,
 .app-auth-region,
 .app-install-region,
+.app-admin-region,
 [aria-label="Caricamento in corso"] {
   background: transparent !important;
 }
