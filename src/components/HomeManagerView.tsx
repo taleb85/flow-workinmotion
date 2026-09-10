@@ -229,7 +229,7 @@ export default memo(function HomeManagerView({
                 value: ritardiCount,
                 Icon: Clock,
                 iconColor: 'text-red-400',
-                border: 'border-2 border-red-400/25',
+                border: 'border border-red-400/25',
                 iconWell: 'bg-red-500/15',
               },
               {
@@ -237,7 +237,7 @@ export default memo(function HomeManagerView({
                 value: senzaTimbraturaCount,
                 Icon: AlertCircle,
                 iconColor: 'text-amber-400',
-                border: 'border-2 border-amber-400/25',
+                border: 'border border-amber-400/25',
                 iconWell: 'bg-amber-400/15',
               },
               {

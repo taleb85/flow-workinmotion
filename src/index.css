@@ -1887,7 +1887,7 @@ thead th {
 [data-theme="dark"] .border-neutral-500 {
   background: transparent !important;
   border-color: rgba(255, 255, 255, 0.50) !important;
-  border-width: 2px !important;
+  border-width: 1px !important;
 }
 [data-theme="dark"] .rounded-xl.border-neutral-500 {
   box-shadow:
