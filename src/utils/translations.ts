@@ -598,6 +598,8 @@ const baseIt = {
   sidebar_logout: 'Esci',
   /** Bottom nav mobile: tab impostazioni (stessa larghezza visiva delle altre) */
   bottom_nav_settings_short: 'Impost.',
+  /** Nome tab impostazioni di sistema (distinto da "Impostazioni" del profilo) */
+  bottom_nav_settings_title: 'Sistema',
   bottom_nav_profile: 'Profilo',
   bottom_nav_profile_short: 'Profilo',
   profile_tab_open_menu_hint:
@@ -2298,6 +2300,7 @@ const baseEn: Record<string, string> = {
   sidebar_home: 'Home',
   sidebar_logout: 'Log out',
   bottom_nav_settings_short: 'Setup',
+  bottom_nav_settings_title: 'System',
   bottom_nav_profile: 'Profile',
   bottom_nav_profile_short: 'Profile',
   profile_tab_open_menu_hint: 'Tap the button below to open your profile, edit details, or log out.',
@@ -4001,6 +4004,7 @@ const baseEs: Record<string, string> = {
   sidebar_home: 'Inicio',
   sidebar_logout: 'Salir',
   bottom_nav_settings_short: 'Ajust.',
+  bottom_nav_settings_title: 'Sistema',
   bottom_nav_profile: 'Perfil',
   bottom_nav_profile_short: 'Perfil',
   profile_tab_open_menu_hint:
@@ -5368,6 +5372,7 @@ const baseFr: Record<string, string> = {
   sidebar_admin: 'Admin',
   sidebar_home: 'Accueil',
   bottom_nav_settings_short: 'Régl.',
+  bottom_nav_settings_title: 'Système',
   bottom_nav_profile: 'Profil',
   bottom_nav_profile_short: 'Profil',
   statistics_nav: 'Heures',
