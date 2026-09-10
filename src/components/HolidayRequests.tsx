@@ -400,7 +400,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
       )}
 
       {/* ── Layout: schede disposte verticalmente ─────────────────────────── */}
-      <div className={`grid grid-cols-1 ${isAdmin ? '' : 'justify-items-center'} gap-6 md:gap-8 flex-1`}>
+      <div className={`grid grid-cols-1 content-start ${isAdmin ? '' : 'justify-items-center'} gap-4 flex-1`}>
 
         {/* Calendario + richieste (in colonna) */}
         <div className={`${isAdmin ? 'w-full' : 'w-full max-w-xl'} flex flex-col gap-4`}>
