@@ -138,11 +138,6 @@ export default function AdminLayout() {
             <div className="space-y-4">
               {fullAdminNav && (
                 <div className="rounded-2xl border border-white/[0.12] overflow-hidden">
-                  <div className="px-4 pt-3 pb-1">
-                    <h2 className="text-[0.6875rem] font-semibold uppercase tracking-widest text-white/50">
-                      {t.admin_tab_rules}
-                    </h2>
-                  </div>
                   <SettingsPage view="regole" />
                 </div>
               )}
