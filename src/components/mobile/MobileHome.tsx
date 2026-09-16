@@ -124,7 +124,7 @@ export default function MobileHome({
 
   return (
     <div
-      className="flex flex-col gap-4 px-4 py-3 pb-12 relative shift-mobile-safe staff-home-screen"
+      className="flex flex-col gap-4 py-3 pb-12 relative shift-mobile-safe staff-home-screen"
       style={{ transform: pullDistance > 0 ? `translateY(${pullDistance}px)` : undefined, transition: pullDistance === 0 ? 'transform 0.25s ease-out' : undefined }}
     >
       {/* Pull-to-refresh indicator */}
@@ -144,7 +144,7 @@ export default function MobileHome({
       )}
 
       {/* ── Saluto (page-title) ─────────────────────────────────────── */}
-      <div className="px-1 mt-5 flex items-start justify-between gap-3">
+      <div className="mt-5 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="page-title text-white">{greetingText}</h1>
           <p className="page-subtitle capitalize">{todayLabel}</p>

@@ -12,7 +12,6 @@ import SavedToast from './ui/SavedToast';
 import { isManagementRole, isAdminOnly } from '../utils/permissions';
 import { translateRole } from '../utils/roles';
 import { translateDepartmentValue } from '../utils/departmentLabels';
-import { isFeatureEnabled } from '../utils/enabledFeatures';
 import { PinPadModal } from './ui/PinPadModal';
 import { hasPlatformBiometricAuthenticator } from '../utils/pinUnlockWebAuthn';
 import { ProfileFormSelf, type ProfileFormSelfData } from './UserProfile';
@@ -322,8 +321,6 @@ export default function ProfileNavTabPanel({
     [formData]
   );
 
-  const _isProfileReadOnly = currentUser ? isFeatureEnabled(currentUser, 'profile_readonly') : false;
-
   useEffect(() => {
     const ref = profileLeaveGuardRef;
     if (!ref) return;
@@ -508,7 +505,7 @@ export default function ProfileNavTabPanel({
           {/* Avatar + photo button */}
           <div className="relative inline-block" ref={photoMenuWrapRef}>
             <div
-              className="flex h-[9rem] w-[9rem] items-center justify-center overflow-hidden rounded-3xl border-2 border-white/[0.14] bg-brand-electric/6 text-[3.5rem] font-bold text-brand-electric"
+              className="flex h-[9rem] w-[9rem] items-center justify-center overflow-hidden rounded-3xl border-2 border-white/[0.14] bg-brand-electric/[0.06] text-[3.5rem] font-bold text-brand-electric"
             >
               {resolvedAvatar ? (
                 <img
@@ -595,7 +592,7 @@ export default function ProfileNavTabPanel({
         {/* Management area shortcut rimosso */}
 
         {/* ── Menu accordion ────────────────────────────────────────────── */}
-        <div className="flex flex-col gap-4 px-4 pt-4 pb-8">
+        <div className="flex flex-col gap-4 pt-4 pb-8">
 
           {/* Impostazioni profilo */}
           <button

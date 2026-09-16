@@ -59,7 +59,6 @@ button,
   color-scheme: dark;
   --app-bg:   #0a0a0c;
   --card-bg:  #ffffff;
-  --text-main: #1a1a1a;
   --surface-header-slab: rgba(10, 10, 12, 0.86);
 
   /* ── Sistema di scala proporzionale (larghezza schermo) ────────────────
@@ -80,8 +79,10 @@ button,
   --spacing-md: calc(16px * var(--scale-factor));
   --spacing-lg: calc(24px * var(--scale-factor));
 
-  --radius-card: calc(12px * var(--scale-factor));
-  --radius-panel: calc(16px * var(--scale-factor));
+  /* ── Raggi: derivano dall'UNICA scala in flow-v2-skin.css (`--flow-radius-*`),
+     scalati per viewport. Nessun valore di raggio duplicato in questo file. ── */
+  --radius-card: calc(var(--flow-radius-md) * var(--scale-factor));
+  --radius-panel: calc(var(--flow-radius-lg) * var(--scale-factor));
   --padding-card: calc(16px * var(--scale-factor)) calc(20px * var(--scale-factor));
 }
 
@@ -175,7 +176,6 @@ body {
 
 @layer base {
   :root {
-    --gray-dark: #1a1a1a;
     --gray-medium: #ffffff;
     --gray-light: #ffffff;
     --gray-lighter: #f1f5f9;
@@ -183,13 +183,10 @@ body {
     --flow-slate:    #ffffff;
     --flow-border:   rgba(255, 255, 255, 0.14);
     --flow-bg-light: rgba(255, 255, 255, 0.06);
-    --brand: #10b981;
-    --brand-from: #10b981;
-    --brand-to:   #34d399;
-    --brand-gradient: #10b981;
-    --brand-rgb: 16 185 129;
-    --brand-from: #10b981;
-    --brand-to:   #34d399;
+    /* Brand: UNICO responsabile = flow-v2-skin.css `:root` (importato dopo
+       index.css) + override runtime in TenantContext.syncBrandToTheme().
+       Qui non si duplica `--brand`/`--brand-from-to`/`--brand-rgb`: restavano
+       sovrascritti e rendevano ambigua la sorgente del colore. */
     --brand-50:  #ecfdf5;
     --brand-100: #d1fae5;
     --brand-200: #a7f3d0;
@@ -217,7 +214,6 @@ body {
     --color-accent: var(--brand);
     --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05);
     --shadow-card-accent: 0 4px 16px -4px rgb(107 107 107 / 0.14), 0 2px 8px -4px rgb(15 23 42 / 0.08);
-    --text-dark: #1a1a1a;
     --text-secondary: #ffffff;
     --text-muted: #ffffff;
     --text-on-dark-bg: #e2e8f0;
@@ -391,7 +387,7 @@ body {
   }
 
   /**
-   * Card “solida” — modali, kiosk, overlay che devono staccarsi dallo sfondo.
+   * Card “solida” — modali e overlay che devono staccarsi dallo sfondo.
    * Per contenuto in pagina usare `.surface-ghost` (+ `.surface-ghost-interactive` se cliccabile).
    */
   .card-factorial {
@@ -944,7 +940,7 @@ button[role="switch"][class~="bg-accent"] {
     font-weight: 600;
   }
 
-  /* Font moderno FLOW — Inter bold (il Kiosk usa FlowLogo, non il font cursivo) */
+  /* Font moderno FLOW — Inter bold (FlowLogo usa questo, non il font corsivo) */
   .font-logo-snell {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 800;
@@ -1785,6 +1781,21 @@ thead th {
 [data-theme="dark"] [class*="text-white/50"] { color: rgba(255,255,255,0.90) !important; }
 [data-theme="dark"] [class*="text-white/55"] { color: rgba(255,255,255,0.90) !important; }
 
+/* Valori mancanti della scala: senza queste regole ricadono nel blanket
+   `[class*="text-white"]` → #fff, invertendo la gerarchia (una `/20` risultava
+   più luminosa di una `/55`). Con queste la scala è monotona:
+   0.45 (`/20`) → 0.85 (`/25`-`/35`) → 0.88 (`/40`-`/45`) → 0.90 (`/50`-`/65`)
+   → 0.92 (`/70`-`/75`) → 0.95 (`/80`-`/85`) → 1.0 (`/90`,`/95`, `text-white`). */
+[data-theme="dark"] [class*="text-white/20"] { color: rgba(255,255,255,0.45) !important; }
+[data-theme="dark"] [class*="text-white/60"] { color: rgba(255,255,255,0.90) !important; }
+[data-theme="dark"] [class*="text-white/65"] { color: rgba(255,255,255,0.90) !important; }
+[data-theme="dark"] [class*="text-white/70"] { color: rgba(255,255,255,0.92) !important; }
+[data-theme="dark"] [class*="text-white/75"] { color: rgba(255,255,255,0.92) !important; }
+[data-theme="dark"] [class*="text-white/80"] { color: rgba(255,255,255,0.95) !important; }
+[data-theme="dark"] [class*="text-white/85"] { color: rgba(255,255,255,0.95) !important; }
+[data-theme="dark"] [class*="text-white/90"] { color: #ffffff !important; }
+[data-theme="dark"] [class*="text-white/95"] { color: #ffffff !important; }
+
 /* ── NEON TOGGLE globali: glow verde su tutti i toggle nella app ── */
 /* ON state: verde + glow + bordo verde + knob glow */
 [data-theme="dark"] [role="switch"].bg-accent,
@@ -1815,7 +1826,7 @@ thead th {
 [data-theme="dark"] .elevated-role-label { color: #ffffff !important; }
 
 /* Background overrides — white/light → dark surfaces */
-[data-theme="dark"] .bg-white:not(input):not(textarea):not(select):not([class*="modal"]):not([class*="pin"]):not([class*="kiosk"]):not(button[role="switch"] span):not([class*="knob"]) {
+[data-theme="dark"] .bg-white:not(input):not(textarea):not(select):not([class*="modal"]):not([class*="pin"]):not(button[role="switch"] span):not([class*="knob"]) {
   background: transparent !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
@@ -1969,8 +1980,11 @@ thead th {
 
 /* Chip toolbar (Template, PDF, Copia) — solo quelli con uppercase tracking-wider.
    `:not([aria-pressed="true"])` preserva lo stato attivo dei toggle segmentati
-   (Settimana/Periodo), che altrimenti perderebbe lo sfondo. */
-[data-theme="dark"] button[class*="uppercase"][class*="tracking-wider"][class*="bg-white/"]:not([aria-pressed="true"]) {
+   (Settimana/Periodo), che altrimenti perderebbe lo sfondo.
+   `:not([class*="text-accent"])` lascia invece i chip accent (es. "Riattiva delega"
+   in Impostazioni) con il loro sfondo e gli stati hover/active: qui l'`!important`
+   su `background` vince anche sulle regole hover, quindi li annullerebbe. */
+[data-theme="dark"] button[class*="uppercase"][class*="tracking-wider"][class*="bg-white/"]:not([aria-pressed="true"]):not([class*="text-accent"]) {
   background: transparent !important;
   backdrop-filter: blur(12px) !important;
   border: 1px solid rgba(255, 255, 255, 0.20) !important;
@@ -2183,8 +2197,7 @@ html[data-theme="dark"] body {
   --color-text:           rgba(255, 255, 255, 0.97);
   --color-text-secondary: rgba(255, 255, 255, 0.72);
 
-  --brand:       #10b981;
-  --brand-hover: #059669;
+  /* --brand / --brand-hover non sono ridefiniti qui: vedi flow-v2-skin.css */
   --accent-blue: #10b981;
   --flow-blue:   #10b981;
 }
@@ -2319,7 +2332,7 @@ a.border-neutral-500 {
 }
 
 /* ── Tailwind bg-* → dark glass ── */
-body .bg-white:not(input):not(textarea):not(select):not([class*="modal"]):not([class*="pin"]):not([class*="kiosk"]) {
+body .bg-white:not(input):not(textarea):not(select):not([class*="modal"]):not([class*="pin"]) {
   background-color: rgba(10, 10, 10, 0.82) !important;
 }
 body .bg-slate-50:not(input):not(textarea):not(select),
@@ -2574,4 +2587,39 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: #fff !important;
   caret-color: #fff !important;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ── Matrice permessi (desktop) ──────────────────────────────────────────────
+ * `border-collapse: separate` (spacing 0): con `collapse` il browser ignora il
+ * border-radius sulle celle, quindi l'header sticky non potrebbe avere gli
+ * angoli arrotondati. Le separazioni sono box-shadow inset: a differenza dei
+ * bordi restano agganciate alle celle sticky durante lo scroll.
+ */
+.perm-matrix-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Linea verticale tra le colonne + linea orizzontale sotto la riga */
+.perm-matrix-table th,
+.perm-matrix-table td {
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.07), inset 0 -1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* Ultima colonna: niente linea verticale (c'è già il bordo del contenitore) */
+.perm-matrix-table th:last-child,
+.perm-matrix-table td:last-child {
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* Header sticky: angoli arrotondati, così il pannello in sovrapposizione
+   segue il raggio del contenitore invece di sporgere con spigoli vivi. */
+.perm-matrix-table thead th:first-child {
+  border-top-left-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+}
+
+.perm-matrix-table thead th:last-child {
+  border-top-right-radius: 1rem;
+  border-bottom-right-radius: 1rem;
 }

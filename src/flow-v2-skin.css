@@ -45,11 +45,14 @@
   --flow-header-bg: rgba(28, 28, 30, 0.72);
   --flow-navbar-bg: rgba(28, 28, 30, 0.78);
 
-  /* ── Raggi Apple ────────────────────────────────────── */
+  /* ── Raggi Apple (UNICA scala: anche `--radius-card/--radius-panel` in
+     index.css derivano da questi token) ─────────────────────────────── */
   --flow-radius-sm: 8px;
   --flow-radius-md: 12px;
   --flow-radius-lg: 16px;
-  --flow-radius-pill: 999px;
+  /* 9999px = stesso valore di Tailwind `rounded-full`, così i pill dichiarati
+     con la classe e quelli forzati dalla skin hanno lo stesso raggio calcolato. */
+  --flow-radius-pill: 9999px;
 
   /* ── Tipografia (stack unico: Inter caricato in index.html) ── */
   --flow-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
@@ -136,8 +139,13 @@ body {
 .app-header {
   background: transparent !important;
   border-bottom: none !important;
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
+  /* Stesso gutter del contenuto (token unico): il logo resta allineato
+     al bordo sinistro delle card in compact (1rem) e comfortable (1.5rem).
+     L'header è `fixed` da 768px in su, quindi non eredita il `safe-area-pad`
+     del contenitore di regione: l'inset orizzontale va sommato qui, altrimenti
+     in landscape su device con notch il logo sarebbe disallineato di ~48px. */
+  padding-left: calc(env(safe-area-inset-left, 0px) + var(--layout-app-px)) !important;
+  padding-right: calc(env(safe-area-inset-right, 0px) + var(--layout-app-px)) !important;
 }
 /* Header trasparente — niente pillola/glass sul contenitore:
    i singoli bottoni mantengono il proprio vetro (liquid-glass) */
@@ -206,8 +214,10 @@ body {
 /* ═══════════════ BOTTOM NAV: pillola flottante su mobile (≤768px) ═══════════════ */
 @media (max-width: 767.98px) {
   .bottom-nav-glass-edge {
-    left: 16px !important;
-    right: 16px !important;
+    /* Stesso gutter orizzontale del contenuto/header (--layout-app-px):
+       la pillola resta allineata al bordo sinistro/destro delle card. */
+    left: var(--layout-app-px) !important;
+    right: var(--layout-app-px) !important;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) !important;
     width: auto !important;
     border-radius: var(--flow-radius-pill) !important;
@@ -246,7 +256,12 @@ body {
 }
 
 /* ═══════════════ CARD (vetro Apple) ═══════════════ */
-body .bg-white:not(input):not(textarea):not(select):not([class*="modal"]):not([class*="pin"]):not([class*="kiosk"]) {
+/* `:not([class*="rounded-full"])`: gli elementi con `bg-white` + `rounded-full`
+   sono riempimenti/pallini/knob (barre di avanzamento, indicatori di selezione,
+   manopole toggle), NON card. Prima venivano convertiti in vetro con bordo,
+   ombra e raggio card, quindi lo stesso componente (es. le due barre di
+   "Report" in Home) rendeva in modo diverso da `bg-white/20`. */
+body .bg-white:not(input):not(textarea):not(select):not([class*="modal"]):not([class*="pin"]):not([class*="rounded-full"]) {
   background: var(--flow-card) !important;
   border: 1px solid var(--flow-border) !important;
   border-radius: var(--flow-radius-lg) !important;
@@ -291,8 +306,8 @@ button[class*="rounded-"] {
   border-radius: var(--flow-radius-pill) !important;
 }
 
-/* Pulsanti-icona e avatar → rotondi */
-button[class*="h-9"], button[class*="h-10"] { border-radius: 999px !important; }
+/* Pulsanti-icona e avatar → rotondi (stesso token pill: unica scala raggi) */
+button[class*="h-9"], button[class*="h-10"] { border-radius: var(--flow-radius-pill) !important; }
 [class*="rounded-full"] { -webkit-tap-highlight-color: transparent; }
 
 /* ═══════════════ TESTI ═══════════════ */

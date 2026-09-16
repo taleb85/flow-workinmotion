@@ -14,8 +14,6 @@ import { getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
 import { getTranslations, getDateLocale } from '../utils/translations';
 import { readStoredUiLanguage } from '../utils/uiLanguagePreference';
 import {
-  getVisibleStaffTabs,
-  getUnifiedNavTabs,
   type AppNavTab,
 } from '../utils/enabledModules';
 import { useWallAlignedMinuteClock } from '../hooks/useWallAlignedMinuteClock';
@@ -84,7 +82,7 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
   }
 
   return (
-    <div className="flex flex-col gap-11 pb-8 px-4 md:px-6">
+    <div className="mx-auto w-full max-w-7xl flex flex-col gap-11 pb-8">
       {weeks.map((week, wIdx) => {
         const weekDays = eachDayOfInterval({ start: week.start, end: week.end });
         const byDay = new Map<string, Shift[]>();
@@ -219,11 +217,11 @@ export default function StaffPersonalDashboard({
   const { setCurrentUser, users, effectiveLanguage, setLanguage, clearLanguage } = useAppUser();
   /* Lingua AUTO = nessuna preferenza esplicita salvata (segue il dispositivo) */
   const isAutoLanguage = readStoredUiLanguage() === null;
-  const { breakRules, featureFlags, roleTemplatesRevision } = useAppConfig();
+  const { breakRules, featureFlags } = useAppConfig();
   const { showSuccess, showError } = useAppOverlay();
   const { seedDemoProfileForUser } = useAppData();
   const latestUser = users.find((u) => u.id === user.id) ?? user;
-  // Usa latestUser (da users) per permessi: quando l'admin disabilita can_request_holidays,
+  // Usa latestUser (da users) per i permessi: gli aggiornamenti dell'admin arrivano sull'elenco condiviso,
   // currentUser non viene aggiornato (è un altro utente), ma users sì.
   const displayUser = latestUser;
   const uiW = useCallback((key: string) => isUiWidgetVisible(displayUser, key), [displayUser]);
@@ -336,17 +334,6 @@ export default function StaffPersonalDashboard({
   useEffect(() => {
     if (activeTab !== 'home') setHolidaysFocus(false);
   }, [activeTab]);
-
-  /** Sempre prima di qualsiasi return anticipato (loading / profilo gestionale) — altrimenti React #310. */
-  const _visibleStaffTabs = useMemo(() => {
-    void roleTemplatesRevision;
-    return getVisibleStaffTabs(displayUser, featureFlags);
-  }, [displayUser, featureFlags, roleTemplatesRevision]);
-
-  const _staffUnifiedTabs = useMemo(() => {
-    void roleTemplatesRevision;
-    return getUnifiedNavTabs(displayUser, false, featureFlags);
-  }, [displayUser, featureFlags, roleTemplatesRevision]);
 
   const renderHome = () => {
     const grouped: Record<string, typeof upcomingShifts> = {};

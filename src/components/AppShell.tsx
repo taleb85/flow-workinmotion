@@ -30,7 +30,7 @@ import { PinPadModal } from '../components/ui/PinPadModal';
 import { lockBodyScroll, unlockBodyScroll } from '../utils/bodyScrollLock';
 import { persistStoredUiLanguage } from '../utils/uiLanguagePreference';
 import { PATH_PROFILO } from '../config/appPaths';
-import { APP_SESSION_STORAGE_KEY } from '../constants/appSession';
+import { APP_SESSION_STORAGE_KEY, HAD_SAVED_SESSION_AT_BOOT } from '../constants/appSession';
 import { getUnifiedNavTabs, getBottomNavTabsForMainApp, type AppNavTab } from '../utils/enabledModules';
 import {
   readMainViewState,
@@ -56,7 +56,6 @@ const HolidayRequests = lazy(() => import('../components/HolidayRequests'));
 const SettingsPage = lazy(() => import('../components/SettingsPage'));
 const UnifiedShiftsPage = lazy(() => import('../components/UnifiedShiftsPage'));
 
-// NOTA: KioskRoute rimosso — /kiosk reindirizza sempre a /profilo in AppContent
 /** Dopo login: torna a `/app`, `/admin`, ecc. solo se path interno (no open redirect). */
 function safeInternalRedirectPath(state: unknown, fallback = '/app'): string {
   const pathname = (state as { from?: { pathname?: string } } | null)?.from?.pathname;
@@ -176,6 +175,18 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     window.addEventListener('flow-bg-change', handler);
     return () => window.removeEventListener('flow-bg-change', handler);
   }, []);
+
+  // ── Blocco alla riapertura dell'app (Face ID / impronta o PIN) ──────────────
+  // Attivo solo se all'avvio esisteva già una sessione salvata: subito dopo un login
+  // l'utente è già autenticato e non deve riconfermare nulla.
+  const [appUnlockRequired, setAppUnlockRequired] = useState(false);
+  useEffect(() => {
+    if (!HAD_SAVED_SESSION_AT_BOOT) return;
+    // I reload interni (update service worker, riavvio post-sblocco) non sono riaperture.
+    if (new URLSearchParams(window.location.search).has('_r')) return;
+    setAppUnlockRequired(true);
+  }, []);
+  const appLockVisible = appUnlockRequired && Boolean(currentUser);
 
   const t = useT();
   const isManagement = useMemo(
@@ -715,7 +726,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         className={`app-header sticky md:fixed top-0 left-0 right-0 z-[10050] shrink-0 transition-[visibility,opacity] duration-150 ${
           overlayOpen ? 'invisible opacity-0 pointer-events-none' : ''
         } ${
-          isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'pointer-events-none' : ''
+          isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending || appLockVisible ? 'pointer-events-none' : ''
         }`}
         style={{
           /* Stesso effetto della bottom nav: sfondo trasparente (il blur è
@@ -792,8 +803,12 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         id="main-content"
         role="main"
         aria-label="Contenuto principale"
-        className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending ? 'blur-md pointer-events-none' : ''}`}>
+        className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending || appLockVisible ? 'blur-md pointer-events-none' : ''}`}>
+        {/* Larghezza massima contenuto unificata (max-w-7xl): tutte le schede
+            condividono lo stesso blocco centrato, come già facevano
+            Statistiche/Ferie/Profilo-visibilità. */}
         <div className="w-full app-horizontal-pad pt-0 md:pt-[var(--app-sticky-header-offset)] flex-1 min-h-0 flex flex-col pb-[3rem] md:pb-0">
+          <div className="w-full max-w-7xl mx-auto flex-1 min-h-0 flex flex-col">
           {/* PIN portals */}
           {createPortal(
             <AnimatePresence>
@@ -876,6 +891,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
               </Suspense>
             </RouteErrorBoundary>
           ) : null}
+          </div>
         </div>
       </main>
 
@@ -931,6 +947,14 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
           <PostUnlockRestartOverlay key="post-unlock-restart" language={effectiveLanguage} />
         )}
       </AnimatePresence>
+
+      {appLockVisible && (
+        <RefreshLockOverlay
+          key="app-open-lock"
+          mode="app-open"
+          onUnlocked={() => setAppUnlockRequired(false)}
+        />
+      )}
 
     </div>
     </ProfileLeaveGuardRefContext.Provider>
@@ -1057,7 +1081,6 @@ function AppContent() {
         <Route path={PATH_PROFILO} element={<LoginRoute />} />
         <Route path="/login" element={<Navigate to={PATH_PROFILO} replace />} />
         <Route path="/" element={<Navigate to={PATH_PROFILO} replace />} />
-        <Route path="/kiosk" element={<Navigate to={PATH_PROFILO} replace />} />
         <Route path="/timbratura" element={<Navigate to={PATH_PROFILO} replace />} />
         <Route path="/app" element={<ProtectedApp />} />
         <Route path="/app/*" element={<ProtectedApp />} />

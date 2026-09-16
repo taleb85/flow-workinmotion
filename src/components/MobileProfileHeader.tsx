@@ -95,7 +95,7 @@ export default function MobileProfileHeader({
     /* Il padding sotto la tacca è gestito dall'header (padding-top env) */
     <div className="relative" ref={wrapperRef}>
     <div
-      className="flow-brand-header px-4 flex items-center justify-between gap-3"
+      className="flow-brand-header mx-auto w-full max-w-7xl flex items-center justify-between gap-3"
       style={{ height: '3.125rem' }}
     >
       {/* Sinistra: icona F + testo */}

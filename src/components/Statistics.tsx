@@ -88,7 +88,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
     () => ({ autoBreaksFeatureEnabled: featureFlags['auto_breaks'] !== false }),
     [featureFlags]
   );
-  /** Vista gestione team: ruolo gestionale, `view_stats` e (admin o `can_view_total_hours`). */
+  /** Vista gestione team: ruolo gestionale e `view_stats`. */
   const isManagementRoleUser = useMemo(
     () => currentUser ? isManagementRole(currentUser.role) : false,
     [currentUser?.role]
@@ -538,7 +538,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
   const staffRangeTotalMins = Object.values(minutesByUserByWeek[currentUser.id] ?? {}).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="pb-content pt-4 px-4 w-full max-w-7xl mx-auto font-sans">
+    <div className="pb-content pt-4 w-full max-w-7xl mx-auto font-sans">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

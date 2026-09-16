@@ -82,7 +82,7 @@ export default memo(function HomeStaffView({
   const locale = getDateLocale(effectiveLanguage) ?? it;
 
   return (
-    <div className="pb-content pt-6 w-full app-horizontal-pad font-sans md:!pb-32">
+    <div className="pb-content pt-6 w-full font-sans md:!pb-32">
       <div className="mx-auto w-full max-w-7xl">
       <div className="block md:hidden space-y-4">
         <MobileStaffDashboard

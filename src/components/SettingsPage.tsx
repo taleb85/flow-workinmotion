@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Monitor, ShieldAlert, LayoutGrid, Building2, Zap, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell, Timer, Sun, Moon, type LucideIcon } from 'lucide-react';
+import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, ShieldAlert, LayoutGrid, Building2, ChevronDown, MapPin, UserPlus, UserX, UserCheck, LocateFixed, QrCode, UploadCloud, RefreshCw, Mail, Lock, KeyRound, Copy, CalendarDays, BookTemplate, Link2, Bell, Timer, Sun, Moon, type LucideIcon } from 'lucide-react';
 import { database } from '../lib/database';
 import { supabase } from '../lib/supabase';
 import { PinPadModal } from './ui/PinPadModal';
@@ -14,9 +14,19 @@ import {
   dispatchPeriodConfigUpdated,
   currentPeriodConfig,
   periodConfigFromStartDate,
+  loadCustomPeriodRules,
+  saveCustomPeriodRules,
+  loadSelectedPeriodRuleId,
+  saveSelectedPeriodRuleId,
+  createPeriodRuleId,
+  isBuiltinPeriodRule,
+  BUILTIN_PERIOD_RULES,
+  PERIOD_RULES_UPDATED_EVENT,
   type PeriodConfig,
+  type PeriodRule,
+  type PeriodRuleType,
 } from '../utils/periodConfig';
-import { saveTimesheetPeriodToSupabase } from '../utils/timesheetPeriodSupabase';
+import { saveTimesheetPeriodToSupabase, savePeriodRulesToSupabase } from '../utils/timesheetPeriodSupabase';
 import DatePickerField from './DatePickerField';
 import { useAppUser, useAppData, useAppConfig, useAppOverlay } from '../context/AppContext';
 import { useT } from '../hooks/useT';
@@ -193,12 +203,10 @@ function FeatureFlagCard({
     unlock_with_pin:  <Unlock className="w-4 h-4" />,
     auto_breaks:      <Coffee className="w-4 h-4" />,
     staff_requests:   <Palmtree className="w-4 h-4" />,
-    kiosk_active:     <Monitor className="w-4 h-4" />,
     geofence_punch:   <MapPin className="w-4 h-4" />,
     visibility_management: <LayoutGrid className="w-4 h-4" />,
     department_creation: <Building2 className="w-4 h-4" />,
     violation_rules: <ShieldAlert className="w-4 h-4" />,
-    master_control_panel: <Zap className="w-4 h-4" />,
   };
 
   return (
@@ -354,7 +362,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
                           }
                           onSetShareMenu(null);
                         }}
-                        className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-[0.75rem] font-medium text-white/80 hover:bg-white/5 transition-colors active:bg-white/5/80"
+                        className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-[0.75rem] font-medium text-white/80 hover:bg-white/5 transition-colors active:bg-white/10"
                       >
                         <Link2 className="w-3.5 h-3.5 shrink-0 text-white/40" />
                         Copia link accesso
@@ -374,7 +382,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
               onClick={() => {
                 onSetVisibility(isVisibilityOpen ? null : user.id);
               }}
-              className={`px-2 py-1 text-[0.6875rem] font-bold uppercase rounded-md transition-colors border ${isVisibilityOpen ? 'bg-white/15 text-accent border-white/30 shadow-sm' : 'text-white/55 border-transparent hover:text-white/80'} active:text-white/80'}`}
+              className={`px-2 py-1 text-[0.6875rem] font-bold uppercase rounded-md transition-colors border ${isVisibilityOpen ? 'bg-white/20 text-accent border-white/30 shadow-sm' : 'text-white/55 border-transparent hover:text-white/80'} active:text-white/80'}`}
             >
               {t.what_sees}
             </button>
@@ -410,7 +418,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
                   <button
                     type="button"
                     onClick={() => onSetDeleteConfirm(user.id)}
-                    className="flex h-6 w-6 items-center justify-center rounded-lg bg-red-500/15 text-red-400 transition-colors hover:bg-red-500/150/25 active:bg-red-500/150/80"
+                    className="flex h-6 w-6 items-center justify-center rounded-lg bg-red-500/15 text-red-400 transition-colors hover:bg-red-500/25 active:bg-red-500/80"
                     title={t.settings_delete_user_title}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -598,23 +606,88 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
   const [periodDraftWeeks, setPeriodDraftWeeks] = useState<4 | 5>(periodCfg.numWeeks);
   const [periodDraftDirty, setPeriodDraftDirty] = useState(false);
   const [periodSavingCloud, setPeriodSavingCloud] = useState(false);
-  /** Regola di calcolo periodo: 'last_sunday' = ultima domenica del mese (auto); 'fixed_start' = primo giorno manuale */
-  const [periodRuleMode, setPeriodRuleMode] = useState<'last_sunday' | 'fixed_start'>(() => {
-    try { return (localStorage.getItem('osteria_period_rule') as 'last_sunday' | 'fixed_start') ?? 'last_sunday'; }
-    catch { return 'last_sunday'; }
-  });
+  /** Regole di calcolo personalizzate (le due regole di sistema sono sempre disponibili). */
+  const [customPeriodRules, setCustomPeriodRules] = useState<PeriodRule[]>(() => loadCustomPeriodRules());
+  /** Id della regola di calcolo selezionata. */
+  const [periodRuleId, setPeriodRuleId] = useState<string>(() => loadSelectedPeriodRuleId());
+  /** Form di creazione regola. */
+  const [showPeriodRuleForm, setShowPeriodRuleForm] = useState(false);
+  const [newRuleName, setNewRuleName] = useState('');
+  const [newRuleType, setNewRuleType] = useState<PeriodRuleType>('last_sunday');
+  /** Regola in attesa di conferma eliminazione. */
+  const [deletingPeriodRule, setDeletingPeriodRule] = useState<PeriodRule | null>(null);
 
-  /** Aggiorna solo il draft (navigazione rapida) — NON salva. */
+  const periodRules = useMemo(
+    () => [...BUILTIN_PERIOD_RULES, ...customPeriodRules],
+    [customPeriodRules]
+  );
+  const activePeriodRule =
+    periodRules.find((r) => r.id === periodRuleId) ?? BUILTIN_PERIOD_RULES[0];
+  const periodRuleMode = activePeriodRule.type;
+
+  /** Ricarica le regole quando arrivano dal cloud o cambiano in un'altra vista. */
+  useEffect(() => {
+    const reload = () => setCustomPeriodRules(loadCustomPeriodRules());
+    window.addEventListener(PERIOD_RULES_UPDATED_EVENT, reload);
+    return () => window.removeEventListener(PERIOD_RULES_UPDATED_EVENT, reload);
+  }, []);
+
+  const periodRulesPersist = (rules: PeriodRule[]) => {
+    setCustomPeriodRules(rules);
+    saveCustomPeriodRules(rules);
+    void savePeriodRulesToSupabase(rules).catch(() => { /* il locale resta valido */ });
+  };
+
+  /** Salva il periodo in bozza (NON conferma): cambia solo l'anteprima. */
   const setDraftFromConfig = (cfg: PeriodConfig) => {
     setPeriodDraftStart(cfg.startDate);
     setPeriodDraftWeeks(cfg.numWeeks);
     setPeriodDraftDirty(true);
   };
 
-  const applyPeriod = (cfg: PeriodConfig, rule?: 'last_sunday' | 'fixed_start') => {
-    const ruleToSave = rule ?? periodRuleMode;
-    try { localStorage.setItem('osteria_period_rule', ruleToSave); } catch { /* ignore */ }
-    setPeriodRuleMode(ruleToSave);
+  /** Scarta la bozza: torna al periodo attualmente salvato. */
+  const discardPeriodDraft = () => {
+    setPeriodDraftStart(periodCfg.startDate);
+    setPeriodDraftWeeks(periodCfg.numWeeks);
+    setPeriodDraftDirty(false);
+  };
+
+  /** Seleziona una regola e ricalcola la bozza in base al suo tipo di calcolo. */
+  const selectPeriodRule = (rule: PeriodRule) => {
+    setPeriodRuleId(rule.id);
+    saveSelectedPeriodRuleId(rule.id);
+    setDraftFromConfig(
+      rule.type === 'last_sunday'
+        ? currentPeriodConfig()
+        : periodConfigFromStartDate(parseISO(periodDraftStart || periodCfg.startDate))
+    );
+  };
+
+  const handleCreatePeriodRule = () => {
+    const name = newRuleName.trim();
+    if (!name) return;
+    const rule: PeriodRule = { id: createPeriodRuleId(), name: name.slice(0, 40), type: newRuleType };
+    periodRulesPersist([...customPeriodRules, rule]);
+    setShowPeriodRuleForm(false);
+    setNewRuleName('');
+    setNewRuleType('last_sunday');
+    selectPeriodRule(rule);
+    showSuccess?.('Regola creata');
+  };
+
+  const handleDeletePeriodRule = (rule: PeriodRule) => {
+    periodRulesPersist(customPeriodRules.filter((r) => r.id !== rule.id));
+    setDeletingPeriodRule(null);
+    if (periodRuleId === rule.id) {
+      selectPeriodRule(BUILTIN_PERIOD_RULES[0]);
+    }
+    showSuccess?.('Regola eliminata');
+  };
+
+  const applyPeriod = (cfg: PeriodConfig, ruleId?: string) => {
+    const ruleIdToSave = ruleId ?? periodRuleId;
+    saveSelectedPeriodRuleId(ruleIdToSave);
+    setPeriodRuleId(ruleIdToSave);
     persistPeriodConfig(cfg);
     setPeriodCfg(cfg);
     setPeriodDraftStart(cfg.startDate);
@@ -796,7 +869,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
   if (!isManager) {
     return (
-      <div className="pb-content pt-6 w-full app-horizontal-pad font-sans">
+      <div className="pb-content pt-6 w-full font-sans">
         <p className="text-sm text-white/70">{t.no_access_settings}</p>
       </div>
     );
@@ -820,7 +893,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
     };
 
     return (
-      <div className="pb-content pt-6 w-full app-horizontal-pad font-sans">
+      <div className="pb-content pt-6 w-full font-sans">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -845,7 +918,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 <button
                   type="button"
                   onClick={() => setShowCreateStaff(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/10"
                 >
                   <UserPlus className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   {t.admin_add_employee}
@@ -898,7 +971,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                               showError?.((t as { copy_failed?: string }).copy_failed ?? 'Copia non riuscita.');
                             }
                           }}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/10"
                         >
                           <Copy className="h-3.5 w-3.5 shrink-0" aria-hidden />
                           Link accesso
@@ -906,7 +979,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         <button
                           type="button"
                           onClick={() => setEditingUser(user)}
-                          className="rounded-lg border border-white/20 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                          className="rounded-lg border border-white/20 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/10"
                         >
                           {t.settings_delegated_view_profile}
                         </button>
@@ -914,7 +987,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           <button
                             type="button"
                             onClick={() => handleDelegateSuspend(user)}
-                            className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 bg-red-500/15 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-red-400 transition-colors hover:bg-red-500/150/25 active:bg-red-500/150/80"
+                            className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 bg-red-500/15 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-red-400 transition-colors hover:bg-red-500/25 active:bg-red-500/80"
                           >
                             <UserX className="h-3.5 w-3.5 shrink-0" aria-hidden />
                             {t.settings_delegated_suspend}
@@ -947,7 +1020,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                               <button
                                 type="button"
                                 onClick={() => setDeleteConfirmUserId(user.id)}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/15 text-red-400 transition-colors hover:bg-red-500/150/25 active:bg-red-500/150/80"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/15 text-red-400 transition-colors hover:bg-red-500/25 active:bg-red-500/80"
                                 title={t.settings_delete_user_title}
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -992,7 +1065,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
   }
 
   return (
-    <div className="pb-content pt-6 w-full app-horizontal-pad font-sans">
+    <div className="pb-content pt-6 w-full font-sans">
         <AnimatePresence>
           {importStatus && (
             <motion.div
@@ -1018,7 +1091,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               <button
                 type="button"
                 onClick={() => setShowCreateStaff(true)}
-                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/20 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/20 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/10"
               >
                 <UserPlus className="w-3.5 h-3.5" aria-hidden />
                 {t.admin_add_employee}
@@ -1093,18 +1166,18 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
           </div>
         </section>
 
-        {/* Permessi per Ruolo — matrice (solo admin/elevati) */}
+        {/* Permessi per Ruolo — matrice (solo admin/elevati).
+            Sezione sempre aperta e senza contenitore: la scheda visibile è solo quella del pannello. */}
         {adminOnly && (
-          <SettingsAccordionSection
-            storageKey="osteria_settings_acc_role_permissions"
-            title={t.settings_role_permissions_title ?? 'Permessi per Ruolo'}
-            subtitle={t.settings_role_permissions_subtitle ?? 'Configura le funzionalità accessibili per Manager, Capo e Staff'}
-            defaultOpen={false}
-            accentBorder="rgba(255,255,255,0.35)"
-            attached
-          >
+          <section className="mb-4">
+            <h2 className="text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-white">
+              {t.settings_role_permissions_title ?? 'Permessi per Ruolo'}
+            </h2>
+            <p className="text-[0.8rem] text-white/65 mt-0.5 mb-3">
+              {t.settings_role_permissions_subtitle ?? 'Configura le funzionalità accessibili per Manager, Capo e Staff'}
+            </p>
             <RoleFeatureTemplatesPanel variant="embedded" />
-          </SettingsAccordionSection>
+          </section>
         )}
 
         </div>{/* fine sezione Gestione Profili */}
@@ -1610,7 +1683,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           className="w-14 rounded-lg border border-white/20 bg-white/10 px-2 py-1.5 text-sm font-semibold text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-white/20"
                         />
                         <span className="text-[0.625rem] font-semibold uppercase text-white/45">h</span>
-                        <span className="text-white/20">→</span>
+                        <span className="text-white/45">→</span>
                         <input
                           type="number"
                           min={0}
@@ -1775,7 +1848,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               {/* Empty state */}
               {!shiftTemplatesLoading && shiftTemplates.length === 0 && (
                 <div className="flex flex-col items-center gap-2 py-8 text-center">
-                  <CalendarDays className="h-8 w-8 text-white/30" />
+                  {/* `text-slate-400` (→ 0.50 bianco): il namespace `text-white/*` è forzato a ≥0.85, quindi non può rendere l'icona subordinata al testo. */}
+                  <CalendarDays className="h-8 w-8 text-slate-400" />
                   <p className="text-[0.8125rem] text-white/40">{t.settings_no_templates_saved ?? 'Nessun template salvato.'}</p>
                   <p className="text-[0.6875rem] text-white/60">Salva una settimana dal tabellone turni usando il menu Template.</p>
                 </div>
@@ -1850,23 +1924,16 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               <div className="grid grid-cols-2 gap-3">
                 {/* Periodo attivo: mostra anteprima della regola selezionata */}
                 {(() => {
-                  const isLastSunday = periodRuleMode === 'last_sunday';
                   const previewStart = parseISO(periodCfg.startDate);
                   const previewEnd = getPeriodEndDate(periodCfg);
-                  const ruleName = isLastSunday ? 'Ultima domenica' : 'Primo giorno';
-                  const ruleColor = isLastSunday
-                    ? 'text-accent'
-                    : 'text-brand-deep';
-                  const borderColor = isLastSunday
-                    ? 'border-white/25 border-l-accent'
-                    : 'border-brand-deep/25 border-l-brand-deep';
+                  const ruleName = activePeriodRule.name;
                   return (
-                    <div className={`rounded-xl border-2 border-l-4 ${borderColor} bg-transparent px-3 py-2.5`}>
+                    <div className="rounded-xl border-2 border-l-4 border-white/25 border-l-white/60 bg-transparent px-3 py-2.5">
                       <div className="flex items-center gap-1.5 mb-1">
                         <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
                           Periodo attivo
                         </p>
-                        <span className={`text-[0.6875rem] font-extrabold uppercase tracking-wide ${ruleColor}`}>
+                        <span className="text-[0.6875rem] font-extrabold uppercase tracking-wide text-white">
                           · {ruleName}
                         </span>
                       </div>
@@ -1875,7 +1942,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         <span className="text-white/40 font-normal"> → </span>
                         {format(previewEnd, 'dd/MM/yy')}
                       </p>
-                      <p className={`text-[0.6875rem] mt-0.5 ${ruleColor}`}>
+                      <p className="text-[0.6875rem] mt-0.5 text-white/70">
                         {periodCfg.numWeeks} sett.
                       </p>
                     </div>
@@ -1883,8 +1950,17 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 })()}
                 {/* Bozza (non ancora salvata) */}
                 {periodDraftDirty ? (
-                  <div className="rounded-xl border-2 border-l-4 border-amber-300/60 border-l-amber-500 bg-amber-50/80 px-3 py-2.5">
-                    <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-amber-600 mb-1">
+                  <div className="relative rounded-xl border-2 border-l-4 border-amber-400/40 border-l-amber-400 bg-amber-400/10 px-3 py-2.5">
+                    <button
+                      type="button"
+                      onClick={discardPeriodDraft}
+                      title="Scarta bozza"
+                      aria-label="Scarta bozza"
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-md text-amber-300 transition-colors hover:bg-white/10 hover:text-white active:brightness-95"
+                    >
+                      <X className="h-3 w-3" aria-hidden />
+                    </button>
+                    <p className="mb-1 pr-6 text-[0.6875rem] font-bold uppercase tracking-wider text-amber-300">
                       Bozza non salvata
                     </p>
                     <p className="text-[0.8125rem] font-bold text-white tabular-nums">
@@ -1892,7 +1968,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       <span className="text-white/40 font-normal"> → </span>
                       {format(addDays(parseISO(periodDraftStart), periodDraftWeeks * 7 - 1), 'dd/MM/yy')}
                     </p>
-                    <p className="text-[0.6875rem] text-amber-600 mt-0.5">
+                    <p className="text-[0.6875rem] text-amber-300 mt-0.5">
                       {periodDraftWeeks} sett. · premi Salva per confermare
                     </p>
                   </div>
@@ -1907,53 +1983,124 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
               {/* ── Selettore regola ────────────────────────────────────────── */}
               <div>
-                <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
-                  Regola di calcolo
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {/* Regola 1: Ultima domenica */}
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
+                    Regola di calcolo
+                  </p>
                   <button
                     type="button"
-                    onClick={() => {
-                      setPeriodRuleMode('last_sunday');
-                      const cfg = currentPeriodConfig();
-                      setDraftFromConfig(cfg);
-                    }}
-                    className={`flex flex-col items-start gap-1 rounded-xl border-2 px-3 py-2.5 text-left transition-colors ${
- periodRuleMode === 'last_sunday'
- ? 'border-accent bg-white/10'
- : 'border-white/20 bg-white/10 hover:border-white/20'
- } active:brightness-95`}
+                    onClick={() => setShowPeriodRuleForm((v) => !v)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-2 py-1 text-[0.6875rem] font-bold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/10 active:brightness-95"
                   >
-                    <span className={`text-[0.6875rem] font-extrabold uppercase tracking-wide ${periodRuleMode === 'last_sunday' ? 'text-accent' : 'text-white/70'}`}>
-                      Ultima domenica
-                    </span>
-                    <span className="text-[0.6875rem] leading-snug text-white/40">
-                      Il periodo termina sull'ultima dom. del mese
-                    </span>
-                  </button>
-                  {/* Regola 2: Primo giorno */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPeriodRuleMode('fixed_start');
-                      const cfg = periodConfigFromStartDate(parseISO(periodDraftStart));
-                      setDraftFromConfig(cfg);
-                    }}
-                    className={`flex flex-col items-start gap-1 rounded-xl border-2 px-3 py-2.5 text-left transition-colors ${
- periodRuleMode === 'fixed_start'
- ? 'border-brand-deep bg-brand-deep/8'
- : 'border-white/20 bg-white/10 hover:border-white/20'
- } active:brightness-95`}
-                  >
-                    <span className={`text-[0.6875rem] font-extrabold uppercase tracking-wide ${periodRuleMode === 'fixed_start' ? 'text-brand-deep' : 'text-white/70'}`}>
-                      Primo giorno
-                    </span>
-                    <span className="text-[0.6875rem] leading-snug text-white/40">
-                      Imposti la data di inizio, il sistema calcola la fine
-                    </span>
+                    <Plus className="h-3 w-3" aria-hidden />
+                    Nuova regola
                   </button>
                 </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {periodRules.map((rule) => {
+                    const isSelected = rule.id === activePeriodRule.id;
+                    const isLastSunday = rule.type === 'last_sunday';
+                    return (
+                      <div
+                        key={rule.id}
+                        className={`flex items-stretch rounded-xl border-2 transition-colors ${
+                          isSelected ? 'border-white/60 bg-white/10' : 'border-white/20 bg-white/10'
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => selectPeriodRule(rule)}
+                          className="flex min-w-0 flex-1 flex-col items-start gap-1 rounded-l-xl px-3 py-2.5 text-left active:brightness-95"
+                        >
+                          <span
+                            className={`break-words text-[0.6875rem] font-extrabold uppercase tracking-wide ${
+                              isSelected ? 'text-white' : 'text-white/70'
+                            }`}
+                          >
+                            {rule.name}
+                          </span>
+                          <span className="break-words text-[0.6875rem] leading-snug text-white/40">
+                            {isLastSunday
+                              ? "Il periodo termina sull'ultima dom. del mese"
+                              : 'Imposti la data di inizio, il sistema calcola la fine'}
+                          </span>
+                        </button>
+                        {!isBuiltinPeriodRule(rule.id) && (
+                          <button
+                            type="button"
+                            onClick={() => setDeletingPeriodRule(rule)}
+                            title="Elimina regola"
+                            aria-label={`Elimina regola ${rule.name}`}
+                            className="flex w-8 shrink-0 items-center justify-center rounded-r-xl text-white/40 transition-colors hover:bg-white/10 hover:text-white active:brightness-95"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Creazione regola personalizzata */}
+                {showPeriodRuleForm && (
+                  <div className="mt-2 space-y-2 rounded-xl border-2 border-dashed border-white/20 bg-white/5 p-3">
+                    <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
+                      Nuova regola
+                    </p>
+                    <input
+                      type="text"
+                      value={newRuleName}
+                      onChange={(e) => setNewRuleName(e.target.value)}
+                      maxLength={40}
+                      placeholder="Nome regola (es. Periodo estivo)"
+                      aria-label="Nome della nuova regola"
+                      className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/35 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      {BUILTIN_PERIOD_RULES.map((builtin) => (
+                        <button
+                          key={builtin.id}
+                          type="button"
+                          onClick={() => setNewRuleType(builtin.type)}
+                          className={`rounded-xl border-2 px-3 py-2 text-left transition-colors ${
+                            newRuleType === builtin.type
+                              ? 'border-white/60 bg-white/10'
+                              : 'border-white/20 bg-white/10'
+                          } active:brightness-95`}
+                        >
+                          <span
+                            className={`text-[0.6875rem] font-extrabold uppercase tracking-wide ${
+                              newRuleType === builtin.type ? 'text-white' : 'text-white/70'
+                            }`}
+                          >
+                            {builtin.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        disabled={!newRuleName.trim()}
+                        onClick={handleCreatePeriodRule}
+                        className="flex-1 rounded-xl bg-[rgba(255,255,255,0.18)] py-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:bg-[rgba(255,255,255,0.26)] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Crea regola
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowPeriodRuleForm(false);
+                          setNewRuleName('');
+                          setNewRuleType('last_sunday');
+                        }}
+                        className="flex-1 rounded-xl border border-white/20 py-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/10 active:brightness-95"
+                      >
+                        Annulla
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* ── Configurazione in base alla regola selezionata ───────────── */}
@@ -1982,10 +2129,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     const cfg = periodConfigFromStartDate(draftStart);
                     const endDate = addDays(draftStart, cfg.numWeeks * 7 - 1);
                     return (
-                      <div className="flex items-center justify-between rounded-xl border border-brand-deep/22 bg-brand-deep/80/8 px-3 py-2.5">
+                      <div className="flex items-center justify-between rounded-xl border border-white/[0.14] bg-white/[0.06] px-3 py-2.5">
                         <div className="flex items-center gap-2">
-                          <span className="text-[0.6875rem] font-bold text-brand-deep">Primo giorno</span>
-                          <span className="rounded-full bg-brand-deep/80/15 px-2 py-0.5 text-[0.6875rem] font-bold text-brand-deep">
+                          <span className="text-[0.6875rem] font-bold text-white">Primo giorno</span>
+                          <span className="rounded-full bg-white/10 px-2 py-0.5 text-[0.6875rem] font-bold text-white/70">
                             {cfg.numWeeks} sett.
                           </span>
                         </div>
@@ -2002,7 +2149,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               <button
                 type="button"
                 disabled={!periodDraftDirty || periodSavingCloud}
-                onClick={() => applyPeriod({ startDate: periodDraftStart, numWeeks: periodDraftWeeks }, periodRuleMode)}
+                onClick={() => applyPeriod({ startDate: periodDraftStart, numWeeks: periodDraftWeeks }, periodRuleId)}
                 className={`w-full rounded-xl py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${
  !periodDraftDirty || periodSavingCloud
  ? 'cursor-not-allowed'
@@ -2199,7 +2346,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             {/* Feature flag cards */}
             {/* Griglia feature flag: righe uniformi (auto-rows-fr) così tutte le card hanno la stessa altezza */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 auto-rows-fr">
-              {FEATURE_DEFINITIONS.filter((f) => !['kiosk_active', 'staff_requests', 'unlock_with_pin'].includes(f.slug)).map((feature) => {
+              {FEATURE_DEFINITIONS.filter((f) => !['staff_requests', 'unlock_with_pin'].includes(f.slug)).map((feature) => {
                 const enabled = featureFlags[feature.slug] !== false;
                 const isMaintenance = feature.slug === 'maintenance_mode';
                 return (
@@ -2351,7 +2498,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
                 {dataToolsLocked ? (
                   /* ── Stato bloccato ── */
-                  <div className="flex flex-col items-center gap-3 rounded-xl border border-white/[0.14] bg-white/5/80 py-5 px-4">
+                  <div className="flex flex-col items-center gap-3 rounded-xl border border-white/[0.14] bg-white/5 py-5 px-4">
                     <Lock className="h-7 w-7 text-white/40" />
                     <p className="text-[0.75rem] text-center text-white/55 leading-snug">
                       Sezione protetta.<br/>Inserisci il tuo PIN per sbloccare.
@@ -2456,7 +2603,7 @@ className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-m
         {adminOnly && (
           <div className="rounded-2xl border border-white/25 bg-white/5 p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex gap-3 min-w-0">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10">
                 <UploadCloud className="h-5 w-5 text-white" style={{ color: '#fff' }} aria-hidden />
               </div>
               <div className="min-w-0">
@@ -2542,6 +2689,45 @@ className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-m
           onSave={handleSaveBreakRule}
           onClose={() => { setCreatingBreakRule(false); setEditingBreakRule(null); }}
         />
+      )}
+
+      {/* Modale eliminazione regola di calcolo periodo */}
+      {deletingPeriodRule && (
+        <CenteredModalPortal
+          open
+          onClose={() => setDeletingPeriodRule(null)}
+          maxWidthClass="max-w-sm"
+        >
+          <div className="p-1">
+            <div className="mb-4 flex items-start gap-3">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                <Trash2 className="h-4 w-4 text-white" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold text-white">Elimina regola</h3>
+                <p className="mt-0.5 text-xs text-white/55">
+                  La regola «{deletingPeriodRule.name}» verrà rimossa. Il periodo attivo non cambia.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleDeletePeriodRule(deletingPeriodRule)}
+                className="flex-1 rounded-xl bg-white/[0.18] py-2.5 text-xs font-semibold uppercase text-white transition-colors hover:bg-white/25 active:bg-white/80"
+              >
+                Elimina
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeletingPeriodRule(null)}
+                className="flex-1 rounded-xl bg-white/10 py-2.5 text-xs font-semibold uppercase text-white/70 transition-colors hover:bg-white/15 active:bg-white/80"
+              >
+                Annulla
+              </button>
+            </div>
+          </div>
+        </CenteredModalPortal>
       )}
 
       {/* Modale eliminazione reparto con riassegnazione utenti */}
@@ -2845,7 +3031,7 @@ function BreakRuleModal({
                 {tab.label}
               </button>
             ))}
-            <div className="mx-1 h-5 w-px shrink-0 bg-white/15" aria-hidden />
+            <div className="mx-1 h-5 w-px shrink-0 bg-white/20" aria-hidden />
             <button
               type="submit"
               title={isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}

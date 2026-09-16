@@ -2247,7 +2247,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       )}
 
       {/* ── Mobile Card View (card memoizzate: si ri-renderizzano solo se le loro props cambiano) ── */}
-      <div className="md:hidden space-y-4 px-1 pb-content">
+      <div className="md:hidden space-y-4 pb-content">
         {visibleUsers.map((user) => (
           <ShiftGridMobileCard
             key={user.id}
