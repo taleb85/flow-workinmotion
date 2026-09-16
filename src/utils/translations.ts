@@ -83,7 +83,7 @@ const baseIt = {
 
   // Blocco alla riapertura dell’app (Face ID / impronta o PIN)
   app_lock_title: 'Sblocca FLOW',
-  app_lock_subtitle: 'Usa Face ID o l’impronta, oppure il PIN a 4 cifre.',
+  app_lock_subtitle: 'Face ID, impronta o PIN a 4 cifre.',
 
   // Timbratura
   pin_invalid: 'PIN non valido.',

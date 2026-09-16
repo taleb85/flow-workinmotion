@@ -3,6 +3,7 @@ import { Users, Layers, Clock, MapPin, Languages, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Tenant, TenantSettings } from '../types';
 import DipendentiTab from './SuperAdminDipendentiTab';
+import ToggleSwitch from './ui/toggle-switch-glass';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -84,25 +85,14 @@ function mergeSettings(base: TenantSettings, overrides: TenantSettings): TenantS
 
 export function Toggle({ value, onChange, danger }: { value: boolean; onChange: (v: boolean) => void; danger?: boolean }) {
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={value}
-      onClick={() => onChange(!value)}
-      className={`relative w-10 h-5.5 rounded-full transition-all duration-200 shrink-0 ${
- value
- ? danger ? 'bg-red-500' : 'bg-accent'
- : ''
- }`}
-      style={{ minWidth: '2.5rem', height: '1.375rem' }}
-    >
-      <span
-        className={`absolute top-0.5 left-0.5 w-4.5 h-4.5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${
- value ? 'translate-x-[1.125rem]' : 'translate-x-0'
- }`}
-        style={{ width: '1.125rem', height: '1.125rem' }}
-      />
-    </button>
+    <ToggleSwitch
+      isActive={value}
+      onChange={onChange}
+      colorTheme={danger ? 'danger' : 'default'}
+      size="sm"
+      darkMode
+      className="shrink-0"
+    />
   );
 }
 

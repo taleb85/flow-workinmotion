@@ -7,6 +7,7 @@ import { useState, useMemo } from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { translateRole } from '../utils/roles';
+import ToggleSwitch from './ui/toggle-switch-glass';
 export default function ElevatedAccessPanel() {
   const { users, updateUser, effectiveLanguage } = useAppUser();
 
@@ -67,19 +68,14 @@ export default function ElevatedAccessPanel() {
               </div>
             </div>
 
-            <button
-              type="button"
+            <ToggleSwitch
+              isActive={enabled}
+              onChange={() => handleToggle(u.id, enabled)}
               disabled={isSaving}
-              onClick={() => handleToggle(u.id, enabled)}
-              role="switch"
-              aria-checked={enabled}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 transition-all duration-200 focus:outline-none disabled:opacity-50 ${enabled ? 'bg-accent' : ''}`}
-            >
-              <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full toggle-knob transition-all duration-200 ease-in-out ${
- enabled ? 'translate-x-5' : 'translate-x-0'
- }`}
-              />            </button>
+              size="sm"
+              darkMode
+              className="shrink-0"
+            />
           </div>
         );
       })}

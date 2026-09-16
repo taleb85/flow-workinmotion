@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RotateCcw, Users, Info } from 'lucide-react';
+import ToggleSwitch from './ui/toggle-switch-glass';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppConfig } from '../context/appSliceContexts';
 import { useAppOverlay } from '../context/appSliceContexts';
@@ -96,6 +97,43 @@ function initials(user: User): string {
 }
 
 /**
+ * Wrapper dei toggle, definito a livello di modulo (e non dentro il componente):
+ * in questo modo la reference resta stabile tra i render e i toggle NON vengono
+ * smontati/rimontati a ogni re-render (era la causa del flicker nella tabella).
+ */
+function MatrixToggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
+  return (
+    <ToggleSwitch
+      isActive={enabled}
+      onChange={onToggle}
+      size="xs"
+      darkMode
+      className="inline-flex"
+    />
+  );
+}
+
+function MobileRow({ label, enabled, onToggle, sublabel }: {
+  label: React.ReactNode; enabled: boolean; onToggle: () => void; sublabel?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between px-4 py-3 gap-3">
+      <div className="flex-1 min-w-0">
+        <div className="text-[0.8125rem] text-white/80 leading-snug">{label}</div>
+        {sublabel && <div className="text-[0.6875rem] text-white/50 mt-0.5 leading-snug">{sublabel}</div>}
+      </div>
+      <ToggleSwitch
+        isActive={enabled}
+        onChange={onToggle}
+        size="sm"
+        darkMode
+        className="shrink-0"
+      />
+    </div>
+  );
+}
+
+/**
  * Template permessi per dipendente. Usabile in pagina dedicata o dentro Impostazioni.
  * nelle anteprime compatte, text-[8–10]px è voluto (mini-card).
  */
@@ -119,10 +157,34 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   );
 
   // ─── Stato per-utente ────────────────────────────────────────────────────
-  const [userFeatures, setUserFeatures] = useState<Record<string, EnabledFeatures>>({});
-  const [userOp, setUserOp] = useState<Record<string, Record<SettingsOperationalPermKey, boolean>>>({});
-  const [userTeamVisible, setUserTeamVisible] = useState<Record<string, boolean>>({});
-  const [userPlannedOnly, setUserPlannedOnly] = useState<Record<string, boolean>>({});
+  // Inizializzato "lazy" dai dati già presenti al primo render: evita che i
+  // toggle partano spenti per poi scattare quando arriva lo stato (flicker
+  // all'apertura della scheda).
+  const computePermState = () => {
+    const features: Record<string, EnabledFeatures> = {};
+    const ops: Record<string, Record<SettingsOperationalPermKey, boolean>> = {};
+    const teamVis: Record<string, boolean> = {};
+    const plannedOnly: Record<string, boolean> = {};
+    for (const u of nonAdminUsers) {
+      features[u.id] = getEnabledFeatures(u);
+      ops[u.id] = {
+        can_punch_from_app: u.can_punch_from_app ?? false,
+        can_create_shifts: u.can_create_shifts ?? false,
+        can_manage_drafts: u.can_manage_drafts ?? false,
+        can_approve_shifts: u.can_approve_shifts ?? false,
+      };
+      teamVis[u.id] = !(u.hide_from_team_schedule === true);
+      plannedOnly[u.id] = getTimesheetGridPrivacyMode(u) === 'planned_only';
+    }
+    return { features, ops, teamVis, plannedOnly };
+  };
+
+  const initialPermState = useMemo(computePermState, [nonAdminUsers]);
+
+  const [userFeatures, setUserFeatures] = useState<Record<string, EnabledFeatures>>(() => initialPermState.features);
+  const [userOp, setUserOp] = useState<Record<string, Record<SettingsOperationalPermKey, boolean>>>(() => initialPermState.ops);
+  const [userTeamVisible, setUserTeamVisible] = useState<Record<string, boolean>>(() => initialPermState.teamVis);
+  const [userPlannedOnly, setUserPlannedOnly] = useState<Record<string, boolean>>(() => initialPermState.plannedOnly);
 
   // ─── Selezione utente mobile ─────────────────────────────────────────────
   const [mobileSelectedUserId, setMobileSelectedUserId] = useState<string | null>(null);
@@ -154,24 +216,10 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
     );
   }, [userFeatures, userOp, userTeamVisible, userPlannedOnly, mods]);
 
-  // Inizializza stato dai dati utente
+  // Inizializza/riallinea stato dai dati utente (quando non ci sono modifiche pendenti)
   useEffect(() => {
     if (templatePanelDirtyRef.current) return;
-    const features: Record<string, EnabledFeatures> = {};
-    const ops: Record<string, Record<SettingsOperationalPermKey, boolean>> = {};
-    const teamVis: Record<string, boolean> = {};
-    const plannedOnly: Record<string, boolean> = {};
-    for (const u of nonAdminUsers) {
-      features[u.id] = getEnabledFeatures(u);
-      ops[u.id] = {
-        can_punch_from_app: u.can_punch_from_app ?? false,
-        can_create_shifts: u.can_create_shifts ?? false,
-        can_manage_drafts: u.can_manage_drafts ?? false,
-        can_approve_shifts: u.can_approve_shifts ?? false,
-      };
-      teamVis[u.id] = !(u.hide_from_team_schedule === true);
-      plannedOnly[u.id] = getTimesheetGridPrivacyMode(u) === 'planned_only';
-    }
+    const { features, ops, teamVis, plannedOnly } = computePermState();
     setUserFeatures(features);
     setUserOp(ops);
     setUserTeamVisible(teamVis);
@@ -396,26 +444,6 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
 
   // ─── Componenti render ───────────────────────────────────────────────────
   const colCount = nonAdminUsers.length + 1;
-
-  const MatrixToggle = ({
-    enabled, onToggle,
-  }: { enabled: boolean; onToggle: () => void }) => (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={enabled}
-      onClick={onToggle}
-      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${
- enabled ? 'bg-accent' : ''
- }`}
-    >
-      <span
-        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full toggle-knob transition-all duration-200 ease-in-out ${
- enabled ? 'translate-x-[1.125rem]' : 'translate-x-[0.125rem]'
- }`}
-      />
-    </button>
-  );
 
   const SectionHeader = ({ title, icon }: { title: string; icon?: React.ReactNode }) => (
     <tr className="bg-white/5">
@@ -765,26 +793,6 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   }
 
   // ─── Vista mobile: user chip + lista permessi ────────────────────────────
-  const MobileRow = ({ label, enabled, onToggle, sublabel }: {
-    label: React.ReactNode; enabled: boolean; onToggle: () => void; sublabel?: string;
-  }) => (
-    <div className="flex items-center justify-between px-4 py-3 gap-3">
-      <div className="flex-1 min-w-0">
-        <div className="text-[0.8125rem] text-white/80 leading-snug">{label}</div>
-        {sublabel && <div className="text-[0.6875rem] text-white/50 mt-0.5 leading-snug">{sublabel}</div>}
-      </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={enabled}
-        onClick={onToggle}
-        className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full transition-all duration-200 focus:outline-none ${enabled ? 'bg-accent' : ''}`}
-      >
-        <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full toggle-knob transition-all duration-200 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
-      </button>
-    </div>
-  );
-
   const MobileSectionHeader = ({ title }: { title: string }) => (
     <div className="px-4 py-2 bg-white/5 border-y border-white/10">
       <span className="text-[0.625rem] font-bold uppercase tracking-widest text-white/50">{title}</span>

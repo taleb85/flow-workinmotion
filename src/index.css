@@ -34,6 +34,16 @@
   animation: glow-pulse 1.8s ease-out infinite;
 }
 
+/* Lucchetto PIN: animazione successo rosso→verde */
+@keyframes pin-lock-success {
+  0% { color: #ef4444; transform: scale(1); }
+  60% { color: #22c55e; transform: scale(1.2); }
+  100% { color: #22c55e; transform: scale(1); }
+}
+.pin-lock-success {
+  animation: pin-lock-success 0.7s ease-in-out forwards;
+}
+
 /* Fix iOS: disabilita highlight nativo, abilita cursor */
 button,
 [role="button"] {
@@ -2622,4 +2632,38 @@ input:-webkit-autofill:active {
 .perm-matrix-table thead th:last-child {
   border-top-right-radius: 1rem;
   border-bottom-right-radius: 1rem;
+}
+
+/* ── Tabella permessi: colonna sticky "Permesso" ──
+   Header = vetro come le altre colonne; corpo = trasparente. */
+[data-theme="dark"] .perm-matrix-table th.sticky.left-0 {
+  background: rgba(255, 255, 255, 0.06) !important;
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+}
+
+[data-theme="dark"] .perm-matrix-table td.sticky.left-0 {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ── Tabella permessi: header con i nomi utente = effetto vetro ── */
+[data-theme="dark"] .perm-matrix-table thead th:not(.sticky) {
+  background: rgba(255, 255, 255, 0.06) !important;
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+}
+
+/* ── PIN pad: nessun anello di focus ──
+ * `flow-v2-skin.css` applica `*:focus-visible { outline: 2px solid #0a84ff }`
+ * con `!important`: la card (tabindex=-1, focalizzata via script) risultava
+ * circondata da un bordo azzurro. Questo selettore ha specificità maggiore. */
+.pinpad-card:focus,
+.pinpad-card:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
 }

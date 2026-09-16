@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import ToggleSwitch from './ui/toggle-switch-glass';
 import {
   Search,
   Home,
@@ -691,28 +692,15 @@ className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-3
                                   label={FEATURE_LABELS[key]}
                                   description={desc}
                                   action={
-                                    <button
-                                      type="button"
-                                      role="switch"
-                                      aria-checked={eff}
-                                      aria-disabled={isSelectedAdmin}
-                                      tabIndex={isSelectedAdmin ? -1 : 0}
-                                      title={
-                                        isSelectedAdmin ? (tv.profile_visibility_admin_switch_hint ?? '') : undefined
-                                      }
-                                      onClick={() => {
+                                    <ToggleSwitch
+                                      isActive={eff}
+                                      onChange={() => {
                                         if (!isSelectedAdmin) handleFeatureToggle(previewUser, key, !eff);
                                       }}
-                                      className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/35 focus:ring-offset-2 ${
- isSelectedAdmin ? 'cursor-default opacity-100' : 'cursor-pointer'
- } ${eff ? 'bg-accent' : ''}`}
-                                    >
-                                      <span
-                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full toggle-knob transition-all duration-200 ease-in-out ${
- eff ? 'translate-x-5' : 'translate-x-1'
- }`}
-                                      />
-                                    </button>
+                                      size="sm"
+                                      darkMode
+                                      className={`shrink-0 ${isSelectedAdmin ? 'pointer-events-none' : ''}`}
+                                    />
                                   }
                                 />
                               );

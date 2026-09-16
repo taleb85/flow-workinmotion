@@ -2698,7 +2698,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             </AnimatePresence>
                             <label className="flex items-center gap-2 cursor-pointer" aria-label={t.deduct_break_label ?? 'Detrae pausa'}>
                               <input type="checkbox" checked={deductBreak} onChange={handleDeductBreakToggle}
-                                className="w-3.5 h-3.5 rounded border-white/20 bg-white/10 accent-accent" />
+                                className="w-3.5 h-3.5 rounded border-white/20 bg-white/10 accent-white" />
                               {breakUnsaved ? (
                                 <button
                                   type="button"
@@ -2715,7 +2715,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             {deductBreak && _hasAutoBreak && (
                               <label className="flex items-center gap-2 cursor-pointer" aria-label={autoBreakLabel}>
                                 <input type="checkbox" checked={isAutoBreak} onChange={handleAutoBreakToggle}
-                                  className="w-3.5 h-3.5 rounded border-white/20 bg-white/10 accent-accent" />
+                                  className="w-3.5 h-3.5 rounded border-white/20 bg-white/10 accent-white" />
                                 <span className="text-[0.625rem] font-bold text-amber-400 whitespace-nowrap">{autoBreakLabel}</span>
                               </label>
                             )}

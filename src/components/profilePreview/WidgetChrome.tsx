@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import type { User } from '../../types';
 import { isUiWidgetVisible } from '../../utils/uiScreenWidgets';
 import { previewWidgetLabel } from './previewWidgetLabel';
+import ToggleSwitch from '../ui/toggle-switch-glass';
 
 export const WidgetChrome = memo(function WidgetChrome({
   widgetKey,
@@ -30,20 +31,13 @@ export const WidgetChrome = memo(function WidgetChrome({
         <div className="mb-1 flex items-center justify-end gap-2">
           <span className="hidden max-w-[55%] truncate text-right text-[0.5625rem] font-medium text-white/50 md:inline" title={previewWidgetLabel(widgetKey)}>{previewWidgetLabel(widgetKey)}
           </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={visible}
-            aria-label={previewWidgetLabel(widgetKey)}
-            onClick={() => onUiToggle(widgetKey, !visible)}
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-all duration-200 ${visible ? 'bg-accent' : ''}`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${
- visible ? 'translate-x-5' : 'translate-x-0'
- }`}
-            />
-          </button>
+          <ToggleSwitch
+            isActive={visible}
+            onChange={(next) => onUiToggle(widgetKey, next)}
+            size="sm"
+            darkMode
+            className="shrink-0"
+          />
         </div>
       )}
       <div className="relative">

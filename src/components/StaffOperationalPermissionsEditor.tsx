@@ -8,6 +8,7 @@ import { canUserEdit, isAdminOnly } from '../utils/permissions';
 import { isUserPermissionEffective, toggledPermissionDbValue } from '../utils/staffPermissionDefaults';
 import { buildSettingsPermissionRows, type SettingsOperationalPermKey } from '../utils/settingsPermissionRows';
 import AdminRow from './ui/AdminRow';
+import ToggleSwitch from './ui/toggle-switch-glass';
 
 type Props = {
   user: User;
@@ -90,23 +91,14 @@ export default function StaffOperationalPermissionsEditor({ user, currentUser }:
               }
               action={
                 interactive ? (
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={enabled}
-                    aria-label={perm.label}
+                  <ToggleSwitch
+                    isActive={enabled}
+                    onChange={() => void handleToggle(perm.key, perm.adminOnly)}
                     disabled={busyKey !== null}
-                    onClick={() => void handleToggle(perm.key, perm.adminOnly)}
-                    className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 ${
- enabled ? 'bg-accent' : ''
- } ${busyKey !== null ? 'cursor-wait opacity-60' : ''}`}
-                  >
-                    <span
-                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${
- enabled ? 'translate-x-5' : 'translate-x-0'
- }`}
-                    />
-                  </button>
+                    size="sm"
+                    darkMode
+                    className="flex-shrink-0"
+                  />
                 ) : (
                   <span
                     className={`shrink-0 text-[0.6875rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${

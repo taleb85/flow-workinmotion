@@ -4,6 +4,7 @@ import { Plus, Trash2, Pencil, X, Check, Wrench, Unlock, Coffee, Palmtree, Shiel
 import { database } from '../lib/database';
 import { supabase } from '../lib/supabase';
 import { PinPadModal } from './ui/PinPadModal';
+import ToggleSwitch from './ui/toggle-switch-glass';
 import { format, parseISO, addDays } from 'date-fns';
 import { getDateLocale } from '../utils/translations';
 import {
@@ -211,13 +212,13 @@ function FeatureFlagCard({
 
   return (
     <div
-      className={`rounded-xl border border-white/[0.14] flex h-full flex-col p-3.5 transition-colors surface-ghost-interactive hover:border-white/[0.14] md:p-4 active:brightness-95 ${
+      className={`rounded-xl border border-white/[0.14] flex h-full flex-col p-3.5 transition-colors hover:border-white/[0.14] md:p-4 active:brightness-95 ${
         isMaintenance && enabled ? 'border-red-500/40 bg-red-500/15' : ''
       }`}
     >
       <div className="flex items-start gap-3 min-w-0">
         <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-          isMaintenance && enabled ? 'bg-red-500/20 text-red-400' : 'bg-white/10 text-accent'
+          isMaintenance && enabled ? 'bg-red-500/20 text-red-400' : 'bg-white/10 text-white'
         }`}>
           <span className="w-[1.125rem] h-[1.125rem]">{iconMap[feature.slug]}</span>
         </div>
@@ -229,18 +230,14 @@ function FeatureFlagCard({
               }`}>{featureLabel}</p>
               <p className="text-[0.6875rem] md:text-xs text-white mt-1 leading-snug">{featureDescription}</p>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={enabled}
-              aria-label={featureLabel}
-              onClick={onToggle}
-              className={`relative mt-0.5 h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/35 focus:ring-offset-2 ${
-                isMaintenance ? (enabled ? 'bg-red-500' : '') : (enabled ? 'bg-accent' : '')
-              }`}
-            >
-              <span className={`pointer-events-none absolute top-0.5 left-0.5 h-5 w-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
-            </button>
+            <ToggleSwitch
+              isActive={enabled}
+              onChange={() => void onToggle()}
+              colorTheme={isMaintenance ? 'danger' : 'default'}
+              size="sm"
+              darkMode
+              className="mt-0.5 flex-shrink-0"
+            />
           </div>
           {detailLines.length > 0 && (
             <>
@@ -425,17 +422,13 @@ const SettingsUserRow = memo(function SettingsUserRow({
                   </button>
                 )
               )}
-              <button
-                type="button"
-                role="switch"
-                aria-checked={user.status === 'active'}
-                onClick={() => onToggleStatus(user)}
-                className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-all duration-200 ${
-                  user.status === 'active' ? 'bg-accent' : ''
-                }`}
-              >
-                <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${user.status === 'active' ? 'translate-x-5' : 'translate-x-0'}`} />
-              </button>
+              <ToggleSwitch
+                isActive={user.status === 'active'}
+                onChange={() => onToggleStatus(user)}
+                size="sm"
+                darkMode
+                className="flex-shrink-0"
+              />
             </div>
           )}
         </div>
@@ -579,7 +572,6 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
   const [geoLat, setGeoLat] = useState('');
   const [geoLng, setGeoLng] = useState('');
   const [geoRadius, setGeoRadius] = useState('120');
-  const [geoSaving, setGeoSaving] = useState(false);
   const [geoAcquiring, setGeoAcquiring] = useState(false);
   const [presenceQrBusy, setPresenceQrBusy] = useState(false);
 
@@ -928,7 +920,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             <div
               className="divide-y divide-white/10 overflow-hidden rounded-xl"
               style={
-                { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.14)' }
+                { border: '1px solid rgba(255,255,255,0.14)' }
               }
             >
               {displayUsersDelegated.length === 0 ? (
@@ -1135,7 +1127,6 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 <div className="border-t border-white/10">
                 <div
                   className="divide-y divide-white/10"
-                  style={{ background: 'rgba(255,255,255,0.05)' }}
                 >
               {displayUsers.map((user) => (
                 <SettingsUserRow
@@ -1170,12 +1161,14 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             Sezione sempre aperta e senza contenitore: la scheda visibile è solo quella del pannello. */}
         {adminOnly && (
           <section className="mb-4">
-            <h2 className="text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-white">
-              {t.settings_role_permissions_title ?? 'Permessi per Ruolo'}
-            </h2>
-            <p className="text-[0.8rem] text-white/65 mt-0.5 mb-3">
-              {t.settings_role_permissions_subtitle ?? 'Configura le funzionalità accessibili per Manager, Capo e Staff'}
-            </p>
+            <div className="flex items-baseline gap-2 mb-3">
+              <h2 className="text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-white">
+                {t.settings_role_permissions_title ?? 'Permessi per Ruolo'}
+              </h2>
+              <p className="text-[0.8rem] text-white/65">
+                {t.settings_role_permissions_subtitle ?? 'Configura le funzionalità accessibili per Manager, Capo e Staff'}
+              </p>
+            </div>
             <RoleFeatureTemplatesPanel variant="embedded" />
           </section>
         )}
@@ -1190,14 +1183,14 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
           <div className="rounded-xl border border-white/[0.14] p-4 mb-4">
             <div className="flex items-center justify-between gap-3 mb-1">
               <h2 className="text-md font-bold flex items-center gap-2">
-                <Bell className="w-4 h-4 text-accent" />
+                <Bell className="w-4 h-4 text-white" />
                 {t.admin_notify_team_title}
               </h2>
               <button
                 type="button"
                 disabled={teamNotifyLoading}
                 onClick={() => void handleNotifyTeam()}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-white/10 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:pointer-events-none"
               >
                 <Bell className="w-3.5 h-3.5 opacity-80" />
                 {teamNotifyLoading ? '…' : t.admin_notify_team_button}
@@ -1475,7 +1468,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         void notifyDepartmentsChanged();
                       }
                     }}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent-hover transition-colors disabled:opacity-40 active:bg-white/80"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 text-white text-xs font-semibold hover:bg-white/25 transition-colors disabled:opacity-40 active:bg-white/80"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     {t.settings_add_dept}
@@ -1528,15 +1521,13 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 <p className="text-[0.6875rem] text-white/55 leading-snug">{t.wst_violation_critical_sub}</p>
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={workRules.criticEnabled}
-                    onClick={() => updateWorkRule('criticEnabled', !workRules.criticEnabled)}
-                    className={`relative w-11 h-6 rounded-full transition-all duration-200 ${workRules.criticEnabled ? 'bg-accent' : ''}`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${workRules.criticEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
-                  </button>
+                  <ToggleSwitch
+                    isActive={workRules.criticEnabled}
+                    onChange={() => updateWorkRule('criticEnabled', !workRules.criticEnabled)}
+                    size="sm"
+                    darkMode
+                    className="flex-shrink-0"
+                  />
                 </div>
                 {workRules.criticEnabled && (
                   <div className="grid grid-cols-2 gap-2 border-t border-white/10 pt-2">
@@ -1579,15 +1570,13 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 <p className="text-[0.6875rem] text-white/55 leading-snug">{t.wst_violation_attention_sub}</p>
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={workRules.attentionEnabled}
-                    onClick={() => updateWorkRule('attentionEnabled', !workRules.attentionEnabled)}
-                    className={`relative w-11 h-6 rounded-full transition-all duration-200 ${workRules.attentionEnabled ? 'bg-accent' : ''}`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${workRules.attentionEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
-                  </button>
+                  <ToggleSwitch
+                    isActive={workRules.attentionEnabled}
+                    onChange={() => updateWorkRule('attentionEnabled', !workRules.attentionEnabled)}
+                    size="sm"
+                    darkMode
+                    className="flex-shrink-0"
+                  />
                 </div>
                 {workRules.attentionEnabled && (
                   <div className="grid grid-cols-2 gap-2 border-t border-white/10 pt-2">
@@ -1630,15 +1619,13 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 <p className="text-[0.6875rem] text-white/55 leading-snug">{t.wst_violation_overlap_sub}</p>
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={workRules.overlapEnabled}
-                    onClick={() => updateWorkRule('overlapEnabled', !workRules.overlapEnabled)}
-                    className={`relative w-11 h-6 rounded-full transition-all duration-200 ${workRules.overlapEnabled ? 'bg-accent' : ''}`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${workRules.overlapEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
-                  </button>
+                  <ToggleSwitch
+                    isActive={workRules.overlapEnabled}
+                    onChange={() => updateWorkRule('overlapEnabled', !workRules.overlapEnabled)}
+                    size="sm"
+                    darkMode
+                    className="flex-shrink-0"
+                  />
                 </div>
               </div>
 
@@ -1653,15 +1640,13 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 <p className="text-[0.6875rem] text-white/55 leading-snug">{t.settings_wr_auto_break_tiers_hint}</p>
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={workRules.autoBreakTiersEnabled !== false}
-                    onClick={() => updateWorkRule('autoBreakTiersEnabled', workRules.autoBreakTiersEnabled === false)}
-                    className={`relative w-11 h-6 rounded-full transition-all duration-200 ${workRules.autoBreakTiersEnabled !== false ? 'bg-accent' : ''}`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${workRules.autoBreakTiersEnabled !== false ? 'translate-x-5' : 'translate-x-0'}`} />
-                  </button>
+                  <ToggleSwitch
+                    isActive={workRules.autoBreakTiersEnabled !== false}
+                    onChange={() => updateWorkRule('autoBreakTiersEnabled', workRules.autoBreakTiersEnabled === false)}
+                    size="sm"
+                    darkMode
+                    className="flex-shrink-0"
+                  />
                 </div>
                 {workRules.autoBreakTiersEnabled !== false && (
                   <div className="space-y-1.5 border-t border-white/10 pt-2">
@@ -1754,16 +1739,32 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
  }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="w-8 h-8 rounded-xl bg-amber-500/15 flex items-center justify-center flex-shrink-0">
+                      <span className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${rule.icon === 'moon' ? 'bg-blue-500/15' : 'bg-yellow-500/15'}`}>
                         {(() => {
                           const RuleIcon = getBreakRuleIconComponent(rule.icon);
-                          return <RuleIcon className="w-4 h-4 text-amber-400" />;
+                          return <RuleIcon className={`w-4 h-4 ${rule.icon === 'moon' ? 'text-blue-400' : 'text-yellow-400'}`} />;
                         })()}
                       </span>
                       <h3
                         className={`flex-1 truncate text-xs font-bold uppercase tracking-wider ${isEnabled ? 'text-white' : 'text-white/40'}`}
                        title={rule.title}>{rule.title}
                       </h3>
+                      <div className="flex flex-shrink-0 items-center gap-1">
+                        <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
+                        <ToggleSwitch
+                          isActive={isEnabled}
+                          onChange={toggle}
+                          size="sm"
+                          darkMode
+                          className="flex-shrink-0"
+                        />
+                        <button type="button" onClick={() => setEditingBreakRule(rule)} className="p-1.5 rounded-xl hover:bg-white/10 text-white/40 hover:text-white/80 transition-colors active:text-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button type="button" onClick={() => handleDeleteBreakRule(rule.id)} className="p-1.5 rounded-xl hover:bg-red-500/15 text-white/40 hover:text-red-500 transition-colors active:text-red-500 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                     <p className="text-[0.6875rem] text-white/55 leading-snug">
                       {rule.breakStart} – {rule.breakEnd}
@@ -1779,34 +1780,14 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         {rule.paid ? t.settings_break_paid : t.settings_break_unpaid}
                       </span>
                     </p>
-                    <div className="flex items-center justify-between pt-1 mt-auto">
-                      <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={isEnabled}
-                          onClick={toggle}
-                          title={isEnabled ? t.settings_break_toggle_disable : t.settings_break_toggle_enable}
-                          className={`relative w-11 h-6 rounded-full transition-all duration-200 flex-shrink-0 ${isEnabled ? 'bg-accent' : ''}`}
-                        >
-                          <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${isEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </button>
-                        <button type="button" onClick={() => setEditingBreakRule(rule)} className="p-1.5 rounded-xl hover:bg-white/10 text-white/40 hover:text-white/80 transition-colors active:text-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button type="button" onClick={() => handleDeleteBreakRule(rule.id)} className="p-1.5 rounded-xl hover:bg-red-500/15 text-white/40 hover:text-red-500 transition-colors active:text-red-500 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
+
                   </div>
                 );
               })}
               <button
                 type="button"
                 onClick={() => setCreatingBreakRule(true)}
-                className="rounded-xl border border-white/[0.14] surface-ghost-interactive flex min-h-[7.5rem] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/[0.14] p-4 text-white/55 transition-colors hover:border-accent hover:bg-white/5 hover:text-accent active:text-accent"
+                className="rounded-xl border border-white/[0.14] flex min-h-[3rem] flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-white/[0.14] p-2 text-white/55 transition-colors hover:border-white/30 hover:bg-white/5 hover:text-white active:text-white"
               >
                 <Plus className="w-6 h-6" />
                 <span className="text-xs font-semibold">{t.settings_break_new_rule}</span>
@@ -1830,20 +1811,22 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             attached
           >
             <div className="space-y-3">
-              <p className="text-[0.75rem] text-white/55 leading-relaxed">
-                {t.settings_week_template_manage_hint ?? 'Gestisci i template di settimana salvati dal tabellone turni. Ogni template memorizza i turni assegnati per giorno e dipendente e può essere riapplicato in qualsiasi settimana.'}
-              </p>
+              <div className="flex items-center justify-between gap-3 mt-2 px-[9px]">
+                <p className="text-[0.75rem] text-white/55 leading-relaxed">
+                  {t.settings_week_template_manage_hint ?? 'Template salvati dal tabellone turni, riapplicabili a qualsiasi settimana.'}
+                </p>
 
-              {/* Refresh button */}
-              <button
-                type="button"
-                onClick={loadShiftTemplates}
-                disabled={shiftTemplatesLoading}
-                className="flex items-center gap-1.5 text-[0.75rem] text-blue-600 font-medium disabled:opacity-50"
-              >
-                <RefreshCw className={`h-3.5 w-3.5 ${shiftTemplatesLoading ? 'animate-spin' : ''}`} />
-                {shiftTemplatesLoading ? 'Aggiornamento…' : 'Aggiorna lista'}
-              </button>
+                {/* Refresh button */}
+                <button
+                  type="button"
+                  onClick={loadShiftTemplates}
+                  disabled={shiftTemplatesLoading}
+                  className="flex flex-shrink-0 items-center gap-1.5 text-[0.75rem] text-blue-600 font-medium disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${shiftTemplatesLoading ? 'animate-spin' : ''}`} />
+                  {shiftTemplatesLoading ? 'Aggiornamento…' : 'Aggiorna lista'}
+                </button>
+              </div>
 
               {/* Empty state */}
               {!shiftTemplatesLoading && shiftTemplates.length === 0 && (
@@ -1870,16 +1853,16 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         key={tmpl.name}
                         className="rounded-xl border border-white/[0.14] rounded-lg p-3 flex items-start gap-3"
                       >
-                        <div className="flex-shrink-0 w-8 h-8 rounded-md bg-blue-50 flex items-center justify-center">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-md bg-black flex items-center justify-center">
                           <BookTemplate className="h-4 w-4 text-blue-500" />
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 flex items-center gap-2">
                           <p className="text-[0.8125rem] font-semibold text-white truncate" title={tmpl.name}>{tmpl.name}</p>
-                          <p className="text-[0.6875rem] text-white/55 mt-0.5">
+                          <p className="text-[0.6875rem] text-white/55 whitespace-nowrap">
                             {tmpl.count} {tmpl.count !== 1 ? (t.shift_plural ?? 'turni') : (t.shift_singular ?? 'turno')} · {tmpl.days.map((d) => tplDay(d)).join(', ')}
                           </p>
                           {tmpl.created_at && (
-                            <p className="text-[0.6875rem] text-white/60 mt-0.5">
+                            <p className="text-[0.6875rem] text-white/60 whitespace-nowrap">
                               {new Date(tmpl.created_at).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                             </p>
                           )}
@@ -2197,31 +2180,23 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               })()}
               <div className="rounded-xl border border-white/[0.14] mb-3 flex items-center justify-between gap-3 px-3 py-2.5">
                 <span className="text-xs font-semibold text-white">{t.settings_presence_require_label}</span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={presenceVerificationConfig.requireVerification === true}
-                  onClick={async () => {
+                <ToggleSwitch
+                  isActive={presenceVerificationConfig.requireVerification === true}
+                  onChange={async (next) => {
                     try {
                       await savePresenceVerificationConfig({
                         ...presenceVerificationConfig,
-                        requireVerification: !presenceVerificationConfig.requireVerification,
+                        requireVerification: next,
                       });
                       showSuccess?.(t.settings_presence_saved);
                     } catch (e) {
                       showError?.(e instanceof Error ? e.message : t.settings_presence_save_error);
                     }
                   }}
-                  className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-all duration-200 ${
- presenceVerificationConfig.requireVerification ? 'bg-accent' : ''
- }`}
-                >
-                  <span
-                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${
- presenceVerificationConfig.requireVerification ? 'translate-x-5' : 'translate-x-0'
- }`}
-                  />
-                </button>
+                  size="sm"
+                  darkMode
+                  className="flex-shrink-0"
+                />
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button
@@ -2274,7 +2249,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
           >
             <div className="p-4 space-y-4">
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-mid/10 text-[#2255BB]">
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-mid/10 text-white">
                   <Mail className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -2369,7 +2344,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
             <div className="rounded-xl border border-white/[0.14] mt-0 bg-white/5 p-4">
               <div className="mb-2 flex items-center gap-2">
-                <MapPin className="h-4 w-4 flex-shrink-0 text-accent" />
+                <MapPin className="h-4 w-4 flex-shrink-0 text-white" />
                 <h3 className="text-xs font-bold uppercase tracking-wider text-white">
                   {t.settings_geofence_editor_title}
                 </h3>
@@ -2379,7 +2354,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               </p>
               {geofenceEffectiveConfig && (
                 <div className="mb-3 flex items-start gap-2 rounded-xl border border-brand-200/80 bg-brand-50/90 px-3 py-2">
-                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-600" aria-hidden />
+                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-white" aria-hidden />
                   <p className="text-[0.6875rem] leading-snug text-brand-900">
                     {formatTrans(t.settings_geofence_active_summary, {
                       lat: geofenceEffectiveConfig.lat.toFixed(6),
@@ -2389,7 +2364,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   </p>
                 </div>
               )}
-              <div className="fluid-grid fluid-grid-3 gap-2 mb-3">
+              <div className="fluid-grid fluid-grid-4 gap-2 mb-3">
                 <label className="flex flex-col gap-1 text-[0.6875rem] font-medium text-white/70">
                   {t.settings_geofence_lat}
                   <input
@@ -2423,11 +2398,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     placeholder="120"
                   />
                 </label>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  disabled={geoAcquiring || geoSaving}
+                  disabled={geoAcquiring}
                   onClick={async () => {
                     setGeoAcquiring(true);
                     try {
@@ -2450,36 +2423,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       setGeoAcquiring(false);
                     }
                   }}
-                  className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl border border-white/20 px-4 text-xs font-bold uppercase tracking-wider text-white/80 surface-ghost-interactive disabled:opacity-60"
+                  className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl border border-white/20 px-4 text-xs font-bold uppercase tracking-wider text-white/80 disabled:opacity-60"
                 >
-                  <LocateFixed className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+                  <LocateFixed className="h-4 w-4 shrink-0 text-white" aria-hidden />
                   {geoAcquiring ? t.ui_ellipsis : t.settings_geofence_acquire_gps}
-                </button>
-                <button
-                  type="button"
-                  disabled={geoSaving || geoAcquiring}
-                  onClick={async () => {
-                    const lat = Number.parseFloat(geoLat.replace(',', '.'));
-                    const lng = Number.parseFloat(geoLng.replace(',', '.'));
-                    const radiusM = Number.parseFloat(geoRadius.replace(',', '.'));
-                    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-                      showError?.(t.settings_geofence_invalid);
-                      return;
-                    }
-                    const r = Number.isFinite(radiusM) && radiusM > 0 ? radiusM : 120;
-                    setGeoSaving(true);
-                    try {
-                      await saveGeofenceConfig({ lat, lng, radiusM: r });
-                      showSuccess?.(t.settings_geofence_saved);
-                    } catch (e) {
-                      showError?.(e instanceof Error ? e.message : t.settings_geofence_save_error);
-                    } finally {
-                      setGeoSaving(false);
-                    }
-                  }}
-                  className="min-h-[2.5rem] rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60 active:bg-white/80"
-                >
-                  {geoSaving ? t.ui_ellipsis : t.settings_geofence_save}
                 </button>
               </div>
             </div>
@@ -2498,15 +2445,15 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
                 {dataToolsLocked ? (
                   /* ── Stato bloccato ── */
-                  <div className="flex flex-col items-center gap-3 rounded-xl border border-white/[0.14] bg-white/5 py-5 px-4">
-                    <Lock className="h-7 w-7 text-white/40" />
+                  <div className="flex flex-col items-center gap-2 rounded-xl border border-white/[0.14] bg-white/5 py-3 px-3">
+                    <Lock className="h-5 w-5 text-white/40" />
                     <p className="text-[0.75rem] text-center text-white/55 leading-snug">
                       Sezione protetta.<br/>Inserisci il tuo PIN per sbloccare.
                     </p>
                     <button
                       type="button"
                       onClick={() => { setDataToolsPin(''); setDataToolsPinError(''); setShowDataToolsPinPad(true); }}
-                      className="flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-[0.75rem] font-semibold text-white shadow-sm hover:bg-white/90 transition-colors"
+                      className="flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/15 px-4 py-2 text-[0.75rem] font-semibold text-white shadow-sm hover:bg-white/25 transition-colors"
                     >
                       <KeyRound className="h-3.5 w-3.5" />
                       Sblocca con PIN
@@ -3208,15 +3155,13 @@ function BreakRuleModal({
                       {minShiftThresholdOn ? t.settings_break_shift_threshold_on : t.settings_break_shift_threshold_off}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={minShiftThresholdOn}
-                    onClick={() => setMinShiftThresholdOn((v) => !v)}
-                    className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 ${minShiftThresholdOn ? 'bg-accent' : ''}`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full toggle-knob transition-all duration-200 ease-in-out ${minShiftThresholdOn ? 'translate-x-5' : 'translate-x-0'}`} />
-                  </button>
+                  <ToggleSwitch
+                    isActive={minShiftThresholdOn}
+                    onChange={() => setMinShiftThresholdOn((v) => !v)}
+                    size="sm"
+                    darkMode
+                    className="flex-shrink-0"
+                  />
                 </div>
                 {minShiftThresholdOn && (
                   <div className="flex items-center gap-3 border-t border-white/10/90 pt-1">
