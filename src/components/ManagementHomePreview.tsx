@@ -49,7 +49,7 @@ export default function ManagementHomePreview({
 
   const styleApproved: HomeManagementShiftCardProps['style'] = {
     border: 'border-l-white/30',
-    bg: 'bg-white/8',
+    bg: 'bg-white/10',
     badge: 'bg-white/10 text-white border-white/20',
     dot: 'bg-white/60',
     label: t.home_status_approved,
@@ -120,7 +120,7 @@ export default function ManagementHomePreview({
             onUiToggle={onUiToggle}
             hiddenBadge={hiddenBadge}
           >
-            <div className="flex items-center gap-3 rounded-2xl border border-neutral-500 px-4 py-3" style={{ background: 'rgba(255, 255, 255, 0.16)' }}>
+            <div className="flex items-center gap-3 rounded-2xl border border-white/[0.14] px-4 py-3" style={{ background: 'rgba(255, 255, 255, 0.16)' }}>
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10">
                 <Users className="h-4 w-4 text-white/60" />
               </div>
@@ -139,7 +139,7 @@ export default function ManagementHomePreview({
           onUiToggle={onUiToggle}
           hiddenBadge={hiddenBadge}
         >
-          <div className="rounded-2xl border border-dashed border-white/20 px-4 py-3" style={{ background: 'rgba(255, 255, 255, 0.14)' }}>
+          <div className="rounded-2xl border border-dashed border-white/[0.14] px-4 py-3" style={{ background: 'rgba(255, 255, 255, 0.14)' }}>
             <div className="flex items-start gap-3">
               <Megaphone size={15} className="mt-0.5 shrink-0 text-white/50" />
               <div className="min-w-0 flex-1">
@@ -166,8 +166,8 @@ export default function ManagementHomePreview({
                 value: 0,
                 Icon: Users,
                 iconColor: 'text-brand-mid',
-                bg: 'bg-white/8',
-                border: 'border-white/10',
+                bg: 'bg-white/10',
+                border: 'border-white/[0.14]',
                 iconWell: 'bg-brand-mid/10',
               },
               {
@@ -175,8 +175,8 @@ export default function ManagementHomePreview({
                 value: 0,
                 Icon: Clock,
                 iconColor: 'text-red-400',
-                bg: 'bg-white/8',
-                border: 'border-white/10',
+                bg: 'bg-white/10',
+                border: 'border-white/[0.14]',
                 iconWell: 'bg-red-500/15',
               },
               {
@@ -184,8 +184,8 @@ export default function ManagementHomePreview({
                 value: 0,
                 Icon: AlertCircle,
                 iconColor: 'text-orange-400',
-                bg: 'bg-white/8',
-                border: 'border-white/10',
+                bg: 'bg-white/10',
+                border: 'border-white/[0.14]',
                 iconWell: 'bg-orange-500/15',
               },
               {
@@ -193,8 +193,8 @@ export default function ManagementHomePreview({
                 value: 2,
                 Icon: UserCheck,
                 iconColor: 'text-white/70',
-                bg: 'bg-white/8',
-                border: 'border-white/10',
+                bg: 'bg-white/10',
+                border: 'border-white/[0.14]',
                 iconWell: 'bg-white/10',
               },
             ].map(({ label, value, Icon, iconColor, bg, border, iconWell }) => (
@@ -284,7 +284,7 @@ export default function ManagementHomePreview({
             onUiToggle={onUiToggle}
             hiddenBadge={hiddenBadge}
           >
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14]">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-bold text-white/90">{t.home_section_attendance}</h3>
                 <TrendingUp className="h-4 w-4 text-white/50" />
@@ -320,7 +320,7 @@ export default function ManagementHomePreview({
             onUiToggle={onUiToggle}
             hiddenBadge={hiddenBadge}
           >
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14]">
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="font-bold text-white/90">{t.home_holidays_section}</h3>
                 <Palmtree className="h-4 w-4 text-white/60" />
@@ -343,14 +343,14 @@ export default function ManagementHomePreview({
             hiddenBadge={hiddenBadge}
           >
             <div className="grid grid-cols-2 gap-3">
-              <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
+              <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14]">
                 <div className="mb-2 flex items-center justify-between">
                   <TrendingUp className="h-4 w-4 text-white/50" />
                   <span className="text-[0.6875rem] font-semibold uppercase text-white/50">{t.home_kpi_hours_week}</span>
                 </div>
                 <p className="text-2xl font-bold text-white">{formatMinutesToHoursAndMinutes(weeklyMinutesDemo)}</p>
               </div>
-              <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
+              <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14]">
                 <div className="mb-2 flex items-center justify-between">
                   <Calendar className="h-4 w-4 text-white/50" />
                   <span className="text-[0.6875rem] font-semibold uppercase text-white/50">{t.home_kpi_shifts_week}</span>

@@ -188,14 +188,15 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
       role="dialog"
       aria-modal="true"
       aria-labelledby="permission-modal-title"
-      className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-4 bg-black/40 overflow-y-auto"
     >
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 40 }}
         transition={{ duration: 0.28, ease: 'easeOut' }}
-        className="w-full max-w-sm rounded-2xl border border-white/10 bg-app-bg/95 shadow-2xl overflow-hidden"
+        className="w-full max-w-sm rounded-2xl border border-white/[0.14] overflow-hidden"
+        style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', boxShadow: '0 32px 80px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08)' }}
       >
         {/* Header */}
         <div className="px-5 pt-6 pb-4 text-center border-b border-white/10">
@@ -220,7 +221,7 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
  ? 'bg-emerald-500/20 border-emerald-500/40'
  : notifDenied
  ? 'bg-rose-500/10 border-rose-500/40'
- : 'bg-white/8 border-neutral-500 hover:bg-white/12 hover:border-white/25 cursor-pointer'
+ : 'bg-white/10 border-white/20 hover:bg-white/12 hover:border-white/20 cursor-pointer'
  }`}
           >
             <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
@@ -275,7 +276,7 @@ export default function PermissionRequestModal({ onDone, userId }: PermissionReq
  ? 'bg-emerald-500/20 border-emerald-500/40'
  : locDenied
  ? 'bg-rose-500/10 border-rose-500/40'
- : 'bg-white/8 border-neutral-500 hover:bg-white/12 hover:border-white/25 cursor-pointer'
+ : 'bg-white/10 border-white/20 hover:bg-white/12 hover:border-white/20 cursor-pointer'
  } hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
           >
             <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl

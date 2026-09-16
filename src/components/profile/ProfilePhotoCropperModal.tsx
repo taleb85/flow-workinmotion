@@ -158,7 +158,7 @@ export default function ProfilePhotoCropperModal({ imageSrc, labels, onClose, on
   return createPortal(
     <div
       className="fixed inset-0 z-[10060] flex flex-col text-white"
-      style={{ background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)', paddingTop: 'max(8px, env(safe-area-inset-top, 0px))' }}
+      style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingTop: 'max(8px, env(safe-area-inset-top, 0px))' }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="profile-crop-title"
@@ -227,7 +227,7 @@ export default function ProfilePhotoCropperModal({ imageSrc, labels, onClose, on
       <div className="flex shrink-0 items-center justify-center gap-6 border-t border-white/10 py-3">
         <button
           type="button"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white transition-colors hover:bg-white/15 touch-manipulation active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/15 touch-manipulation active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           aria-label="Zoom out"
           onClick={() => setUserScale((s) => Math.max(1, s - 0.15))}
         >
@@ -235,7 +235,7 @@ export default function ProfilePhotoCropperModal({ imageSrc, labels, onClose, on
         </button>
         <button
           type="button"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white transition-colors hover:bg-white/15 touch-manipulation active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/15 touch-manipulation active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           aria-label="Zoom in"
           onClick={() => setUserScale((s) => Math.min(4, s + 0.15))}
         >

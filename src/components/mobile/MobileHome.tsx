@@ -1,10 +1,10 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode } from 'react';
 import { Play, LogOut, RotateCcw } from 'lucide-react';
 import { useT } from '../../hooks/useT';
+import { groupShiftsByDay } from '../../utils/timeCalculations';
 import { useAppUser } from '../../context/AppContext';
 import { getDateLocale } from '../../utils/translations';
 import HeaderTodayCoworkersCard from '../HeaderTodayCoworkersCard';
-import MobileStatsCards from './MobileStatsCards';
 import { usePullToRefresh } from '../../hooks/usePullToRefresh';
 import { format, parseISO, type Locale } from 'date-fns';
 import type { Shift } from '../../types';
@@ -16,17 +16,8 @@ export interface MobileHomeProps {
   todayLabel: string;
   todayStr?: string;
   rightContent?: ReactNode;
-  statsLabels: {
-    title: string;
-    week: string;
-    month: string;
-    daysWorked: string;
-  };
-  weeklyMinutes: number;
-  monthlyMinutes: number;
-  monthDaysWorked: number;
-  weekCapMinutes: number;
   inProgress: EnrichedShift | null;
+  /** Tempo trascorso dall'entrata — mostrato solo con timbratura in corso */
   elapsedLabel: string | null;
   todayWorkShiftsCount: number;
   noShiftsHint: string;
@@ -46,17 +37,6 @@ export interface MobileHomeProps {
   locale?: Locale;
 }
 
-/** Minuti da "HH:MM" */
-function timeToMin(t?: string): number {
-  const [h, m] = (t || '00:00').slice(0, 5).split(':').map(Number);
-  return (h || 0) * 60 + (m || 0);
-}
-/** Minuti → "XhYY" (es. 8h30) */
-function fmtHours(mins: number): string {
-  const h = Math.floor(mins / 60);
-  const m = Math.round(mins % 60);
-  return `${h}h${String(m).padStart(2, '0')}`;
-}
 /** TS → "HH:MM" */
 function punchHHMM(ts?: string | null): string | null {
   if (!ts) return null;
@@ -73,11 +53,6 @@ export default function MobileHome({
   todayLabel,
   todayStr,
   rightContent,
-  statsLabels,
-  weeklyMinutes,
-  monthlyMinutes,
-  monthDaysWorked,
-  weekCapMinutes,
   inProgress,
   elapsedLabel,
   todayWorkShiftsCount,
@@ -104,25 +79,10 @@ export default function MobileHome({
   const { effectiveLanguage } = useAppUser();
   const calLocale = locale ?? getDateLocale(effectiveLanguage);
 
-  // ── Orologio live (come da design) ─────────────────────────────────
-  const [clock, setClock] = useState(() => new Date());
-  useEffect(() => {
-    const id = window.setInterval(() => setClock(new Date()), 1000);
-    return () => window.clearInterval(id);
-  }, []);
-  const clockHHMM = `${String(clock.getHours()).padStart(2, '0')}:${String(clock.getMinutes()).padStart(2, '0')}`;
-
   const today = todayStr ?? format(new Date(), 'yyyy-MM-dd');
 
-  // ── KPI ────────────────────────────────────────────────────────────
-  const todayMinutes = todayWorkShifts.reduce((sum, s) => {
-    const start = timeToMin(s.start_time);
-    const end = s.end_time ? timeToMin(s.end_time) : start;
-    return sum + Math.max(0, end - start);
-  }, 0);
-
   // ── Prossimi turni (da domani in poi) ──────────────────────────────
-  const nextShifts = myShifts
+  const upcomingShifts = myShifts
     .filter((s) =>
       s.date > today &&
       !s.notes?.startsWith('__OPEN__') &&
@@ -133,8 +93,16 @@ export default function MobileHome({
       a.date === b.date
         ? (a.start_time || '').localeCompare(b.start_time || '')
         : a.date.localeCompare(b.date)
-    )
-    .slice(0, 5);
+    );
+
+  // Massimo 5 turni, ma senza spezzare l'ultimo giorno: ogni blocco
+  // giornaliero mostra sempre tutti i turni della stessa data.
+  const nextShifts = (() => {
+    const limited = upcomingShifts.slice(0, 5);
+    const lastDate = limited[limited.length - 1]?.date;
+    if (!lastDate) return limited;
+    return [...limited, ...upcomingShifts.slice(5).filter((s) => s.date === lastDate)];
+  })();
 
   const entryTime = inProgress?.punchIn
     ? punchHHMM((inProgress.punchIn as { calculated_time?: string | null }).calculated_time ?? inProgress.punchIn.timestamp)
@@ -147,8 +115,6 @@ export default function MobileHome({
       : todayWorkShiftsCount > 0
         ? 'Nessun turno in corso'
         : 'Nessun turno oggi';
-
-  const bigClock = inProgress && elapsedLabel ? elapsedLabel : clockHHMM;
 
   const dayLabel = (dateStr: string) => {
     const d = parseISO(dateStr);
@@ -192,59 +158,53 @@ export default function MobileHome({
 
       {/* ── Card timbratura dominante ───────────────────────────────── */}
       <section className="flow-card" data-tour="punch">
-        <span className="flow-section-label">Timbratura</span>
-        <div className="punch-time text-white tabular-nums">{bigClock}</div>
-        <div className="flex items-center justify-between gap-2 mb-4">
+        <div className="flex items-center justify-between gap-2">
+          <span className="flow-section-label">Timbratura</span>
           <span className="text-sm font-medium text-white/70">{punchStatus}</span>
-          {inProgress && entryTime && (
-            <span className="flow-badge flow-badge-success">Entrata {entryTime}</span>
-          )}
         </div>
 
-        {inProgress ? (
-          canEnd && (
+        {inProgress && elapsedLabel && (
+          <div className="punch-time text-white tabular-nums">{elapsedLabel}</div>
+        )}
+
+        {inProgress && entryTime && (
+          <div className="mt-2">
+            <span className="flow-badge flow-badge-success">Entrata {entryTime}</span>
+          </div>
+        )}
+
+        <div className="mt-4">
+          {inProgress ? (
+            canEnd && (
+              <button
+                type="button"
+                disabled={punchBusy}
+                onClick={onEnd}
+                className="w-full h-12 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 transition-colors disabled:opacity-60"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="text-sm font-bold uppercase tracking-wider">
+                  {punchBusy ? savingLabel : endLabel}
+                </span>
+              </button>
+            )
+          ) : canStart ? (
             <button
               type="button"
               disabled={punchBusy}
-              onClick={onEnd}
-              className="w-full h-12 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 transition-colors disabled:opacity-60"
+              onClick={onStart}
+              className="w-full h-12 bg-brand hover:bg-blue-500 text-white rounded-full flex items-center justify-center gap-2 shadow-lg shadow-black/20 transition-colors disabled:opacity-60"
             >
-              <LogOut className="w-4 h-4" />
+              <Play className="w-4 h-4 fill-current" />
               <span className="text-sm font-bold uppercase tracking-wider">
-                {punchBusy ? savingLabel : endLabel}
+                {punchBusy ? savingLabel : startLabel}
               </span>
             </button>
-          )
-        ) : canStart ? (
-          <button
-            type="button"
-            disabled={punchBusy}
-            onClick={onStart}
-            className="w-full h-12 bg-brand hover:bg-blue-500 text-white rounded-full flex items-center justify-center gap-2 shadow-lg shadow-black/20 transition-colors disabled:opacity-60"
-          >
-            <Play className="w-4 h-4 fill-current" />
-            <span className="text-sm font-bold uppercase tracking-wider">
-              {punchBusy ? savingLabel : startLabel}
-            </span>
-          </button>
-        ) : (
-          <p className="text-center text-[0.6875rem] font-bold uppercase tracking-widest text-white/50 py-2">
-            {todayWorkShiftsCount > 0 ? tapStartHint : noShiftsHint}
-          </p>
-        )}
-      </section>
-
-      {/* ── Riga KPI ────────────────────────────────────────────────── */}
-      <section className="flow-card" aria-label="Riepilogo">
-        <div className="grid grid-cols-2 gap-2">
-          <div className="min-w-0">
-            <span className="flow-label block">Ore oggi</span>
-            <span className="flow-kpi text-white block mt-0.5">{fmtHours(todayMinutes)}</span>
-          </div>
-          <div className="min-w-0">
-            <span className="flow-label block">Turni</span>
-            <span className="flow-kpi text-white block mt-0.5">{todayWorkShiftsCount}</span>
-          </div>
+          ) : (
+            <p className="text-center text-[0.6875rem] font-bold uppercase tracking-widest text-white/50 py-2">
+              {todayWorkShiftsCount > 0 ? tapStartHint : noShiftsHint}
+            </p>
+          )}
         </div>
       </section>
 
@@ -252,23 +212,18 @@ export default function MobileHome({
       <section className="flow-card" aria-label="Turno di oggi">
         <span className="flow-section-label">Turno di oggi</span>
         {todayWorkShifts.length > 0 ? (
-          <div className="flex flex-col gap-2 mt-3">
+          <div className="flex gap-2 mt-3">
             {todayWorkShifts.map((s) => {
               const isActive = inProgress?.shift.id === s.id;
               return (
                 <div
                   key={s.id}
-                  className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 ${isActive ? '' : 'border-white/10'}`}
+                  className={`flex flex-1 min-w-0 flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-xl border px-3 py-2.5 ${isActive ? '' : 'border-white/[0.14]'}`}
                   style={isActive ? { borderColor: 'rgba(10, 132, 255, 0.6)', background: 'rgba(10, 132, 255, 0.10)' } : undefined}
                 >
                   <div className="min-w-0">
                     <span className="block text-base font-semibold text-white tabular-nums">
                       {s.start_time.slice(0, 5)} – {s.end_time?.slice(0, 5) ?? '…'}
-                    </span>
-                    <span className="mt-0.5 flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-white/50">
-                        {s.type === 'lunch' ? 'Pranzo' : 'Cena'}
-                      </span>
                     </span>
                   </div>
                   {isActive && (
@@ -285,24 +240,41 @@ export default function MobileHome({
         )}
       </section>
 
-      {/* ── Prossimi turni ──────────────────────────────────────────── */}
+      {/* ── Prossimi turni: un blocco per giorno ────────────────────── */}
       <section className="flow-card" aria-label="Prossimi turni">
         <span className="flow-section-label">Prossimi turni</span>
         {nextShifts.length === 0 ? (
           <p className="text-sm text-white/40 py-2">—</p>
         ) : (
-          <div className="flex flex-col mt-1">
-            {nextShifts.map((s) => (
-              <div key={s.id} className="flex items-center justify-between py-2.5 border-b border-white/10 last:border-b-0">
-                <div className="min-w-0">
-                  <span className="block text-sm font-semibold text-white truncate">{dayLabel(s.date)}</span>
-                  <span className="block text-xs text-white/45 mt-0.5">
-                    {s.type === 'lunch' ? 'Pranzo' : 'Cena'}
+          <div className="flex flex-col gap-2 mt-3">
+            {groupShiftsByDay(nextShifts).map((group) => (
+              <div
+                key={group.date}
+                data-shift-day={group.date}
+                className="rounded-xl border border-white/[0.14] overflow-hidden"
+              >
+                <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-white/10">
+                  <span className="flow-section-label">
+                    {dayLabel(group.date)}
                   </span>
+                  {group.shifts.length > 1 && (
+                    <span className="flow-section-label tabular-nums shrink-0">
+                      {group.shifts.length} turni
+                    </span>
+                  )}
                 </div>
-                <span className="text-base font-semibold text-white tabular-nums shrink-0 ml-3">
-                  {s.start_time.slice(0, 5)} – {s.end_time?.slice(0, 5) ?? '…'}
-                </span>
+                <div className="flex gap-2 p-2">
+                  {group.shifts.map((s) => (
+                    <div
+                      key={s.id}
+                      className="flex flex-1 min-w-0 items-center justify-center px-2 py-1.5"
+                    >
+                      <span className="block text-base font-semibold text-white tabular-nums">
+                        {s.start_time.slice(0, 5)} – {s.end_time?.slice(0, 5) ?? '…'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -311,28 +283,6 @@ export default function MobileHome({
 
       {/* ── Colleghi in turno oggi ──────────────────────────────────── */}
       <HeaderTodayCoworkersCard />
-
-      {/* ── I miei numeri ───────────────────────────────────────────── */}
-      <section>
-        <div className="flex items-center justify-between px-1 mb-2">
-          <h2 className="flow-section-label">{statsLabels.title}</h2>
-        </div>
-
-        <MobileStatsCards
-          weekWorkedMins={weeklyMinutes}
-          weekCapMins={weekCapMinutes}
-          monthWorkedMins={monthlyMinutes}
-          monthDaysWorked={monthDaysWorked}
-          hoursFormat="hhmm"
-          hideWeek
-          labels={{
-            title: statsLabels.title,
-            week: t.ts_period_week ?? 'Settimana',
-            month: t.ts_period_month ?? 'Mese',
-            daysWorked: statsLabels.daysWorked,
-          }}
-        />
-      </section>
 
     </div>
   );

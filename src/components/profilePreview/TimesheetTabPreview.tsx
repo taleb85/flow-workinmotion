@@ -33,7 +33,7 @@ export default function TimesheetTabPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-neutral-500 flex items-center gap-3 px-4 py-3 shadow-sm border border-slate-100" >
+        <div className="rounded-xl border border-white/[0.14] flex items-center gap-3 px-4 py-3 shadow-sm border border-white/[0.14]" >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
             <ClipboardList className="h-5 w-5 text-white/60" />
           </div>
@@ -41,10 +41,10 @@ export default function TimesheetTabPreview({
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-semibold text-white/90">{t.timesheet_title}</p>
               <div className="flex items-center gap-1">
-                <div className="rounded-lg border border-slate-200 p-1 text-white/50">
+                <div className="rounded-lg border border-white/[0.14] p-1 text-white/50">
                   <ChevronLeft className="h-3 w-3" />
                 </div>
-                <div className="rounded-lg border border-slate-200 p-1 text-white/50">
+                <div className="rounded-lg border border-white/[0.14] p-1 text-white/50">
                   <ChevronRight className="h-3 w-3" />
                 </div>
               </div>
@@ -67,12 +67,12 @@ export default function TimesheetTabPreview({
       >
         <div className="fluid-grid fluid-grid-4 gap-2">
           {[
-            { v: '4', l: t.home_stat_in_shift, b: 'border-slate-100' },
-            { v: '1', l: t.home_stat_delays, b: 'border-slate-100' },
-            { v: '0', l: t.home_stat_missing_out, b: 'border-slate-100' },
-            { v: '12', l: t.home_stat_approved, b: 'border-slate-100' },
+            { v: '4', l: t.home_stat_in_shift, b: 'border-white/[0.14]' },
+            { v: '1', l: t.home_stat_delays, b: 'border-white/[0.14]' },
+            { v: '0', l: t.home_stat_missing_out, b: 'border-white/[0.14]' },
+            { v: '12', l: t.home_stat_approved, b: 'border-white/[0.14]' },
           ].map((c) => (
-            <div key={c.l} className={`rounded-xl border border-neutral-500 p-3 text-center ${c.b} shadow-sm border border-slate-100`} >
+            <div key={c.l} className={`rounded-xl border border-white/[0.14] p-3 text-center ${c.b} shadow-sm border border-white/[0.14]`} >
               <p className="text-xl font-bold text-white">{c.v}</p>
               <p className="mt-0.5 text-[0.625rem] font-medium text-white/60">{c.l}</p>
             </div>
@@ -90,15 +90,15 @@ export default function TimesheetTabPreview({
         hiddenBadge={hiddenBadge}
       >
         <div className="fluid-grid fluid-grid-3 gap-2">
-          <div className="rounded-xl border border-neutral-500 p-3 shadow-sm border border-slate-100" >
+          <div className="rounded-xl border border-white/[0.14] p-3 shadow-sm border border-white/[0.14]" >
             <p className="text-[0.625rem] font-bold uppercase text-white/50">{t.stats_approved_hours}</p>
             <p className="text-xl font-bold text-white">128:30</p>
           </div>
-          <div className="rounded-xl border border-neutral-500 p-3 shadow-sm border border-slate-100" >
+          <div className="rounded-xl border border-white/[0.14] p-3 shadow-sm border border-white/[0.14]" >
             <p className="text-[0.625rem] font-bold uppercase text-white/50">{t.stats_estimated_cost}</p>
             <p className="text-xl font-bold text-white">—</p>
           </div>
-          <div className="rounded-xl border border-neutral-500 p-3 shadow-sm border border-slate-100" >
+          <div className="rounded-xl border border-white/[0.14] p-3 shadow-sm border border-white/[0.14]" >
             <p className="text-[0.625rem] font-bold uppercase text-white/50">{t.pending}</p>
             <p className="text-xl font-bold text-amber-800">3</p>
           </div>
@@ -115,11 +115,11 @@ export default function TimesheetTabPreview({
         hiddenBadge={hiddenBadge}
       >
         <div className="space-y-2">
-          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-semibold text-white/90">
+          <div className="flex items-center justify-between rounded-xl border border-white/[0.14] bg-slate-50 px-3 py-2.5 text-sm font-semibold text-white/90">
             <span>{t.mod_stats_hours}</span>
             <ChevronDown className="h-4 w-4 text-white/50" />
           </div>
-          <div className="flex items-center justify-between rounded-xl border border-neutral-500 px-3 py-2.5 text-sm font-semibold text-white/90">
+          <div className="flex items-center justify-between rounded-xl border border-white/[0.14] px-3 py-2.5 text-sm font-semibold text-white/90">
             <span>{t.sidebar_shifts}</span>
             <ChevronDown className="h-4 w-4 text-white/50" />
           </div>
@@ -150,7 +150,7 @@ export default function TimesheetTabPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-neutral-500 overflow-hidden shadow-sm border border-slate-100" >
+        <div className="rounded-xl border border-white/[0.14] overflow-hidden shadow-sm border border-white/[0.14]" >
           <div className="grid grid-cols-[minmax(4rem,1fr)_repeat(4,minmax(0,1fr))] gap-px bg-slate-100 text-[0.5625rem]">
             <div className="bg-white px-1 py-2 font-bold text-white/50">Staff</div>
             {['Lun', 'Mar', 'Mer', 'Gio'].map((d) => (
@@ -179,7 +179,7 @@ export default function TimesheetTabPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-neutral-500 flex items-center gap-3 px-4 py-3">
+        <div className="rounded-xl border border-white/[0.14] flex items-center gap-3 px-4 py-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
             <Layout className="h-5 w-5 text-white/60" />
           </div>
@@ -201,8 +201,8 @@ export default function TimesheetTabPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-accent/25 bg-accent/5 p-4">
-          <p className="text-[0.625rem] font-bold uppercase tracking-widest text-accent-dark/80">{t.timesheet_my_week}</p>
+        <div className="rounded-xl border border-white/25 bg-white/5 p-4">
+          <p className="text-[0.625rem] font-bold uppercase tracking-widest text-white/80">{t.timesheet_my_week}</p>
           <p className="mt-1 text-lg font-bold text-white">32:00</p>
           <p className="text-xs text-white/70">{t.shifts_week}</p>
         </div>

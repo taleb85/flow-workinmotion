@@ -454,14 +454,14 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
       <div className="space-y-1">
         <label htmlFor="sa-import-tenant" className="text-[0.6875rem] font-semibold text-white/55 uppercase tracking-wider">Sede di destinazione</label>
         <select id="sa-import-tenant" value={selectedTenantId} onChange={(e) => { setSelectedTenantId(e.target.value); setRows([]); setImportResult(null); }}
-          className="w-full rounded-xl border border-neutral-500 bg-white/8 px-3 py-2.5 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-amber-400/40">
+          className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-amber-400/40">
           {tenants.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
         </select>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         <button onClick={downloadTemplate}
-className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-500 bg-white/8 py-2.5 text-xs font-semibold text-white/55 hover:bg-white/10 hover:text-white/90 transition active:text-white/90 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+className="flex items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/10 py-2.5 text-xs font-semibold text-white/55 hover:bg-white/10 hover:text-white/90 transition active:text-white/90 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
           <ChevronRight className="w-3.5 h-3.5 -rotate-90" />
           Scarica template CSV
         </button>
@@ -474,7 +474,7 @@ className="flex items-center justify-center gap-1.5 rounded-xl border border-neu
           onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }} />
       </div>
 
-      <div className="rounded-xl bg-white/5 border border-neutral-500 p-3 space-y-2">
+      <div className="rounded-xl bg-white/5 border border-white/[0.14] p-3 space-y-2">
         <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">Formato A — griglia settimanale (Ore dipendenti)</p>
         <p className="text-[0.6875rem] text-white/55 leading-snug">
           Separatore <strong>;</strong>, prima riga con <code className="text-[0.6875rem]">DATA:</code> e giorni <code className="text-[0.6875rem]">MONDAY 29;;TUESDAY 30;;</code> … Poi una riga per dipendente (nome in maiuscolo) e righe successive senza nome per altri turni nella stessa settimana.
@@ -510,7 +510,7 @@ className="flex items-center justify-center gap-1.5 rounded-xl border border-neu
             <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[0.6875rem] font-bold text-emerald-700">✓ {matched.length} turni pronti</span>
             {unmatched.length > 0 && <span className="px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-[0.6875rem] font-bold text-red-600">✗ Non riconosciuti: {unmatched.join(', ')}</span>}
           </div>
-          <div className="rounded-xl border border-neutral-500 overflow-hidden">
+          <div className="rounded-xl border border-white/[0.14] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-[0.6875rem]">
                 <thead><tr className="bg-white/5 text-white/55">
@@ -533,13 +533,13 @@ className="flex items-center justify-center gap-1.5 rounded-xl border border-neu
                 </tbody>
               </table>
             </div>
-            {rows.length > 15 && <p className="text-center text-[0.6875rem] text-white/40 py-2 border-t border-white/12">… e altri {rows.length - 15} turni</p>}
+            {rows.length > 15 && <p className="text-center text-[0.6875rem] text-white/40 py-2 border-t border-white/10">… e altri {rows.length - 15} turni</p>}
           </div>
         </div>
       )}
 
       {/* Pulsante importazione sempre visibile in fondo */}
-      <div className="rounded-xl border border-amber-400/40 bg-white/8 p-4 space-y-3 shadow-sm">
+      <div className="rounded-xl border border-amber-400/40 bg-white/10 p-4 space-y-3 shadow-sm">
         <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-amber-800/80">Importazione nel database</p>
         {rows.length === 0 && (
           <p className="text-xs text-white/70">
@@ -575,8 +575,8 @@ className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500
       </div>
 
       {/* ── Storico importazioni ── */}
-      <div className="rounded-xl border border-neutral-500 bg-white/8 overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-2.5 bg-white/5 border-b border-neutral-500">
+      <div className="rounded-xl border border-white/[0.14] bg-white/10 overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-2.5 bg-white/5 border-b border-white/10">
           <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/55">Storico importazioni</p>
           <button
             onClick={() => void loadHistory(selectedTenantId)}
@@ -623,7 +623,7 @@ className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500
                     </button>
                     <button
                       onClick={() => setConfirmDelete(null)}
-                      className="rounded-lg border border-neutral-500 px-2 py-1 text-[0.6875rem] font-semibold text-white/70 hover:bg-white/5 transition active:bg-white/5/80"
+                      className="rounded-lg border border-white/20 px-2 py-1 text-[0.6875rem] font-semibold text-white/70 hover:bg-white/5 transition active:bg-white/5/80"
                     >
                       Annulla
                     </button>

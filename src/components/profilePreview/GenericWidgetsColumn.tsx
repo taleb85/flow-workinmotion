@@ -57,7 +57,7 @@ export default function GenericWidgetsColumn({
                       hiddenBadge={hiddenBadge}
                     >
                       <div
-                        className="rounded-xl border border-neutral-500 flex items-center gap-3 px-4 py-3"
+                        className="rounded-xl border border-white/[0.14] flex items-center gap-3 px-4 py-3"
                         title={w.key}
                       >
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">

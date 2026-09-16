@@ -19,7 +19,7 @@ import AdminRow from './ui/AdminRow';
 
 /** Liste permessi: niente overflow-hidden sul contenitore (evita tagli verticali su testi lunghi). */
 export const PERMISSION_SUMMARY_LIST_CLASS =
-  'space-y-0 rounded-xl border border-neutral-500 ring-1 ring-slate-100/70';
+  'space-y-0 rounded-xl border border-white/[0.14] ring-1 ring-slate-100/70';
 
 function rowLabel(sectionId: RoleTemplateSectionId, key: EnabledFeatureKey): string {
   if (sectionId === 'tabs_nav') return FEATURE_LABELS_TAB_FIRST[key];
@@ -73,7 +73,7 @@ export default function RoleFeatureSectionsBlock(props: Props) {
           if (props.mode !== 'toggles') return;
           props.onToggle(key);
         }}
-        className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${
+        className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/35 focus:ring-offset-2 ${
  lockedOn || rowDisabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
  } ${enabled ? 'bg-accent' : ''}`}
       >
@@ -103,7 +103,7 @@ export default function RoleFeatureSectionsBlock(props: Props) {
         description={lockedOn ? homeHint : undefined}
         badge={
           lockedOn ? (
-            <span className="rounded-lg px-1.5 py-0.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60" style={{ background: 'rgba(255,255,255,0.13)', border: '1px solid rgba(255,255,255,0.22)' }}>
+            <span className="rounded-lg px-1.5 py-0.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60" style={{ background: 'rgba(255,255,255,0.13)', border: '1px solid rgba(255,255,255,0.20)' }}>
               {tv.role_template_always_on ?? 'Sempre'}
             </span>
           ) : undefined
@@ -125,7 +125,7 @@ export default function RoleFeatureSectionsBlock(props: Props) {
             const panelId = `role-tab-sheet-panel-${group.id}`;
             const label = tv[group.titleKey] ?? group.id;
             return (
-              <div key={group.id} className="border-b last:border-b-0" style={{ borderColor: 'rgba(255,255,255,0.12)' }}>
+              <div key={group.id} className="border-b last:border-b-0" style={{ borderColor: 'rgba(255,255,255,0.10)' }}>
                 <button
                   type="button"
                   id={`role-tab-sheet-trigger-${group.id}`}
@@ -133,7 +133,7 @@ export default function RoleFeatureSectionsBlock(props: Props) {
                   aria-controls={panelId}
                   aria-label={`${tv.role_template_tab_expand_aria ?? ''} — ${label}`}
                   onClick={() => toggleTabGroup(group.id)}
-                  className="flex min-h-[3.5rem] w-full items-center gap-2 px-5 py-3 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 focus-visible:ring-inset"
+                  className="flex min-h-[3.5rem] w-full items-center gap-2 px-5 py-3 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-inset"
                   onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.07)'; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = ''; }}
                 >
@@ -150,7 +150,7 @@ export default function RoleFeatureSectionsBlock(props: Props) {
                     id={panelId}
                     role="region"
                     aria-labelledby={`role-tab-sheet-trigger-${group.id}`}
-                    style={{ borderTop: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.05)' }}
+                    style={{ borderTop: '1px solid rgba(255,255,255,0.10)', background: 'rgba(255,255,255,0.05)' }}
                   >
                     {group.keys.map((key) => renderFeatureRow(key))}
                   </div>

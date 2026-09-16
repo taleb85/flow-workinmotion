@@ -31,7 +31,7 @@ export default function StatisticsTabPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-neutral-500 flex items-center gap-3 px-4 py-3">
+        <div className="rounded-xl border border-white/[0.14] flex items-center gap-3 px-4 py-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
             <BarChart3 className="h-5 w-5 text-white/60" />
           </div>
@@ -53,7 +53,7 @@ export default function StatisticsTabPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-neutral-500 flex items-center gap-3 px-4 py-3">
+        <div className="rounded-xl border border-white/[0.14] flex items-center gap-3 px-4 py-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
             <Filter className="h-5 w-5 text-white/60" />
           </div>
@@ -63,7 +63,7 @@ export default function StatisticsTabPreview({
               <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-[0.625rem] font-semibold text-white/80">
                 {t.stats_preset_current_month}
               </span>
-              <span className="rounded-lg border border-slate-200 px-2 py-0.5 text-[0.625rem] font-semibold text-white/60">
+              <span className="rounded-lg border border-white/20 px-2 py-0.5 text-[0.625rem] font-semibold text-white/60">
                 PDF Export
               </span>
             </div>
@@ -80,7 +80,7 @@ export default function StatisticsTabPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-neutral-500 overflow-hidden text-xs">
+        <div className="rounded-xl border border-white/[0.14] overflow-hidden text-xs">
           <div className="grid grid-cols-3 gap-px bg-slate-200 font-bold text-white/70">
             <div className="bg-slate-50 px-2 py-2">{t.stats_preset_period}</div>
             <div className="bg-slate-50 px-2 py-2 text-center">Ore</div>
@@ -101,7 +101,7 @@ export default function StatisticsTabPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-neutral-500 p-4">
+        <div className="rounded-xl border border-white/[0.14] p-4">
           <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50">{t.mod_stats_hours}</p>
           <p className="mt-1 text-2xl font-bold text-white">24:00</p>
           <p className="text-xs text-white/60">{t.stats_preset_current_week}</p>

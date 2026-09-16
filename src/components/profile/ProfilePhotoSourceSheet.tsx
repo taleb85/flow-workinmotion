@@ -40,7 +40,7 @@ export default function ProfilePhotoSourceSheet({
       id={menuId}
       role="menu"
       aria-label={labels.sheetAria}
-      className="absolute right-0 top-[calc(100%+4px)] z-[80] min-w-[10.25rem] max-w-[min(14rem,calc(100vw-1.5rem))] overflow-hidden rounded-lg border border-slate-200/90 bg-white/95 py-0.5 shadow-lg backdrop-blur-xl"
+      className="absolute right-0 top-[calc(100%+4px)] z-[80] min-w-[10.25rem] max-w-[min(14rem,calc(100vw-1.5rem))] overflow-hidden rounded-lg border border-white/[0.14] bg-white/95 py-0.5 shadow-lg backdrop-blur-xl"
     >
       <li role="none">
         <button
@@ -85,7 +85,7 @@ export default function ProfilePhotoSourceSheet({
         </button>
       </li>
       {onRemovePhoto && (
-        <li role="none" className="border-t border-slate-100 mt-0.5 pt-0.5">
+        <li role="none" className="border-t border-white/10 mt-0.5 pt-0.5">
           <button
             type="button"
             role="menuitem"

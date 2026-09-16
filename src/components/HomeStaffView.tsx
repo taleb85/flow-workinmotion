@@ -20,9 +20,6 @@ interface HomeStaffViewProps {
   myApprovedHolidays: HolidayRequest[];
   upcomingShifts: Shift[];
   todayShiftsMine: Shift[];
-  weeklyMinutes: number;
-  monthlyMinutes: number;
-  monthDaysWorked: number;
   getDateLabel: (dateStr: string) => string;
   getPunchForShift: (shiftId: string, userId: string, dateStr: string, isLunchShift: boolean) => { punchIn?: any; punchOut?: any };
   staffRequestsEnabled: boolean;
@@ -59,9 +56,6 @@ export default memo(function HomeStaffView({
   myApprovedHolidays,
   upcomingShifts,
   todayShiftsMine,
-  weeklyMinutes,
-  monthlyMinutes,
-  monthDaysWorked,
   getDateLabel,
   getPunchForShift,
   staffRequestsEnabled,
@@ -98,10 +92,6 @@ export default memo(function HomeStaffView({
           now={now}
           myShifts={myShifts}
           punchRecords={punchRecords}
-          weeklyMinutes={weeklyMinutes}
-          monthlyMinutes={monthlyMinutes}
-          monthDaysWorked={monthDaysWorked}
-          weekCapMinutes={40 * 60}
           onTabChange={onTabChange}
           greetingText={t.home_greeting.replace('{name}', currentUser.first_name ?? '')}
           activeTab={activeTab ?? 'home'}
@@ -176,7 +166,7 @@ export default memo(function HomeStaffView({
         {uiW('home_compact.next_shift') && upcomingShifts.filter((s) => s.date !== todayStr)[0] && (() => {
           const next = upcomingShifts.filter((s) => s.date !== todayStr)[0];
           return (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14]">
               <p className="text-[0.6875rem] font-bold text-white/55 uppercase tracking-wider mb-2">{t.home_next_shift}</p>
               <p className="text-lg font-bold text-white mb-1">{getDateLabel(next.date)}</p>
               <div className="flex items-center gap-2">
@@ -189,7 +179,7 @@ export default memo(function HomeStaffView({
 
         {/* Lista turni */}
         {uiW('home_compact.shift_list') && (
-        <div ref={shiftsListRef} className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
+        <div ref={shiftsListRef} className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xs font-bold text-white/55 uppercase tracking-wider">{t.home_my_shifts}</h3>
 <button type="button" onClick={() => onNavigateToShifts?.()} className="text-xs font-semibold text-white/70 flex items-center gap-1 hover:underline active:brightness-95 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
@@ -210,7 +200,7 @@ export default memo(function HomeStaffView({
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {grouped[dateStr].sort((a, b) => a.start_time.localeCompare(b.start_time)).map((s) => (
-                      <span key={s.id} className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${s.approval_status === 'draft' ? 'bg-blue-500/20 text-blue-200 border-blue-400/40' : 'bg-white/15 text-white border-white/30'}`}>
+                      <span key={s.id} className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${s.approval_status === 'draft' ? 'bg-blue-500/20 text-blue-200 border-blue-400/40' : 'bg-white/15 text-white border-white/20'}`}>
                         {s.start_time.slice(0, 5)}–{s.end_time?.slice(0, 5) ?? '…'}
                       </span>
                     ))}
@@ -224,7 +214,7 @@ export default memo(function HomeStaffView({
 
         {/* Ferie approvate */}
         {uiW('home_compact.approved_holidays') && staffRequestsEnabled && myApprovedHolidays.length > 0 && (
-          <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
+          <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14]">
             <h3 className="text-xs font-bold text-white/55 uppercase tracking-wider mb-3 flex items-center gap-2">
               <Palmtree className="w-4 h-4 text-white/60" /> {t.home_upcoming_holidays}
             </h3>

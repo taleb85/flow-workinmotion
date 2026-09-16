@@ -26,7 +26,7 @@ function getLocale(lang = 'it') {
 
 function getDarkCard() {
   return {
-    cls: 'rounded-2xl border border-neutral-500 overflow-hidden',
+    cls: 'rounded-2xl border border-white/[0.14] overflow-hidden',
     style: { background: 'transparent' } as React.CSSProperties,
   };
 }
@@ -62,7 +62,7 @@ export default function MobileTimesheet({
   if (history.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border border-white/[0.08]">
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border border-white/[0.14]">
           <Clock className="w-7 h-7 text-white/50" />
         </div>
         <p className="text-white/50 font-bold uppercase tracking-widest text-[0.6875rem]">
@@ -159,7 +159,7 @@ export default function MobileTimesheet({
                           className={`rounded-xl px-3 py-2.5 border ${
  isAbsent
  ? 'border-red-500/10'
- : 'bg-white/8 border-neutral-500'
+ : 'bg-white/10 border-white/20'
  }`}
                           style={
                             typeof document !== 'undefined' && document.documentElement.classList.contains('dark')

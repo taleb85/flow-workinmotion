@@ -595,7 +595,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
 
             {/* Invite onboarding — nuovo dipendente */}
             {isInviteLink && !inviteOnboardDone && (
-              <div className="rounded-xl px-4 py-4 text-xs space-y-3" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)' }}>
+              <div className="rounded-xl px-4 py-4 text-xs space-y-3" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.14)' }}>
                 <p className="text-sm font-bold text-white">
                   Benvenuto{linkedUser ? ` ${linkedUser.first_name}` : ''}! 👋
                 </p>
@@ -613,8 +613,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder="Email"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm focus:outline-none ring-2 ring-accent/60 transition-all"
-                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', WebkitAppearance: 'none', appearance: 'none', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
+                    className="w-full !pl-10 !pr-4 py-3 rounded-xl text-white text-sm focus:outline-none ring-2 ring-white/60 transition-all"
+                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.20)', WebkitAppearance: 'none', appearance: 'none', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
                   />
                 </div>
 
@@ -628,8 +628,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value.replace(/\D/g, ''))}
                     placeholder="PIN (4 cifre)"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm font-bold tracking-[0.3em] focus:outline-none ring-2 ring-accent/60 transition-all"
-                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', WebkitAppearance: 'none', appearance: 'none', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
+                    className="w-full !pl-10 !pr-4 py-3 rounded-xl text-white text-sm font-bold tracking-[0.3em] focus:outline-none ring-2 ring-white/60 transition-all"
+                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.20)', WebkitAppearance: 'none', appearance: 'none', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
                   />
                 </div>
 
@@ -642,8 +642,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                     value={invitePhone}
                     onChange={(e) => setInvitePhone(e.target.value)}
                     placeholder="Numero di telefono"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm focus:outline-none ring-2 ring-accent/60 transition-all"
-                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', WebkitAppearance: 'none', appearance: 'none', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
+                    className="w-full !pl-10 !pr-4 py-3 rounded-xl text-white text-sm focus:outline-none ring-2 ring-white/60 transition-all"
+                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.20)', WebkitAppearance: 'none', appearance: 'none', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
                   />
                 </div>
 
@@ -657,7 +657,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                   onClick={handleInviteOnboard}
                   disabled={!password.trim() || inviteOnboardLoading}
                   className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40"
-                  style={{ background: '#FF9500', border: '1px solid rgba(255,255,255,0.15)' }}
+                  style={{ background: '#FF9500', border: '1px solid rgba(255,255,255,0.20)' }}
                 >
                   {inviteOnboardLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Salva e inizia
@@ -670,7 +670,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               <>
             {/* Invite banner (solo informativo, onboarding già fatto) */}
             {isInviteLink && (
-              <div className="rounded-xl px-3 py-2.5 text-xs text-white/80 space-y-1" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)' }}>
+              <div className="rounded-xl px-3 py-2.5 text-xs text-white/80 space-y-1" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.14)' }}>
                 <p className="font-semibold text-white">✅ Dati salvati. Accedi con nome e PIN.</p>
               </div>
             )}
@@ -696,8 +696,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                 placeholder={t.login_name_ph ?? 'Nome utente'}
                 aria-label={t.login_name_label}
                 autoComplete="name"
-                className="w-full pl-10 pr-4 py-3.5 rounded-2xl text-white text-base uppercase placeholder:normal-case placeholder:text-white/35 placeholder:text-base focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors"
-                style={{ WebkitAppearance: 'none', appearance: 'none', backgroundColor: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
+                className="w-full !pl-10 !pr-4 py-3.5 rounded-2xl text-white text-base uppercase placeholder:normal-case placeholder:text-white/35 placeholder:text-base focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors"
+                style={{ WebkitAppearance: 'none', appearance: 'none', backgroundColor: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.20)', WebkitBoxShadow: '0 0 0 30px rgba(255,255,255,0.09) inset', WebkitTextFillColor: '#fff' }}
               />
             </div>
 
@@ -731,7 +731,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               {/* Contenitore visivo */}
               <div
                 className={`w-full pl-10 pr-10 py-3.5 rounded-2xl flex items-center justify-center gap-5 transition-all cursor-text ${pinFocused ? 'ring-2 ring-white/50' : ''}`}
-                style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)' }}
+                style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.14)' }}
                 onClick={() => pinInputRef.current?.focus()}
               >
                 {showPassword ? (
@@ -785,7 +785,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                       exit={{ opacity: 0 }}
                       transition={{ delay: 0.08 }}
                       className="mt-1.5 text-xs text-white/70 leading-snug text-center rounded-xl px-3 py-2.5"
-                      style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)' }}
+                      style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.14)' }}
                     >
                       {t.login_forgot_pin_hint}
                     </motion.p>
@@ -824,7 +824,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               onClick={handleLogin}
               disabled={!staffName.trim() || !password.trim() || isLoading || deviceLoading}
               className="w-full py-3.5 rounded-2xl text-white font-semibold text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
-              style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)' }}
+              style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.20)' }}
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -850,7 +850,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                   onClick={handleDeviceLogin}
                   disabled={deviceLoading || isLoading}
                   className="w-full py-3.5 rounded-2xl text-white/75 font-medium text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)' }}
+                  style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.20)' }}
                 >
                   {deviceLoading ? (
                     <Loader2 className="w-4.5 h-4.5 animate-spin" />

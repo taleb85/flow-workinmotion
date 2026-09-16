@@ -27,7 +27,7 @@ export default function StaffShiftsPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-neutral-500 p-4 shadow-sm border border-slate-100" >
+        <div className="rounded-xl border border-white/[0.14] p-4 shadow-sm border border-white/[0.14]" >
           <p className="text-[0.625rem] font-bold uppercase tracking-widest text-white/50">{t.approved_hours_summary}</p>
           <p className="mt-1 text-2xl font-bold text-white">24:00</p>
           <p className="mt-1 text-xs text-white/60">{t.hours_this_month}</p>
@@ -41,7 +41,7 @@ export default function StaffShiftsPreview({
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-neutral-500 overflow-hidden shadow-sm border border-slate-100" >
+        <div className="rounded-xl border border-white/[0.14] overflow-hidden shadow-sm border border-white/[0.14]" >
           <div className="flex items-center gap-2 border-b border-slate-50 px-3 py-2.5">
             <Calendar className="h-4 w-4 text-white/50" />
             <span className="text-xs font-bold text-white/80">{t.sidebar_shifts}</span>

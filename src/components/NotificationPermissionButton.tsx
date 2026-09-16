@@ -26,7 +26,7 @@ export function NotificationPermissionButton({
   // Browser che non supporta push (es. Safari < 16, Firefox su iOS)
   if (!isPushNotificationSupported) {
     return (
-      <div className="flex items-start gap-2 px-3 py-2.5 text-xs font-medium text-white/60 bg-slate-50 rounded-lg border border-slate-100">
+      <div className="flex items-start gap-2 px-3 py-2.5 text-xs font-medium text-white/60 bg-slate-50 rounded-lg border border-white/[0.14]">
         <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
         <span>{t.notif_push_not_supported}</span>
       </div>
@@ -89,8 +89,8 @@ export function NotificationPermissionButton({
         className={`flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-semibold rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
  isSubscribed
  ? 'bg-brand-50 text-brand-700 border-brand-200'
- : 'bg-slate-100 text-white/80 border-slate-200 hover:bg-slate-200'
- } active:bg-slate-200'/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
+ : 'bg-slate-100 text-white/80 border-white/20 hover:bg-slate-200'
+ } active:bg-slate-200 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />

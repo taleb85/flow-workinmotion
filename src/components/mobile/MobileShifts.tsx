@@ -49,7 +49,7 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
   if (shifts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border border-white/[0.09]">
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border border-white/[0.14]">
           <Calendar className="w-7 h-7 text-white/25" />
         </div>
         <p className="text-white/25 font-bold uppercase tracking-widest text-[0.6875rem]">
@@ -88,7 +88,7 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
         return (
           <div key={wIdx} className="mb-4">
             {/* Card griglia settimanale — trasparente, solo bordo */}
-            <div className="rounded-2xl border border-neutral-500 overflow-hidden" style={{ background: 'transparent' }}>
+            <div className="rounded-2xl border border-white/[0.14] overflow-hidden" style={{ background: 'transparent' }}>
               {/* Griglia giorni */}
               <div className="grid grid-cols-7 gap-1 px-2 pt-3 pb-2">
                 {weekDays.map((day, i) => {
@@ -105,7 +105,7 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
                     ? 'bg-white/[0.12] border border-white/20'
                     : isAbsent
                       ? 'bg-red-500/[0.08] border border-red-500/[0.18]'
-                      : 'border border-neutral-500 bg-white/5';
+                      : 'border border-white/20 bg-white/5';
 
                   return (
                     <div key={i} className="flex flex-col items-center gap-1">
@@ -163,7 +163,7 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
                       const badgeCls = isAbsent
                         ? 'text-red-400 border-red-500/30 bg-red-500/15'
                         : isDraft
-                          ? 'text-white/50 border-neutral-500 bg-white/8'
+                          ? 'text-white/50 border-white/20 bg-white/10'
                           : 'text-white/70 border-white/20 bg-white/10';
                       const badgeLabel = isAbsent
                         ? (t.status_absent ?? 'Assente')
@@ -176,7 +176,7 @@ export default function MobileShifts({ shifts, language }: MobileShiftsProps) {
                           className={`flex items-center justify-between rounded-xl px-3 py-2.5 mb-1 border ${
  isAbsent
  ? 'border-red-500/30 bg-red-500/10'
- : 'border-neutral-500'
+ : 'border-white/20'
  }`}
                           style={isAbsent ? {} : { background: 'transparent' }}
                         >

@@ -73,7 +73,7 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
   if (shifts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border border-slate-200">
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border border-white/[0.14]">
           <Calendar className="w-7 h-7 text-white/40" />
         </div>
         <p className="text-white/70 font-bold uppercase tracking-widest text-[0.6875rem]">
@@ -143,7 +143,7 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
                     className={`flex flex-col min-h-[100px] ${today ? 'bg-white/15' : ''}`}
                   >
                     {/* Day header */}
-                    <div className={`px-2 py-2 text-center ${today ? 'bg-accent/20' : ''}`}>
+                    <div className={`px-2 py-2 text-center ${today ? 'bg-white/20' : ''}`}>
                       <p className={`text-[0.6875rem] font-bold uppercase tracking-wider ${today ? 'text-accent' : 'text-white/60'}`}>
                         {format(day, 'EEE', { locale })}
                       </p>
@@ -348,38 +348,6 @@ export default function StaffPersonalDashboard({
     return getUnifiedNavTabs(displayUser, false, featureFlags);
   }, [displayUser, featureFlags, roleTemplatesRevision]);
 
-  const staffHomeWeeklyMonthly = useMemo(() => {
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const weekEnd = addDays(weekStart, 7);
-    const mStart = startOfMonth(now);
-    const mEnd = endOfMonth(now);
-    const weekOk = (s: Shift) =>
-      s.approval_status === 'confirmed' || s.approval_status === 'absent';
-    const thisWeekShifts = visibleShifts.filter((s) => {
-      const d = parseISO(s.date);
-      return d >= weekStart && d < weekEnd && weekOk(s);
-    });
-    let weeklyMinutes = 0;
-    for (const s of thisWeekShifts) {
-      if (s.approval_status === 'absent') continue;
-      const { start, end } = getResolvedStartEndForHours(s, punchRecords);
-      weeklyMinutes += getNetShiftMinutes(s, start, end, displayUser, breakRules, breakComputeOpts);
-    }
-    const monthShifts = visibleShifts.filter((s) => {
-      const d = parseISO(s.date);
-      return d >= mStart && d <= mEnd && weekOk(s);
-    });
-    let monthlyMinutes = 0;
-    for (const s of monthShifts) {
-      if (s.approval_status === 'absent') continue;
-      const { start, end } = getResolvedStartEndForHours(s, punchRecords);
-      monthlyMinutes += getNetShiftMinutes(s, start, end, displayUser, breakRules, breakComputeOpts);
-    }
-    const monthDaysWorked = new Set(monthShifts.filter((s) => s.approval_status !== 'absent').map((s) => s.date)).size;
-    const monthShiftCount = monthShifts.filter((s) => s.approval_status !== 'absent').length;
-    return { weeklyMinutes, monthlyMinutes, monthDaysWorked, monthShiftCount };
-  }, [now, visibleShifts, punchRecords, displayUser, breakRules, breakComputeOpts]);
-
   const renderHome = () => {
     const grouped: Record<string, typeof upcomingShifts> = {};
     upcomingShifts.slice(0, 10).forEach(s => {
@@ -399,10 +367,6 @@ export default function StaffPersonalDashboard({
           now={now}
           myShifts={shifts}
           punchRecords={punchRecords}
-          weeklyMinutes={staffHomeWeeklyMonthly.weeklyMinutes}
-          monthlyMinutes={staffHomeWeeklyMonthly.monthlyMinutes}
-          monthDaysWorked={staffHomeWeeklyMonthly.monthDaysWorked}
-          weekCapMinutes={40 * 60}
           onTabChange={onTabChange}
           greetingText={t.home_greeting.replace('{name}', displayUser.first_name ?? '')}
           activeTab={activeTab}
@@ -578,18 +542,18 @@ export default function StaffPersonalDashboard({
     <div className="flex items-center gap-2 mb-4 px-4">
       {/* Etichetta "Oggi" a sinistra — cliccabile per tornare al periodo corrente */}
       <button type="button" onClick={() => onOffsetChange(() => 0)}
-        className="h-9 inline-flex items-center px-3 rounded-2xl bg-accent text-white text-[0.6875rem] font-extrabold uppercase tracking-wider shrink-0 shadow-sm active:bg-accent/80 transition-colors">
+        className="h-9 inline-flex items-center px-3 rounded-2xl bg-accent text-white text-[0.6875rem] font-extrabold uppercase tracking-wider shrink-0 shadow-sm active:bg-white/80 transition-colors">
         {t.today}
       </button>
 
       {/* Frecce + chip data a destra */}
-      <div className="flex items-center border border-slate-100 rounded-2xl overflow-hidden flex-1" style={{ background: 'transparent', boxShadow: 'none' }}>
+      <div className="flex items-center border border-white/20 rounded-2xl overflow-hidden flex-1" style={{ background: 'transparent', boxShadow: 'none' }}>
         <button
           type="button"
           onClick={() => onOffsetChange(o => o - 1)}
           disabled={disablePrev}
           aria-label={(t as Record<string, string>).nav_prev_period ?? 'Periodo precedente'}
-          className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-r border-slate-100 active:bg-slate-50/80 disabled:opacity-30 disabled:pointer-events-none"
+          className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-r border-white/10 active:bg-slate-50/80 disabled:opacity-30 disabled:pointer-events-none"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -609,7 +573,7 @@ export default function StaffPersonalDashboard({
           onClick={() => onOffsetChange(o => o + 1)}
           disabled={disableNext}
           aria-label={(t as Record<string, string>).nav_next_period ?? 'Periodo successivo'}
-          className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-l border-slate-100 active:bg-slate-50/80 disabled:opacity-30 disabled:pointer-events-none"
+          className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-l border-white/10 active:bg-slate-50/80 disabled:opacity-30 disabled:pointer-events-none"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -638,8 +602,8 @@ export default function StaffPersonalDashboard({
   const renderProfile = () => (
     <div className="space-y-4">
       {uiW('staff_profile.panel') && (
-      <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500">
-        <div className="px-5 py-4 border-b border-slate-100">
+      <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14]">
+        <div className="px-5 py-4 border-b border-white/10">
           <h3 className="ui-section-title text-white/70">{(t as { profile_settings?: string }).profile_settings ?? 'Impostazioni profilo'}</h3>
         </div>
         <div>
@@ -670,7 +634,7 @@ export default function StaffPersonalDashboard({
             }
           />
           {showProfileDemoSeed && (
-            <div className="border-t border-slate-100 px-5 py-4 space-y-2">
+            <div className="border-t border-white/10 px-5 py-4 space-y-2">
               <button
                 type="button"
                 disabled={seedingDemoProfile}
@@ -697,7 +661,7 @@ export default function StaffPersonalDashboard({
           <button
             type="button"
             onClick={onLogout}
-            className="w-full flex items-center justify-between border-t border-slate-100 px-5 py-4 text-left hover:bg-red-50 transition-colors min-h-[52px] text-red-600 font-medium active:bg-red-50/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+            className="w-full flex items-center justify-between border-t border-white/10 px-5 py-4 text-left hover:bg-red-50 transition-colors min-h-[52px] text-red-600 font-medium active:bg-red-50/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             <span className="text-sm">{(t as { header_logout?: string }).header_logout ?? 'Esci'}</span>
             <LogOut className="w-5 h-5" strokeWidth={2} />
@@ -730,7 +694,7 @@ export default function StaffPersonalDashboard({
   if (isPurelyManagementRole(displayUser.role)) {
     return (
       <div className="min-h-screen text-white/90 font-sans antialiased flex flex-col items-center justify-center px-6 safe-area-pad" style={{ background: 'transparent' }}>
-        <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 max-w-sm p-8 text-center">
+        <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] max-w-sm p-8 text-center">
           <Shield className="w-14 h-14 text-white/60 mx-auto mb-4" strokeWidth={1.5} />
           <h2 className="text-lg font-bold text-white/90 mb-2">Profilo Gestionale</h2>
           <p className="text-white/60 text-sm">Nessun turno assegnato</p>
@@ -763,7 +727,7 @@ export default function StaffPersonalDashboard({
           <button
             type="button"
             onClick={() => setHolidaysFocus(false)}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent min-h-[2.75rem] px-2 -ml-2 rounded-xl hover:bg-accent/10 touch-target active:bg-accent/80"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent min-h-[2.75rem] px-2 -ml-2 rounded-xl hover:bg-white/10 touch-target active:bg-white/80"
           >
             <ChevronLeft className="w-5 h-5" aria-hidden />
             {(t as { back?: string }).back ?? 'Indietro'}

@@ -77,7 +77,7 @@ export function HomeManagementShiftCard({ e, style, isManager, onClose, onApprov
       className={`rounded-xl border-l-4 ${style.border}`}
       style={{
         background: 'transparent',
-        border: '1px solid rgba(255, 255, 255, 0.10)',
+        border: '1px solid rgba(255, 255, 255, 0.14)',
         borderLeft: '4px solid',
         borderLeftColor: statusBorderColor(style.border),
         borderRadius: '0.625rem',
@@ -155,7 +155,7 @@ export function HomeManagementShiftCard({ e, style, isManager, onClose, onApprov
               type="button"
               onClick={onApprove}
               disabled={approvingId === e.shift.id}
-              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-accent/80 hover:bg-accent text-white text-[0.6875rem] font-bold transition-colors disabled:opacity-50 active:bg-accent/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-white/80 hover:bg-accent text-white text-[0.6875rem] font-bold transition-colors disabled:opacity-50 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               <Check className="w-3 h-3" />
               {approvingId === e.shift.id ? '...' : t.home_btn_approve}

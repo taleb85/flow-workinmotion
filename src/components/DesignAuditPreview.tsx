@@ -110,7 +110,7 @@ export default function DesignAuditPreview() {
       </div>
 
       {/* Summary */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-2">
+      <div className="rounded-2xl border border-white/[0.14] bg-white/5 p-4 space-y-2">
         <h3 className="text-sm font-bold text-white/80">Riepilogo</h3>
         <p className="text-xs text-white/50">
           <span className="text-emerald-400 font-bold">{selectedLogos.size}</span> loghi mantenuti / <span className="text-rose-400 font-bold">{removedLogos.length}</span> da rimuovere

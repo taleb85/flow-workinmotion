@@ -180,7 +180,7 @@ export default memo(function HomeManagerView({
 
           {/* ── Profilo amministratore (solo Admin) ───────────────────── */}
           {uiW('home_mgmt.admin_banner') && isPurelyManagementRole(currentUser.role) && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 flex items-center gap-3">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-slate-200 flex items-center justify-center flex-shrink-0">
                 <Users className="w-4 h-4 text-white/55" />
               </div>
@@ -221,7 +221,7 @@ export default memo(function HomeManagerView({
                 value: inTurnoCount,
                 Icon: Users,
                 iconColor: 'text-white/70',
-                border: 'border-neutral-500',
+                border: 'border-white/[0.14]',
                 iconWell: 'bg-white/10',
               },
               {
@@ -245,7 +245,7 @@ export default memo(function HomeManagerView({
                 value: approvatiCount,
                 Icon: UserCheck,
                 iconColor: 'text-white/70',
-                border: 'border-neutral-500',
+                border: 'border-white/[0.14]',
                 iconWell: 'bg-white/10',
               },
             ].map(({ label, value, Icon, iconColor, border, iconWell }) => (
@@ -289,16 +289,16 @@ export default memo(function HomeManagerView({
                         <p className="font-bold text-white text-sm">{e.user?.first_name ?? '—'}</p>
                         <p className="text-[0.6875rem] text-white/55">{e.user?.department ?? e.user?.role ?? ''}</p>
                       </div>
-                      <span className="ml-auto flex items-center gap-1 rounded-full border border-accent/50 bg-accent/15 px-2 py-0.5 text-[0.6875rem] font-bold text-white">
+                      <span className="ml-auto flex items-center gap-1 rounded-full border border-white/50 bg-white/15 px-2 py-0.5 text-[0.6875rem] font-bold text-white">
                         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-500" /> {t.home_badge_in_shift}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                      <div className="bg-transparent rounded-xl px-2.5 py-2 text-center border border-white/10">
+                      <div className="bg-transparent rounded-xl px-2.5 py-2 text-center border border-white/[0.14]">
                         <p className="text-[0.6875rem] text-white/45 uppercase font-semibold mb-0.5">{t.home_label_planned}</p>
                         <p className="text-sm font-bold text-white tabular-nums">{e.scheduledStart}–{e.scheduledEnd}</p>
                       </div>
-                      <div className="bg-transparent rounded-xl px-2.5 py-2 text-center border border-white/10">
+                      <div className="bg-transparent rounded-xl px-2.5 py-2 text-center border border-white/[0.14]">
                         <p className="text-[0.6875rem] text-white/45 uppercase font-semibold mb-0.5">{t.home_label_entry}</p>
                         <p className="text-sm font-bold text-white tabular-nums">{e.actualStart ?? '—'}</p>
                       </div>
@@ -306,7 +306,7 @@ export default memo(function HomeManagerView({
                     <button
                       type="button"
                       onClick={() => onCloseShift(e)}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-bold transition-colors shadow-sm active:bg-accent-hover/80"
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-bold transition-colors shadow-sm active:bg-white/80"
                     >
                       <LogOutIcon className="w-4 h-4" /> {t.home_btn_close_shift}
                     </button>
@@ -347,7 +347,7 @@ export default memo(function HomeManagerView({
                 <Calendar className="w-4 h-4 text-white/55" />
                 <h2 className="text-sm font-bold text-white">{t.home_todays_shifts}</h2>
                 <span className="text-[0.6875rem] text-slate-200 ml-1">({todayShiftsEnriched.length})</span>
-<button type="button" onClick={() => onNavigateToShifts?.()} className="ml-auto text-xs font-semibold text-accent flex items-center gap-0.5 hover:underline active:brightness-95 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+<button type="button" onClick={() => onNavigateToShifts?.()} className="ml-auto text-xs font-semibold text-white flex items-center gap-0.5 hover:underline active:brightness-95 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                   {t.home_see_all_shifts} <ArrowRight className="w-3 h-3" />
                 </button>
               </div>
@@ -371,7 +371,7 @@ export default memo(function HomeManagerView({
           <div className="fluid-grid fluid-grid-2 gap-4">
             {/* Reports */}
             {uiW('home_mgmt.card_presenze') && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 cursor-pointer" onClick={() => onNavigateToReports?.()}>
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] cursor-pointer" onClick={() => onNavigateToReports?.()}>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-bold text-white">{t.home_section_attendance}</h2>
                 <TrendingUp className="w-4 h-4 text-white/45" />
@@ -398,7 +398,7 @@ export default memo(function HomeManagerView({
 
             {/* Holidays — nascosto se funzione disattivata globalmente */}
             {uiW('home_mgmt.card_ferie') && staffRequestsEnabled && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 cursor-pointer" onClick={() => onNavigateToHolidays?.()}>
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] cursor-pointer" onClick={() => onNavigateToHolidays?.()}>
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-bold text-white">{t.home_holidays_section}</h2>
                 <Palmtree className="w-4 h-4 text-white/60" />
@@ -413,7 +413,7 @@ export default memo(function HomeManagerView({
                 {holidays.slice(0, 3).map((h) => {
                   const u = users.find((x) => x.id === h.user_id);
                   return (
-                    <div key={h.id} className="flex items-center justify-between py-1 border-b border-white/8 last:border-0">
+                    <div key={h.id} className="flex items-center justify-between py-1 border-b border-white/10 last:border-0">
                       <span className="text-white/70 text-xs font-medium truncate flex-1" title={u?.first_name ?? '?'}>{u?.first_name ?? '?'}</span>
                       <span className={`text-[0.6875rem] font-bold px-2 py-0.5 rounded-full border ml-2 ${h.status === 'approved' ? 'bg-white/15 text-white/80 border-white/20' : h.status === 'pending' ? 'bg-amber-500/15 text-amber-300 border-amber-400/30' : 'bg-red-500/15 text-red-300 border-red-400/30'}`}>
                         {h.status === 'approved' ? t.home_holiday_approved : h.status === 'pending' ? t.home_holiday_pending : t.home_holiday_rejected}
@@ -429,14 +429,14 @@ export default memo(function HomeManagerView({
             {/* KPI */}
             {uiW('home_mgmt.card_kpi') && (
             <div className="grid grid-cols-2 gap-4">
-              <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 cursor-pointer" onClick={() => onNavigateToShifts?.()}>
+              <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] cursor-pointer" onClick={() => onNavigateToShifts?.()}>
                 <div className="flex items-center justify-between mb-2">
                   <TrendingUp className="w-4 h-4 text-white/45" />
                   <span className="text-[0.6875rem] text-white/55 font-semibold uppercase">{t.home_kpi_hours_week}</span>
                 </div>
                 <p className="text-2xl font-bold text-white tabular-nums">{formatMinutesToHoursAndMinutes(weeklyMinutes)}</p>
               </div>
-              <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 cursor-pointer" onClick={() => onNavigateToShifts?.()}>
+              <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] cursor-pointer" onClick={() => onNavigateToShifts?.()}>
                 <div className="flex items-center justify-between mb-2">
                   <Calendar className="w-4 h-4 text-white/45" />
                   <span className="text-[0.6875rem] text-white/55 font-semibold uppercase">{t.home_kpi_shifts_week}</span>
@@ -459,7 +459,7 @@ export default memo(function HomeManagerView({
           const homeClockComplete = /^\d{2}:\d{2}$/.test((clockOutInput || '').trim());
           return (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
               onClick={(e) => { if (e.target === e.currentTarget) { handleDismissCloseModal(); } }}>
               <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
                 transition={{ duration: 0.15 }} className="modal-glass-panel w-full max-w-sm rounded-2xl p-6">
@@ -476,7 +476,7 @@ export default memo(function HomeManagerView({
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 mb-4">
-                  <div className="bg-transparent rounded-xl p-3 text-center border border-white/10">
+                  <div className="bg-transparent rounded-xl p-3 text-center border border-white/[0.14]">
                     <p className="text-[0.6875rem] text-white/45 uppercase font-semibold mb-1">{t.home_label_planned}</p>
                     <p className="font-bold text-white tabular-nums">{closeModal.actualStart} → {closeModal.plannedEnd}</p>
                   </div>
@@ -499,7 +499,7 @@ export default memo(function HomeManagerView({
                 </div>
 
                 {homeClockComplete && (
-                  <div className="bg-transparent rounded-xl p-3 mb-4 grid grid-cols-3 gap-2 text-center border border-white/10">
+                  <div className="bg-transparent rounded-xl p-3 mb-4 grid grid-cols-3 gap-2 text-center border border-white/[0.14]">
                     {[
                       { label: t.home_modal_start, val: closeModal.actualStart },
                       { label: t.home_modal_end, val: clockOutInput },
@@ -515,11 +515,11 @@ export default memo(function HomeManagerView({
 
                 <div className="flex gap-2">
                   <button type="button" onClick={handleDismissCloseModal}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-neutral-500 text-white/70 text-sm font-semibold hover:bg-white/12 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-white/20 text-white/70 text-sm font-semibold hover:bg-white/12 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
                     {t.cancel}
                   </button>
                   <button type="button" disabled={!clockOutInput || closingLoading} onClick={onConfirmClose}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2 transition-colors active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                     {closingLoading ? t.saving : <><LogOutIcon className="w-4 h-4" />{t.home_btn_register}</>}
                   </button>
                 </div>

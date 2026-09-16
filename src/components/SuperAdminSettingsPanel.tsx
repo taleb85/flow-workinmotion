@@ -135,7 +135,7 @@ function NumberInput({ value, min, max, onChange, suffix }: {
         value={value}
         onChange={(e) => onChange(Math.max(min, Math.min(max, parseInt(e.target.value) || min)))}
         placeholder="0"
-        className="w-16 rounded-lg border border-neutral-500 bg-white/8 px-2 py-1 text-base text-center text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40"
+        className="w-16 rounded-lg border border-white/20 bg-white/10 px-2 py-1 text-base text-center text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40"
       />
       <span className="text-xs text-white/40">{suffix}</span>
     </div>
@@ -229,9 +229,9 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
   const flags = settings.featureFlags ?? {};
 
   return (
-    <div className="mt-3 rounded-xl border border-white/12 bg-white/5 overflow-hidden">
+    <div className="mt-3 rounded-xl border border-white/[0.14] bg-white/5 overflow-hidden">
       {/* Tabs */}
-      <div className="flex border-b border-neutral-500 overflow-x-auto">
+      <div className="flex border-b border-white/10 overflow-x-auto">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -239,7 +239,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             onClick={() => setTab(t.id)}
             className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold whitespace-nowrap transition-colors ${
  tab === t.id
- ? 'text-accent border-b-2 border-accent bg-white/8'
+ ? 'text-accent border-b-2 border-accent bg-white/10'
  : 'text-white/55 hover:text-white/80'
  } active:text-white/80'`}
           >
@@ -274,7 +274,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
               ))}
             </div>
 
-            <div className="border-t border-neutral-500 pt-3 space-y-1">
+            <div className="border-t border-white/10 pt-3 space-y-1">
               <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-2">Funzionalità avanzate</p>
               {FEATURE_DEFS.map((f) => (
                 <div key={f.slug} className="flex items-center justify-between py-1.5">
@@ -325,7 +325,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
               <NumberInput value={wr.lateThresholdMinutes ?? 10} min={0} max={60} onChange={(v) => setWorkRule('lateThresholdMinutes', v)} suffix="min" />
             </RuleRow>
 
-            <div className="border-t border-neutral-500 pt-3 space-y-2">
+            <div className="border-t border-white/10 pt-3 space-y-2">
               <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-1">Alert automatici</p>
               {([
                 { key: 'criticEnabled',    label: 'Alert critico (turno lungo + riposo insufficiente)' },
@@ -366,7 +366,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
                       value={settings.geofence.lat}
                       onChange={(e) => set('geofence', { ...settings.geofence!, lat: parseFloat(e.target.value) || 0 })}
                       placeholder="0"
-                      className="w-full rounded-lg border border-neutral-500 bg-white/8 px-3 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40"
+                      className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40"
                     />
                   </div>
                   <div className="space-y-1">
@@ -377,7 +377,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
                       value={settings.geofence.lng}
                       onChange={(e) => set('geofence', { ...settings.geofence!, lng: parseFloat(e.target.value) || 0 })}
                       placeholder="0"
-                      className="w-full rounded-lg border border-neutral-500 bg-white/8 px-3 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40"
+                      className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40"
                     />
                   </div>
                 </div>
@@ -389,7 +389,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
                     value={settings.geofence.radiusM}
                     onChange={(e) => set('geofence', { ...settings.geofence!, radiusM: parseInt(e.target.value) || 100 })}
                     placeholder="0"
-                    className="w-full rounded-lg border border-neutral-500 bg-white/8 px-3 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40"
                   />
                 </div>
                 <p className="text-[0.6875rem] text-white/40">
@@ -411,7 +411,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
                 id="sa-locale-lang"
                 value={settings.defaultLanguage ?? 'it'}
                 onChange={(e) => set('defaultLanguage', e.target.value as 'it' | 'en' | 'es' | 'fr')}
-                className="w-full rounded-xl border border-neutral-500 bg-white/8 px-3 py-2.5 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40"
+                className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40"
               >
                 {LANGUAGES.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
               </select>
@@ -423,7 +423,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
                 id="sa-locale-tz"
                 value={settings.timezone ?? 'Europe/Rome'}
                 onChange={(e) => set('timezone', e.target.value)}
-                className="w-full rounded-xl border border-neutral-500 bg-white/8 px-3 py-2.5 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40"
+                className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40"
               >
                 {TIMEZONES.map((tz) => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
               </select>
@@ -432,7 +432,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
         )}
 
         {/* Salva impostazioni — sempre visibile, disabilitato nel tab Dipendenti (salvataggio inline per-utente) */}
-        <div className="pt-2 border-t border-neutral-500 space-y-1.5">
+        <div className="pt-2 border-t border-white/10 space-y-1.5">
           {dirty && !saving && (
             <p className="text-center text-[0.6875rem] font-semibold text-amber-500">
               ● Modifiche non salvate
@@ -447,7 +447,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             type="button"
             onClick={handleSave}
             disabled={saving || tab === 'staff'}
-className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-accent-hover/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             <Check className="w-4 h-4" />
             {saving ? 'Salvataggio…' : tab === 'staff' ? 'Salvataggio inline per dipendente' : 'Salva impostazioni sede'}

@@ -85,7 +85,7 @@ function NavPreviewBar({
   const iconSz = fs ? 'w-7 h-7 md:w-8 md:h-8' : hub ? 'w-[1.125rem] h-[1.125rem] md:w-5 md:h-5' : 'w-4 h-4';
   const labelSz = fs ? 'text-[0.6875rem] md:text-xs' : hub ? 'text-[0.6875rem] md:text-[0.6875rem]' : 'text-[0.6875rem]';
   return (
-    <div className={`rounded-[1.25rem] border border-neutral-500 shadow-inner ${pad}`} style={{ backgroundColor: ACCENT }}>
+    <div className={`rounded-[1.25rem] border border-white/[0.14] shadow-inner ${pad}`} style={{ backgroundColor: ACCENT }}>
       <div className={`flex justify-between items-stretch gap-1 md:gap-2 ${rowMin}`}>
         {tabs.map((id) => {
           const Icon = PREVIEW_TAB_ICONS[id];
@@ -442,7 +442,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tv.profile_visibility_search_ph ?? 'Cerca nome o email…'}
-              className="w-full rounded-xl border border-slate-200 py-2.5 pr-3 pl-10 text-base text-white placeholder:text-white/50 outline-none focus:border-accent focus:ring-2 focus:ring-accent/25"
+              className="w-full rounded-xl border border-white/20 py-2.5 pr-3 pl-10 text-base text-white placeholder:text-white/50 outline-none focus:border-accent focus:ring-2 focus:ring-white/25"
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -454,7 +454,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                 className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
  roleFilter === k
  ? 'rounded-full border border-accent bg-accent text-white'
- : 'rounded-xl border border-neutral-500 !rounded-full text-white/70 surface-ghost-interactive hover:border-neutral-500'
+ : 'rounded-xl border border-white/20 !rounded-full text-white/70 surface-ghost-interactive hover:border-white/20'
  } active:brightness-95`}
               >
                 {k === 'all'
@@ -470,12 +470,12 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
               type="checkbox"
               checked={showSuspended}
               onChange={(e) => setShowSuspended(e.target.checked)}
-              className="rounded border-neutral-500 text-accent focus:ring-accent/30"
+              className="rounded border-white/20 text-accent focus:ring-white/30"
             />
             {tv.profile_visibility_show_suspended ?? 'Mostra sospesi / inattivi'}
           </label>
 
-          <ul className="max-h-[min(52vh,28rem)] divide-y divide-slate-100 overflow-y-auto rounded-xl border border-neutral-500">
+          <ul className="max-h-[min(52vh,28rem)] divide-y divide-slate-100 overflow-y-auto rounded-xl border border-white/[0.14]">
             {filteredList.length === 0 && (
               <li className="px-4 py-8 text-center text-sm text-white/50">
                 {tv.profile_visibility_empty_list ?? 'Nessun profilo corrisponde ai filtri.'}
@@ -489,8 +489,8 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                     type="button"
                     onClick={() => setSelectedId(u.id)}
                     className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors ${
- active ? 'bg-accent/8' : 'hover:bg-slate-50'
- } active:bg-slate-50'/80`}
+ active ? 'bg-white/10' : 'hover:bg-slate-50'
+ } active:bg-slate-50`}
                   >
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-white/70">
                       {(u.first_name?.[0] ?? '?').toUpperCase()}
@@ -523,7 +523,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
 
         {!previewUser && (
         <div className="md:col-span-8 space-y-6">
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-16 text-center">
+            <div className="rounded-2xl border border-dashed border-white/[0.14] bg-slate-50/80 px-6 py-16 text-center">
               <LayoutList className="mx-auto mb-3 h-10 w-10 text-slate-300" />
               <p className="text-sm font-medium text-white/70">
                 {tv.profile_visibility_pick_user ?? 'Seleziona un profilo dall’elenco.'}
@@ -536,16 +536,17 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
 
     {previewUser && createPortal(
         <div
-          className="fixed inset-0 z-[10060] flex touch-manipulation flex-col overscroll-contain bg-slate-100/95 backdrop-blur-md"
+          className="fixed inset-0 z-[10060] flex touch-manipulation flex-col overscroll-contain"
+          style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
           role="dialog"
           aria-modal="true"
           aria-labelledby="profile-visibility-fs-title"
         >
-          <header className="sticky top-0 z-[10070] safe-area-pad flex min-h-[4.5rem] shrink-0 items-center gap-3 border-b border-slate-200/90 bg-white/90 px-4 py-3 pt-[max(12px,env(safe-area-inset-top,0px))] shadow-sm backdrop-blur-lg md:px-5">
+          <header className="sticky top-0 z-[10070] safe-area-pad flex min-h-[4.5rem] shrink-0 items-center gap-3 border-b border-white/10 bg-white/90 px-4 py-3 pt-[max(12px,env(safe-area-inset-top,0px))] shadow-sm backdrop-blur-lg md:px-5">
             <button
               type="button"
               onClick={closePreview}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-white/80 transition-colors hover:bg-slate-100 active:bg-slate-100/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-slate-50 text-white/80 transition-colors hover:bg-slate-100 active:bg-slate-100/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               aria-label={tv.profile_visibility_close_preview ?? 'Chiudi anteprima'}
             >
               <X className="h-5 w-5 text-white/90" strokeWidth={2} />
@@ -579,7 +580,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                 {tv.profile_visibility_save_apply ?? 'Salva e applica'}
               </button>
             ) : (
-              <span className="shrink-0 rounded-lg border border-accent/20 bg-accent/10 px-2.5 py-1.5 text-[0.6875rem] font-bold tracking-wider text-accent uppercase">
+              <span className="shrink-0 rounded-lg border border-white/20 bg-white/10 px-2.5 py-1.5 text-[0.6875rem] font-bold tracking-wider text-accent uppercase">
                 {tv.profile_visibility_readonly_preview ?? 'Solo lettura'}
               </span>
             )}
@@ -587,8 +588,8 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
 
           <div className="flex-1 min-h-0 overflow-y-auto app-horizontal-pad py-4 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))]">
             <div className="mx-auto w-full max-w-7xl space-y-4">
-              <div className="rounded-xl border border-neutral-500 overflow-hidden">
-                <div className="border-b border-slate-100 bg-slate-50 px-3 py-2">
+              <div className="rounded-xl border border-white/[0.14] overflow-hidden">
+                <div className="border-b border-white/10 bg-slate-50 px-3 py-2">
                   <p className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider">
                     {tv.profile_visibility_preview_banner ?? 'Anteprima navigazione'}
                   </p>
@@ -625,7 +626,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                   <button
                     type="button"
                     onClick={handleSmartRestore}
-className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 px-3 py-2 text-xs font-semibold text-white/70 surface-ghost-interactive hover:text-white active:text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-3 py-2 text-xs font-semibold text-white/70 surface-ghost-interactive hover:text-white active:text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     {hasUnsavedChanges
@@ -638,7 +639,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                       type="button"
                       onClick={handleDeleteUser}
                       disabled={isDeleting}
-className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 px-3 py-2 text-xs font-semibold text-red-600 surface-ghost-interactive hover:bg-red-50 active:bg-red-50/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-3 py-2 text-xs font-semibold text-red-600 surface-ghost-interactive hover:bg-red-50 active:bg-red-50/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
                     >
                       {isDeleting ? (
                         <RotateCcw className="w-3.5 h-3.5 animate-spin" />
@@ -653,7 +654,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
 
               <div className="space-y-4">
                   {activeTabPanelEmpty && (
-                    <div className="rounded-xl border border-neutral-500 p-6 text-center">
+                    <div className="rounded-xl border border-white/[0.14] p-6 text-center">
                       <p className="text-sm text-white/60">
                         {tv.profile_visibility_tab_empty ??
                           'Nessun permesso o blocco configurabile per questa scheda. Scegli un’altra scheda o attiva prima il permesso della scheda (es. Tabellone team).'}
@@ -677,7 +678,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                             navLabel={navLabels[activeHubTab]}
                           />
                           {staffModulesForActiveTab.length > 0 && (
-                            <div className="space-y-1 border-t border-neutral-500/80 pt-1.5">
+                            <div className="space-y-1 border-t border-white/10 pt-1.5">
                               <p className="px-1 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">
                                 {tv.profile_visibility_tab_staff_modules ?? 'Moduli area personale'}
                               </p>
@@ -688,8 +689,8 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                                     key={mod}
                                     className={`flex min-h-[2.75rem] items-stretch gap-0 rounded-lg border-2 ${
  enabled
- ? 'border-slate-200 rounded-xl border border-neutral-500'
- : 'border-dashed border-neutral-500/70 bg-slate-300/40'
+ ? 'border-white/[0.14] rounded-xl border border-white/[0.14]'
+ : 'border-dashed border-white/[0.14] bg-slate-300/40'
  }`}
                                   >
                                     <div
@@ -712,7 +713,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                                           role="switch"
                                           aria-checked={enabled}
                                           onClick={() => handleModuleToggle(previewUser, mod, !enabled)}
-                                          className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${
+                                          className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/35 focus:ring-offset-2 ${
  enabled ? 'bg-accent' : ''
  }`}
                                         >
@@ -742,7 +743,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                       {featuresForActiveTab.length > 0 && (
                         <details
                           key={`perm-${previewUser.id}-${activeHubTab}`}
-                          className="group rounded-xl border border-neutral-500 open:border-neutral-500/95 bg-slate-50/50 open:bg-slate-50/80"
+                          className="group rounded-xl border border-white/[0.14] open:border-white/[0.14] bg-slate-50/50 open:bg-slate-50/80"
                           open={permDetailsOpen}
                           onToggle={(e) => setPermDetailsOpen(e.currentTarget.open)}
                         >
@@ -755,7 +756,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                             </span>
                             <ChevronDown className="h-4 w-4 shrink-0 text-white/50 transition-transform group-open:rotate-180" />
                           </summary>
-                          <p className="border-t border-slate-100 px-4 pt-2 text-[0.6875rem] text-white/60">
+                          <p className="border-t border-white/10 px-4 pt-2 text-[0.6875rem] text-white/60">
                             {tv.profile_visibility_tab_permissions_hint ??
                               'Attivano o disattivano funzioni e spesso la presenza della scheda in app.'}
                           </p>
@@ -774,9 +775,9 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                               return (
                                 <AdminRow
                                   key={key}
-                                  className={`rounded-lg border border-neutral-500 !border-b-0 !p-2 ${
+                                  className={`rounded-lg border border-white/[0.14] !border-b-0 !p-2 ${
  key === 'view_estimated_cost'
- ? '[&_.font-bold]:border-l-2 [&_.font-bold]:border-accent/30 [&_.font-bold]:pl-2'
+ ? '[&_.font-bold]:border-l-2 [&_.font-bold]:border-white/30 [&_.font-bold]:pl-2'
  : ''
  }`}
                                   label={FEATURE_LABELS[key]}
@@ -794,7 +795,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-neutral-500 p
                                       onClick={() => {
                                         if (!isSelectedAdmin) handleFeatureToggle(previewUser, key, !eff);
                                       }}
-                                      className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${
+                                      className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/35 focus:ring-offset-2 ${
  isSelectedAdmin ? 'cursor-default opacity-100' : 'cursor-pointer'
  } ${eff ? 'bg-accent' : ''}`}
                                     >

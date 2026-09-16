@@ -1,10 +1,10 @@
-import { useState, useCallback, useRef, useEffect, useMemo, useLayoutEffect, memo } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo, useLayoutEffect, memo, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import {
   CalendarDays, AlertTriangle, Check, Lock, Plus, Clock,
   ChevronLeft, ChevronRight, Copy, Send, Filter, FileDown,
   Trash2, Save, X, ChevronDown, Unlock, Menu, ChevronUp, Pencil,
-  History,
+  History, Sun, Moon,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CenteredModalPortal } from './ui/CenteredModalPortal';
@@ -32,7 +32,7 @@ import { logShiftAudit, formatAuditDate } from '../utils/shiftAuditLog';
 import { PinPadModal } from './ui/PinPadModal';
 import {
   loadPeriodConfig, savePeriodConfig, getPeriodStartDate, getPeriodEndDate,
-  nextPeriodConfig, prevPeriodConfig, periodConfigForMonth,
+  nextPeriodConfig, prevPeriodConfig, periodConfigForMonth, periodConfigContainingDate,
   type PeriodConfig,
 } from '../utils/periodConfig';
 import {
@@ -203,7 +203,7 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
   const totalNet = totals.planned;
   const totalActual = totals.actual;
   return (
-    <div className="rounded-xl border border-neutral-500 overflow-hidden p-4 shadow-sm">
+    <div className="rounded-xl border border-white/[0.14] overflow-hidden p-4 shadow-sm">
       <div
         role="button"
         tabIndex={0}
@@ -231,7 +231,7 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
         </div>
         <div className="text-right shrink-0">
           <div className="text-[0.625rem] font-bold text-white/40 uppercase tracking-tight">{t.total_hours ?? 'Ore'}</div>
-          <div className="text-sm font-bold text-accent tabular-nums">
+          <div className="text-sm font-bold text-white tabular-nums">
             {formatMinutesToHoursAndMinutes(totalActual)}
           </div>
           <div className={`text-[0.625rem] font-bold tabular-nums ${totalActual > totalNet ? 'text-accent' : 'text-emerald-400'}`}>
@@ -241,10 +241,10 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
       </div>
 
       {isExpanded && (
-      <div className="space-y-2">
+      <div className="space-y-2 divide-y divide-white/10">
         {!hasShifts ? (
           <div
-            className={`py-4 text-center border-2 border-dashed border-white/10 rounded-xl ${dropTargetKey ===`${user.id}_empty` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+            className={`py-4 text-center border-2 border-dashed border-white/20 rounded-xl ${dropTargetKey ===`${user.id}_empty` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
             onDragOver={(e) => onDragOver(e, `${user.id}_empty`)}
             onDragLeave={onDragLeave}
             onDrop={(e) => { const firstDay = weekDateStrings[0]; if (firstDay) onDrop(e, user.id, firstDay); }}
@@ -260,44 +260,45 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
             const todayDate = isToday(day);
             return (
               <div key={dateStr}
-                className={`flex items-start gap-3 p-2.5 rounded-xl ${todayDate ? 'bg-accent/5 ring-1 ring-accent/20' : 'bg-white/[0.04]'} ${dropTargetKey ===`${user.id}_${dateStr}` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+                className={`flex items-start gap-3 p-2.5 rounded-xl ${todayDate ? 'bg-white/5 ring-1 ring-white/20' : 'bg-white/[0.04]'} ${dropTargetKey ===`${user.id}_${dateStr}` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
                 onDragOver={(e) => onDragOver(e, `${user.id}_${dateStr}`)}
                 onDragLeave={onDragLeave}
                 onDrop={(e) => onDrop(e, user.id, dateStr)}
               >
                 <div className="w-10 shrink-0 text-center pt-0.5">
-                  <div className={`text-[0.625rem] font-bold uppercase ${todayDate ? 'text-accent' : 'text-white/50'}`}>
+                  <div className={`text-[0.625rem] font-bold uppercase ${todayDate ? 'text-white' : 'text-white/50'}`}>
                     {format(day, 'EEE', { locale })}
                   </div>
-                  <div className={`text-sm font-bold ${todayDate ? 'text-accent' : 'text-white/70'}`}>
+                  <div className={`text-sm font-bold ${todayDate ? 'text-white' : 'text-white/70'}`}>
                     {format(day, 'd')}
                   </div>
                 </div>
 
-                <div className="flex-1 flex flex-col gap-1">
+                <div className="flex-1 flex min-w-0 gap-1">
                   {(() => {
                     const { lunch, evening, extraLunchGroups, extraEveningGroups } = splitDayGroupsBySlot(groups);
                     const canAddSecond = canEdit && groups.length < 2;
-                    return (
-                      <>
-                        <div className="min-h-[1.75rem]">
-                          {lunch ? renderGroupButton(lunch, 'mobile', false, extraLunchGroups) : canAddSecond ? (
-                            <button type="button" onClick={() => onCreateShift(user.id, dateStr, 'lunch')}
-                              className="w-full rounded-lg border border-dashed border-white/15 py-1.5 text-[0.625rem] font-bold text-white/40 transition-colors hover:border-white/30 hover:text-white/70">
-                              <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_shift ?? 'Aggiungi'}
-                            </button>
-                          ) : null}
-                        </div>
-                        <div className="min-h-[1.75rem]">
-                          {evening ? renderGroupButton(evening, 'mobile', false, extraEveningGroups) : canAddSecond ? (
-                            <button type="button" onClick={() => onCreateShift(user.id, dateStr, 'evening')}
-                              className="w-full rounded-lg border border-dashed border-white/15 py-1.5 text-[0.625rem] font-bold text-white/40 transition-colors hover:border-white/30 hover:text-white/70">
-                              <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_second_shift ?? '2° turno'}
-                            </button>
-                          ) : null}
-                        </div>
-                      </>
+                    const slots: ReactNode[] = [];
+                    if (lunch) slots.push(renderGroupButton(lunch, 'mobile', false, extraLunchGroups));
+                    else if (canAddSecond) slots.push(
+                      <button key="add-lunch" type="button" onClick={() => onCreateShift(user.id, dateStr, 'lunch')}
+                        className="w-full rounded-lg border border-dashed border-white/20 py-1.5 text-[0.625rem] font-bold text-white/40 transition-colors hover:border-white/20 hover:text-white/70">
+                        <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_shift ?? 'Aggiungi'}
+                      </button>
                     );
+                    if (evening) slots.push(renderGroupButton(evening, 'mobile', false, extraEveningGroups));
+                    else if (canAddSecond) slots.push(
+                      <button key="add-evening" type="button" onClick={() => onCreateShift(user.id, dateStr, 'evening')}
+                        className="w-full rounded-lg border border-dashed border-white/20 py-1.5 text-[0.625rem] font-bold text-white/40 transition-colors hover:border-white/20 hover:text-white/70">
+                        <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_second_shift ?? '2° turno'}
+                      </button>
+                    );
+                    // Slot affiancati: ognuno larghezza pari merito, a piena larghezza se è l'unico.
+                    return slots.map((slot, i) => (
+                      <div key={i} className={`min-h-[1.75rem] min-w-0 ${slots.length > 1 ? 'flex-1' : 'w-full'}`}>
+                        {slot}
+                      </div>
+                    ));
                   })()}
                 </div>
               </div>
@@ -341,7 +342,7 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
   const totalActual = totals.actual;
   return (
     <tr className="wst-employee-row">
-      <td className={`sticky left-0 z-10 px-2 py-1.5 border-b border-r border-white/[0.06] cursor-pointer hover:bg-white/[0.08] transition-colors duration-200 ${hScrolled ? 'wst-col-scrolled' : ''}`}
+      <td className={`sticky left-0 z-10 px-2 py-1.5 border-b border-r border-white/10 cursor-pointer hover:bg-white/[0.08] transition-colors duration-200 ${hScrolled ? 'wst-col-scrolled' : ''}`}
         onClick={() => onReviewClick(user)}>
         <div className="flex items-center gap-1 min-w-0 ml-2">
           <span className="text-xs font-bold text-white truncate">{user.first_name} {user.last_name?.[0] ?? ''}</span>
@@ -354,7 +355,7 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
         const weekEnd = isPeriodView && day.getDay() === 0;
         return (
           <td key={dIdx}
-            className={`px-1 py-0.5 align-top group min-w-0 border-b border-r border-white/[0.06] ${weekEnd ? 'border-r-2 border-r-white/15' : ''} ${isToday(day) ? '!border-b-white' : ''}`}
+            className={`px-1 py-0.5 align-top group min-w-0 border-b border-r border-white/10 ${weekEnd ? 'border-r-2 border-r-white/15' : ''} ${isToday(day) ? '!border-b-white' : ''}`}
           >
             {groups.length === 0 ? (
               <div
@@ -412,7 +413,7 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
                       ) : emptySlot('lunch', t.add_shift ?? 'Aggiungi')}
                     </div>
                     <div
-                      className={`flex items-center flex-1 ${isPeriodView ? 'border-t border-white/[0.08]' : ''} ${dropTargetKey ===`${user.id}_${dateStr}_evening` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+                      className={`flex items-center flex-1 ${isPeriodView ? 'border-t border-white/10' : ''} ${dropTargetKey ===`${user.id}_${dateStr}_evening` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
                       style={{ ...(isPeriodView ? {} : { paddingLeft: '1px', paddingRight: '1px' }) }}
                       onDragOver={(e) => onDragOver(e, `${user.id}_${dateStr}_evening`)}
                       onDragLeave={onDragLeave}
@@ -431,7 +432,7 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
           </td>
         );
       })}
-      <td className={`px-1 py-1 text-center align-middle border-b border-white/[0.06] ${compactGrid ? 'text-[0.625rem]' : ''}`}>
+      <td className={`px-1 py-1 text-center align-middle border-b border-white/10 ${compactGrid ? 'text-[0.625rem]' : ''}`}>
         <div className={`${compactGrid ? 'text-[0.625rem]' : 'text-xs'} font-bold text-white tabular-nums`}>{formatMinutesToHoursAndMinutes(totalActual)}</div>
         <div className={`${compactGrid ? 'text-[0.5625rem]' : 'text-[0.625rem]'} font-bold tabular-nums ${totalActual > totalNet ? 'text-accent' : 'text-emerald-400'}`}>
           {totalActual > totalNet ? '+' : ''}{formatMinutesToHoursAndMinutes(Math.abs(totalActual - totalNet))}
@@ -604,10 +605,21 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   }, []);
   const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
 
-  const effectivePeriod = periodNavOffset === 0 ? periodConfig
-    : periodNavOffset > 0
-      ? Array.from({ length: periodNavOffset }, () => null).reduce((p) => nextPeriodConfig(p), periodConfig)
-      : Array.from({ length: -periodNavOffset }, () => null).reduce((p) => prevPeriodConfig(p), periodConfig);
+  /**
+   * Periodo effettivo mostrato dall'indicatore.
+   * - Vista Periodo: il periodo scelto, spostato dall'offset di navigazione.
+   * - Vista Settimana: il periodo che CONTIENE la settimana visibile. Serve a
+   *   non lasciare l'indicatore fermo mentre si avanza di settimana in settimana.
+   */
+  const effectivePeriod = useMemo(() => {
+    const navigated = periodNavOffset === 0 ? periodConfig
+      : periodNavOffset > 0
+        ? Array.from({ length: periodNavOffset }, () => null).reduce((p) => nextPeriodConfig(p), periodConfig)
+        : Array.from({ length: -periodNavOffset }, () => null).reduce((p) => prevPeriodConfig(p), periodConfig);
+    if (viewMode !== 'week') return navigated;
+    const inPeriod = weekStart >= getPeriodStartDate(navigated) && weekStart <= getPeriodEndDate(navigated);
+    return inPeriod ? navigated : periodConfigContainingDate(weekStart);
+  }, [viewMode, periodNavOffset, periodConfig, weekStart]);
 
   const periodStart = getPeriodStartDate(effectivePeriod);
   const periodEnd = getPeriodEndDate(effectivePeriod);
@@ -705,7 +717,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       if (!prev && deptTriggerRef.current) {
         const rect = deptTriggerRef.current.getBoundingClientRect();
         const gap = 6;
-        const dropdownWidth = 180;
         const estimatedHeight = 130;
 
         let top: number;
@@ -715,13 +726,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           top = rect.bottom + gap;
         }
 
-        let left = rect.right - dropdownWidth;
-        if (left < 16) left = 16;
-        if (left + dropdownWidth > window.innerWidth - 16) {
-          left = window.innerWidth - dropdownWidth - 16;
-        }
+        // Il menu si dimensiona sul contenuto: ancorato a destra resta allineato
+        // al pulsante qualunque sia la larghezza (prima se ne assumeva una fissa di 180px).
+        const right = Math.max(16, window.innerWidth - rect.right);
 
-        setDeptDropdownStyle({ top, left });
+        setDeptDropdownStyle({ top, right });
       }
       return !prev;
     });
@@ -782,6 +791,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
+      // Chiudi i popover della toolbar (calendario periodo, filtro reparto, azioni)
+      setShowPeriodPopover(false);
+      setDeptDropdownOpen(false);
+      setActionsDrawerOpen(false);
       // Chiudi modale creazione turno
       setCreateModal(null);
       // Chiudi drawer dettaglio (solo se nessuna modifica non salvata)
@@ -887,8 +900,18 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     } catch { /* database not available */ }
   }, []);
 
-  const prevWeek = () => setWeekStart(d => addDays(d, -7));
-  const nextWeek = () => setWeekStart(d => addDays(d, 7));
+  // Le frecce navigano l'unità mostrata: una settimana in vista Settimana,
+  // un periodo in vista Periodo (dove `weekStart` non influenza i giorni visibili).
+  const prevWeek = () => {
+    if (viewMode === 'period') setPeriodNavOffset((o) => o - 1);
+    else setWeekStart((d) => addDays(d, -7));
+  };
+  const nextWeek = () => {
+    if (viewMode === 'period') setPeriodNavOffset((o) => o + 1);
+    else setWeekStart((d) => addDays(d, 7));
+  };
+  const prevNavLabel = viewMode === 'period' ? 'Periodo precedente' : 'Settimana precedente';
+  const nextNavLabel = viewMode === 'period' ? 'Periodo successivo' : 'Settimana successiva';
   const goToday = () => {
     // Ripristina il periodo predefinito salvato, non quello personalizzato
     const defaultCfg = loadPeriodConfig();
@@ -1679,7 +1702,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           className={
             stacked
               ? `w-full relative flex shrink-0 items-center justify-center gap-0.5 rounded-md border-2 border-dashed px-1 text-[0.625rem] font-extrabold tabular-nums leading-none text-white shadow-[0_1px_4px_rgba(0,0,0,0.35)] border-accent bg-accent`
-              : `w-full rounded-lg border-2 border-dashed px-2 py-1.5 text-[0.6875rem] font-extrabold tabular-nums text-white border-accent bg-accent/80`
+              : `w-full rounded-lg border-2 border-dashed px-2 py-1.5 text-[0.6875rem] font-extrabold tabular-nums text-white border-accent bg-white/80`
           }
           style={stacked ? { height: extraRowHeight, minHeight: extraRowHeight } : undefined}
         >
@@ -1805,7 +1828,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   return (
     <div ref={gridRootRef} className="w-full flex-none min-h-0 flex flex-col font-sans md:flex-1">
       {/* Linea divisoria tra dipendenti */}
-      <style>{`.wst-employee-row td { border-bottom: 1px solid rgba(255,255,255,0.20) !important; }
+      <style>{`.wst-employee-row td { border-bottom: 1px solid rgba(255,255,255,0.10) !important; }
 .wst-employee-row td { border-top: 1px solid rgba(255,255,255,0.10) !important; }
 /* Header tabella opaco su scroll: solo vetro satinato senza colore, offusca il contenuto sottostante */
 .wst-header-scrolled { background: transparent !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
@@ -1813,7 +1836,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 .wst-header-scrolled th.border-b-white { border-bottom-color: white !important; }
 .wst-header-scrolled th div { color: #ffffff !important; }
 .wst-header-scrolled .text-accent { color: #ffffff !important; }
-.wst-col-scrolled.wst-col-scrolled { background-color: rgba(10, 10, 10, 0.55) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
+/* Colonna dipendente sticky su scroll orizzontale: come l'header, vetro satinato
+   senza colore — solo blur, niente fondo nero. */
+.wst-col-scrolled.wst-col-scrolled { background-color: transparent !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
 .wst-col-scrolled th { color: #ffffff !important; }
 /* Toolbar Presenze mobile: vetro trasparente (solo blur, nessun colore) quando sovrapposta */
 @media (max-width: 767px) {
@@ -1838,11 +1863,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       <div ref={contentAboveRef}>
        {/* Toolbar sticky; su mobile glass stile bottom nav quando sovrapposta al contenuto */}
        <div ref={toolbarBandRef}
-        className={`ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mb-4 w-full min-w-0 sticky top-[var(--app-sticky-header-offset,5rem)] z-50 py-2 md:top-[3.125rem] ${toolbarOverlapping ? 'toolbar-band-over-content' : ''}`}
+        className={`ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mb-4 w-full min-w-0 sticky top-[var(--app-sticky-header-offset,5rem)] z-50 py-2 md:top-[3.125rem] md:overflow-x-auto ${toolbarOverlapping ? 'toolbar-band-over-content' : ''}`}
         data-toolbar-mode={mode}>
         {/* MOBILE: ◀ e ▶ occupano lo spazio ai lati; Oggi + data al centro */}
         <div className="flex w-full min-w-0 items-center gap-1.5 md:hidden">
-          <button type="button" onClick={prevWeek} aria-label="Settimana precedente"
+          <button type="button" onClick={prevWeek} aria-label={prevNavLabel}
             className="flex min-w-0 flex-1 items-center justify-center rounded-lg bg-white/10 px-3 py-2 text-white/60 hover:text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-5 w-5" /></button>
           {/* Mobile: data inizio — Oggi — data fine, affiancate e centrate insieme.
               Il gruppo centrale resta alla larghezza naturale (shrink-0): i pulsanti
@@ -1863,29 +1888,33 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               {(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
             </span>
           </div>
-          <button type="button" onClick={nextWeek} aria-label="Settimana successiva"
+          <button type="button" onClick={nextWeek} aria-label={nextNavLabel}
             className="flex min-w-0 flex-1 items-center justify-center rounded-lg bg-white/10 px-3 py-2 text-white/60 hover:text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5" /></button>
         </div>
         {/* DESKTOP: navigazione + data (unica riga con i filtri, vedi sotto) */}
-        <div className="hidden md:flex md:w-auto min-w-0 items-center gap-1.5 md:gap-2">
+        <div className="hidden md:flex md:w-auto shrink-0 items-center gap-1.5 md:gap-2">
           <div className="flex shrink-0 items-center gap-1">
-            <button type="button" onClick={prevWeek} aria-label="Settimana precedente"
+            <button type="button" onClick={prevWeek} aria-label={prevNavLabel}
               className="rounded-lg bg-white/10 px-3 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-5 w-5 md:h-4 md:w-4" /></button>
             <button type="button" onClick={goToday}
               className="rounded-lg bg-white/10 px-2.5 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors text-xs md:text-xs font-bold uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">{t.today_btn ?? 'Oggi'}</button>
-            <button type="button" onClick={nextWeek} aria-label="Settimana successiva"
+            <button type="button" onClick={nextWeek} aria-label={nextNavLabel}
               className="rounded-lg bg-white/10 px-3 py-2 md:py-1.5 text-white/60 hover:text-white transition-colors md:px-3 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-5 w-5 md:h-4 md:w-4" /></button>
           </div>
-          <span
-            className="flex-1 md:flex-none min-w-0 max-w-full truncate text-sm font-semibold text-white/50 tabular-nums"
-            title={`${(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()} — ${(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()}`}
-          >
-            {(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
-            <span className="hidden md:inline"> — {(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}</span>
-          </span>
+          {!hasHScroll && (
+            <span
+              className="flex-1 md:flex-none min-w-0 max-w-full truncate text-sm font-semibold text-white/50 tabular-nums"
+              title={`${(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()} — ${(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })()}`}
+            >
+              {(() => { const d = weekStart; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}
+              <span className="hidden md:inline"> — {(() => { const d = weekEnd; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })()}</span>
+            </span>
+          )}
+          {/* Con griglia larga il chip prende il posto della data: libera lo spazio
+              necessario a tenere visibili tutti i pulsanti senza scroll orizzontale. */}
           {hasHScroll && (
-            <span className="hidden md:inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 text-[0.5625rem] font-bold uppercase tracking-wider text-white/70">
-              <span className="rounded-md border border-white/25 bg-white/10 px-1 py-px font-black text-white">Shift</span>
+            <span className="hidden md:inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/20 bg-white/[0.06] px-2.5 py-1 text-[0.5625rem] font-bold uppercase tracking-wider text-white/70">
+              <span className="rounded-md border border-white/20 bg-white/10 px-1 py-px font-black text-white">Shift</span>
               + rotellina = scroll orizzontale
             </span>
           )}
@@ -1893,7 +1922,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
         {/* Mobile: filtri su una riga sola (filtro | sett/periodo | data periodo);
             desktop: riga flessibile allineata a destra */}
-        <div className="flex w-full min-w-0 items-center gap-1.5 md:ml-auto md:h-10 md:max-h-10 md:w-auto md:flex-nowrap md:justify-end md:gap-2">
+        <div className="flex w-full min-w-0 items-center gap-1.5 md:ml-auto md:h-10 md:max-h-10 md:w-auto md:shrink-0 md:flex-nowrap md:justify-end md:gap-2">
           {departments.length > 1 && (
             <div className="shrink-0 md:flex-none relative">
               <button ref={deptTriggerRef} type="button" onClick={toggleDeptDropdown}
@@ -1904,8 +1933,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               </button>
               {deptDropdownOpen && createPortal(
                 <div ref={deptPopoverRef}
-                  className="fixed z-[10050] mt-0 min-w-[8.125rem] overflow-hidden rounded-2xl border border-white/10 py-1"
-                  style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', top: deptDropdownStyle.top, left: deptDropdownStyle.left }}>
+                  className="fixed z-[10050] mt-0 flex flex-col overflow-hidden rounded-2xl border border-white/[0.14] py-1"
+                  style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', top: deptDropdownStyle.top, right: deptDropdownStyle.right }}>
                   <button type="button" onClick={() => { setDeptFilter(null); setDeptDropdownOpen(false); }}
                     className="w-full px-3 py-1.5 text-left text-[0.6875rem] font-bold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/10">
                     {t.department_filter_all ?? 'Tutti'}
@@ -1921,14 +1950,24 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               )}
             </div>
           )}
-          <div className="flex flex-1 md:flex-none min-w-0 items-center gap-1 rounded-lg bg-white/5 p-0.5">
+          <div className="flex flex-1 md:flex-none min-w-0 items-center gap-1 rounded-full bg-white/5 p-0.5">
             <button type="button" onClick={() => setViewMode('week')}
-              className={`flex-1 md:flex-none rounded-md px-1.5 md:px-2.5 py-1.5 text-[0.625rem] md:text-[0.625rem] font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
+              aria-pressed={viewMode === 'week'}
+              className={`flex-1 md:flex-none rounded-md border px-1.5 md:px-2.5 py-1.5 text-[0.625rem] md:text-[0.625rem] font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'border-white/40 bg-white/20 text-white' : 'border-transparent text-white/40 hover:text-white/70'}`}>
               <span className="md:hidden">{t.view_week_short ?? 'Sett.'}</span>
               <span className="hidden md:inline">{t.view_week ?? 'Settimana'}</span>
             </button>
-            <button type="button" onClick={() => setViewMode('period')}
-              className={`flex-1 md:flex-none rounded-md px-1.5 md:px-2.5 py-1.5 text-[0.625rem] md:text-[0.625rem] font-bold uppercase tracking-wider transition-colors ${viewMode === 'period' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/70'}`}>
+            <button type="button" onClick={() => {
+              // Eredita il periodo della settimana visibile: senza questo la vista
+              // Periodo ripartirebbe dal periodo salvato, saltando altrove.
+              if (viewMode === 'week') {
+                setPeriodConfigState(periodConfigContainingDate(weekStart));
+                setPeriodNavOffset(0);
+              }
+              setViewMode('period');
+            }}
+              aria-pressed={viewMode === 'period'}
+              className={`flex-1 md:flex-none rounded-md border px-1.5 md:px-2.5 py-1.5 text-[0.625rem] md:text-[0.625rem] font-bold uppercase tracking-wider transition-colors ${viewMode === 'period' ? 'border-white/40 bg-white/20 text-white' : 'border-transparent text-white/40 hover:text-white/70'}`}>
               {t.view_period ?? 'Periodo'}
             </button>
           </div>
@@ -1950,10 +1989,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               type="button"
               onClick={() => void handlePublishWeek()}
               aria-label={t.publish_week ?? 'Pubblica settimana'}
-              className="hidden md:flex shrink-0 items-center gap-1 rounded-lg bg-emerald-600/20 px-2 py-1.5 text-[0.625rem] md:text-[0.6875rem] font-bold uppercase tracking-wider text-emerald-300 transition-colors hover:bg-emerald-600/30 md:px-2.5"
+              className="group hidden md:flex shrink-0 items-center gap-0 overflow-hidden rounded-xl p-1.5 text-[0.625rem] md:text-[0.6875rem] font-bold uppercase tracking-wider text-emerald-300 liquid-glass liquid-glass-green transition-all duration-200 hover:gap-1.5 hover:pr-2.5"
             >
               <Send className="h-3 w-3 shrink-0" />
-              <span className="hidden md:inline">{t.publish_week ?? 'Pubblica settimana'}</span>
+              <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none transition-all duration-200 group-hover:max-w-[10.5rem]">
+                {t.publish_week ?? 'Pubblica settimana'}
+              </span>
             </button>
           )}
           {isMgmt && canFreezeWeek && (
@@ -2008,8 +2049,16 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               maxHeightClass="max-h-[min(90dvh,720px)]"
               panelClassName="py-1"
             >
-              <div className="border-b border-white/10 px-4 py-2.5 text-sm font-semibold text-white">
-                {t.actions ?? 'Azioni'}
+              <div className="mb-1 flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-white">{t.actions ?? 'Azioni'}</span>
+                <button
+                  type="button"
+                  onClick={closeActionsDrawer}
+                  aria-label={t.close ?? 'Chiudi'}
+                  className="rounded-full p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
               </div>
 
               {isMgmt && (
@@ -2019,7 +2068,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     closeActionsDrawer();
                     void handleCopyWeek();
                   }}
-                  className="flex w-full items-center gap-2 border-b border-white/10 px-4 py-2.5 text-left text-sm text-white/85 transition-colors hover:bg-white/10"
+                  className="flex w-full items-center gap-2 border-b border-white/10 px-4 py-2.5 text-left text-sm font-semibold text-white transition-colors hover:bg-white/10"
                 >
                   <Copy className="h-4 w-4 shrink-0 text-white/50" strokeWidth={2.25} />
                   {t.copy_week ?? 'Copia settimana'}
@@ -2054,13 +2103,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                           value={saveTemplateName}
                           onChange={(e) => setSaveTemplateName(e.target.value)}
                           placeholder={t.save_current_as ?? 'Salva come...'}
-                          className="flex-1 rounded-lg border border-white/10 bg-white/10 px-2 py-1.5 text-[0.6875rem] font-bold text-white outline-none placeholder:text-white/30"
+                          className="flex-1 rounded-lg border border-white/20 bg-white/10 px-2 py-1.5 text-[0.6875rem] font-bold text-white outline-none placeholder:text-white/30"
                         />
                         <button
                           type="button"
                           onClick={() => void handleSaveTemplate()}
                           disabled={savingTemplate || !saveTemplateName.trim()}
-                          className="rounded-lg bg-accent px-2.5 py-1.5 text-[0.625rem] font-bold text-white disabled:opacity-40"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white transition-colors hover:bg-white/30 disabled:opacity-40"
                         >
                           <Save className="h-3.5 w-3.5" />
                         </button>
@@ -2072,7 +2121,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                               <button
                                 type="button"
                                 onClick={() => void handleApplyTemplate(name)}
-                                className="w-full truncate rounded-lg px-2 py-1.5 text-left text-[0.6875rem] font-bold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                                className="w-full truncate rounded-lg px-2 py-1.5 text-left text-[0.6875rem] font-bold text-white transition-colors hover:bg-white/10"
                               >
                                 {name}
                               </button>
@@ -2092,7 +2141,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               {/* ── Vista ── */}
               {canEdit && (
                 <>
-                  <div className="border-b border-white/10 px-3 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white/55">
+                  <div className="border-b border-white/10 px-4 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white">
                     {t.wst_view_section ?? 'Vista'}
                   </div>
                   <button
@@ -2165,7 +2214,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* ── Period Popover ── */}
       {showPeriodPopover && createPortal(
           <div ref={periodPopoverRef}
-            className="fixed z-[10050] mt-1 rounded-2xl border border-white/10 p-3 md:p-4 w-[calc(100vw-32px)] max-w-[21.25rem] max-h-[85vh] overflow-y-auto"
+            className="fixed z-[10050] mt-1 rounded-2xl border border-white/[0.14] p-3 md:p-4 w-[calc(100vw-32px)] max-w-[21.25rem] max-h-[85vh] overflow-y-auto"
             style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', top: periodPopoverStyle.top, left: periodPopoverStyle.left, transform: 'translateX(-50%)' }}>
           <div className="flex items-center justify-between mb-3">
             <button type="button" onClick={() => setPeriodPopoverYear(y => y - 1)}
@@ -2180,12 +2229,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               const cfg = periodConfigForMonth(refDate);
               const start = getPeriodStartDate(cfg);
               const end = getPeriodEndDate(cfg);
-              const isActive = periodNavOffset === 0 && cfg.startDate === periodConfig.startDate && cfg.numWeeks === periodConfig.numWeeks;
+              const isActive = cfg.startDate === effectivePeriod.startDate && cfg.numWeeks === effectivePeriod.numWeeks;
               return (
                 <button key={i} type="button" onClick={() => applyPeriod(cfg)}
-                  className={`rounded-xl border px-2.5 py-2 text-left transition-colors ${isActive ? 'border-accent/50 bg-accent/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20'}`}>
-                  <div className={`text-[0.6875rem] font-bold ${isActive ? 'text-accent' : 'text-white'}`}>{format(new Date(periodPopoverYear, i, 15), 'MMM', { locale }).toUpperCase()}</div>
-                  <div className="text-[0.5625rem] text-white/40 mt-0.5 leading-tight tabular-nums truncate">
+                  className={`rounded-xl border px-2.5 py-2 text-center transition-colors ${isActive ? 'border-white/40 bg-white/20' : 'border-white/20 hover:border-white/40'}`}>
+                  <div className="text-[0.6875rem] font-bold text-white">{format(new Date(periodPopoverYear, i, 15), 'MMM', { locale }).toUpperCase()}</div>
+                  <div className="text-[0.5625rem] text-white/40 mt-0.5 leading-tight tabular-nums whitespace-nowrap">
                     {format(start, 'd MMM', { locale }).toUpperCase()} — {format(end, 'd MMM', { locale }).toUpperCase()}
                   </div>
                   <div className="text-[0.5rem] text-white/30 mt-0.5 font-bold uppercase">{(t.ts_period_weeks_abbr ?? '{n} sett.').replace('{n}', String(cfg.numWeeks))}</div>
@@ -2227,7 +2276,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* ── Desktop Grid ── */}
       <div
         ref={tableScrollRef}
-        className="hidden md:flex flex-col min-h-0 overflow-auto overscroll-contain rounded-2xl border border-white/10"
+        className="hidden md:flex flex-col min-h-0 overflow-auto overscroll-contain rounded-2xl border border-white/[0.14]"
         style={tableMaxHeight ? { maxHeight: tableMaxHeight } : { flex: '1 1 0', minHeight: 0 }}
         data-table-container
       >
@@ -2264,7 +2313,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     ) : (
                       <>
                         <div className={`text-[0.625rem] font-bold uppercase tracking-wider ${isToday(day) ? 'text-white/80' : 'text-white/25'}`}>{format(day, 'EEE', { locale })}</div>
-                        <div className={`text-sm font-black ${isToday(day) ? 'text-white' : 'text-white/50'}`}>{format(day, 'd')}</div>
+                        <div className={`text-sm font-black ${isToday(day) ? 'text-white' : 'text-white/50'}`}>
+                          {format(day, 'd')}
+                          <span className="ml-1 text-[0.625rem] font-bold uppercase">{format(day, 'MMM', { locale })}</span>
+                        </div>
                       </>
                     )}
                   </th>
@@ -2315,12 +2367,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 return (
                   <td key={i} className={`px-1 py-1.5 text-center border-t border-white/10 ${weekEnd ? 'border-r-2 border-r-white/20' : ''}`}>
                     <div className="flex items-center justify-center gap-1">
-                      <span className={`uppercase text-[0.6875rem] font-bold tabular-nums leading-none ${lunch > 0 ? 'text-amber-300' : 'text-white/25'}`}>
-                        {t.lunch_label ?? 'Pranzo'} {lunch}
+                      <span className={`flex items-center gap-0.5 text-[0.6875rem] font-bold tabular-nums leading-none ${lunch > 0 ? 'text-amber-300' : 'text-white/25'}`}>
+                        <Sun className="h-3 w-3" aria-label={t.lunch_label ?? 'Pranzo'} /> {lunch}
                       </span>
                       <span className="text-[0.6875rem] font-bold tabular-nums leading-none text-white/30">/</span>
-                      <span className={`uppercase text-[0.6875rem] font-bold tabular-nums leading-none ${evening > 0 ? 'text-sky-300' : 'text-white/25'}`}>
-                        {t.dinner_label ?? 'Cena'} {evening}
+                      <span className={`flex items-center gap-0.5 text-[0.6875rem] font-bold tabular-nums leading-none ${evening > 0 ? 'text-sky-300' : 'text-white/25'}`}>
+                        <Moon className="h-3 w-3" aria-label={t.dinner_label ?? 'Cena'} /> {evening}
                       </span>
                     </div>
                   </td>
@@ -2344,7 +2396,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-3xl rounded-2xl border border-white/15 p-5 shadow-2xl max-h-[90vh] z-10 flex flex-col"
+            className="relative w-full max-w-3xl rounded-2xl border border-white/[0.14] p-5 shadow-2xl max-h-[90vh] z-10 flex flex-col"
             style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: `2px solid ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}40`, boxShadow: `0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08), 0 0 24px ${isFrozen(selectedShift) || selectedShift.approval_status === 'approved' ? '#34d399' : selectedShift.approval_status === 'confirmed' ? '#67e8f9' : 'rgba(255,255,255,0.2)'}20` }}
             onClick={e => e.stopPropagation()}
           >
@@ -2395,21 +2447,21 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
             {/* Riga principale: nome/data (mobile: sotto i pulsanti) */}
             <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="min-w-0 flex flex-wrap items-baseline gap-x-1.5">
+              <div className="min-w-0 flex flex-nowrap items-baseline gap-x-1.5">
                 <h3 className="text-lg md:text-base font-bold text-white">{selectedUser?.first_name ?? ''} {selectedUser?.last_name ?? ''}</h3>
                 {drawerIsExtraShift && (
-                  <span className="inline-block mt-0.5 rounded-md bg-accent/20 px-1.5 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-accent">
+                  <span className="inline-block mt-0.5 shrink-0 rounded-md bg-white/20 px-1.5 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-accent">
                     {t.extra_shift ?? 'Turno aggiuntivo'}
                   </span>
                 )}
-                <p className="text-lg md:text-base text-white font-semibold uppercase">· {format(parseISO(selectedShift.date), 'EEEE d MMMM', { locale })} — {selectedShift.start_time?.slice(0, 5)}-{selectedShift.end_time?.slice(0, 5)}</p>
+                <p className="min-w-0 truncate text-base md:text-sm text-white font-semibold uppercase">· {format(parseISO(selectedShift.date), 'EEEE d MMMM', { locale })} — {selectedShift.start_time?.slice(0, 5)}-{selectedShift.end_time?.slice(0, 5)}</p>
               </div>
               <div className="hidden md:flex shrink-0 items-center gap-2">
                 {reviewQueue && (
                   <>
                     <span className="text-[0.625rem] font-bold text-white/50 tabular-nums">{reviewIdx + 1}/{reviewQueue.length}</span>
-                    <button type="button" disabled={reviewIdx <= 0} onClick={() => { const next = reviewIdx - 1; if (next >= 0) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-4 w-4" /></button>
-                    <button type="button" disabled={reviewIdx >= reviewQueue.length - 1} onClick={() => { const next = reviewIdx + 1; if (next < reviewQueue.length) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-4 w-4" /></button>
+                    <button type="button" disabled={reviewIdx <= 0} onClick={() => { const next = reviewIdx - 1; if (next >= 0) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg border border-white/20 bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-4 w-4" /></button>
+                    <button type="button" disabled={reviewIdx >= reviewQueue.length - 1} onClick={() => { const next = reviewIdx + 1; if (next < reviewQueue.length) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg border border-white/20 bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-4 w-4" /></button>
                   </>
                 )}
                 {/* Desktop: azioni a icona (l'orario del turno è già visibile a sinistra) */}
@@ -2418,7 +2470,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     <button type="button" onClick={() => setDrawerDeleteConfirm(true)}
                       className="group flex items-center gap-0 overflow-hidden rounded-lg bg-rose-600/20 p-2 text-rose-300 transition-all duration-200 hover:gap-1.5 hover:bg-rose-600/30 hover:pr-2.5" title={t.delete ?? 'Elimina'}>
                       <Trash2 className="h-4 w-4 shrink-0" />
-                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[5rem]">
+                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[5rem]">
                         {t.delete ?? 'Elimina'}
                       </span>
                     </button>
@@ -2439,7 +2491,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     <button type="button" onClick={() => handleFreezeShift(selectedShift)}
                       className="group flex items-center gap-0 overflow-hidden rounded-lg bg-emerald-600/20 p-2 text-emerald-300 transition-all duration-200 hover:gap-1.5 hover:bg-emerald-600/30 hover:pr-2.5" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
                       <Unlock className="h-4 w-4 shrink-0" />
-                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[5rem]">
+                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[5rem]">
                         {t.ts_drawer_freeze_btn ?? 'Congela'}
                       </span>
                     </button>
@@ -2450,7 +2502,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       title={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
                       aria-label={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}>
                       <History className="h-4 w-4 shrink-0" />
-                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[6rem]">
+                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[9rem]">
                         {(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
                       </span>
                     </button>
@@ -2461,7 +2513,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   aria-label={t.cancel ?? 'Chiudi'}
                   title={t.cancel ?? 'Chiudi'}>
                   <X className="h-4 w-4 shrink-0" />
-                  <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[4rem]">
+                  <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[4rem]">
                     {t.cancel ?? 'Chiudi'}
                   </span>
                 </button>
@@ -2528,7 +2580,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                         {!hasIn && !hasOut ? (
                           <span className="flex items-center gap-1 text-[0.6875rem] font-bold text-amber-400"><AlertTriangle className="h-3 w-3" />{t.not_clocked ?? 'Non timbrato'}</span>
                         ) : hasIn && !hasOut ? (
-                          <span className="flex items-center gap-1 text-[0.6875rem] font-bold text-accent"><Clock className="h-3 w-3" />{t.clocked_in_only ?? 'Solo entrata'}</span>
+                          <span className="flex items-center gap-1 text-[0.6875rem] font-bold text-white"><Clock className="h-3 w-3" />{t.clocked_in_only ?? 'Solo entrata'}</span>
                         ) : (
                           <span className="flex items-center gap-1 text-[0.6875rem] font-bold text-emerald-400"><Check className="h-3 w-3" />{t.clocked_complete ?? 'Timbratura completa'}</span>
                         )}
@@ -2646,7 +2698,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             </AnimatePresence>
                             <label className="flex items-center gap-2 cursor-pointer" aria-label={t.deduct_break_label ?? 'Detrae pausa'}>
                               <input type="checkbox" checked={deductBreak} onChange={handleDeductBreakToggle}
-                                className="w-3.5 h-3.5 rounded border-white/30 bg-white/10 accent-accent" />
+                                className="w-3.5 h-3.5 rounded border-white/20 bg-white/10 accent-accent" />
                               {breakUnsaved ? (
                                 <button
                                   type="button"
@@ -2663,7 +2715,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             {deductBreak && _hasAutoBreak && (
                               <label className="flex items-center gap-2 cursor-pointer" aria-label={autoBreakLabel}>
                                 <input type="checkbox" checked={isAutoBreak} onChange={handleAutoBreakToggle}
-                                  className="w-3.5 h-3.5 rounded border-white/30 bg-white/10 accent-accent" />
+                                  className="w-3.5 h-3.5 rounded border-white/20 bg-white/10 accent-accent" />
                                 <span className="text-[0.625rem] font-bold text-amber-400 whitespace-nowrap">{autoBreakLabel}</span>
                               </label>
                             )}
@@ -2678,7 +2730,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               <div className="col-span-1 md:col-span-2 flex flex-wrap gap-2">
                 {canEdit && isFrozen(selectedShift) && (
                   <button type="button" onClick={() => handleUnfreezeShift(selectedShift)}
-                    className="ml-auto flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-2 text-[0.6875rem] font-bold text-accent hover:bg-accent/30 transition-colors border border-transparent hover:border-accent/30">
+                    className="ml-auto flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-2 text-[0.6875rem] font-bold text-accent hover:bg-white/30 transition-colors border border-transparent hover:border-white/30">
                     <Lock className="h-3.5 w-3.5" />{t.wst_unfreeze_btn ?? 'Sblocca'}
                   </button>
                 )}
@@ -2703,7 +2755,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="relative z-10 flex h-[70vh] max-h-[82vh] w-full max-w-xl flex-col rounded-2xl p-4 shadow-2xl"
-            style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08)' }}
+            style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.14)', boxShadow: '0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08)' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-center justify-between">
@@ -2741,13 +2793,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   bulk_approve: t.hist_action_bulk_approve ?? 'Approvazione multipla',
                 };
                 const actionColor: Record<string, string> = {
-                  create: 'bg-accent/25 text-accent',
+                  create: 'bg-white/25 text-accent',
                   update: 'bg-amber-500/25 text-amber-300',
                   shift_edit: 'bg-sky-500/25 text-sky-300',
                   delete: 'bg-red-500/25 text-red-300',
-                  publish: 'bg-accent/20 text-accent',
+                  publish: 'bg-white/20 text-accent',
                   bulk_delete: 'bg-red-500/25 text-red-300',
-                  bulk_approve: 'bg-accent/25 text-accent',
+                  bulk_approve: 'bg-white/25 text-accent',
                 };
                 const fieldLabels: Record<string, string> = {
                   start_time: tv.field_start_time ?? 'Ora inizio',
@@ -2793,7 +2845,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     ? (fieldColor[entry.field] ?? 'bg-sky-500/25 text-sky-300')
                     : (actionColor[entry.action] ?? 'bg-white/15 text-white/85');
                   return (
-                    <div key={entry.id} className="grid grid-cols-[minmax(110px,auto)_1fr_auto] items-center gap-2.5 rounded-lg border border-white/15 px-3 py-2 uppercase">
+                    <div key={entry.id} className="grid grid-cols-[minmax(110px,auto)_1fr_auto] items-center gap-2.5 rounded-lg border border-white/[0.14] px-3 py-2 uppercase">
                       {/* Col 1: la modifica effettuata (es. "Ora inizio"); senza campo, l'azione (es. "Creato") */}
                       <span className={`justify-self-start rounded-full px-2 py-1 text-[0.6875rem] font-bold ${chipClass}`}>
                         {hasField ? fieldLabel(entry.field) : (actionLabel[entry.action] ?? entry.action)}
@@ -2835,8 +2887,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-lg rounded-2xl border border-white/15 p-5 shadow-2xl z-10 bg-transparent"
-            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+            className="relative w-full max-w-lg rounded-2xl border border-white/[0.14] p-5 shadow-2xl z-10 bg-transparent"
+            style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">{t.create_shift ?? 'Nuovo turno'}</h3>
@@ -2892,10 +2944,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 className="flex-1 rounded-lg border border-white/20 px-4 py-2.5 text-[0.6875rem] font-bold text-white/70 hover:bg-white/[0.07] hover:text-white uppercase tracking-wider"
               >{t.cancel ?? 'Annulla'}</button>
               <button type="button" onClick={() => handleCreateShift()} disabled={saving}
-                className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-accent/80 disabled:opacity-60 uppercase tracking-wider flex items-center justify-center gap-1.5"
+                className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-white/80 disabled:opacity-60 uppercase tracking-wider flex items-center justify-center gap-1.5"
               >
                 {saving ? (
-                  <><span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Salvando…</>
+                  <><span className="inline-block w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />Salvando…</>
                 ) : (
                   <><Plus className="h-3.5 w-3.5" />{t.create ?? 'Crea'}</>
                 )}
@@ -2918,8 +2970,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-xs rounded-2xl border border-white/15 p-5 shadow-2xl z-10 bg-white/[0.04]"
-            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+            className="relative w-full max-w-xs rounded-2xl border border-white/[0.14] p-5 shadow-2xl z-10 bg-transparent"
+            style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-sm font-bold text-white mb-2">{t.drop_confirm_title ?? 'Turno trascinato'}</h3>
@@ -2956,7 +3008,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   }}
                   className={`rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold tabular-nums transition-colors ${
                     i === dropConfirm.selectedPresetIdx
-                      ? 'ring-2 ring-accent/70 bg-accent/15 text-accent shadow-md'
+                      ? 'ring-2 ring-white/70 bg-white/15 text-accent shadow-md'
                       : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
                   }`}
                 >

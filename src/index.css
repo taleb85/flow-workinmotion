@@ -181,7 +181,7 @@ body {
     --gray-lighter: #f1f5f9;
     --flow-blue:     #ffffff;
     --flow-slate:    #ffffff;
-    --flow-border:   rgba(255, 255, 255, 0.15);
+    --flow-border:   rgba(255, 255, 255, 0.14);
     --flow-bg-light: rgba(255, 255, 255, 0.06);
     --brand: #10b981;
     --brand-from: #10b981;
@@ -237,7 +237,7 @@ body {
     /** Menu/popover su `body` (portal): stessa tinta senza alpha così testo e righe restano leggibili sulla griglia sotto. */
     --bg-popover-solid: rgb(10, 10, 10);
     --bg-surface-secondary: transparent;
-    --border-color: rgba(255, 255, 255, 0.15);
+    --border-color: rgba(255, 255, 255, 0.14);
     --text-primary: #ffffff;
     --text-secondary: #ffffff;
     --text-muted: #ffffff;
@@ -362,7 +362,7 @@ body {
   .panel textarea,
   .panel select {
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.20);
     color: #ffffff;
   }
 
@@ -444,7 +444,7 @@ body {
     background: var(--surface-header-slab);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.35);
   }
   .surface-glass-sm {
@@ -465,7 +465,7 @@ body {
     @apply text-neutral-50 shadow-2xl;
     background: rgba(10, 10, 10, 0.08);
     color: #f1f5f9;
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
     overscroll-behavior-y: none;
@@ -491,7 +491,7 @@ body {
   .liquid-glass {
     position: relative;
     background: rgba(255, 255, 255, 0.13);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     -webkit-backdrop-filter: blur(12px) saturate(1.4);
     backdrop-filter: blur(12px) saturate(1.4);
     box-shadow:
@@ -512,7 +512,7 @@ body {
   }
   .liquid-glass:hover {
     background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.14);
   }
   .liquid-glass-green {
     background: rgba(16, 185, 129, 0.22);
@@ -546,7 +546,7 @@ body {
     background: rgba(22, 42, 72, 0.88);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255,255,255,0.85);
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
     border-left: none;
     border-right: none;
     border-bottom: none;
@@ -597,9 +597,9 @@ body {
    */
   .ui-toolbar-group {
     @apply flex h-[1.375rem] items-center gap-0 overflow-hidden rounded-lg shadow-sm;
-    @apply divide-x divide-white/15;
+    @apply divide-x divide-white/10;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.20);
     box-shadow: none;
   }
   /** Fascia grigia periodo Presenze: stesso schema segmenti; scroll orizzontale se serve */
@@ -643,7 +643,7 @@ body {
   .ui-toolbar-chip {
     @apply inline-flex h-[1.375rem] items-center justify-center gap-1 rounded-lg px-2 text-center text-[0.8125rem] font-medium leading-none transition-colors;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.20);
     color: rgba(255, 255, 255, 0.85);
     box-shadow: none;
   }
@@ -653,7 +653,7 @@ body {
   }
   /** «Oggi» / outline accent */
   .ui-toolbar-ghost-accent {
-    @apply box-border inline-flex h-[1.375rem] min-h-[1.375rem] max-h-[1.375rem] items-center justify-center rounded-lg border border-accent/30 bg-transparent px-2 py-0 text-center text-[0.8125rem] font-semibold leading-none text-accent shadow-none transition-colors hover:bg-accent/10;
+    @apply box-border inline-flex h-[1.375rem] min-h-[1.375rem] max-h-[1.375rem] items-center justify-center rounded-lg border border-white/30 bg-transparent px-2 py-0 text-center text-[0.8125rem] font-semibold leading-none text-accent shadow-none transition-colors hover:bg-white/10;
   }
 
   /** Pulsante primario compatto in toolbar (accent) */
@@ -662,14 +662,14 @@ body {
     background: transparent !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.50) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
   }
 
   /** Pulsante secondario bordo (CSV, outline) */
   .ui-toolbar-outline {
     @apply inline-flex h-[1.375rem] items-center justify-center gap-1.5 rounded-lg px-2.5 text-center text-[0.8125rem] font-semibold leading-none shadow-none transition-colors;
     background: transparent !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.50) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
     color: #ffffff;
   }
   .ui-toolbar-outline:hover {
@@ -731,11 +731,11 @@ body {
 
   .ui-toolbar-page-band-presences .ui-toolbar-group {
     @apply flex h-9 md:h-10 items-stretch gap-0 overflow-hidden rounded-xl shadow-sm;
-    @apply divide-x divide-white/20;
+    @apply divide-x divide-white/10;
     background: rgba(255, 255, 255, 0.20);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.20);
     box-shadow: 0 1px 4px -1px rgba(255, 255, 255, 0.08);
   }
   /**
@@ -759,7 +759,7 @@ body {
     background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.20);
     color: rgba(255, 255, 255, 0.85);
     box-shadow: none;
   }
@@ -768,7 +768,7 @@ body {
     background: transparent !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.50) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
   }
 
   /* ═══════════════════════════════════════════════════════════════
@@ -825,14 +825,14 @@ body {
   background: transparent !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.50) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
 }
 .ui-toolbar-accent,
 .ui-toolbar-page-band-presences .ui-toolbar-accent {
   background: transparent !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.50) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
 }
 [class~="bg-accent"]:hover:not([role="switch"]),
 [class~="hover:bg-accent-hover"]:hover {
@@ -1006,7 +1006,7 @@ button[role="switch"][class~="bg-accent"] {
 
 .rdp-modern.rdp-root .rdp-dropdown_root select {
   border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.20);
   background: rgba(255, 255, 255, 0.15);
   padding: 0.1rem 0.35rem;
   font-size: 0.75rem;
@@ -1017,7 +1017,7 @@ button[role="switch"][class~="bg-accent"] {
 .rdp-modern.rdp-root .rdp-button_previous,
 .rdp-modern.rdp-root .rdp-button_next {
   border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.20);
   color: rgba(255, 255, 255, 0.70);
   width: 1.75rem;
   height: 1.75rem;
@@ -1231,7 +1231,7 @@ html.no-motion *::after {
 
 /* Separatore riga dipendente: 0.5px grigio chiarissimo */
 .shift-separator-ultra {
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
 }
 
 /* Card glassmorphism premium: dark surface con backdrop-blur 16px */
@@ -1239,7 +1239,7 @@ html.no-motion *::after {
   background: var(--bg-surface);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
   border-radius: 1rem;
 }
@@ -1343,7 +1343,7 @@ input[type="url"],
 textarea,
 select {
   background: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
   color: #ffffff !important;
   transition: border-color 0.2s, background 0.2s;
 }
@@ -1389,14 +1389,14 @@ thead tr,
 thead th {
   background: transparent !important;
   color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
 }
 
 /* Table rows alternating — rimosso per evitare striping automatico */
 
 /* Table cells */
 td, th {
-  border-color: var(--border-color) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
   color: var(--text-primary) !important;
 }
 
@@ -1425,13 +1425,13 @@ td, th {
 .shift-card-ultra .rounded-full {
   color: #ffffff !important;
   background: rgba(255, 255, 255, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
 /* Inner time boxes (PIANIFICATO / TIMBRATO sub-cards) */
 .shift-card-ultra .rounded-xl {
   background: rgba(255, 255, 255, 0.13) !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
   color: #ffffff !important;
 }
 
@@ -1510,7 +1510,7 @@ button[class*="bg-accent"][class*="ui-toolbar"] {
 div.rounded-2xl.border.px-4.py-3\.5,
 .rounded-2xl.border.px-4 {
   background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
 /* KPI number - force white color with multiple selectors */
@@ -1618,7 +1618,7 @@ div[class*="rounded-2xl"] .text-slate-600 {
 .calendar-container,
 [class*="calendar-wrapper"] {
   background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
 /* Legend text */
@@ -1666,7 +1666,7 @@ input[type="file"] {
 .ui-toolbar-drawer input,
 [class*="drawer"] input[type="text"] {
   background: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
   color: #ffffff !important;
 }
 
@@ -1796,7 +1796,7 @@ thead th {
 /* OFF state: sottile */
 [data-theme="dark"] [role="switch"]:not(.bg-accent):not([class*="bg-accent"]) {
   background: rgba(255,255,255,0.06) !important;
-  border-color: rgba(255,255,255,0.08) !important;
+  border-color: rgba(255,255,255,0.20) !important;
   box-shadow: none !important;
 }
 /* Peer-checkbox toggles */
@@ -1807,7 +1807,7 @@ thead th {
 }
 [data-theme="dark"] .peer:not(:checked) + div:not(.bg-accent) {
   background: rgba(255,255,255,0.06) !important;
-  border-color: rgba(255,255,255,0.08) !important;
+  border-color: rgba(255,255,255,0.20) !important;
   box-shadow: none !important;
 }
 
@@ -1846,13 +1846,14 @@ thead th {
   background: rgba(255, 255, 255, 0.04) !important;
 }
 
-/* Border overrides — light borders → dark equivalents */
-[data-theme="dark"] .border-slate-200 { border-color: rgba(255, 255, 255, 0.22) !important; }
-[data-theme="dark"] .border-gray-200  { border-color: rgba(255, 255, 255, 0.22) !important; }
-[data-theme="dark"] .border-slate-100 { border-color: rgba(255, 255, 255, 0.16) !important; }
-[data-theme="dark"] .border-gray-100  { border-color: rgba(255, 255, 255, 0.16) !important; }
-[data-theme="dark"] .border-slate-300 { border-color: rgba(255, 255, 255, 0.28) !important; }
-[data-theme="dark"] .border-gray-300  { border-color: rgba(255, 255, 255, 0.28) !important; }
+/* Border overrides — SCALA UNIFICATA A 3 LIVELLI
+   contenitori 0.14 · celle/controlli 0.20 · divisori 0.10 */
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-gray-200,
+[data-theme="dark"] .border-slate-300,
+[data-theme="dark"] .border-gray-300 { border-color: rgba(255, 255, 255, 0.20) !important; }
+[data-theme="dark"] .border-slate-100,
+[data-theme="dark"] .border-gray-100 { border-color: rgba(255, 255, 255, 0.14) !important; }
 /* ── Tutti i p bianchi ── */
 [data-theme="dark"] p {
   color: #ffffff !important;
@@ -1866,6 +1867,16 @@ thead th {
 [data-theme="dark"] td {
   background: transparent !important;
   background-color: transparent !important;
+}
+
+/* ── Prima colonna sticky su scroll orizzontale: vetro satinato senza colore.
+   Le celle che scorrono sotto vengono sfocate, non coperte da una lastra scura. ── */
+[data-theme="dark"] th[class*="sticky"][class*="left-0"],
+[data-theme="dark"] td[class*="sticky"][class*="left-0"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
 }
 
 /* ── input, textarea, select: bordi arrotondati ── */
@@ -1886,7 +1897,7 @@ thead th {
 [data-theme="dark"] .rounded-2xl.border-neutral-500,
 [data-theme="dark"] .border-neutral-500 {
   background: transparent !important;
-  border-color: rgba(255, 255, 255, 0.50) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
   border-width: 1px !important;
 }
 [data-theme="dark"] .rounded-xl.border-neutral-500 {
@@ -1912,16 +1923,16 @@ thead th {
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* Divisori interni: linea bianca sottile con fade ai lati */
+/* Divisori interni: livello divisori */
 [data-theme="dark"] .border-b.border-neutral-500 {
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.20) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
 }
 [data-theme="dark"] .border-t.border-neutral-500 {
-  border-top: 1.5px solid rgba(255, 255, 255, 0.20) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.10) !important;
 }
 [data-theme="dark"] .divide-neutral-500,
 [data-theme="dark"] .divide-neutral-500\/20 {
-  border-color: rgba(255, 255, 255, 0.20) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
 }
 
 /* Barre di progresso: track visibile e fill sempre bianco */
@@ -1947,7 +1958,7 @@ thead th {
 /* Bottoni riga profilo (Impostazioni, Notifiche, Lingua) */
 [data-theme="dark"] [class*="w-full"][class*="flex"][class*="px-4"][class*="py-3"] {
   background: transparent !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
   border-radius: 0.75rem;
 }
 
@@ -1956,11 +1967,13 @@ thead th {
   background: transparent !important;
 }
 
-/* Chip toolbar (Template, PDF, Copia) — solo quelli con uppercase tracking-wider */
-[data-theme="dark"] button[class*="uppercase"][class*="tracking-wider"][class*="bg-white/"] {
+/* Chip toolbar (Template, PDF, Copia) — solo quelli con uppercase tracking-wider.
+   `:not([aria-pressed="true"])` preserva lo stato attivo dei toggle segmentati
+   (Settimana/Periodo), che altrimenti perderebbe lo sfondo. */
+[data-theme="dark"] button[class*="uppercase"][class*="tracking-wider"][class*="bg-white/"]:not([aria-pressed="true"]) {
   background: transparent !important;
   backdrop-filter: blur(12px) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
 }
 /* Dropdown reparti: override per rimuovere bordi ereditati */
 [data-theme="dark"] .rounded-2xl button[class*="uppercase"][class*="tracking-wider"][class*="text-left"] {
@@ -1975,36 +1988,36 @@ thead th {
 }
 
 /* Periodo/Settimana toggle — solo quelli senza bg-color */
-[data-theme="dark"] button[class*="rounded-md"][class*="px-"][class*="bg-white/"] {
+[data-theme="dark"] button[class*="rounded-md"][class*="px-"][class*="bg-white/"]:not([aria-pressed="true"]) {
   background: transparent !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
 }
 
 /* Chevron nav — solo quelli senza bg-color */
 [data-theme="dark"] button[class*="rounded-lg"][class*="chevron"][class*="bg-white/"] {
   background: transparent !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
 }
 
 /* Pulsante Oggi — solo senza bg-color */
 [data-theme="dark"] button[class*="Oggi"][class*="bg-white/"] {
   background: transparent !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
 }
 
 /* Header tabella (th) */
 [data-theme="dark"] th[class*="bg-transparent"] {
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
 }
 
 /* Selettore data (10px) */
 [data-theme="dark"] button[class*="rounded-lg"][class*="px-"][class*="text-["] {
   background: transparent !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
 }
 
 /* divide colors */
-[data-theme="dark"] .divide-\[#F1F5F9\] > * + * { border-color: rgba(255, 255, 255, 0.15) !important; }
+[data-theme="dark"] .divide-\[#F1F5F9\] > * + * { border-color: rgba(255, 255, 255, 0.10) !important; }
 
 /* Progress bar tracks */
 [data-theme="dark"] .bg-gray-200  { background-color: rgba(255, 255, 255, 0.06) !important; }
@@ -2036,7 +2049,7 @@ thead th {
 /* Avatar boost — slightly more visible */
 .shift-card-ultra [class*="rounded-full"][class*="bg-white\/"] {
   background: rgba(255, 255, 255, 0.25) !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
 /* Icon opacity boost inside dark cards */
@@ -2054,7 +2067,7 @@ thead th {
 
 /* Toolbar pill dark */
 .ui-toolbar-pill {
-  border-color: rgba(255, 255, 255, 0.22) !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
   color: rgba(255, 255, 255, 0.85) !important;
   background: rgba(255, 255, 255, 0.06) !important;
 }
@@ -2062,10 +2075,10 @@ thead th {
 /* ui-toolbar-group-muted dark */
 .ui-toolbar-group-muted {
   background: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(255, 255, 255, 0.22) !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
 }
 .ui-toolbar-group-muted > * + * {
-  border-color: rgba(255, 255, 255, 0.22) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
 }
 
 /* card-factorial dark */
@@ -2143,7 +2156,7 @@ html[data-theme="dark"] body {
   [class*='grid-cell'],
   [class*='GridCell'] {
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.20);
   }
 }
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -2161,7 +2174,7 @@ html[data-theme="dark"] body {
   --bg-surface-secondary:  rgba(20, 20, 20, 0.45);
   --surface:               rgba(20, 20, 20, 0.55);
   --surface-card:          rgba(20, 20, 20, 0.60);
-  --border-color:          rgba(255, 255, 255, 0.15);
+  --border-color:          rgba(255, 255, 255, 0.14);
   --app-bg:                #0a0a0a;
 
   --text-primary:         rgba(255, 255, 255, 0.97);
@@ -2189,7 +2202,7 @@ html[data-theme="dark"] body {
   background: rgba(10, 10, 10, 0.70) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
 }
 
 /* ── Bottom nav glass (nascosta) ── */
@@ -2200,7 +2213,7 @@ html[data-theme="dark"] body {
 /* ── Bottoni con bordo neutral-500 ── */
 button.border-neutral-500,
 a.border-neutral-500 {
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
 }
 
 /* ── Riduci padding top tabella turni ──
@@ -2213,9 +2226,11 @@ a.border-neutral-500 {
 }
 
 /* ── Bordi slate → bianco semi-trasparente ── */
-.border-slate-50, .border-slate-100, .border-slate-200, .border-slate-300, .border-slate-400,
+.border-slate-50, .border-slate-100, .border-slate-200, .border-slate-300, .border-slate-400 {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
 .divide-slate-50 > * + *, .divide-slate-100 > * + *, .divide-slate-200 > * + * {
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
 }
 
 /* ── scrollbar nascosta ── */
@@ -2232,14 +2247,14 @@ a.border-neutral-500 {
   background: rgba(5, 5, 5, 0.10) !important;
   backdrop-filter: blur(32px) !important;
   -webkit-backdrop-filter: blur(32px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
-/* Backdrop overlay modali */
+/* Backdrop overlay modali — scrim piatto, uniforme (il blur è sui pannelli) */
 .z-50.fixed.inset-0 {
-  background: rgba(0, 0, 0, 0.10) !important;
-  backdrop-filter: blur(6px) !important;
-  -webkit-backdrop-filter: blur(6px) !important;
+  background: rgba(0, 0, 0, 0.40) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* Input bg-slate-* nei modal */
@@ -2251,7 +2266,7 @@ a.border-neutral-500 {
 .modal-glass-panel .bg-slate-50,
 .modal-glass-panel [class*="bg-slate-"] {
   background: rgba(255, 255, 255, 0.09) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
   color: rgba(255, 255, 255, 0.90) !important;
 }
 .modal-glass-panel .bg-slate-100:hover,
@@ -2269,18 +2284,34 @@ a.border-neutral-500 {
   background: rgba(5, 5, 5, 0.92) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
 .liquid-glass {
   background: rgba(10, 10, 10, 0.60) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
 }
 
+/* Varianti di stato del vetro (verde/rosso/ambra): la tinta deve restare
+   visibile anche a riposo, sopra la superficie neutra definita qui sopra
+   e sopra quella di flow-v2-skin.css. Specificità maggiore = vince. */
+.liquid-glass.liquid-glass-green {
+  background: rgba(16, 185, 129, 0.22) !important;
+  border-color: rgba(16, 185, 129, 0.50) !important;
+}
+.liquid-glass.liquid-glass-red {
+  background: rgba(239, 68, 68, 0.20) !important;
+  border-color: rgba(239, 68, 68, 0.45) !important;
+}
+.liquid-glass.liquid-glass-amber {
+  background: rgba(245, 158, 11, 0.20) !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
 .surface-ghost-sm {
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
 .surface-ghost-interactive:hover {
@@ -2310,7 +2341,7 @@ body .bg-gray-300:not(input):not(textarea):not(select) {
 input.bg-slate-100, input.bg-slate-200,
 select.bg-slate-100, select.bg-slate-200 {
   background: rgba(255, 255, 255, 0.09) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
   color: #fff !important;
 }
 
@@ -2355,14 +2386,14 @@ input[type="url"],
 textarea,
 select {
   background: rgba(255, 255, 255, 0.16) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
   color: rgba(255, 255, 255, 0.9) !important;
 }
 input:focus,
 textarea:focus,
 select:focus {
   background: transparent !important;
-  border-color: rgba(255, 255, 255, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.10) !important;
 }
 
@@ -2378,12 +2409,12 @@ select:focus {
 /* ── Toolbar chips / groups ── */
 .ui-toolbar-group {
   background: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
 }
 .ui-toolbar-chip:not(.bg-accent),
 .ui-toolbar-tab:not(.bg-accent) {
   background: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
   color: rgba(255, 255, 255, 0.70) !important;
 }
 .ui-toolbar-chip:hover,
@@ -2399,12 +2430,12 @@ thead tr, thead th {
   border-color: rgba(255, 255, 255, 0.10) !important;
 }
 td, th {
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
 }
 
 /* ── Depth row ── */
 .depth-row {
-  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.10) !important;
 }
 
 /* ── Header: stesso effetto della bottom nav ────────────────────────────
@@ -2437,7 +2468,7 @@ td, th {
 .bottom-nav-glass-edge {
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
 }
 
 /* I figli restano senza effetti (stesso pattern di .app-header *):

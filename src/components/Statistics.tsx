@@ -557,7 +557,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                       className="h-9 inline-flex items-center px-3 rounded-2xl bg-white/20 text-white text-xs font-extrabold uppercase tracking-wider shrink-0 shadow-sm active:bg-white/30 transition-colors">
                       {t.today}
                     </button>
-                    <div className="flex items-center rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.28)' }}>
+                    <div className="flex items-center rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.20)' }}>
                       <button
                         type="button"
                         onClick={() => setNavOffset(o => o - 1)}
@@ -709,7 +709,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                             style={{
                               background: 'var(--bg-popover-solid, rgb(21, 40, 72))',
                               color: '#f1f5f9',
-                              border: '1px solid rgba(255,255,255,0.15)',
+                              border: '1px solid rgba(255,255,255,0.14)',
                               isolation: 'isolate',
                             }}
                           >
@@ -808,7 +808,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
             </div>
             <div className="fluid-grid fluid-grid-4 gap-3">
               <div
-                className="rounded-2xl border border-white/12 px-3 py-3"
+                className="rounded-2xl border border-white/[0.14] px-3 py-3"
                 style={{ background: 'rgba(255,255,255,0.06)' }}
               >
                 <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/45">
@@ -819,7 +819,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 </p>
               </div>
               <div
-                className="rounded-2xl border border-white/12 px-3 py-3"
+                className="rounded-2xl border border-white/[0.14] px-3 py-3"
                 style={{ background: 'rgba(255,255,255,0.06)' }}
               >
                 <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/45">
@@ -830,7 +830,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 </p>
               </div>
               <div
-                className="rounded-2xl border border-white/12 px-3 py-3"
+                className="rounded-2xl border border-white/[0.14] px-3 py-3"
                 style={{ background: 'rgba(255,255,255,0.06)' }}
               >
                 <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/45">
@@ -841,7 +841,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 </p>
               </div>
               <div
-                className="rounded-2xl border border-white/12 px-3 py-3"
+                className="rounded-2xl border border-white/[0.14] px-3 py-3"
                 style={{ background: 'rgba(255,255,255,0.06)' }}
               >
                 <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/45">
@@ -851,7 +851,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
               </div>
             </div>
             <div
-              className="rounded-2xl border border-white/12 p-4"
+              className="rounded-2xl border border-white/[0.14] p-4"
               style={{ background: 'rgba(255,255,255,0.05)' }}
             >
               <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white/50">
@@ -920,7 +920,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
           <div className="mb-4 rounded-2xl px-4 py-3.5 text-sm"
             style={{
               background: 'rgba(255,255,255,0.11)',
-              border: '1px solid rgba(255,255,255,0.18)',
+              border: '1px solid rgba(255,255,255,0.14)',
             }}
           >
             <p className="font-bold text-white">
@@ -942,7 +942,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
           <div className="mb-8 md:mb-6">
 
             {/* ── DESKTOP: card unica con tabella (invariato) ── */}
-            <div className="hidden md:block rounded-xl border border-neutral-500 overflow-hidden border-l-4 border-l-white/30 border border-neutral-500">
+            <div className="hidden md:block rounded-xl border border-white/[0.14] overflow-hidden border-l-4 border-l-white/30 border border-white/[0.14]">
               <div className="flex items-center justify-between gap-3 px-5 py-4 md:px-6">
                 <p className="text-[0.6875rem] font-bold uppercase tracking-widest text-white/80">
                   {t.stats_your_hours_in_range}
@@ -960,7 +960,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                   <p className="max-w-xs text-xs leading-relaxed text-white/50">{t.stats_no_confirmed_shifts_period}</p>
                 </div>
               ) : (
-                <div className="border-t border-neutral-500">
+                <div className="border-t border-white/10">
                   {weeksInRange.map((w) => {
                     const weekMins = minutesByUserByWeek[currentUser.id]?.[w.key] ?? 0;
                     const clampedStart = w.start < rangeStart ? rangeStart : w.start;
@@ -969,14 +969,14 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                     return (
                       <div key={`staff-d-${w.key}`} className="border-b border-white/10 last:border-0">
                         <div className="overflow-x-auto [-webkit-overflow-scrolling:touch]">
-                            <table className="w-full border-collapse border border-white/12" style={{ minWidth: `${weekDays.length * 60 + 120}px` }}>
+                            <table className="w-full border-collapse border border-white/[0.14]" style={{ minWidth: `${weekDays.length * 60 + 120}px` }}>
                             <thead>
                               <tr className="bg-white/10">
-                                <th className="py-2 pl-5 pr-2 text-left text-[0.6875rem] font-bold uppercase tracking-wider text-white/70 border border-white/12">
+                                <th className="py-2 pl-5 pr-2 text-left text-[0.6875rem] font-bold uppercase tracking-wider text-white/70 border border-white/10">
                                   {w.label}
                                 </th>
                                 {weekDays.map((day) => (
-                                  <th key={format(day, 'yyyy-MM-dd')} className="px-2 py-2 text-center min-w-[3.75rem] border border-white/12">
+                                  <th key={format(day, 'yyyy-MM-dd')} className="px-2 py-2 text-center min-w-[3.75rem] border border-white/10">
                                     <span className="block text-[0.6875rem] font-bold uppercase tracking-wider text-white/70">
                                       {format(day, 'EEE', { locale: statsLoc })}
                                     </span>
@@ -985,19 +985,19 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                                     </span>
                                   </th>
                                 ))}
-                                <th className="py-2 pl-2 pr-5 text-right text-[0.6875rem] font-bold uppercase tracking-wider text-white/70 min-w-[3.75rem] border border-white/12 bg-white/10">
+                                <th className="py-2 pl-2 pr-5 text-right text-[0.6875rem] font-bold uppercase tracking-wider text-white/70 min-w-[3.75rem] border border-white/10 bg-white/10">
                                   Tot.
                                 </th>
                               </tr>
                             </thead>
                             <tbody>
                               <tr>
-                                <td className="py-2 pl-5 pr-2 border border-white/12 text-[0.6875rem] text-white/45" />
+                                <td className="py-2 pl-5 pr-2 border border-white/10 text-[0.6875rem] text-white/45" />
                                 {weekDays.map((day) => {
                                   const dayKey = format(day, 'yyyy-MM-dd');
                                   const mins = minutesByUserByDay[currentUser.id]?.[dayKey] ?? 0;
                                   return (
-                                    <td key={dayKey} className="px-2 py-2.5 text-center tabular-nums border border-white/12">
+                                    <td key={dayKey} className="px-2 py-2.5 text-center tabular-nums border border-white/10">
                                       {mins > 0 ? (
                                         <span className="text-[0.8125rem] font-bold text-white">
                                           {formatMinutesToHoursAndMinutes(mins)}
@@ -1008,7 +1008,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                                     </td>
                                   );
                                 })}
-                                <td className="py-2.5 pl-2 pr-5 text-right tabular-nums border border-white/12 bg-white/5">
+                                <td className="py-2.5 pl-2 pr-5 text-right tabular-nums border border-white/10 bg-white/5">
                                   <span className={`text-[0.8125rem] font-extrabold ${weekMins > 0 ? 'text-white' : 'text-white/25'}`}>
                                     {weekMins > 0 ? formatMinutesToHoursAndMinutes(weekMins) : '—'}
                                   </span>
@@ -1030,7 +1030,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
         {uiW('stats.table') && displayUsers.length > 1 && (
           <div className="mb-6 space-y-4">
             {showManagementStatsChrome && (
-              <div className="rounded-xl border border-neutral-500 overflow-hidden border-l-4 border-l-white/30 border border-neutral-500">
+              <div className="rounded-xl border border-white/[0.14] overflow-hidden border-l-4 border-l-white/30 border border-white/[0.14]">
                 {/* Intestazione totale */}
                 <div className="flex items-center justify-between gap-3 px-5 py-4 md:px-6">
                   <p className="text-[0.6875rem] font-bold uppercase tracking-widest text-white/80">
@@ -1042,7 +1042,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 </div>
                 {/* Griglia giornaliera per settimana */}
                 {mgmtPersonalTotalMins > 0 && (
-                  <div className="border-t border-neutral-500">
+                  <div className="border-t border-white/10">
                     {weeksInRange.map((w) => {
                       const weekMins = minutesByUserByWeek[currentUser.id]?.[w.key] ?? 0;
                       const clampedStart = w.start < rangeStart ? rangeStart : w.start;
@@ -1150,7 +1150,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
               </div>
             )}
             {showManagementStatsChrome && (
-              <div className="rounded-xl border border-neutral-500 border-l-4 border-l-white/30 border border-neutral-500 p-5 md:p-6">
+              <div className="rounded-xl border border-white/[0.14] border-l-4 border-l-white/30 border border-white/[0.14] p-5 md:p-6">
                 <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-widest text-white/80">
                   {deptFilter === 'all' ? (tv.stats_team_hours_period ?? t.stats_total) : `TOTALE ${translateDepartmentValue(deptFilter, effectiveLanguage).toUpperCase()}`}
                 </p>
@@ -1160,7 +1160,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
               </div>
             )}
             {!hasDataInRange ? (
-              <div className="rounded-xl border border-neutral-500 flex flex-col items-center gap-3 p-8 text-center md:p-10">
+              <div className="rounded-xl border border-white/[0.14] flex flex-col items-center gap-3 p-8 text-center md:p-10">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
                   <Calendar className="h-6 w-6 text-white/25" />
                 </div>
@@ -1175,9 +1175,9 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 const clampedEnd   = w.end   > rangeEnd   ? rangeEnd   : w.end;
                 const weekDays = eachDayOfInterval({ start: clampedStart, end: clampedEnd });
                 return (
-                  <div key={w.key} className="overflow-hidden rounded-2xl" style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 4px 16px -4px rgba(0,0,0,0.35)' }}>
+                  <div key={w.key} className="overflow-hidden rounded-2xl" style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.14)', boxShadow: '0 4px 16px -4px rgba(0,0,0,0.35)' }}>
                     {/* Intestazione settimana */}
-                    <div className="px-4 py-2.5 md:px-5 border-b border-white/12 bg-white/5 flex items-center justify-between gap-3">
+                    <div className="px-4 py-2.5 md:px-5 border-b border-white/10 bg-white/5 flex items-center justify-between gap-3">
                       <p className="text-xs font-bold uppercase tracking-[0.15em] text-white/80">{w.label}</p>
                       {showManagementStatsChrome && weekTotal > 0 && (
                         <span className="tabular-nums text-sm font-extrabold text-white/80">
@@ -1246,7 +1246,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                       })}
                       {/* Footer totali giornalieri su mobile */}
                       {showManagementStatsChrome && weekTotal > 0 && (
-                        <div className="flex items-center gap-1 pt-1 border-t border-white/12 mt-1 rounded-lg">
+                        <div className="flex items-center gap-1 pt-1 border-t border-white/10 mt-1 rounded-lg">
                           <div className="w-[4.5rem] shrink-0 pl-1 text-[0.6875rem] font-bold uppercase tracking-wide text-white/80">
                             {t.stats_total}
                           </div>
@@ -1286,8 +1286,8 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                           <col style={{ width: '72px' }} />
                         </colgroup>
                         <thead>
-                          <tr className="bg-white/8" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15)' }}>
-                            <th className="sticky left-0 z-10 bg-white/8 backdrop-blur-sm py-2 pl-5 pr-3 text-left text-[0.6875rem] font-bold uppercase tracking-wider text-white/80 border-r border-white/12">
+                          <tr className="bg-white/10" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15)' }}>
+                            <th className="sticky left-0 z-10 py-2 pl-5 pr-3 text-left text-[0.6875rem] font-bold uppercase tracking-wider text-white/80 border-r border-white/10">
                               {tv.department_filter_label ?? 'Nome'}
                             </th>
                             {weekDays.map((day) => (
@@ -1311,7 +1311,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                             const rowBg = i % 2 === 0 ? 'bg-white/5' : '';
                             return (
                               <tr key={u.id} className={`${rowBg} depth-row`}>
-                                <td className={`sticky left-0 z-10 backdrop-blur-sm py-2.5 pl-5 pr-3 border-r border-white/12 ${i % 2 === 0 ? 'bg-white/5' : 'bg-white/3'}`}>
+                                <td className="sticky left-0 z-10 py-2.5 pl-5 pr-3 border-r border-white/10">
                                   <span className="block text-[0.6875rem] font-semibold uppercase tracking-wide text-white truncate">
                                     {(u.first_name ?? '').trim() || '—'}
                                   </span>
@@ -1324,7 +1324,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                                   const dayKey = format(day, 'yyyy-MM-dd');
                                   const mins = minutesByUserByDay[u.id]?.[dayKey] ?? 0;
                                   return (
-                                    <td key={dayKey} className="py-2.5 px-1 text-center tabular-nums border-r border-white/8 last:border-r-0">
+                                    <td key={dayKey} className="py-2.5 px-1 text-center tabular-nums border-r border-white/10 last:border-r-0">
                                       {mins > 0 ? (
                                         <span className="text-[0.8125rem] font-bold text-white/80">
                                           {formatMinutesToHoursAndMinutes(mins)}
@@ -1346,8 +1346,8 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                         </tbody>
                         {showManagementStatsChrome && (
                           <tfoot>
-                            <tr className="bg-white/8" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15)' }}>
-                              <td className="sticky left-0 z-10 bg-white/8 py-2.5 pl-5 pr-3 text-[0.6875rem] font-bold uppercase tracking-wider text-white/80 border-r border-white/12">
+                            <tr className="bg-white/10" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15)' }}>
+                              <td className="sticky left-0 z-10 py-2.5 pl-5 pr-3 text-[0.6875rem] font-bold uppercase tracking-wider text-white/80 border-r border-white/10">
                                 {t.stats_total}
                               </td>
                               {weekDays.map((day) => {

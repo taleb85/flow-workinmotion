@@ -129,7 +129,7 @@ function SuperAdminPinGate({ onUnlocked }: { onUnlocked: () => void }) {
  }`}
               style={isDelete ? undefined : {
                 background: '#0a0a0c',
-                border: '1px solid rgba(255,255,255,0.10)',
+                border: '1px solid rgba(255,255,255,0.20)',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
               }}
               onMouseEnter={e => { if (!isDelete) (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(107,107,107,0.55)'; }}
@@ -240,7 +240,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 8 }}
       onSubmit={handleSubmit}
-      className="space-y-4 p-5 bg-white/8 rounded-2xl border border-neutral-500 shadow-sm"
+      className="space-y-4 p-5 bg-white/10 rounded-2xl border border-white/[0.14] shadow-sm"
     >
       <p className="text-xs font-bold uppercase tracking-wider text-white/40">{initial?.id ? 'Modifica sede' : 'Nuova sede'}</p>
 
@@ -253,7 +253,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Es. Ristorante Mario"
-          className="w-full rounded-xl border border-neutral-500 bg-white/8 px-3 py-2.5 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40 transition"
+          className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40 transition"
         />
       </div>
 
@@ -268,7 +268,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
             onChange={(e) => { setSlug(slugify(e.target.value)); setSlugManual(true); }}
             placeholder="es-ristorante-mario"
             pattern="[a-z0-9\-]+"
-            className="flex-1 rounded-xl border border-neutral-500 bg-white/8 px-3 py-2.5 text-base font-mono text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40 transition"
+            className="flex-1 rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-base font-mono text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40 transition"
           />
 <button type="button" onClick={() => { setSlugManual(false); setSlug(slugify(name)); }} className="text-xs text-accent hover:underline shrink-0 active:brightness-95 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">Auto</button>
         </div>
@@ -276,7 +276,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
       </div>
 
       {/* Nota branding — colore e logo fissi FLOW */}
-      <div className="rounded-xl border border-neutral-500 bg-white/6 px-3.5 py-2.5 flex items-center gap-2.5">
+      <div className="rounded-xl border border-white/[0.14] bg-white/6 px-3.5 py-2.5 flex items-center gap-2.5">
         <div className="w-6 h-6 rounded-full bg-brand-deep flex items-center justify-center shrink-0">
           <span className="text-white text-[0.6875rem] font-bold">F</span>
         </div>
@@ -287,7 +287,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
 
       {/* Dati demo — solo per nuova sede */}
       {!initial?.id && onSeedDemoChange && (
-        <div className="rounded-xl border border-neutral-500 bg-white/6 px-3.5 py-3 flex items-start gap-3">
+        <div className="rounded-xl border border-white/[0.14] bg-white/6 px-3.5 py-3 flex items-start gap-3">
           <Toggle value={seedDemo} onChange={onSeedDemoChange} />
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white/80 leading-snug">
@@ -305,7 +305,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
         <button
           type="submit"
           disabled={saving || !name.trim() || !slug.trim()}
-className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-accent-hover/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition disabled:opacity-40 active:bg-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
         >
           <Check className="w-4 h-4" />
           {saving ? 'Salvataggio…' : 'Salva'}
@@ -370,8 +370,11 @@ function NewAdminCredentialsModal({ creds, onClose }: { creds: NewAdminCredentia
   };
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/35 backdrop-blur-sm p-4">
-      <div className="bg-white/8 rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40 p-4">
+      <div
+        className="w-full max-w-sm rounded-2xl border border-white/[0.14] p-6 space-y-4"
+        style={{ background: 'transparent', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', boxShadow: '0 32px 80px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08)' }}
+      >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
             <ShieldCheck className="w-5 h-5 text-emerald-600" />
@@ -408,7 +411,7 @@ function NewAdminCredentialsModal({ creds, onClose }: { creds: NewAdminCredentia
         <div className="flex gap-2">
           <button
             onClick={handleCopy}
-className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-neutral-500 py-2.5 text-sm font-semibold text-white/80 hover:bg-white/5 active:bg-white/10 transition transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-white/20 py-2.5 text-sm font-semibold text-white/80 hover:bg-white/5 active:bg-white/10 transition transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           >
             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
             {copied ? 'Copiato!' : 'Copia'}
@@ -714,7 +717,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
               <motion.div
                 key={t.id}
                 layout
-                className={`rounded-2xl border shadow-sm ${t.is_active ? 'border-neutral-500 bg-white/8' : 'border-neutral-500 bg-white/5 opacity-60'} overflow-hidden`}
+                className={`rounded-2xl border shadow-sm ${t.is_active ? 'border-white/[0.14] bg-white/10' : 'border-white/[0.14] bg-white/5 opacity-60'} overflow-hidden`}
               >
                 <AnimatePresence mode="wait">
                   {editingTenant?.id === t.id ? (

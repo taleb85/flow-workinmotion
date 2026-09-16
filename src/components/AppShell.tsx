@@ -759,7 +759,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                 ) : (
                   <CloudOff className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
                 )}
-                <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[10.5rem]">
+                <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[14rem]">
                   {isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso...' : 'Sincronizza dati'}
                 </span>
               </button>
@@ -778,7 +778,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   {globalPinSessionId
                     ? <Unlock className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
                     : <Lock className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />}
-                  <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[8rem]">
+                  <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[10rem]">
                     {globalPinSessionId ? 'Sessione PIN attiva' : 'Sblocca sessione PIN'}
                   </span>
                 </button>
@@ -830,14 +830,14 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   key="global-pin-unlock"
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   transition={{ duration: 0.18 }}
-                  className="fixed inset-0 z-[10080] bg-black/40 backdrop-blur-md flex flex-col items-center justify-center"
+                  className="fixed inset-0 z-[10080] bg-black/40 flex flex-col items-center justify-center"
                 >
                   <button type="button" onClick={closePinMenu} className="absolute top-5 right-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors active:bg-white/80" aria-label={t.close}>
                     <X size={20} strokeWidth={2.5} />
                   </button>
                   <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.9 }} className="flex flex-col items-center w-full max-w-[20rem] px-6">
                     <div className="flex flex-col items-center text-center mb-10">
-                      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent/20 border-2 border-accent/40 mb-5">
+                      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/20 border-2 border-white/40 mb-5">
                         <ShieldCheck className="w-9 h-9 text-accent" strokeWidth={2} />
                       </div>
                       <h2 className="text-white font-bold uppercase tracking-widest text-base mb-2">Sessione sbloccata</h2>
@@ -897,7 +897,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       {isGlobalRefreshing && (() => {
         // Sfondo loading: glass scuro molto trasparente per far intravedere lo sfondo sotto
         return (
-          <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 font-sans text-center px-4" style={{ background: 'rgba(2, 6, 23, 0.70)' }}>
+          <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 font-sans text-center px-4 bg-black/40">
             <div className="flex flex-col items-center gap-6">
               <motion.div
                 animate={{

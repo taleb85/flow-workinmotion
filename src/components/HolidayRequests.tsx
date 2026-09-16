@@ -48,7 +48,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
     approved: {
       label: t.status_approved,
       dot: 'bg-[#60a5fa]',
-      badge: 'bg-neutral-500/15 text-white/70 border border-neutral-500/40',
+      badge: 'bg-neutral-500/15 text-white/70 border border-white/20',
     },
     pending: {
       label: t.pending,
@@ -65,7 +65,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
   if (featureFlags['staff_requests'] === false) {
     return (
       <div className={`app-horizontal-pad font-sans mx-auto flex min-h-[40vh] w-full max-w-7xl items-center justify-center ${embedded ? '' : 'pb-content'}`}>
-        <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 max-w-md px-6 py-8 text-center">
+        <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] max-w-md px-6 py-8 text-center">
           <Palmtree className="w-10 h-10 text-white/60 mx-auto mb-3 opacity-90" />
           <p className="text-white/80 font-semibold text-sm">{t.staff_requests_feature_off}</p>
         </div>
@@ -199,7 +199,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
 
   // ── Shared input style ────────────────────────────────────────────────────
   const inputCls =
-    'w-full rounded-lg px-3 py-2 text-base outline-none transition-colors bg-white/10 focus:bg-white/[0.15] focus:border-accent/50 focus:ring-2 focus:ring-accent/20';
+    'w-full rounded-lg px-3 py-2 text-base outline-none transition-colors bg-white/10 focus:bg-white/[0.15] focus:border-white/50 focus:ring-2 focus:ring-white/20';
   const inputStyle = {
     border: '1px solid rgba(255,255,255,0.20)',
     color: '#ffffff',
@@ -237,7 +237,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
           type="button"
           onClick={() => setShowForm(true)}
           className="gap-1.5 px-3 py-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-80"
-          style={{ background: 'transparent', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1.5px solid rgba(255,255,255,0.25)', borderRadius: '0.5rem' }}
+          style={{ background: 'transparent', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.20)', borderRadius: '0.5rem' }}
         >
           {t.request_holiday}
         </button>
@@ -252,7 +252,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/10 p-4"
+            className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/40 p-4"
             onClick={() => setShowForm(false)}
           >
             <motion.form
@@ -262,8 +262,8 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               onSubmit={handleSubmit}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md rounded-2xl border border-white/15 p-6 shadow-2xl bg-transparent"
-              style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+              className="w-full max-w-md rounded-2xl border border-white/[0.14] p-6 bg-transparent"
+              style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', boxShadow: '0 32px 80px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08)' }}
             >
               <div className="flex items-center justify-between mb-5">
                 <h3 className="text-white font-semibold text-base">{t.new_request}</h3>
@@ -301,7 +301,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                   />
                 </div>
 
-                <button type="submit" className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-accent text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-accent/20 transition-colors hover:shadow-xl hover:shadow-accent/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                <button type="submit" className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-accent text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-white/20 transition-colors hover:shadow-xl hover:shadow-white/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                   <Check className="w-3.5 h-3.5" strokeWidth={3} />
                   {t.request_holiday}
                 </button>
@@ -320,7 +320,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/10 p-4"
+            className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/40 p-4"
             onClick={() => setSelectedH(null)}
           >
             <motion.div
@@ -329,7 +329,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
               exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-2xl border border-white/15 p-6 shadow-2xl bg-transparent"
+              className="w-full max-w-sm rounded-2xl border border-white/[0.14] p-6 shadow-2xl bg-transparent"
               style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
             >
               <div className="flex items-center justify-between mb-4">
@@ -348,7 +348,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                 const u = users.find((u) => u.id === selectedH.user_id);
                 return (
                   <>
-                    <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 mb-4 p-4">
+                    <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] mb-4 p-4">
                       <p className="text-white font-semibold text-sm">{u?.first_name} {u?.last_name}</p>
                       <p className="text-xs mt-1" style={{ color: '#ffffff' }}>
                         {safeFormatDate(selectedH.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(selectedH.end_date, 'd MMM yyyy', { locale: calLocale })}
@@ -362,7 +362,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                         type="button"
                         onClick={() => handleStatusChange(selectedH.id, 'approved')}
                         disabled={updatingId === selectedH.id}
-                        className="flex h-10 items-center justify-center gap-1.5 rounded-lg bg-accent text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60 active:bg-accent-hover/80"
+                        className="flex h-10 items-center justify-center gap-1.5 rounded-lg bg-accent text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60 active:bg-white/80"
                       >
                         {updatingId === selectedH.id ? (
                           <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -405,7 +405,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
         {/* Calendario + richieste (in colonna) */}
         <div className={`${isAdmin ? 'w-full' : 'w-full max-w-xl'} flex flex-col gap-4`}>
           {uiW('ferie.calendar') && (
-          <div className="group w-full rounded-xl border px-2 py-2 text-left border-neutral-500">
+          <div className="group w-full rounded-xl border px-2 py-2 text-left border-white/[0.14]">
             <div className="flex items-center justify-between mb-1">
               <h2 className="font-semibold text-base uppercase" style={{ color: '#ffffff' }}>
                 {format(now, 'MMMM yyyy', { locale: calLocale })}
@@ -439,7 +439,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                 } else if (status === 'rejected') {
                   dayStyle = { background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5' };
                 } else if (today) {
-                  dayStyle = { background: 'transparent', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1.5px solid rgba(255,255,255,0.25)', color: '#ffffff', fontWeight: 700 };
+                  dayStyle = { background: 'transparent', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.20)', color: '#ffffff', fontWeight: 700 };
                 }
                 
                 return (
@@ -472,7 +472,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
 
           {/* My requests list (staff only) */}
           {!isAdmin && uiW('ferie.list') && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] overflow-hidden">
               <div className="px-5 py-4">
                 <h3 className="text-white font-semibold text-xl">{(t as Record<string, string>).my_holiday_requests ?? 'Le mie richieste'}</h3>
               </div>
@@ -522,7 +522,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
 
           {/* Pending (manager) */}
           {isAdmin && uiW('ferie.list') && pendingAll.length > 0 && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] overflow-hidden">
               <div className="px-5 py-4 flex items-center justify-between">
                 <h3 className="text-white font-semibold text-xl">{t.pending}</h3>
                 <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/80">{pendingAll.length}</span>
@@ -584,7 +584,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
 
           {/* Upcoming approved */}
           {isAdmin && uiW('ferie.list') && approvedFuture.length > 0 && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] overflow-hidden">
               <div className="px-4 py-3">
                 <h3 className="text-white font-semibold text-xl">{t.home_upcoming_holidays}</h3>
               </div>
@@ -604,7 +604,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                             </p>
                           </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full bg-neutral-500/15 text-white/70 text-xs font-semibold uppercase border border-neutral-500/40">
+                        <span className="px-2 py-0.5 rounded-full bg-neutral-500/15 text-white/70 text-xs font-semibold uppercase border border-white/20">
                           {t.status_approved}
                         </span>
                       </div>
@@ -616,7 +616,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
 
           {/* Rejected (admin) */}
           {isAdmin && uiW('ferie.list') && rejectedAll.length > 0 && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] overflow-hidden">
               <div className="px-5 py-4 flex items-center justify-between">
                 <h3 className="text-white font-semibold text-xl">{t.rejected}</h3>
                 <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-bold border border-red-200/80">{rejectedAll.length}</span>
@@ -651,7 +651,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
 
           {/* Empty state */}
           {isAdmin && uiW('ferie.list') && pendingAll.length === 0 && approvedFuture.length === 0 && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 p-12 flex flex-col items-center justify-center text-center">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] p-12 flex flex-col items-center justify-center text-center">
               <Palmtree className="w-10 h-10 text-white/60 mb-3 opacity-90" />
               <p className="text-white/70 text-sm">{t.no_holidays_yet}</p>
             </div>
@@ -659,7 +659,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
 
           {/* Staff: my upcoming approved */}
           {!isAdmin && uiW('ferie.list') && myHolidays.filter(h => h.status === 'approved' && new Date(h.end_date) >= new Date()).length > 0 && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-neutral-500 overflow-hidden">
+            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] overflow-hidden">
               <div className="px-5 py-4">
                 <h3 className="text-white font-semibold text-xl">{t.home_upcoming_holidays}</h3>
               </div>
@@ -675,7 +675,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
                           {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
                         </span>
                       </div>
-                      <span className="px-2 py-0.5 rounded-full bg-neutral-500/15 text-white/70 text-xs font-semibold uppercase border border-neutral-500/40">{t.status_approved}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-neutral-500/15 text-white/70 text-xs font-semibold uppercase border border-white/20">{t.status_approved}</span>
                     </div>
                   ))}
               </div>

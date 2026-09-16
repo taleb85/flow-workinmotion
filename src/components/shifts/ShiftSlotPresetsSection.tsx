@@ -108,7 +108,7 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
           }}
           className={`shrink-0 rounded-lg px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-wider transition-colors ${
  editMode
- ? 'bg-accent/20 text-accent'
+ ? 'bg-white/20 text-accent'
  : 'bg-white/10 text-white/60 hover:text-white'
  }`}
         >
@@ -117,7 +117,7 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
       </div>
 
       {editMode ? (
-        <div className="space-y-1.5 rounded-xl border border-white/10 bg-white/[0.03] p-2">
+        <div className="space-y-1.5 rounded-xl border border-white/[0.14] bg-white/[0.03] p-2">
           {presets.length === 0 ? (
             <p className="py-1 text-center text-[0.625rem] text-white/40">
               {tv.no_presets ?? 'Nessun orario salvato'}
@@ -176,7 +176,7 @@ export function ShiftSlotPresetsSection({ startTime, endTime: _endTime, onApply,
               type="button"
               onClick={addPreset}
               disabled={!newStart.trim() || !newEnd.trim()}
-              className="w-full rounded-lg bg-accent/20 py-1.5 text-[0.6875rem] font-bold text-accent transition-colors hover:bg-accent/30 disabled:opacity-40 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              className="w-full rounded-lg bg-white/20 py-1.5 text-[0.6875rem] font-bold text-accent transition-colors hover:bg-white/30 disabled:opacity-40 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               + {tv.add ?? 'Aggiungi'}
             </button>

@@ -226,7 +226,7 @@ function MyTimesheetSection({
               key={wIdx}
               type="button"
               onClick={() => toggleWeek(wIdx)}
-              className="w-full flex items-center justify-between rounded-2xl border border-neutral-500 px-4 py-3 text-left transition-colors hover:border-white/20 active:brightness-95"
+              className="w-full flex items-center justify-between rounded-2xl border border-white/20 px-4 py-3 text-left transition-colors hover:border-white/20 active:brightness-95"
               style={cardBg}
             >
               <div className="flex flex-col gap-0.5">
@@ -253,7 +253,7 @@ function MyTimesheetSection({
         return (
           <div key={wIdx}>
             <div
-              className="rounded-2xl border border-neutral-500 overflow-hidden shadow-sm"
+              className="rounded-2xl border border-white/[0.14] overflow-hidden shadow-sm"
               style={cardBg}
             >
               {/* Griglia giorni — stile identico alla scheda turni */}
@@ -270,7 +270,7 @@ function MyTimesheetSection({
                     ? 'bg-white/[0.12] border border-white/20'
                     : isAbsent
                       ? 'bg-red-500/[0.08] border border-red-500/[0.18]'
-                      : 'border border-neutral-500 bg-white/4';
+                      : 'border border-white/20';
                   return (
                     <div
                       key={i}
@@ -399,7 +399,7 @@ function MyTimesheetSection({
                                         : 'border-cyan-500/40'
                                 : isAbsent
                                   ? 'border-red-500/30 bg-red-500/15'
-                                  : 'border-neutral-500'
+                                  : 'border-white/20'
                             }`}
                             style={isAbsent ? undefined : cardBg}
                           >
@@ -726,7 +726,7 @@ export default function ManagementMobileTimesheet({
                   className={`h-8 px-4 rounded-full text-[0.6875rem] font-extrabold uppercase tracking-wider transition-colors ${
                     active
                       ? 'bg-white/15 text-white shadow-sm'
-                      : 'bg-white/8 border border-white/20 text-white/60 hover:border-white/35 hover:text-white/90'
+                      : 'bg-white/10 border border-white/20 text-white/60 hover:border-white/20 hover:text-white/90'
                   } active:text-white/90`}
                 >
                   {label}
@@ -767,12 +767,12 @@ export default function ManagementMobileTimesheet({
       {!hideNavBar && (
       <div className="flex items-center gap-1.5 md:gap-2 mb-5 px-4">
         <button type="button" onClick={() => setNavOffset(0)}
-          className="h-8 md:h-9 inline-flex items-center px-2 md:px-3 rounded-2xl border border-white/30 text-white/70 text-[0.625rem] md:text-[0.6875rem] font-black uppercase tracking-widest shrink-0 active:bg-white/10 transition-colors">
+          className="h-8 md:h-9 inline-flex items-center px-2 md:px-3 rounded-2xl border border-white/20 text-white/70 text-[0.625rem] md:text-[0.6875rem] font-black uppercase tracking-widest shrink-0 active:bg-white/10 transition-colors">
           {t.today}
         </button>
-        <div className="flex items-center border border-white/40 rounded-2xl overflow-hidden flex-1 min-w-0" style={{ background: 'transparent' }}>
+        <div className="flex items-center border border-white/20 rounded-2xl overflow-hidden flex-1 min-w-0" style={{ background: 'transparent' }}>
           <button type="button" onClick={() => setNavOffset(o => o - 1)} disabled={navLimits.disablePrev}
-            className="flex items-center justify-center h-8 md:h-9 w-8 md:w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-r border-white/20 active:bg-white/80 disabled:opacity-30 disabled:pointer-events-none">
+            className="flex items-center justify-center h-8 md:h-9 w-8 md:w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-r border-white/10 active:bg-white/80 disabled:opacity-30 disabled:pointer-events-none">
             <ChevronLeft className="h-3.5 md:h-4 w-3.5 md:w-4" />
           </button>
           <div className="flex-1 flex items-center justify-center gap-1 px-1.5 md:px-2 min-w-0" style={{ color: '#ffffff' }}>
@@ -780,7 +780,7 @@ export default function ManagementMobileTimesheet({
             <span className="text-[0.625rem] md:text-[0.6875rem] font-bold tabular-nums truncate" title={rangeLabel}>{rangeLabel}</span>
           </div>
           <button type="button" onClick={() => setNavOffset(o => o + 1)} disabled={navLimits.disableNext}
-            className="flex items-center justify-center h-8 md:h-9 w-8 md:w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-l border-white/20 active:bg-white/80 disabled:opacity-30 disabled:pointer-events-none">
+            className="flex items-center justify-center h-8 md:h-9 w-8 md:w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-l border-white/10 active:bg-white/80 disabled:opacity-30 disabled:pointer-events-none">
             <ChevronRight className="h-3.5 md:h-4 w-3.5 md:w-4" />
           </button>
         </div>

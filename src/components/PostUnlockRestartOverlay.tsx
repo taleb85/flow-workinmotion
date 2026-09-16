@@ -82,7 +82,7 @@ export default function PostUnlockRestartOverlay({ language }: { language: Langu
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[110] flex flex-col items-center justify-center px-6 text-center font-sans"
-      style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(107,107,107,0.15) 0%, transparent 55%), rgba(10,10,12,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+      style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(107,107,107,0.15) 0%, transparent 55%)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
       role="status"
       aria-live="polite"
       aria-busy="true"
@@ -130,7 +130,7 @@ export default function PostUnlockRestartOverlay({ language }: { language: Langu
  isDone
  ? 'bg-accent text-white'
  : isLast
- ? 'bg-accent/15 text-accent'
+ ? 'bg-white/15 text-accent'
  : 'bg-white/10 text-white/40'
  }`}
                 >

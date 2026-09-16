@@ -181,7 +181,7 @@ const DatePickerField = forwardRef<HTMLButtonElement, DatePickerFieldProps>(func
         className="rdp-modern"
       />
       <div
-        className={`mt-3 flex items-center gap-2.5 border-t border-slate-100 pt-3.5 ${allowClear ? 'justify-between' : 'justify-end'}`}
+        className={`mt-3 flex items-center gap-2.5 border-t border-white/10 pt-3.5 ${allowClear ? 'justify-between' : 'justify-end'}`}
       >
         {allowClear ? (
           <button
@@ -197,7 +197,7 @@ const DatePickerField = forwardRef<HTMLButtonElement, DatePickerFieldProps>(func
         ) : null}
         <button
           type="button"
-          className="rounded-2xl bg-accent px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-hover active:bg-accent-hover/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+          className="rounded-2xl bg-accent px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-hover active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           onClick={() => {
             onChange(format(new Date(), 'yyyy-MM-dd'));
             setOpen(false);
@@ -236,7 +236,7 @@ const DatePickerField = forwardRef<HTMLButtonElement, DatePickerFieldProps>(func
           setMenuStyle({ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' });
           setOpen((o) => !o);
         }}
-        className={`inline-flex shrink-0 items-center text-left font-semibold leading-none tabular-nums text-white/90 transition-colors rounded-xl border border-neutral-500 surface-ghost-interactive hover:border-neutral-500 focus:outline-none focus:ring-2 focus:ring-accent/25 disabled:cursor-not-allowed disabled:opacity-50 ${btnSizeClass} ${className} active:brightness-95`}
+        className={`inline-flex shrink-0 items-center text-left font-semibold leading-none tabular-nums text-white/90 transition-colors rounded-xl border border-white/20 surface-ghost-interactive hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/25 disabled:cursor-not-allowed disabled:opacity-50 ${btnSizeClass} ${className} active:brightness-95`}
       >
         <Calendar className={iconClass} aria-hidden />
         <span className="min-w-0 truncate tabular-nums" title={label}>{label}</span>
@@ -245,7 +245,7 @@ const DatePickerField = forwardRef<HTMLButtonElement, DatePickerFieldProps>(func
       {open && !disabled && createPortal(
         <div
           ref={popRef}
-          className="fixed z-[10050] rounded-2xl border border-white/10 bg-neutral-800/70 p-3 md:p-3.5 shadow-2xl"
+          className="fixed z-[10050] rounded-2xl border border-white/[0.14] bg-neutral-800/70 p-3 md:p-3.5 shadow-2xl"
           style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', ...menuStyle }}
         >
           {panelInner}

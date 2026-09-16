@@ -50,7 +50,7 @@ className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-neutral-500 p-3">
+        <div className="rounded-xl border border-white/[0.14] p-3">
           <p className="mb-2 text-center text-xs font-bold text-white/70">Marzo 2026</p>
           <div className="grid grid-cols-7 gap-1 text-center text-[0.625rem]">
             {['L', 'M', 'M', 'G', 'V', 'S', 'D'].map((d, i) => (
@@ -61,7 +61,7 @@ className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-
             {Array.from({ length: 28 }, (_, i) => (
               <span
                 key={i}
-                className={`rounded-lg py-1 ${i === 10 ? 'bg-accent/20 font-bold text-accent-dark ring-1 ring-accent/30' : 'text-white/70'}`}
+                className={`rounded-lg py-1 ${i === 10 ? 'bg-white/20 font-bold text-accent-dark ring-1 ring-white/30' : 'text-white/70'}`}
               >
                 {i + 1}
               </span>
@@ -77,13 +77,13 @@ className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-
         onUiToggle={onUiToggle}
         hiddenBadge={hiddenBadge}
       >
-        <div className="rounded-xl border border-neutral-500 overflow-hidden">
-          <div className="border-b border-slate-100 px-3 py-2 text-xs font-bold text-white/70">
+        <div className="rounded-xl border border-white/[0.14] overflow-hidden">
+          <div className="border-b border-white/10 px-3 py-2 text-xs font-bold text-white/70">
             {t.mod_vacation_requests}
           </div>
           <div className="divide-y divide-slate-50">
             <div className="flex items-center gap-3 px-3 py-3">
-              <Palmtree className="h-8 w-8 shrink-0 text-accent/60" />
+              <Palmtree className="h-8 w-8 shrink-0 text-white/60" />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-white/90">Jean · Ferie</p>
                 <p className="text-xs text-white/60">15–19 mar</p>

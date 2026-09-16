@@ -90,7 +90,7 @@ const LanguageToggleGrid = memo(function LanguageToggleGrid({ effectiveLanguage,
           onClick={() => setLanguage(lang)}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-colors min-h-[2.75rem] ${
  effectiveLanguage === lang ? 'bg-accent text-white' : 'bg-slate-100 text-white/70 hover:bg-slate-200'
- } active:bg-slate-200'/80`}
+ } active:bg-slate-200`}
         >
           <span>{FLAGS[lang]}</span>
           <span className="text-xs">{LABELS[lang]}</span>

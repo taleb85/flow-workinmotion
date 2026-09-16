@@ -206,7 +206,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                   onBlur={() => setTouched((p) => ({ ...p, email: true }))}
                   onKeyDown={handleKeyDown}
                   placeholder={lang === 'it' ? 'Inserisci la tua email…' : 'Enter your email…'}
-                  className={`w-full rounded-xl border px-4 py-3 text-base font-medium transition-colors outline-none bg-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-accent/30 focus:border-accent ${
+                  className={`w-full rounded-xl border px-4 py-3 text-base font-medium transition-colors outline-none bg-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-white/30 focus:border-accent ${
  emailError ? 'border-red-400 bg-red-50/50' : 'border-white/20'
  }`}
                 />
@@ -233,7 +233,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                   onBlur={() => setTouched((p) => ({ ...p, phone: true }))}
                   onKeyDown={handleKeyDown}
                   placeholder={lang === 'it' ? 'Es. +39 333 1234567' : lang === 'es' ? 'Ej. +34 600 000000' : '+1 555 000 0000'}
-                  className={`w-full rounded-xl border px-4 py-3 text-base font-medium transition-colors outline-none bg-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-accent/30 focus:border-accent ${
+                  className={`w-full rounded-xl border px-4 py-3 text-base font-medium transition-colors outline-none bg-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-white/30 focus:border-accent ${
  phoneError ? 'border-red-400 bg-red-50/50' : 'border-white/20'
  }`}
                 />
@@ -302,7 +302,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
  ? 'pointer-events-none opacity-0'
  : k === '⌫'
  ? 'bg-white/10 text-white/70 hover:bg-white/20'
- : 'bg-white/10 text-white hover:bg-accent/20 hover:text-accent'
+ : 'bg-white/10 text-white hover:bg-white/20 hover:text-accent'
  }`}
                     >
                       {k}

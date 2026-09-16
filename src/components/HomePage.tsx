@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useAppUser, useAppData, useAppConfig, useAppOverlay } from '../context/AppContext';
 import { useT } from '../hooks/useT';
 import { useWallAlignedMinuteClock } from '../hooks/useWallAlignedMinuteClock';
-import { format, isToday, isTomorrow, parseISO, isValid, addDays, startOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import { format, isToday, isTomorrow, parseISO, isValid, addDays, startOfWeek } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { getNetShiftMinutes } from '../utils/breakRules';
 import {
@@ -190,30 +190,6 @@ export default function HomePage({
     );
   }, 0);
 
-  const monthStart = startOfMonth(now);
-  const monthEnd = endOfMonth(now);
-  const thisMonthShifts = myShifts.filter((s) => {
-    const d = parseISO(s.date);
-    return (
-      d >= monthStart &&
-      d <= monthEnd &&
-      (s.approval_status === 'approved' || s.approval_status === 'confirmed' || s.approval_status === 'absent')
-    );
-  });
-  const monthlyMinutes = thisMonthShifts.reduce((sum, s) => {
-    if (s.approval_status === 'absent') return sum;
-    const u = users.find((x) => x.id === s.user_id) ?? currentUser;
-    if (s.approved_at && s.approved_start_time && s.approved_end_time) {
-      const { start, end } = getResolvedStartEndForHours(s, punchRecords);
-      return sum + getNetShiftMinutes(s, start, end, u, breakRules, breakComputeOpts);
-    }
-    return (
-      sum +
-      getNetShiftMinutes(s, (s.start_time || '').slice(0, 5), (s.end_time || '').slice(0, 5), u, breakRules, breakComputeOpts)
-    );
-  }, 0);
-  const monthDaysWorked = new Set(thisMonthShifts.filter((s) => s.approval_status !== 'absent').map((s) => s.date)).size;
-
   const pendingHolidays = holidays.filter((h) => h.status === 'pending');
   const myApprovedHolidays = holidays
     .filter((h) => h.user_id === currentUser.id && h.status === 'approved' && new Date(h.end_date) >= new Date())
@@ -346,7 +322,7 @@ export default function HomePage({
       return { border: 'border-l-red-500', bg: 'bg-red-500/12', badge: 'bg-red-500/20 text-red-200 border-red-400/50', dot: 'bg-red-400', label: t.home_status_anomaly };
     }
     if (e.canApprove) {
-      return { border: 'border-l-white/30', bg: 'bg-white/10', badge: 'bg-white/10 text-white/80 border-white/25', dot: 'bg-white/45', label: t.home_status_to_approve };
+      return { border: 'border-l-white/30', bg: 'bg-white/10', badge: 'bg-white/10 text-white/80 border-white/20', dot: 'bg-white/45', label: t.home_status_to_approve };
     }
     if (!e.punchIn) {
       if (punchMissingHome) {
@@ -384,9 +360,6 @@ export default function HomePage({
         myApprovedHolidays={myApprovedHolidays}
         upcomingShifts={upcomingShifts}
         todayShiftsMine={todayShiftsMine}
-        weeklyMinutes={weeklyMinutes}
-        monthlyMinutes={monthlyMinutes}
-        monthDaysWorked={monthDaysWorked}
         getDateLabel={getDateLabel}
         getPunchForShift={getPunchForShift}
         staffRequestsEnabled={staffRequestsEnabled}
@@ -422,10 +395,6 @@ export default function HomePage({
           now={now}
           myShifts={myShifts}
           punchRecords={punchRecords}
-          weeklyMinutes={weeklyMinutes}
-          monthlyMinutes={monthlyMinutes}
-          monthDaysWorked={monthDaysWorked}
-          weekCapMinutes={40 * 60}
           onTabChange={onTabChange}
           greetingText={t.home_greeting.replace('{name}', currentUser.first_name ?? '')}
           activeTab={activeTabProp ?? 'home'}

@@ -13,7 +13,7 @@ import SettingsPage from './SettingsPage';
 type AdminTab = 'profili' | 'impostazioni';
 
 const adminHeaderCardClass =
-  'w-full rounded-2xl border border-white/[0.12] overflow-visible backdrop-blur-[1.25rem] shadow-[0_4px_16px_-4px_rgba(0,0,0,0.3)]';
+  'w-full rounded-2xl border border-white/[0.14] overflow-visible backdrop-blur-[1.25rem] shadow-[0_4px_16px_-4px_rgba(0,0,0,0.3)]';
 
 interface TabDef {
   key: AdminTab;
@@ -96,7 +96,7 @@ export default function AdminLayout() {
               onClick={() => navigate('/app')}
               className="flex items-center gap-1.5 h-9 px-2 -ml-1 rounded-xl text-white/70 hover:text-white hover:bg-white/10 font-medium text-sm transition-colors shrink-0 active:text-white"
             >
-              <ArrowLeft className="w-4 h-4 shrink-0 text-accent/70" />
+              <ArrowLeft className="w-4 h-4 shrink-0 text-white/70" />
               <span className="hidden md:inline">{t.admin_back_to_app}</span>
             </button>
 

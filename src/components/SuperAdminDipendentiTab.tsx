@@ -220,7 +220,7 @@ export default function DipendentiTab({ tenantId }: { tenantId: string }) {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="rounded-xl border border-accent/30 bg-white/8 p-4 space-y-3 shadow-sm">
+            <div className="rounded-xl border border-white/30 bg-white/10 p-4 space-y-3 shadow-sm">
               <p className="text-xs font-bold uppercase tracking-wider text-accent">
                 {editingId === 'new' ? 'Nuovo dipendente' : 'Modifica dipendente'}
               </p>
@@ -229,33 +229,33 @@ export default function DipendentiTab({ tenantId }: { tenantId: string }) {
                 <div className="space-y-1">
                   <label htmlFor="sa-dip-first" className="text-[0.6875rem] font-semibold text-white/55">Nome *</label>
                   <input id="sa-dip-first" value={form.first_name} onChange={(e) => setF('first_name', e.target.value)} placeholder="Mario"
-                    className="w-full rounded-lg border border-neutral-500 bg-white/8 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40" />
+                    className="w-full rounded-lg border border-white/20 bg-white/10 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40" />
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="sa-dip-last" className="text-[0.6875rem] font-semibold text-white/55">Cognome</label>
                   <input id="sa-dip-last" value={form.last_name ?? ''} onChange={(e) => setF('last_name', e.target.value)} placeholder="Rossi"
-                    className="w-full rounded-lg border border-neutral-500 bg-white/8 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40" />
+                    className="w-full rounded-lg border border-white/20 bg-white/10 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40" />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <label htmlFor="sa-dip-email" className="text-[0.6875rem] font-semibold text-white/55">Email</label>
                 <input id="sa-dip-email" type="email" value={form.email} onChange={(e) => setF('email', e.target.value)} placeholder="mario@email.com"
-                  className="w-full rounded-lg border border-neutral-500 bg-white/8 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40" />
+                  className="w-full rounded-lg border border-white/20 bg-white/10 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40" />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <label htmlFor="sa-dip-role" className="text-[0.6875rem] font-semibold text-white/55">Ruolo *</label>
                   <select id="sa-dip-role" value={form.role} onChange={(e) => setF('role', e.target.value as UserRole)}
-                    className="w-full rounded-lg border border-neutral-500 bg-white/8 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40">
+                    className="w-full rounded-lg border border-white/20 bg-white/10 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40">
                     {ROLE_OPTIONS.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="sa-dip-dept" className="text-[0.6875rem] font-semibold text-white/55">Reparto</label>
                   <input id="sa-dip-dept" value={form.department ?? ''} onChange={(e) => setF('department', e.target.value)} placeholder="sala, bar, cucina…"
-                    className="w-full rounded-lg border border-neutral-500 bg-white/8 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40" />
+                    className="w-full rounded-lg border border-white/20 bg-white/10 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40" />
                 </div>
               </div>
 
@@ -270,7 +270,7 @@ export default function DipendentiTab({ tenantId }: { tenantId: string }) {
                     placeholder="••••"
                     maxLength={4}
                     inputMode="numeric"
-                    className="w-full rounded-lg border border-neutral-500 bg-white/8 px-2.5 py-2 pr-9 text-base font-mono text-white/90 focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    className="w-full rounded-lg border border-white/20 bg-white/10 px-2.5 py-2 pr-9 text-base font-mono text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40"
                   />
                   <button
                     type="button"
@@ -307,7 +307,7 @@ className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-accent 
       {/* Lista dipendenti */}
       {loading ? (
         <div className="py-6 text-center text-white/40 text-sm">
-          <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin mx-auto mb-2" />
+          <div className="w-5 h-5 border-2 border-white/30 border-t-accent rounded-full animate-spin mx-auto mb-2" />
           Caricamento…
         </div>
       ) : users.length === 0 && editingId === null ? (
@@ -318,9 +318,9 @@ className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-accent 
       ) : (
         <div className="space-y-1.5">
           {users.map((u) => (
-            <div key={u.id} className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 border transition ${u.status === 'active' ? 'border-white/12 bg-white/8' : 'border-white/12 bg-white/5 opacity-60'}`}>
+            <div key={u.id} className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 border transition ${u.status === 'active' ? 'border-white/[0.14] bg-white/10' : 'border-white/[0.14] bg-white/5 opacity-60'}`}>
               {/* Avatar iniziali */}
-              <span className="w-8 h-8 rounded-full bg-accent/10 text-accent text-xs font-bold flex items-center justify-center shrink-0">
+              <span className="w-8 h-8 rounded-full bg-white/10 text-accent text-xs font-bold flex items-center justify-center shrink-0">
                 {u.first_name.charAt(0)}{u.last_name?.charAt(0) ?? ''}
               </span>
               {/* Info */}
@@ -334,11 +334,11 @@ className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-accent 
               {/* Azioni */}
               <div className="flex items-center gap-1 shrink-0">
                 <button onClick={() => toggleStatus(u)} title={u.status === 'active' ? 'Sospendi' : 'Riattiva'}
-                  className={`p-1.5 rounded-lg transition ${u.status === 'active' ? 'text-brand-500 hover:bg-brand-50' : 'text-white/40 hover:bg-white/10'} active:bg-brand-50'/80`}>
+                  className={`p-1.5 rounded-lg transition ${u.status === 'active' ? 'text-brand-500 hover:bg-brand-50' : 'text-white/40 hover:bg-white/10'} active:bg-brand-50`}>
                   {u.status === 'active' ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                 </button>
                 <button onClick={() => openEdit(u)} title="Modifica"
-                  className="p-1.5 rounded-lg text-white/40 hover:text-accent hover:bg-accent/10 transition active:text-accent">
+                  className="p-1.5 rounded-lg text-white/40 hover:text-accent hover:bg-white/10 transition active:text-accent">
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
                 <button onClick={() => handleDelete(u.id)} title="Elimina" disabled={deleting === u.id}
@@ -378,7 +378,7 @@ className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-accent 
                 <button
                   type="button"
                   onClick={() => setConfirmClearDemo(false)}
-                  className="flex-1 rounded-xl py-1.5 text-xs font-semibold bg-white/8 text-white/50 hover:bg-white/12 transition active:bg-white/80"
+                  className="flex-1 rounded-xl py-1.5 text-xs font-semibold bg-white/10 text-white/50 hover:bg-white/12 transition active:bg-white/80"
                 >
                   Annulla
                 </button>
@@ -401,7 +401,7 @@ className="flex-1 rounded-xl py-1.5 text-xs font-bold bg-amber-600 text-white ho
         <button
           type="button"
           onClick={openNew}
-className="w-full flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-accent/30 py-2.5 text-sm font-semibold text-accent hover:bg-accent/5 transition transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="w-full flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/30 py-2.5 text-sm font-semibold text-accent hover:bg-white/5 transition transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
         >
           <UserPlus className="w-4 h-4" />
           Aggiungi dipendente

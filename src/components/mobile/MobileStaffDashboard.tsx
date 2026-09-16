@@ -10,12 +10,12 @@ import { useAppData } from '../../context/appSliceContexts';
 import { useAppConfig } from '../../context/appSliceContexts';
 import { useAppOverlay } from '../../context/appSliceContexts';
 import { getTranslations, getDateLocale } from '../../utils/translations';
+import { formatElapsedSince } from '../../utils/timeCalculations';
 import { usePunchPresenceVerification } from '../../hooks/usePunchPresenceVerification';
 import { TimeInputField } from '../ui/TimeInputField';
 import { safeFormatDate } from '../../utils/safeDateFormat';
 import MobileHome from './MobileHome';
 import MobileStaffShifts from './MobileStaffShifts';
-import { calculateUserStats } from '../../utils/stats';
 import { hapticLight as lightHaptic, hapticHeavy as heavyHaptic } from '../../utils/haptics';
 import { useSmartPunchAction, type EnrichedShift } from '../../hooks/useSmartPunchAction';
 import { isDemoMode } from '../../utils/demoData';
@@ -64,11 +64,6 @@ export interface MobileStaffDashboardProps {
   onTabChange?: (tab: AppNavTab) => void;
   greetingText: string;
   activeTab: AppNavTab;
-  /** Se passati dal genitore (es. stesso calcolo KPI della Home), sovrascrivono gli stat interni. */
-  weeklyMinutes?: number;
-  monthlyMinutes?: number;
-  monthDaysWorked?: number;
-  weekCapMinutes?: number;
   onRefresh?: () => Promise<void> | void;
 }
 
@@ -81,10 +76,6 @@ export default function MobileStaffDashboard({
   punchRecords,
   greetingText,
   activeTab,
-  weeklyMinutes: weeklyMinutesProp,
-  monthlyMinutes: monthlyMinutesProp,
-  monthDaysWorked: monthDaysWorkedProp,
-  weekCapMinutes: weekCapMinutesProp,
   onRefresh,
   onTabChange: _onTabChange,
 }: MobileStaffDashboardProps) {
@@ -94,9 +85,8 @@ export default function MobileStaffDashboard({
   const { users } = useAppUser();
   const { updatePunchRecord, shifts: allShifts } = useAppData();
   const { showError, showSuccess } = useAppOverlay();
-  const { featureFlags, breakRules } = useAppConfig();
+  const { featureFlags } = useAppConfig();
   const { requestProof, modal: presenceModal } = usePunchPresenceVerification(language);
-  const [tick, setTick] = useState(0);
   const [closeModal, setCloseModal] = useState<{
     shiftId: string;
     punchInId: string;
@@ -105,11 +95,6 @@ export default function MobileStaffDashboard({
   } | null>(null);
   const [clockOutInput, setClockOutInput] = useState('');
   const [closingLoading, setClosingLoading] = useState(false);
-
-  useEffect(() => {
-    const id = window.setInterval(() => setTick((x) => x + 1), 1000);
-    return () => window.clearInterval(id);
-  }, []);
 
   const todayShifts = useMemo(
     () => myShifts.filter((s) => s.date === todayStr),
@@ -138,20 +123,17 @@ export default function MobileStaffDashboard({
     [enriched],
   );
 
-  const stats = useMemo(() => {
-    return calculateUserStats(user, myShifts, punchRecords, now, breakRules, {
-      autoBreaksFeatureEnabled: featureFlags['auto_breaks'] !== false,
-    });
-  }, [user, myShifts, punchRecords, now, breakRules, featureFlags]);
+  // Tempo trascorso dall'entrata — si aggiorna ogni secondo solo a timbratura attiva
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (!inProgress?.punchIn) return;
+    const id = window.setInterval(() => setTick((x) => x + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [inProgress]);
 
   let elapsedLabel: string | null = null;
   if (inProgress?.punchIn) {
-    const start = new Date(inProgress.punchIn.calculated_time || inProgress.punchIn.timestamp).getTime();
-    const diff = Math.max(0, Date.now() - start);
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const sec = Math.floor((diff % 60000) / 1000);
-    elapsedLabel = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    elapsedLabel = formatElapsedSince(inProgress.punchIn.calculated_time || inProgress.punchIn.timestamp);
   }
   void tick;
 
@@ -181,13 +163,6 @@ export default function MobileStaffDashboard({
       setClosingLoading(false);
     }
   }, [closeModal, clockOutInput, todayStr, updatePunchRecord, showSuccess, showError, t, checkGeofence, featureFlags, user.role]);
-
-  const statsLabels = {
-    title: tv.mobile_dash_numbers ?? 'I miei numeri',
-    week: tv.mobile_dash_this_week ?? 'Questa settimana',
-    month: tv.mobile_dash_this_month ?? 'Questo mese',
-    daysWorked: tv.mobile_dash_days_worked ?? 'Giorni lavorati',
-  };
 
   // ── MODALITÀ DEMO KPI (anteprima con dati di test) ─────────────────────
   const demoMode = isDemoMode();
@@ -222,10 +197,6 @@ export default function MobileStaffDashboard({
           } satisfies EnrichedShift)
         : null,
       elapsed: '05:23:41',
-      weeklyMinutes: 32 * 60 + 45,
-      monthlyMinutes: 128 * 60 + 15,
-      monthDaysWorked: 14,
-      weekCapMinutes: 40 * 60,
     };
   }, [demoMode, todayStr, user.id]);
 
@@ -243,11 +214,6 @@ export default function MobileStaffDashboard({
             greetingText={greetingText}
             todayLabel={safeFormatDate(todayStr, 'EEEE d MMMM', { locale })}
             todayStr={todayStr}
-            statsLabels={statsLabels}
-            weeklyMinutes={demo ? demo.weeklyMinutes : (weeklyMinutesProp ?? stats.weeklyMinutes)}
-            monthlyMinutes={demo ? demo.monthlyMinutes : (monthlyMinutesProp ?? stats.monthlyMinutes)}
-            monthDaysWorked={demo ? demo.monthDaysWorked : (monthDaysWorkedProp ?? stats.monthDaysWorked)}
-            weekCapMinutes={demo ? demo.weekCapMinutes : (weekCapMinutesProp ?? 40 * 60)}
             inProgress={demo ? demo.inProgress : inProgress}
             elapsedLabel={demo ? demo.elapsed : elapsedLabel}
             todayWorkShiftsCount={demo ? demo.todayShifts.length : todayWorkShifts.length}
@@ -333,7 +299,7 @@ export default function MobileStaffDashboard({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10060] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[10060] flex items-center justify-center bg-black/40 px-4"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 setCloseModal(null);
@@ -386,7 +352,7 @@ export default function MobileStaffDashboard({
                     setCloseModal(null);
                     setClockOutInput('');
                   }}
-                  className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-white/70"
+                  className="flex-1 rounded-xl border border-white/20 py-2.5 text-sm font-semibold text-white/70"
                 >
                   {t.cancel}
                 </button>

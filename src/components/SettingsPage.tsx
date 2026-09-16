@@ -123,7 +123,7 @@ function DepartmentColorPicker({
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => setOpen((o) => !o)}
-        className="relative h-9 w-9 shrink-0 rounded-full border-2 border-white shadow-[0_2px_10px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/90 outline-none transition-transform hover:ring-slate-300 focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-2"
+        className="relative h-9 w-9 shrink-0 rounded-full border-2 border-white shadow-[0_2px_10px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/90 outline-none transition-transform hover:ring-slate-300 focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2"
         style={{ backgroundColor: value }}
       />
       {open && (
@@ -203,13 +203,13 @@ function FeatureFlagCard({
 
   return (
     <div
-      className={`rounded-xl border border-neutral-500 flex h-full flex-col p-3.5 transition-colors surface-ghost-interactive hover:border-white/20 md:p-4 active:brightness-95 ${
+      className={`rounded-xl border border-white/[0.14] flex h-full flex-col p-3.5 transition-colors surface-ghost-interactive hover:border-white/[0.14] md:p-4 active:brightness-95 ${
         isMaintenance && enabled ? 'border-red-500/40 bg-red-500/15' : ''
       }`}
     >
       <div className="flex items-start gap-3 min-w-0">
         <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-          isMaintenance && enabled ? 'bg-red-500/20 text-red-400' : 'bg-accent/10 text-accent'
+          isMaintenance && enabled ? 'bg-red-500/20 text-red-400' : 'bg-white/10 text-accent'
         }`}>
           <span className="w-[1.125rem] h-[1.125rem]">{iconMap[feature.slug]}</span>
         </div>
@@ -227,7 +227,7 @@ function FeatureFlagCard({
               aria-checked={enabled}
               aria-label={featureLabel}
               onClick={onToggle}
-              className={`relative mt-0.5 h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/35 focus:ring-offset-2 ${
+              className={`relative mt-0.5 h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/35 focus:ring-offset-2 ${
                 isMaintenance ? (enabled ? 'bg-red-500' : '') : (enabled ? 'bg-accent' : '')
               }`}
             >
@@ -241,7 +241,7 @@ function FeatureFlagCard({
                 {t.impostazioni_detail_label || 'Dettagli'}
               </button>
               {detailsOpen && (
-                <div className="rounded-xl border border-neutral-500 mt-2 bg-white/5 px-2.5 py-2">
+                <div className="rounded-xl border border-white/[0.14] mt-2 bg-white/5 px-2.5 py-2">
                   <p className="mb-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">{t.impostazioni_detail_label || 'Dettagli'}</p>
                   <ul className="list-disc space-y-1 pl-3.5 text-[0.6875rem] leading-relaxed text-white/70">
                     {detailLines.map((line, i) => (<li key={i}>{line}</li>))}
@@ -320,7 +320,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
                   e.stopPropagation();
                   onSetShareMenu(shareMenuOpen ? null : user.id);
                 }}
-                className={`p-1.5 rounded-md border transition-colors ${shareMenuOpen ? 'text-accent border-accent/30 bg-accent/5' : 'text-white/40 border-neutral-500 hover:text-accent hover:border-accent/30 hover:bg-accent/5'} active:text-accent`}
+                className={`p-1.5 rounded-md border transition-colors ${shareMenuOpen ? 'text-accent border-white/30 bg-white/5' : 'text-white/40 border-white/20 hover:text-accent hover:border-white/30 hover:bg-white/5'} active:text-accent`}
               >
                 <Link2 className="w-3.5 h-3.5" />
               </button>
@@ -338,7 +338,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.92, y: -4 }}
                       transition={{ duration: 0.13 }}
-                      className="absolute right-0 top-full mt-1.5 z-[61] w-52 rounded-xl border border-neutral-500 bg-white/10 shadow-lg overflow-hidden"
+                      className="absolute right-0 top-full mt-1.5 z-[61] w-52 rounded-xl border border-white/[0.14] bg-white/10 shadow-lg overflow-hidden"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {/* Copia link accesso */}
@@ -374,7 +374,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
               onClick={() => {
                 onSetVisibility(isVisibilityOpen ? null : user.id);
               }}
-              className={`px-2 py-1 text-[0.6875rem] font-bold uppercase rounded-md transition-colors border ${isVisibilityOpen ? 'bg-white/15 text-accent border-accent/30 shadow-sm' : 'text-white/55 border-transparent hover:text-white/80'} active:text-white/80'}`}
+              className={`px-2 py-1 text-[0.6875rem] font-bold uppercase rounded-md transition-colors border ${isVisibilityOpen ? 'bg-white/15 text-accent border-white/30 shadow-sm' : 'text-white/55 border-transparent hover:text-white/80'} active:text-white/80'}`}
             >
               {t.what_sees}
             </button>
@@ -389,7 +389,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
                     <button
                       type="button"
                       onClick={() => onSetDeleteConfirm(null)}
-                      className="rounded-lg border border-neutral-500 px-2 py-1 text-[0.6875rem] font-semibold text-white/55 hover:bg-white/10 active:bg-white/80"
+                      className="rounded-lg border border-white/20 px-2 py-1 text-[0.6875rem] font-semibold text-white/55 hover:bg-white/10 active:bg-white/80"
                     >
                       {t.cancel ?? 'Annulla'}
                     </button>
@@ -656,7 +656,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
   const builtinValues = new Set(BUILTIN_DEPARTMENTS.map((d) => d.value));
 
   const deptPermissionCategorySelectClass =
-    'w-full min-w-[10rem] max-w-[16rem] rounded-xl border border-neutral-500 bg-white/10 px-3 py-2 text-sm text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30';
+    'w-full min-w-[10rem] max-w-[16rem] rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-white/30';
 
   const updateWorkRule = useCallback(<K extends keyof WorkRules>(key: K, value: WorkRules[K]) => {
     const next = { ...workRules, [key]: value };
@@ -838,14 +838,14 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 <button
                   type="button"
                   onClick={() => setShowSuspended(!showSuspended)}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/20 px-2.5 py-1.5 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
                 >
                   {showSuspended ? t.hide_suspended : t.show_suspended}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCreateStaff(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
                 >
                   <UserPlus className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   {t.admin_add_employee}
@@ -855,7 +855,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             <div
               className="divide-y divide-white/10 overflow-hidden rounded-xl"
               style={
-                { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)' }
+                { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.14)' }
               }
             >
               {displayUsersDelegated.length === 0 ? (
@@ -898,7 +898,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                               showError?.((t as { copy_failed?: string }).copy_failed ?? 'Copia non riuscita.');
                             }
                           }}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-500 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
                         >
                           <Copy className="h-3.5 w-3.5 shrink-0" aria-hidden />
                           Link accesso
@@ -906,7 +906,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         <button
                           type="button"
                           onClick={() => setEditingUser(user)}
-                          className="rounded-lg border border-neutral-500 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                          className="rounded-lg border border-white/20 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
                         >
                           {t.settings_delegated_view_profile}
                         </button>
@@ -926,7 +926,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                                 <button
                                   type="button"
                                   onClick={() => setDeleteConfirmUserId(null)}
-                                  className="rounded-lg border border-neutral-500 px-2 py-1 text-[0.6875rem] font-semibold text-white/55 hover:bg-white/10 active:bg-white/80"
+                                  className="rounded-lg border border-white/20 px-2 py-1 text-[0.6875rem] font-semibold text-white/55 hover:bg-white/10 active:bg-white/80"
                                 >
                                   {t.cancel ?? 'Annulla'}
                                 </button>
@@ -956,7 +956,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                             <button
                               type="button"
                               onClick={() => handleDelegateReactivate(user)}
-                              className="inline-flex items-center gap-1 rounded-lg border border-accent/35 bg-accent/10 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-accent/15 active:bg-accent/80"
+                              className="inline-flex items-center gap-1 rounded-lg border border-white/35 bg-white/10 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-white/15 active:bg-white/80"
                             >
                               <UserCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
                               {t.settings_delegated_reactivate}
@@ -1001,7 +1001,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               exit={{ opacity: 0 }}
               className={`mb-4 rounded-xl border p-4 ${
  importStatus.type === 'success'
- ? 'border-accent/40 bg-accent/10 text-accent'
+ ? 'border-white/40 bg-white/10 text-accent'
  : 'border-red-500/30 bg-red-500/15 text-red-400'
  }`}
             >
@@ -1018,7 +1018,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               <button
                 type="button"
                 onClick={() => setShowCreateStaff(true)}
-                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/20 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:bg-white/5/80"
               >
                 <UserPlus className="w-3.5 h-3.5" aria-hidden />
                 {t.admin_add_employee}
@@ -1028,17 +1028,17 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               <button
                 type="button"
                 onClick={() => setShowSuspended(!showSuspended)}
-                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/30 px-2.5 py-1.5 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/20 px-2.5 py-1.5 text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-white active:text-white"
               >
                 {showSuspended ? t.hide_suspended : t.show_suspended}
               </button>
             )}
           </div>
-          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.35)' }}>
+          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.14)' }}>
             <button
               type="button"
               onClick={toggleTeamSectionExpanded}
-              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition-colors hover:bg-white/8 active:bg-white/8/80"
+              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition-colors hover:bg-white/10 active:bg-white/10"
               aria-expanded={teamSectionExpanded}
             >
               <h2 className="text-[0.6875rem] font-semibold uppercase tracking-widest text-white/80">
@@ -1114,7 +1114,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
         {/* Notifica team */}
         {adminOnly && (
-          <div className="rounded-xl border border-neutral-500 p-4 mb-4">
+          <div className="rounded-xl border border-white/[0.14] p-4 mb-4">
             <div className="flex items-center justify-between gap-3 mb-1">
               <h2 className="text-md font-bold flex items-center gap-2">
                 <Bell className="w-4 h-4 text-accent" />
@@ -1124,7 +1124,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 type="button"
                 disabled={teamNotifyLoading}
                 onClick={() => void handleNotifyTeam()}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-accent/25 bg-accent/[0.07] px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/12 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-white/10 transition-colors disabled:opacity-50 disabled:pointer-events-none"
               >
                 <Bell className="w-3.5 h-3.5 opacity-80" />
                 {teamNotifyLoading ? '…' : t.admin_notify_team_button}
@@ -1167,7 +1167,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       </span>
                       {!isBuiltin && d.permissionCategory && (
                         <span
-                          className="text-[0.6875rem] font-semibold normal-case opacity-90 border-l border-white/35 pl-1.5 shrink-0 max-w-[5.5rem] truncate"
+                          className="text-[0.6875rem] font-semibold normal-case opacity-90 border-l border-white/10 pl-1.5 shrink-0 max-w-[5.5rem] truncate"
                           title={t.settings_dept_permission_group}
                         >
                           {d.permissionCategory === 'sala_bar'
@@ -1181,7 +1181,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       )}
                       {isBuiltin && d.permissionCategory && (
                         <span
-                          className="text-[0.6875rem] font-semibold normal-case opacity-90 border-l border-white/35 pl-1.5 shrink-0 max-w-[5.5rem] truncate"
+                          className="text-[0.6875rem] font-semibold normal-case opacity-90 border-l border-white/10 pl-1.5 shrink-0 max-w-[5.5rem] truncate"
                           title={t.settings_dept_permission_group}
                         >
                           {d.permissionCategory === 'sala_bar'
@@ -1247,7 +1247,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           setHiddenBuiltins(getHiddenBuiltinValues());
                           void notifyDepartmentsChanged();
                         }}
-                        className="flex items-center gap-1.5 rounded-xl border border-dashed border-white/20 px-3 py-1.5 text-xs font-semibold text-white/55 transition-colors opacity-0 group-hover/missing:opacity-100 hover:bg-white/10 hover:border-accent/50 hover:text-accent active:text-accent"
+                        className="flex items-center gap-1.5 rounded-xl border border-dashed border-white/20 px-3 py-1.5 text-xs font-semibold text-white/55 transition-colors opacity-0 group-hover/missing:opacity-100 hover:bg-white/10 hover:border-white/50 hover:text-accent active:text-accent"
                       >
                         <span
                           className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -1269,7 +1269,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="space-y-3 rounded-xl border border-accent/25 bg-white/8 p-3">
+                    <div className="space-y-3 rounded-xl border border-white/25 bg-white/10 p-3">
                       <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/55">
                         {t.settings_dept_edit_title}
                       </p>
@@ -1302,7 +1302,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                               void notifyDepartmentsChanged();
                             }
                           }}
-                          className="min-w-0 flex-1 rounded-xl border border-neutral-500 px-3 py-2 text-base text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 md:min-w-[12rem]"
+                          className="min-w-0 flex-1 rounded-xl border border-white/20 px-3 py-2 text-base text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-white/30 md:min-w-[12rem]"
                         />
                         {!builtinValues.has(editingDeptValue) && (
                           <div>
@@ -1340,7 +1340,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                               setEditingDeptValue(null);
                               void notifyDepartmentsChanged();
                             }}
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-xs font-semibold text-white hover:bg-accent-hover transition-colors disabled:opacity-40 active:bg-accent-hover/80"
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-xs font-semibold text-white hover:bg-accent-hover transition-colors disabled:opacity-40 active:bg-white/80"
                           >
                             <Check className="w-3.5 h-3.5" />
                             {t.save}
@@ -1348,7 +1348,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           <button
                             type="button"
                             onClick={() => setEditingDeptValue(null)}
-                            className="rounded-xl border border-neutral-500 px-3 py-2 text-xs font-semibold text-white/70 surface-ghost-interactive"
+                            className="rounded-xl border border-white/20 px-3 py-2 text-xs font-semibold text-white/70 surface-ghost-interactive"
                           >
                             {t.cancel}
                           </button>
@@ -1386,7 +1386,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       }
                     }}
                     placeholder={t.settings_new_dept_placeholder}
-                    className="min-w-[8rem] flex-1 px-3 py-2 rounded-xl border border-neutral-500 bg-transparent text-base text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
+                    className="min-w-[8rem] flex-1 px-3 py-2 rounded-xl border border-white/20 bg-transparent text-base text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-accent"
                   />
                   <button
                     type="button"
@@ -1402,7 +1402,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         void notifyDepartmentsChanged();
                       }
                     }}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent-hover transition-colors disabled:opacity-40 active:bg-accent-hover/80"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent-hover transition-colors disabled:opacity-40 active:bg-white/80"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     {t.settings_add_dept}
@@ -1445,7 +1445,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
           >
             <div className="fluid-grid fluid-grid-2 gap-3">
               {/* Critico */}
-              <div className="rounded-xl border border-neutral-500 depth-card flex flex-col gap-3 p-4">
+              <div className="rounded-xl border border-white/[0.14] depth-card flex flex-col gap-3 p-4">
                 <div className="flex items-center gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-100">
                     <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
@@ -1476,7 +1476,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         value={workRules.maxDailyHours}
                         onChange={(e) => updateWorkRule('maxDailyHours', Math.max(4, Math.min(14, +e.target.value || 9)))}
                         placeholder="0"
-                        className="w-full rounded-xl border border-neutral-500 px-2 py-1 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-accent/30"
+                        className="w-full rounded-xl border border-white/20 px-2 py-1 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-white/30"
                       />
                     </div>
                     <div>
@@ -1488,7 +1488,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         value={workRules.minRestHours}
                         onChange={(e) => updateWorkRule('minRestHours', Math.max(6, Math.min(24, +e.target.value || 11)))}
                         placeholder="0"
-                        className="w-full rounded-xl border border-neutral-500 px-2 py-1 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-accent/30"
+                        className="w-full rounded-xl border border-white/20 px-2 py-1 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-white/30"
                       />
                     </div>
                   </div>
@@ -1496,7 +1496,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               </div>
 
               {/* Attenzione */}
-              <div className="rounded-xl border border-neutral-500 depth-card flex flex-col gap-3 p-4">
+              <div className="rounded-xl border border-white/20 depth-card flex flex-col gap-3 p-4">
                 <div className="flex items-center gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/15">
                     <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
@@ -1527,7 +1527,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         value={workRules.maxDailyHours}
                         onChange={(e) => updateWorkRule('maxDailyHours', Math.max(4, Math.min(14, +e.target.value || 9)))}
                         placeholder="0"
-                        className="w-full rounded-xl border border-neutral-500 px-2 py-1 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-accent/30"
+                        className="w-full rounded-xl border border-white/20 px-2 py-1 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-white/30"
                       />
                     </div>
                     <div>
@@ -1539,7 +1539,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         value={workRules.maxWeeklyHours}
                         onChange={(e) => updateWorkRule('maxWeeklyHours', Math.max(20, Math.min(60, +e.target.value || 48)))}
                         placeholder="0"
-                        className="w-full rounded-xl border border-neutral-500 px-2 py-1 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-accent/30"
+                        className="w-full rounded-xl border border-white/20 px-2 py-1 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-white/30"
                       />
                     </div>
                   </div>
@@ -1547,7 +1547,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               </div>
 
               {/* Sovrapposizione */}
-              <div className="rounded-xl border border-neutral-500 depth-card flex flex-col gap-3 p-4">
+              <div className="rounded-xl border border-white/20 depth-card flex flex-col gap-3 p-4">
                 <div className="flex items-center gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-red-500/30 bg-red-500/15 shadow-[0_0_6px_rgba(239,68,68,0.3)]">
                     <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
@@ -1570,7 +1570,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               </div>
 
               {/* Pausa automatica — fasce progressive (soglia durata turno) */}
-              <div className="rounded-xl border border-neutral-500 depth-card flex flex-col gap-3 p-4">
+              <div className="rounded-xl border border-white/20 depth-card flex flex-col gap-3 p-4">
                 <div className="flex items-center gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/15">
                     <Timer className="w-4 h-4 text-amber-400" />
@@ -1607,7 +1607,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                             updateAutoBreakTier(idx, { minShiftMinutes: Math.round(Math.max(0, Math.min(24, +e.target.value || 0)) * 60) })
                           }
                           aria-label={t.settings_wr_auto_break_tier_min_shift}
-                          className="w-14 rounded-lg border border-neutral-500 bg-white/10 px-2 py-1.5 text-sm font-semibold text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                          className="w-14 rounded-lg border border-white/20 bg-white/10 px-2 py-1.5 text-sm font-semibold text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-white/20"
                         />
                         <span className="text-[0.625rem] font-semibold uppercase text-white/45">h</span>
                         <span className="text-white/20">→</span>
@@ -1621,7 +1621,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                             updateAutoBreakTier(idx, { breakMinutes: Math.max(0, Math.min(180, Math.round(+e.target.value || 0))) })
                           }
                           aria-label={t.settings_wr_auto_break_tier_break}
-                          className="w-14 rounded-lg border border-neutral-500 bg-white/10 px-2 py-1.5 text-sm font-semibold text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                          className="w-14 rounded-lg border border-white/20 bg-white/10 px-2 py-1.5 text-sm font-semibold text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-white/20"
                         />
                         <span className="text-[0.625rem] font-semibold uppercase text-white/45">min</span>
                         <button
@@ -1674,10 +1674,10 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 return (
                   <div
                     key={rule.id}
-                    className={`rounded-xl border border-neutral-500 flex flex-col gap-3 p-4 transition-colors ${
+                    className={`rounded-xl border border-white/[0.14] flex flex-col gap-3 p-4 transition-colors ${
  isEnabled
  ? ''
- : 'border-white/10 opacity-70 bg-white/5'
+ : 'border-white/[0.14] opacity-70 bg-white/5'
  }`}
                   >
                     <div className="flex items-center gap-2">
@@ -1733,7 +1733,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               <button
                 type="button"
                 onClick={() => setCreatingBreakRule(true)}
-                className="rounded-xl border border-neutral-500 surface-ghost-interactive flex min-h-[7.5rem] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-neutral-500/90 p-4 text-white/55 transition-colors hover:border-accent hover:bg-accent/5 hover:text-accent active:text-accent"
+                className="rounded-xl border border-white/[0.14] surface-ghost-interactive flex min-h-[7.5rem] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/[0.14] p-4 text-white/55 transition-colors hover:border-accent hover:bg-white/5 hover:text-accent active:text-accent"
               >
                 <Plus className="w-6 h-6" />
                 <span className="text-xs font-semibold">{t.settings_break_new_rule}</span>
@@ -1794,7 +1794,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     return (
                       <div
                         key={tmpl.name}
-                        className="rounded-xl border border-neutral-500 rounded-lg p-3 flex items-start gap-3"
+                        className="rounded-xl border border-white/[0.14] rounded-lg p-3 flex items-start gap-3"
                       >
                         <div className="flex-shrink-0 w-8 h-8 rounded-md bg-blue-50 flex items-center justify-center">
                           <BookTemplate className="h-4 w-4 text-blue-500" />
@@ -1858,7 +1858,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     ? 'text-accent'
                     : 'text-brand-deep';
                   const borderColor = isLastSunday
-                    ? 'border-accent/25 border-l-accent'
+                    ? 'border-white/25 border-l-accent'
                     : 'border-brand-deep/25 border-l-brand-deep';
                   return (
                     <div className={`rounded-xl border-2 border-l-4 ${borderColor} bg-transparent px-3 py-2.5`}>
@@ -1897,7 +1897,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     </p>
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-white/10 bg-transparent px-3 py-2.5 flex items-center justify-center">
+                  <div className="rounded-xl border border-white/[0.14] bg-transparent px-3 py-2.5 flex items-center justify-center">
                     <p className="text-[0.6875rem] text-white/60 text-center leading-snug">
                       Nessuna modifica in bozza
                     </p>
@@ -1921,8 +1921,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     }}
                     className={`flex flex-col items-start gap-1 rounded-xl border-2 px-3 py-2.5 text-left transition-colors ${
  periodRuleMode === 'last_sunday'
- ? 'border-accent bg-accent/8'
- : 'border-neutral-500 bg-white/8 hover:border-white/20'
+ ? 'border-accent bg-white/10'
+ : 'border-white/20 bg-white/10 hover:border-white/20'
  } active:brightness-95`}
                   >
                     <span className={`text-[0.6875rem] font-extrabold uppercase tracking-wide ${periodRuleMode === 'last_sunday' ? 'text-accent' : 'text-white/70'}`}>
@@ -1943,7 +1943,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     className={`flex flex-col items-start gap-1 rounded-xl border-2 px-3 py-2.5 text-left transition-colors ${
  periodRuleMode === 'fixed_start'
  ? 'border-brand-deep bg-brand-deep/8'
- : 'border-neutral-500 bg-white/8 hover:border-white/20'
+ : 'border-white/20 bg-white/10 hover:border-white/20'
  } active:brightness-95`}
                   >
                     <span className={`text-[0.6875rem] font-extrabold uppercase tracking-wide ${periodRuleMode === 'fixed_start' ? 'text-brand-deep' : 'text-white/70'}`}>
@@ -1974,7 +1974,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     allowClear={false}
                     compact
                     aria-label="Primo giorno del periodo"
-                    className="mb-3 w-full !border-neutral-500 !bg-white/8"
+                    className="mb-3 w-full !border-white/20 !bg-white/10"
                   />
                   {/* Preview periodo calcolato dalla data scelta */}
                   {(() => {
@@ -2010,7 +2010,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
  }`}
                 style={!periodDraftDirty || periodSavingCloud
                   ? { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' }
-                  : { background: 'transparent', color: '#ffffff', border: '1px solid rgba(255,255,255,0.50)' }
+                  : { background: 'transparent', color: '#ffffff', border: '1px solid rgba(255,255,255,0.20)' }
                 }
               >
                 {periodSavingCloud ? 'Sincronizzazione…' : t.ts_save_period}
@@ -2036,7 +2036,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 const preview =
                   effectiveTok.length > 20 ? `${effectiveTok.slice(0, 20)}…` : effectiveTok || '—';
                 return (
-                  <div className="rounded-xl border border-neutral-500 mb-3 space-y-1.5 px-3 py-2">
+                  <div className="rounded-xl border border-white/[0.14] mb-3 space-y-1.5 px-3 py-2">
                     <p className="text-[0.6875rem] leading-snug text-white/80">
                       {effectiveTok
                         ? formatTrans(t.settings_presence_effective_token_preview, { preview })
@@ -2048,7 +2048,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   </div>
                 );
               })()}
-              <div className="rounded-xl border border-neutral-500 mb-3 flex items-center justify-between gap-3 px-3 py-2.5">
+              <div className="rounded-xl border border-white/[0.14] mb-3 flex items-center justify-between gap-3 px-3 py-2.5">
                 <span className="text-xs font-semibold text-white">{t.settings_presence_require_label}</span>
                 <button
                   type="button"
@@ -2106,7 +2106,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       setPresenceQrBusy(false);
                     }
                   }}
-                  className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60 active:bg-accent-hover/80"
+                  className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60 active:bg-white/80"
                 >
                   <QrCode className="h-4 w-4 shrink-0 text-white" aria-hidden />
                   {presenceQrBusy ? t.ui_ellipsis : t.settings_presence_generate_qr}
@@ -2149,7 +2149,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     onChange={(e) => setHolidayEmailDraft(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') saveHolidayEmail(); }}
                     placeholder="es. direzione@azienda.it"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-transparent bg-transparent text-base text-white placeholder:text-white/60 outline-none transition-colors focus:border-transparent focus:ring-0 focus:shadow-none"
+                    className="w-full !pl-9 !pr-3 py-2.5 rounded-xl border border-transparent bg-transparent text-base text-white placeholder:text-white/60 outline-none transition-colors focus:border-transparent focus:ring-0 focus:shadow-none"
                   />
                 </div>
                 <button
@@ -2220,7 +2220,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               })}
             </div>
 
-            <div className="rounded-xl border border-neutral-500 mt-0 bg-white/5 p-4">
+            <div className="rounded-xl border border-white/[0.14] mt-0 bg-white/5 p-4">
               <div className="mb-2 flex items-center gap-2">
                 <MapPin className="h-4 w-4 flex-shrink-0 text-accent" />
                 <h3 className="text-xs font-bold uppercase tracking-wider text-white">
@@ -2250,7 +2250,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     inputMode="decimal"
                     value={geoLat}
                     onChange={(e) => setGeoLat(e.target.value)}
-                    className="rounded-xl border border-neutral-500 bg-white/10 px-3 py-2 text-base text-white"
+                    className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-base text-white"
                     placeholder="45.123456"
                   />
                 </label>
@@ -2261,7 +2261,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     inputMode="decimal"
                     value={geoLng}
                     onChange={(e) => setGeoLng(e.target.value)}
-                    className="rounded-xl border border-neutral-500 bg-white/10 px-3 py-2 text-base text-white"
+                    className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-base text-white"
                     placeholder="9.123456"
                   />
                 </label>
@@ -2272,7 +2272,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     inputMode="numeric"
                     value={geoRadius}
                     onChange={(e) => setGeoRadius(e.target.value)}
-                    className="rounded-xl border border-neutral-500 bg-white/10 px-3 py-2 text-base text-white"
+                    className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-base text-white"
                     placeholder="120"
                   />
                 </label>
@@ -2303,7 +2303,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       setGeoAcquiring(false);
                     }
                   }}
-                  className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl border border-neutral-500 px-4 text-xs font-bold uppercase tracking-wider text-white/80 surface-ghost-interactive disabled:opacity-60"
+                  className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl border border-white/20 px-4 text-xs font-bold uppercase tracking-wider text-white/80 surface-ghost-interactive disabled:opacity-60"
                 >
                   <LocateFixed className="h-4 w-4 shrink-0 text-accent" aria-hidden />
                   {geoAcquiring ? t.ui_ellipsis : t.settings_geofence_acquire_gps}
@@ -2330,7 +2330,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       setGeoSaving(false);
                     }
                   }}
-                  className="min-h-[2.5rem] rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60 active:bg-accent-hover/80"
+                  className="min-h-[2.5rem] rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-hover disabled:opacity-60 active:bg-white/80"
                 >
                   {geoSaving ? t.ui_ellipsis : t.settings_geofence_save}
                 </button>
@@ -2351,7 +2351,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
                 {dataToolsLocked ? (
                   /* ── Stato bloccato ── */
-                  <div className="flex flex-col items-center gap-3 rounded-xl border border-neutral-500 bg-white/5/80 py-5 px-4">
+                  <div className="flex flex-col items-center gap-3 rounded-xl border border-white/[0.14] bg-white/5/80 py-5 px-4">
                     <Lock className="h-7 w-7 text-white/40" />
                     <p className="text-[0.75rem] text-center text-white/55 leading-snug">
                       Sezione protetta.<br/>Inserisci il tuo PIN per sbloccare.
@@ -2359,7 +2359,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     <button
                       type="button"
                       onClick={() => { setDataToolsPin(''); setDataToolsPinError(''); setShowDataToolsPinPad(true); }}
-                      className="flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-[0.75rem] font-semibold text-white shadow-sm hover:bg-accent/90 transition-colors"
+                      className="flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-[0.75rem] font-semibold text-white shadow-sm hover:bg-white/90 transition-colors"
                     >
                       <KeyRound className="h-3.5 w-3.5" />
                       Sblocca con PIN
@@ -2384,14 +2384,14 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       <button
                         type="button"
                         onClick={handleImportClick}
-className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs font-medium uppercase text-white/70 surface-ghost-interactive transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-medium uppercase text-white/70 surface-ghost-interactive transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                       >
                         {t.restore}
                       </button>
                       <button
                         type="button"
                         onClick={() => exportToJSON({ users, shifts, punchRecords, holidays })}
-                        className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs font-medium uppercase text-white/70 surface-ghost-interactive"
+                        className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-medium uppercase text-white/70 surface-ghost-interactive"
                       >
                         {t.backup_json}
                       </button>
@@ -2454,9 +2454,9 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
 
         {/* ── Sincronizzazione cloud — in fondo alla scheda ─────────────────── */}
         {adminOnly && (
-          <div className="rounded-2xl border border-accent/25 bg-accent/[0.04] p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="rounded-2xl border border-white/25 bg-white/5 p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex gap-3 min-w-0">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15">
                 <UploadCloud className="h-5 w-5 text-white" style={{ color: '#fff' }} aria-hidden />
               </div>
               <div className="min-w-0">
@@ -2501,7 +2501,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                 type="button"
                 disabled={pullSyncBusy || pushSyncBusy || dataSyncInProgress}
                 onClick={() => void handlePullSync()}
-                className="inline-flex w-full md:w-auto min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80 whitespace-nowrap"
+                className="inline-flex w-full md:w-auto min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-white/30 transition-colors active:bg-white/80 whitespace-nowrap"
               >
                 <RefreshCw className={`h-4 w-4 ${pullSyncBusy ? 'animate-spin' : ''}`} />
                 {pullSyncBusy ? t.ui_ellipsis : 'Sincronizza'}
@@ -2510,7 +2510,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                 type="button"
                 disabled={pushSyncBusy || settingsCloudPushBusy || pullSyncBusy || dataSyncInProgress}
                 onClick={() => void handlePushSync()}
-                className="inline-flex w-full md:w-auto min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-accent/30 transition-colors active:bg-accent-dark/80 whitespace-nowrap"
+                className="inline-flex w-full md:w-auto min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-accent-dark disabled:opacity-60 shadow-sm shadow-white/30 transition-colors active:bg-white/80 whitespace-nowrap"
               >
                 <UploadCloud className={`h-4 w-4 text-white ${pushSyncBusy ? 'animate-spin' : ''}`} style={{ color: '#fff' }} />
                 {pushSyncBusy ? t.ui_ellipsis : 'Carica sul cloud'}
@@ -2595,8 +2595,8 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                     {affected.map(u => {
                       const initials = ((u.first_name?.[0] ?? '') + (u.last_name?.[0] ?? '')).toUpperCase() || '?';
                       return (
-                        <div key={u.id} className="flex items-center gap-2 rounded-xl border border-neutral-500 bg-white/10 px-3 py-2">
-                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[0.6875rem] font-bold text-accent">
+                        <div key={u.id} className="flex items-center gap-2 rounded-xl border border-white/[0.14] bg-white/10 px-3 py-2">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-[0.6875rem] font-bold text-accent">
                             {initials}
                           </div>
                           <span className="min-w-0 flex-1 truncate text-xs font-semibold text-white/80" title={u.first_name}>{u.first_name} {u.last_name}
@@ -2604,7 +2604,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
                           <select
                             value={reassignMap[u.id] ?? ''}
                             onChange={e => setReassignMap(m => ({ ...m, [u.id]: e.target.value }))}
-                            className="min-w-0 max-w-[8.125rem] shrink rounded-lg border border-neutral-500 bg-white/5 px-2 py-1 text-base font-semibold text-white/80 outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent/30"
+                            className="min-w-0 max-w-[8.125rem] shrink rounded-lg border border-white/20 bg-white/5 px-2 py-1 text-base font-semibold text-white/80 outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-white/30"
                           >
                             <option value="">— nessun reparto —</option>
                             {departments
@@ -2664,7 +2664,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
       )}
 
       {showImportConfirm && importFile && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
           <div className="modal-glass-panel w-full max-w-sm rounded-2xl p-6">
             <h3 className="mb-2 text-sm font-semibold text-white">{t.attention}</h3>
             <p className="mb-4 text-sm text-white/80">{t.import_warning}</p>
@@ -2673,7 +2673,7 @@ className="rounded-lg rounded-xl border border-neutral-500 px-3 py-2 text-xs fon
               <button
                 type="button"
                 onClick={handleConfirmImport}
-className="flex-1 rounded-xl bg-accent py-2.5 text-xs font-semibold uppercase text-white hover:bg-accent-hover active:bg-accent-hover/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+className="flex-1 rounded-xl bg-accent py-2.5 text-xs font-semibold uppercase text-white hover:bg-accent-hover active:bg-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               >
                 {t.confirm}
               </button>
@@ -2808,17 +2808,17 @@ function BreakRuleModal({
   const labelClass =
     'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/55';
   const inputClass =
-    'w-full rounded-xl border border-neutral-500 bg-white/10 px-3 py-2.5 text-base font-semibold text-white transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20';
+    'w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-base font-semibold text-white transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-white/20';
   const chipClass = (active: boolean) =>
     `cursor-pointer px-2.5 py-1 text-xs font-semibold transition-colors ${
       active
         ? 'rounded-full border border-emerald-500 bg-emerald-500/20 text-emerald-400'
-        : 'rounded-xl border border-neutral-500 !rounded-full text-white/70 surface-ghost-interactive hover:border-accent hover:text-accent'
+        : 'rounded-xl border border-white/20 !rounded-full text-white/70 surface-ghost-interactive hover:border-accent hover:text-accent'
     }`;
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
       onClick={onClose}
     >
       <motion.form
@@ -2832,7 +2832,7 @@ function BreakRuleModal({
       >
         {/* Header — tab + azioni in un unico elemento */}
         <div className="sticky top-0 z-10 flex shrink-0 items-center bg-app-bg/80 px-5 pt-4 pb-4 backdrop-blur-md">
-          <div className="flex w-full items-center gap-1 rounded-xl border border-neutral-500 bg-white/5 p-1">
+          <div className="flex w-full items-center gap-1 rounded-xl border border-white/[0.14] bg-white/5 p-1">
             {tabOptions.map((tab) => (
               <button
                 key={tab.id}
@@ -2853,7 +2853,7 @@ function BreakRuleModal({
               className="group flex items-center gap-0 overflow-hidden rounded-lg bg-accent p-2 text-white transition-all duration-200 hover:gap-1.5 hover:pr-2.5 active:brightness-95"
             >
               <Check className="h-4 w-4 shrink-0" />
-              <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[8rem]">
+              <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[15rem]">
                 {isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
               </span>
             </button>
@@ -2865,7 +2865,7 @@ function BreakRuleModal({
               className="group flex items-center gap-0 overflow-hidden rounded-lg bg-white/10 p-2 text-white/55 transition-all duration-200 hover:gap-1.5 hover:bg-white/15 hover:text-white hover:pr-2.5 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
             >
               <X className="h-4 w-4 shrink-0" />
-              <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[4rem]">
+              <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[4rem]">
                 {t.close}
               </span>
             </button>
@@ -2901,8 +2901,8 @@ function BreakRuleModal({
                       title={getBreakRuleIconLabel(key, t)}
                       className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
                         icon === key
-                          ? 'border-accent bg-accent/20 text-accent'
-                          : 'border-neutral-500 text-white/60 surface-ghost-interactive hover:border-accent hover:text-accent'
+                          ? 'border-accent bg-white/20 text-accent'
+                          : 'border-white/20 text-white/60 surface-ghost-interactive hover:border-accent hover:text-accent'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -2931,7 +2931,7 @@ function BreakRuleModal({
                     value={breakStart}
                     onChange={setBreakStart}
                     aria-label={t.settings_break_label_start}
-                    className="w-full border-neutral-500 bg-white/8"
+                    className="w-full border-white/20 bg-white/10"
                   />
                 </div>
                 <div>
@@ -2940,7 +2940,7 @@ function BreakRuleModal({
                     value={breakEnd}
                     onChange={setBreakEnd}
                     aria-label={t.settings_break_label_end}
-                    className="w-full border-neutral-500 bg-white/8"
+                    className="w-full border-white/20 bg-white/10"
                   />
                 </div>
               </div>
@@ -3014,7 +3014,7 @@ function BreakRuleModal({
           {activeTab === 'apply' && (
             <div className="space-y-3">
               {/* Soglia turno: condizione di applicazione (durata minima del turno) */}
-              <div className="space-y-3 rounded-xl border border-white/10 bg-white/5/70 p-3">
+              <div className="space-y-3 rounded-xl border border-white/[0.14] bg-white/5/70 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-white/80">{t.settings_break_shift_threshold_title}</p>
@@ -3038,13 +3038,13 @@ function BreakRuleModal({
                     <button
                       type="button"
                       onClick={() => setMinHours((h) => Math.max(0.5, Math.round((h - 0.5) * 10) / 10))}
-                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-neutral-500 font-bold text-white/80 surface-ghost-interactive"
+                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 font-bold text-white/80 surface-ghost-interactive"
                     >−</button>
                     <span className="w-16 text-center text-sm font-bold text-white">{minHours}h</span>
                     <button
                       type="button"
                       onClick={() => setMinHours((h) => Math.min(12, Math.round((h + 0.5) * 10) / 10))}
-                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-neutral-500 font-bold text-white/80 surface-ghost-interactive"
+                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 font-bold text-white/80 surface-ghost-interactive"
                     >+</button>
                   </div>
                 )}

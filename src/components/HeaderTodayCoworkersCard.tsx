@@ -181,7 +181,7 @@ export default function HeaderTodayCoworkersCard() {
               return (
                 <li
                   key={r.userId}
-                  className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] py-1.5 px-3.5"
+                  className="flex shrink-0 items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] py-1.5 px-3.5"
                   title={`${ringTitle}${intervalsTitle ? ` · ${intervalsTitle}` : ''}`}
                 >
                   <div className="min-w-0 flex flex-col">

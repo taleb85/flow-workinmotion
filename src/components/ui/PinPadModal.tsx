@@ -26,7 +26,7 @@ interface PinPadModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
   leftActionButton?: ReactNode;
-  /** Sovrascrive le classi dell'overlay (default: 'bg-black/30 backdrop-blur-[0.1875rem]') */
+  /** Non più usato: lo sfondo scuro è `bg-black/40`, uniforme a tutte le modali. */
   backdropClass?: string;
   /** ID utente per biometrica interna (usato solo se leftActionButton non è fornito) */
   userId?: string;
@@ -168,7 +168,7 @@ export function PinPadModal({
           <span className="text-xs font-bold uppercase tracking-widest">{pinLabel}</span>
         </div>
         <div className="w-full h-14 rounded-2xl flex items-center justify-center relative"
-          style={{ background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.18)' }}>
+          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)' }}>
           <div className="flex items-center gap-6">
             {[0, 1, 2, 3].map((i) => (
               <div key={i} className="relative flex items-center justify-center">
@@ -200,14 +200,14 @@ export function PinPadModal({
         <div className="grid grid-cols-3 gap-3">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
             <button key={n} type="button" onClick={() => handleKey(n)}
-              className="h-14 rounded-2xl font-bold text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/30"
+              className="h-14 rounded-2xl font-bold text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"
               style={btnBase}>{n}</button>
           ))}
           {leftActionButton ? (
             <div className="h-14 rounded-2xl flex items-center justify-center" style={btnBase}>{leftActionButton}</div>
           ) : webAuthnOk && credRegistered ? (
             <button type="button" onClick={handleBiometric} disabled={bioLoading || isLoading}
-              className="h-14 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-white/80 transition-colors disabled:opacity-50 hover:bg-white/10 hover:border-white/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              className="h-14 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-white/80 transition-colors disabled:opacity-50 hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               style={btnBase} title="Usa impronta digitale">
               {bioLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Fingerprint className="w-6 h-6" />}
             </button>
@@ -215,10 +215,10 @@ export function PinPadModal({
             <div className="h-14 rounded-2xl" style={btnBase} />
           )}
           <button type="button" onClick={() => handleKey(0)}
-            className="h-14 rounded-2xl font-bold text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/30"
+            className="h-14 rounded-2xl font-bold text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"
             style={btnBase}>0</button>
           <button type="button" onClick={() => handleKey('del')}
-            className="h-14 rounded-2xl flex items-center justify-center text-white/70 hover:text-white transition-colors hover:bg-white/10 hover:border-white/30"
+            className="h-14 rounded-2xl flex items-center justify-center text-white/70 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20"
             style={btnBase}>
             <Delete className="w-6 h-6" />
           </button>
@@ -228,10 +228,10 @@ export function PinPadModal({
       {/* Action buttons */}
       <div className="flex gap-3 px-8 pb-10 md:pb-6 mt-4">
         <button type="button" onClick={onCancel}
-          className="flex-1 h-14 rounded-2xl font-bold text-sm text-white/80 hover:text-white transition-colors hover:bg-white/10 hover:border-white/30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+          className="flex-1 h-14 rounded-2xl font-bold text-sm text-white/80 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           style={btnBase}>{cancelText}</button>
         <button type="button" disabled={pin.length !== 4 || isLoading} onClick={onConfirm}
-          className="flex-1 h-14 rounded-2xl text-white font-bold text-sm disabled:opacity-35 transition-colors flex items-center justify-center gap-2 hover:bg-white/12 hover:border-white/30 disabled:hover:bg-transparent disabled:hover:border-inherit hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+          className="flex-1 h-14 rounded-2xl text-white font-bold text-sm disabled:opacity-35 transition-colors flex items-center justify-center gap-2 hover:bg-white/12 hover:border-white/20 disabled:hover:bg-transparent disabled:hover:border-inherit hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           style={btnBase}>
           {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : confirmText}
         </button>
@@ -255,8 +255,8 @@ export function PinPadModal({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
         transition={{ type: 'spring', stiffness: 360, damping: 30, mass: 0.9 }}
-        className="flex flex-col w-full max-w-[21.25rem] mx-4 rounded-3xl overflow-hidden"
-        style={{ backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.18)', boxShadow: '0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08), 0 0 40px rgba(255,255,255,0.04)' }}
+        className="flex flex-col w-full max-w-[21.25rem] mx-4 rounded-2xl overflow-hidden"
+        style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.14)', boxShadow: '0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08)' }}
         onClick={e => e.stopPropagation()}
       >
         {content}

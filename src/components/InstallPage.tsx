@@ -24,7 +24,7 @@ function StepRow({
       className="flex items-center gap-3 rounded-2xl px-4 py-3.5"
       style={{
         background: 'rgba(40, 32, 24, 0.82)',
-        border: '1px solid rgba(255,255,255,0.15)',
+        border: '1px solid rgba(255,255,255,0.14)',
       }}
     >
       <div
@@ -60,7 +60,7 @@ function DeviceButton({
       className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 text-left transition-colors"
       style={{
         background: 'rgba(255,255,255,0.05)',
-        border: '1px solid rgba(255,255,255,0.12)',
+        border: '1px solid rgba(255,255,255,0.20)',
       }}
     >
       <span className="text-2xl">{emoji}</span>
@@ -254,7 +254,7 @@ export default function InstallPage() {
         className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-colors"
         style={{
           background: 'transparent',
-          border: '1px solid rgba(255,255,255,0.10)',
+          border: '1px solid rgba(255,255,255,0.20)',
           color: 'rgba(255,255,255,0.50)',
         }}
       >
@@ -308,7 +308,7 @@ export default function InstallPage() {
         className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-colors"
         style={{
           background: 'transparent',
-          border: '1px solid rgba(255,255,255,0.10)',
+          border: '1px solid rgba(255,255,255,0.20)',
           color: 'rgba(255,255,255,0.50)',
         }}
       >
@@ -361,7 +361,7 @@ export default function InstallPage() {
         className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mt-4 mb-3 text-sm font-medium transition-colors"
         style={{
           background: 'transparent',
-          border: '1px solid rgba(255,255,255,0.10)',
+          border: '1px solid rgba(255,255,255,0.20)',
           color: 'rgba(255,255,255,0.50)',
         }}
       >
@@ -415,7 +415,7 @@ export default function InstallPage() {
         className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-colors"
         style={{
           background: 'transparent',
-          border: '1px solid rgba(255,255,255,0.10)',
+          border: '1px solid rgba(255,255,255,0.20)',
           color: 'rgba(255,255,255,0.50)',
         }}
       >
@@ -469,7 +469,7 @@ export default function InstallPage() {
         className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 mb-3 text-sm font-medium transition-colors"
         style={{
           background: 'transparent',
-          border: '1px solid rgba(255,255,255,0.10)',
+          border: '1px solid rgba(255,255,255,0.20)',
           color: 'rgba(255,255,255,0.50)',
         }}
       >
@@ -522,7 +522,7 @@ export default function InstallPage() {
           className="relative z-10 w-full rounded-3xl overflow-hidden px-6 py-8"
           style={{
             background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.10)',
+            border: '1px solid rgba(255,255,255,0.14)',
             boxShadow:
               '0 32px 64px -12px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset',
           }}

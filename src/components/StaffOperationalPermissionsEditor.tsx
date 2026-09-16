@@ -83,7 +83,7 @@ export default function StaffOperationalPermissionsEditor({ user, currentUser }:
               description={perm.description}
               badge={
                 perm.adminOnly ? (
-                  <span className="text-[0.6875rem] font-bold text-accent border border-accent/30 bg-accent/8 rounded-xl px-1.5 py-0.5 uppercase tracking-wider">
+                  <span className="text-[0.6875rem] font-bold text-accent border border-white/30 bg-white/10 rounded-xl px-1.5 py-0.5 uppercase tracking-wider">
                     {t.settings_badge_admin}
                   </span>
                 ) : undefined

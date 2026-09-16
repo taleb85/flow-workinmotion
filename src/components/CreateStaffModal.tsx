@@ -155,7 +155,7 @@ export default function CreateStaffModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 bg-black/35 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
         <motion.div
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -163,7 +163,7 @@ export default function CreateStaffModal({
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className="modal-glass-panel w-full max-w-md overflow-hidden rounded-xl"
         >
-          <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4" style={{ background: 'rgba(255, 255, 255, 0.14)' }}>
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 px-5 py-4 backdrop-blur-[20px]">
             <div>
               <h2 className="text-base font-bold tracking-wide text-white font-sans">{t.create_employee_title}</h2>
               <p className="mt-0.5 text-xs text-white/60 font-sans">{t.create_employee_subtitle}</p>
@@ -172,7 +172,7 @@ export default function CreateStaffModal({
               type="button"
               onClick={onClose}
               aria-label={t.close}
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-neutral-500 bg-white/10 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 bg-white/10 transition-colors hover:bg-white/15 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
             >
               <X className="h-4 w-4 text-white/70" aria-hidden />
             </button>

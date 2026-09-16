@@ -64,6 +64,23 @@ export function formatMinutesToHoursAndMinutes(totalMinutes: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
+/**
+ * Tempo trascorso da una timbratura, in formato `HH:MM:SS`.
+ * Restituisce `null` se non c'è un orario di partenza valido: in quel caso
+ * il cronometro non va mostrato (turni futuri o non ancora timbrati).
+ * Un orario di partenza nel futuro viene clampato a `00:00:00`.
+ */
+export function formatElapsedSince(startIso: string | null | undefined, nowMs: number = Date.now()): string | null {
+  if (!startIso) return null;
+  const start = new Date(startIso).getTime();
+  if (Number.isNaN(start)) return null;
+  const diff = Math.max(0, nowMs - start);
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
  
 export function calculateRoundedPunchTime(actualTime: Date, _shiftStartTime?: string): Date {
   const minutes = actualTime.getMinutes();
@@ -224,6 +241,30 @@ export function hasShiftConflictSameDay(
     if (nextStart < currEnd) return true;
   }
   return false;
+}
+
+/** Gruppo di turni che cadono nello stesso giorno di calendario. */
+export interface ShiftDayGroup<T> {
+  /** Data in formato `yyyy-MM-dd`: data di calendario, non un istante. */
+  date: string;
+  shifts: T[];
+}
+
+/**
+ * Raggruppa turni consecutivi dello stesso giorno di calendario.
+ *
+ * La chiave è la stringa `date` del turno (data senza orario): non viene mai
+ * creato un `Date`, quindi due turni finiscono nello stesso gruppo se e solo se
+ * hanno la stessa data, senza slittamenti dovuti al fuso orario del browser.
+ * Presuppone l'array già ordinato per data (gruppi consecutivi).
+ */
+export function groupShiftsByDay<T extends { date: string }>(shifts: T[]): ShiftDayGroup<T>[] {
+  return shifts.reduce<ShiftDayGroup<T>[]>((groups, shift) => {
+    const last = groups[groups.length - 1];
+    if (last && last.date === shift.date) last.shifts.push(shift);
+    else groups.push({ date: shift.date, shifts: [shift] });
+    return groups;
+  }, []);
 }
 
 /**

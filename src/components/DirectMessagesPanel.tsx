@@ -10,8 +10,6 @@ import { readProfileAvatarFromStorage } from '../utils/profilePhotoStorage';
 import { getIntlLocale } from '../utils/translations';
 import { generateNotifications, syncNotificationFeed, getSeenIds, markAllSeen } from '../utils/notifications';
 
-const BRAND = '#0a0a0c';
-
 function formatTime(iso: string, locale?: string) {
   return new Date(iso).toLocaleTimeString(locale ?? 'it-IT', { hour: '2-digit', minute: '2-digit', hour12: false });
 }
@@ -82,7 +80,7 @@ function BroadcastList({
         {sorted.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 px-6 py-10 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'rgba(255, 255, 255, 0.10)' }}>
-              <MessageCircle className="w-8 h-8" style={{ color: BRAND }} />
+              <MessageCircle className="w-8 h-8 text-white/70" />
             </div>
             <p className="text-sm font-semibold text-white">Nessuna comunicazione</p>
             <p className="text-xs text-white/50">I messaggi del management appariranno qui</p>
@@ -98,7 +96,7 @@ function BroadcastList({
               return (
                 <div
                   key={msg.id}
-                  className="rounded-2xl p-4 border border-white/10 transition-colors hover:bg-white/5"
+                  className="rounded-2xl p-4 border border-white/[0.14] transition-colors hover:bg-white/5"
                   style={{ background: 'rgba(255,255,255,0.04)' }}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -324,7 +322,7 @@ function NotificationsView({
       <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-contain p-2 [-webkit-overflow-scrolling:touch]">
         {loading && dbNotifs.length === 0 && allNotifs.length === 0 ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-6 h-6 animate-spin" style={{ color: BRAND }} />
+            <Loader2 className="w-6 h-6 animate-spin text-white/70" />
           </div>
         ) : allNotifs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -338,21 +336,20 @@ function NotificationsView({
             {allNotifs.map((n) => (
               <div
                 key={n.id}
-                className={`relative flex gap-3 rounded-2xl p-4 transition-colors ${
-                  !n.isRead ? 'bg-accent/[0.06]' : 'hover:bg-white/8'
-                } active:bg-white/8/80`}
+                className={`flex items-center gap-3 rounded-2xl px-4 py-2.5 transition-colors ${
+                  !n.isRead ? 'bg-white/5' : 'hover:bg-white/10'
+                }`}
               >
-                <div className="mt-0.5 shrink-0">{getIcon(n.type)}</div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-white">{n.title}</p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-white/70">{n.body}</p>
-                  <p className="mt-2 text-[0.6875rem] font-medium uppercase tracking-wider text-white/50">
+                <div className="shrink-0">{getIcon(n.type)}</div>
+                {/* Titolo, testo e data su una sola riga */}
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <p className="min-w-0 truncate text-sm font-bold text-white">{n.title}</p>
+                  <p className="min-w-0 flex-1 truncate text-xs text-white/70">{n.body}</p>
+                  <p className="shrink-0 text-[0.6875rem] font-medium uppercase tracking-wider text-white/50">
                     {formatRelativeDate(n.timestamp)}
                   </p>
                 </div>
-                {!n.isRead && (
-                  <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-red-500" />
-                )}
+                {!n.isRead && <div className="h-2 w-2 shrink-0 rounded-full bg-red-500" />}
               </div>
             ))}
           </div>
@@ -382,8 +379,10 @@ export function DirectMessagesPanel({ onClose }: { onClose?: () => void } = {}) 
 
   return (
     <div className="relative flex h-full min-h-0 w-full max-w-7xl flex-1 flex-col overflow-hidden mx-auto">
-      {/* Tab bar — sempre visibile in cima, in tutte le viste */}
-      <div className="relative flex shrink-0 border-b border-white/10" style={{ background: BRAND }}>
+      {/* Tab bar — sempre visibile in cima, in tutte le viste.
+          Niente banda nera: la larghezza è ripartita tra i due tab e il
+          pulsante di chiusura, che sta in linea (non più sovrapposto). */}
+      <div className="relative flex shrink-0 items-stretch border-b border-white/10">
         <button
           onClick={() => handleTabChange('notifications')}
           className={`flex-1 py-3 text-sm font-bold transition-colors border-b-2 ${
@@ -405,7 +404,7 @@ export function DirectMessagesPanel({ onClose }: { onClose?: () => void } = {}) 
           {t.messages ?? 'Messaggi'}
         </button>
         {onClose && (
-          <div className="absolute inset-y-0 right-0 flex items-center gap-1 px-2" style={{ background: BRAND }}>
+          <div className="flex shrink-0 items-center gap-1 px-2">
             <button
               onClick={onClose}
               className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 transition-colors active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
@@ -421,7 +420,7 @@ export function DirectMessagesPanel({ onClose }: { onClose?: () => void } = {}) 
       <div className="relative flex-1 min-h-0">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-6 h-6 animate-spin" style={{ color: BRAND }} />
+            <Loader2 className="w-6 h-6 animate-spin text-white/70" />
           </div>
         ) : (
           <AnimatePresence mode="wait">

@@ -127,13 +127,13 @@ export function UnifiedBellButton({
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
 
-        <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[5.5rem]">
+        <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[5.5rem]">
           {(getTranslations(effectiveLanguage) as Record<string, string>).notifications ?? 'Notifiche'}
         </span>
 
         {/* Badge numero notifiche non lette - Rosso acceso con numero bianco */}
         {totalUnread > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[0.5rem] font-black text-white" style={{ background: 'linear-gradient(135deg,#f87171,#dc2626)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.18), 0 2px 8px rgba(220,38,38,0.55)', border: '1.5px solid rgba(255,255,255,0.55)' }}>
+          <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[0.5rem] font-black text-white" style={{ background: 'linear-gradient(135deg,#f87171,#dc2626)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.18), 0 2px 8px rgba(220,38,38,0.55)', border: '1px solid rgba(255,255,255,0.20)' }}>
             {totalUnread > 9 ? '9+' : totalUnread}
           </span>
         )}

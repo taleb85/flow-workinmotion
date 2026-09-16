@@ -473,7 +473,7 @@ export default function ProfileNavTabPanel({
     setTimeout(() => _setLangSaved(false), 2000);
   };
 
-  const _menuRowBase = 'w-full flex items-center justify-between rounded-xl px-4 py-3.5 transition-colors  border border-neutral-500 hover:bg-white/10';
+  const _menuRowBase = 'w-full flex items-center justify-between rounded-xl px-4 py-3.5 transition-colors  border border-white/20 hover:bg-white/10';
 
   const deptLabel = currentUser.department
     ? translateDepartmentValue(currentUser.department, effectiveLanguage)
@@ -503,12 +503,12 @@ export default function ProfileNavTabPanel({
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <div
           className="flex flex-col items-center gap-3 pt-8 pb-6 px-5"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.12)' }}
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.10)' }}
         >
           {/* Avatar + photo button */}
           <div className="relative inline-block" ref={photoMenuWrapRef}>
             <div
-              className="flex h-[9rem] w-[9rem] items-center justify-center overflow-hidden rounded-3xl border-2 border-slate-100 bg-brand-electric/6 text-[3.5rem] font-bold text-brand-electric"
+              className="flex h-[9rem] w-[9rem] items-center justify-center overflow-hidden rounded-3xl border-2 border-white/[0.14] bg-brand-electric/6 text-[3.5rem] font-bold text-brand-electric"
             >
               {resolvedAvatar ? (
                 <img
@@ -681,7 +681,7 @@ export default function ProfileNavTabPanel({
             {expanded === 'lang' && (
               <motion.div key="lang-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
                 <div className="rounded-2xl px-4 py-4 text-white space-y-3" data-save-field="lang" style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
-                  <div className="flex gap-1 rounded-xl p-1 border border-neutral-500" style={{ background: 'transparent' }}>
+                  <div className="flex gap-1 rounded-xl p-1 border border-white/[0.14]" style={{ background: 'transparent' }}>
                     {(() => {
                       const deviceLang = getDeviceUiLanguage();
                       const isAuto = pendingLang === null;
@@ -736,7 +736,7 @@ export default function ProfileNavTabPanel({
                 <div className="rounded-2xl px-4 py-4 text-white" style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
                     {bioAvailable ? (
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)' }}>
                           <Fingerprint className="w-4.5 h-4.5" style={{ color: 'rgba(255,255,255,0.85)' }} strokeWidth={1.75} aria-hidden />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -769,7 +769,7 @@ export default function ProfileNavTabPanel({
                       </div>
                     ) : (
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)' }}>
                           <ShieldCheck className="w-4.5 h-4.5" style={{ color: 'rgba(255,149,0,0.9)' }} strokeWidth={1.75} aria-hidden />
                         </div>
                         <p className="text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.5)' }}>

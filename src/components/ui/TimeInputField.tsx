@@ -174,10 +174,10 @@ export function TimeInputField({
 
   const borderTone =
     size === 'hero'
-      ? 'border-white/35 focus-within:border-transparent focus-within:ring-2 focus-within:ring-accent'
+      ? 'border-white/20 focus-within:border-transparent focus-within:ring-2 focus-within:ring-accent'
       : size === 'lg'
-        ? 'border-white/35 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/30'
-        : 'focus-within:ring-2 focus-within:ring-accent/40';
+        ? 'border-white/20 focus-within:border-accent focus-within:ring-2 focus-within:ring-white/30'
+        : 'focus-within:ring-2 focus-within:ring-white/40';
 
   return (
     <div

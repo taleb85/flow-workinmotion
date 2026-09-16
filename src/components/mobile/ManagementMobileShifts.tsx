@@ -154,7 +154,7 @@ function MyShiftsSection({
               key={wIdx}
               type="button"
               onClick={() => toggleWeek(wIdx)}
-              className="w-full flex items-center justify-between rounded-2xl border border-neutral-500 px-4 py-3 text-left transition-colors hover:border-white/20 active:brightness-95"
+              className="w-full flex items-center justify-between rounded-2xl border border-white/20 px-4 py-3 text-left transition-colors hover:border-white/20 active:brightness-95"
               style={cardBg}
             >
               <div className="flex flex-col gap-0.5">
@@ -181,7 +181,7 @@ function MyShiftsSection({
         return (
           <div key={wIdx}>
             <div
-              className="rounded-2xl border border-neutral-500 overflow-hidden shadow-sm"
+              className="rounded-2xl border border-white/[0.14] overflow-hidden shadow-sm"
               style={cardBg}
             >
               {/* Griglia 7 giorni */}
@@ -199,7 +199,7 @@ function MyShiftsSection({
                     ? 'bg-white/[0.12] border border-white/20'
                     : isAbsent
                       ? 'bg-red-500/[0.08] border border-red-500/[0.18]'
-                      : 'border border-white/8 bg-white/4';
+                      : 'border border-white/20';
                   return (
                     <div
                       key={i}
@@ -377,7 +377,7 @@ function TeamShiftsSection({
         const confirmed = dayShifts.filter(s => s.approval_status !== 'absent');
 
         return (
-          <div key={key} className="rounded-xl border border-neutral-500 overflow-hidden shadow-sm" style={cardBg}>
+          <div key={key} className="rounded-xl border border-white/[0.14] overflow-hidden shadow-sm" style={cardBg}>
             {/* Header cassetto */}
             <button
               type="button"
@@ -491,7 +491,7 @@ export default function ManagementMobileShifts({ shifts, users, currentUserId, l
       <div className="flex items-center gap-2 mb-5 px-4">
         {/* Toggle settimana / periodo */}
         <span
-          className="h-9 inline-flex items-center px-3 rounded-2xl border border-white/30 text-white/70 text-[0.6875rem] font-black uppercase tracking-widest shrink-0 cursor-pointer select-none"
+          className="h-9 inline-flex items-center px-3 rounded-2xl border border-white/20 text-white/70 text-[0.6875rem] font-black uppercase tracking-widest shrink-0 cursor-pointer select-none"
           onClick={() => { setNavMode(m => m === 'week' ? 'period' : 'week'); setNavOffset(0); }}
         >
           {navMode === 'week' ? (t.ts_period_week ?? 'Sett.') : (t.tab_period ?? 'Periodo')}
@@ -499,13 +499,13 @@ export default function ManagementMobileShifts({ shifts, users, currentUserId, l
 
         {/* Frecce + label */}
         <div
-          className="flex items-center border border-white/40 rounded-2xl overflow-hidden flex-1"
+          className="flex items-center border border-white/20 rounded-2xl overflow-hidden flex-1"
           style={{ background: 'transparent' }}
         >
           <button
             type="button"
             onClick={() => setNavOffset(o => o - 1)}
-            className="flex items-center justify-center h-9 w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-r border-white/20 active:bg-white/80"
+            className="flex items-center justify-center h-9 w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-r border-white/10 active:bg-white/80"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -517,7 +517,7 @@ export default function ManagementMobileShifts({ shifts, users, currentUserId, l
           <button
             type="button"
             onClick={() => setNavOffset(o => o + 1)}
-            className="flex items-center justify-center h-9 w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-l border-white/20 active:bg-white/80"
+            className="flex items-center justify-center h-9 w-9 text-white hover:bg-white/15 transition-colors shrink-0 border-l border-white/10 active:bg-white/80"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
