@@ -103,7 +103,7 @@ export interface AppContextType {
       timestamp?: string;
       shift_id?: string;
       presenceProof?: string;
-      /** Se omesso: `manager` se un responsabile timbra per un altro utente, altrimenti `kiosk`. */
+      /** Se omesso: `manager` se un responsabile timbra per un altro utente, altrimenti `kiosk` (timbratura dall’app). */
       source?: PunchRecordSource;
     }
   ) => Promise<

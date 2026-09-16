@@ -310,7 +310,7 @@ export default function HomePage({
       (e.shift.approval_status === 'approved' && !e.shift.approved_at);
 
     if (e.shift.approval_status === 'absent') {
-      return { border: 'border-l-rose-400', bg: 'bg-rose-500/12', badge: 'bg-rose-500/20 text-rose-200 border-rose-400/50', dot: 'bg-rose-400', label: t.status_absent };
+      return { border: 'border-l-rose-400', bg: 'bg-rose-500/[0.12]', badge: 'bg-rose-500/20 text-rose-200 border-rose-400/50', dot: 'bg-rose-400', label: t.status_absent };
     }
     if (e.isApproved) {
       return { border: 'border-l-emerald-400/70', bg: 'bg-emerald-500/10', badge: 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40', dot: 'bg-emerald-400', label: t.home_status_approved };
@@ -319,30 +319,30 @@ export default function HomePage({
       return { border: 'border-l-blue-400', bg: 'bg-white/10', badge: 'bg-blue-500/20 text-blue-200 border-blue-400/40', dot: 'bg-blue-400', label: t.status_draft };
     }
     if (e.hasMissingOut || e.isLate) {
-      return { border: 'border-l-red-500', bg: 'bg-red-500/12', badge: 'bg-red-500/20 text-red-200 border-red-400/50', dot: 'bg-red-400', label: t.home_status_anomaly };
+      return { border: 'border-l-red-500', bg: 'bg-red-500/[0.12]', badge: 'bg-red-500/20 text-red-200 border-red-400/50', dot: 'bg-red-400', label: t.home_status_anomaly };
     }
     if (e.canApprove) {
       return { border: 'border-l-white/30', bg: 'bg-white/10', badge: 'bg-white/10 text-white/80 border-white/20', dot: 'bg-white/45', label: t.home_status_to_approve };
     }
     if (!e.punchIn) {
       if (punchMissingHome) {
-        return { border: 'border-l-amber-400', bg: 'bg-amber-500/12', badge: 'bg-amber-500/20 text-amber-200 border-amber-400/50', dot: 'bg-amber-400', label: t.home_status_not_punched };
+        return { border: 'border-l-amber-400', bg: 'bg-amber-500/[0.12]', badge: 'bg-amber-500/20 text-amber-200 border-amber-400/50', dot: 'bg-amber-400', label: t.home_status_not_punched };
       }
       if (publishedHome) {
         return { border: 'border-l-white/30', bg: 'bg-white/10', badge: 'bg-white/10 text-white/70 border-white/20', dot: 'bg-white/40', label: t.home_status_not_punched };
       }
-      return { border: 'border-l-amber-400', bg: 'bg-amber-500/12', badge: 'bg-amber-500/20 text-amber-200 border-amber-400/50', dot: 'bg-amber-400', label: t.home_status_not_punched };
+      return { border: 'border-l-amber-400', bg: 'bg-amber-500/[0.12]', badge: 'bg-amber-500/20 text-amber-200 border-amber-400/50', dot: 'bg-amber-400', label: t.home_status_not_punched };
     }
     if (inTodayKpiWindow && e.punchIn && !e.isLate && !e.hasMissingOut) {
-      return { border: 'border-l-white/40', bg: 'bg-white/12', badge: 'bg-white/12 text-white border-white/20', dot: 'bg-white/70', label: t.home_status_in_shift };
+      return { border: 'border-l-white/40', bg: 'bg-white/[0.12]', badge: 'bg-white/[0.12] text-white border-white/20', dot: 'bg-white/70', label: t.home_status_in_shift };
     }
     if (e.punchIn && !e.actualEnd) {
-      return { border: 'border-l-white/40', bg: 'bg-white/12', badge: 'bg-white/12 text-white border-white/20', dot: 'animate-pulse bg-white/70', label: t.home_status_in_shift };
+      return { border: 'border-l-white/40', bg: 'bg-white/[0.12]', badge: 'bg-white/[0.12] text-white border-white/20', dot: 'animate-pulse bg-white/70', label: t.home_status_in_shift };
     }
     if (e.punchIn && e.actualEnd) {
       return { border: 'border-l-white/30', bg: 'bg-white/10', badge: 'bg-white/10 text-white/80 border-white/20', dot: 'bg-white/50', label: t.home_status_complete };
     }
-    return { border: 'border-l-amber-400', bg: 'bg-amber-500/12', badge: 'bg-amber-500/20 text-amber-200 border-amber-400/50', dot: 'bg-amber-400', label: t.home_status_not_punched };
+    return { border: 'border-l-amber-400', bg: 'bg-amber-500/[0.12]', badge: 'bg-amber-500/20 text-amber-200 border-amber-400/50', dot: 'bg-amber-400', label: t.home_status_not_punched };
   };
 
   // ── STAFF VIEW (o gestionale senza team_view sulla Home) ────────────────────

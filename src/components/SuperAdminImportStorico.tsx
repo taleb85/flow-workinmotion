@@ -623,7 +623,7 @@ className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500
                     </button>
                     <button
                       onClick={() => setConfirmDelete(null)}
-                      className="rounded-lg border border-white/20 px-2 py-1 text-[0.6875rem] font-semibold text-white/70 hover:bg-white/5 transition active:bg-white/5/80"
+                      className="rounded-lg border border-white/20 px-2 py-1 text-[0.6875rem] font-semibold text-white/70 hover:bg-white/5 transition active:bg-white/10"
                     >
                       Annulla
                     </button>

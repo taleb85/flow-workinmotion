@@ -49,13 +49,7 @@ export default {
           DEFAULT: '#f8fafc',
           card: '#ffffff',
         },
-        ink: {
-          DEFAULT: '#1a1a1a',
-          secondary: '#475569',
-          muted: '#64748b',
-        },
         /** Hex brand legacy centralizzati (ex hardcoded in UI) */
-        'brand-deep': '#1a1a1a',
         'brand-mid': '#ffffff',
         'brand-navy': '#404040',
         'brand-electric': '#ffffff',

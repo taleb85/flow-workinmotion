@@ -5,18 +5,10 @@
 import type { User } from '../types';
 import {
   getEnabledFeatures,
-  DASHBOARD_TAB_FEATURE_KEYS,
   PERMISSION_MATRIX_KEYS,
   type EnabledFeatureKey,
 } from './enabledFeatures';
-import {
-  getEnabledModules,
-  ENABLED_MODULES,
-  type EnabledModule,
-  MODULE_TO_TAB_MANAGEMENT,
-  MODULE_TO_TAB_STAFF,
-  type AppNavTab,
-} from './enabledModules';
+import { type AppNavTab } from './enabledModules';
 
 /** Raggruppa widget UI (`screenGroup`) sotto la scheda bottom bar / hub anteprima. */
 const UI_SCREEN_GROUP_TO_PREVIEW_TAB: Record<string, AppNavTab> = {
@@ -42,47 +34,17 @@ export function screenGroupToPreviewTab(screenGroup: string): AppNavTab | 'all' 
 /** Dove mostrare il toggle permesso nella hub “Cosa vede chi” (per scheda). */
 export function featureKeyToPreviewTab(key: EnabledFeatureKey): AppNavTab {
   switch (key) {
-    case 'home_tab':
-      return 'home';
     case 'team_view':
     case 'edit_shifts':
     case 'approve_shifts':
       return 'turni';
-    case 'timesheet_tab':
-      return 'timesheet';
     case 'export_pdf':
       return 'turni';
     case 'view_stats':
-    case 'view_estimated_cost':
       return 'reports';
-    case 'desktop_access':
-      return 'settings';
-    case 'ferie_tab':
-      return 'ferie';
-    case 'admin_tab':
-      return 'settings';
     default:
       return 'settings';
   }
-}
-
-export function staffModuleToPreviewTab(mod: EnabledModule, isManagement: boolean): AppNavTab {
-  if (isManagement) {
-    const t = MODULE_TO_TAB_MANAGEMENT[mod];
-    if (t === 'home') return 'home';
-    if (t === 'turni') return 'turni';
-    if (t === 'ferie') return 'ferie';
-    if (t === 'timesheet') return 'timesheet';
-    if (t === 'reports') return 'reports';
-    return 'home';
-  }
-  const t = MODULE_TO_TAB_STAFF[mod];
-  if (t === 'home') return 'home';
-  if (t === 'shifts') return 'turni';
-  if (t === 'holidays') return 'ferie';
-  if (t === 'stats') return 'reports';
-  if (t === null && mod === 'pdf_export') return 'timesheet';
-  return 'home';
 }
 
 export function getTemplateOnlyFeaturesUser(user: User): User {
@@ -128,38 +90,11 @@ export function computeNextEnabledFeaturesOverride(
   return prev as Record<string, boolean>;
 }
 
+/**
+ * Chiavi configurabili per utente nell'hub “Cosa vede chi”.
+ * Le schede della barra (Panoramica, Presenze, Ferie, Admin) sono fisse: non
+ * compaiono qui perché non è possibile disattivarle singolarmente.
+ */
 export const PROFILE_VISIBILITY_FEATURE_KEYS: EnabledFeatureKey[] = [
   ...PERMISSION_MATRIX_KEYS,
-  ...DASHBOARD_TAB_FEATURE_KEYS,
 ];
-
-export function toggleStaffModule(user: User, module: EnabledModule, enable: boolean): EnabledModule[] {
-  const current = new Set(getEnabledModules(user));
-  if (enable) current.add(module);
-  else current.delete(module);
-  return ENABLED_MODULES.filter((m) => current.has(m));
-}
-
-const MODULE_LABELS_IT: Record<EnabledModule, string> = {
-  my_shifts: 'I miei turni',
-  team_schedule: 'Tabellone team',
-  stats_hours: 'Ore',
-  financial_reports: 'Report / finanziari',
-  vacation_requests: 'Ferie e permessi',
-  pdf_export: 'Scheda Presenze (modulo legacy)',
-};
-
-export function getModuleLabel(module: EnabledModule, lang: string): string {
-  if (lang === 'en') {
-    const en: Record<EnabledModule, string> = {
-      my_shifts: 'My shifts',
-      team_schedule: 'Team schedule',
-      stats_hours: 'Hours',
-      financial_reports: 'Reports',
-      vacation_requests: 'Time off',
-      pdf_export: 'Attendance sheet (legacy module)',
-    };
-    return en[module];
-  }
-  return MODULE_LABELS_IT[module];
-}

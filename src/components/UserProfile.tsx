@@ -5,7 +5,7 @@
  * Layout: Reparto sopra Stato account (in admin). Tutte le etichette via t('chiave') per IT/EN/ES.
  * Persistenza: updateUser -> database.users.update (tabella `users`), campo `department` incluso.
  */
-import { useMemo, useCallback, useState, useRef } from 'react';
+import { useMemo, useCallback } from 'react';
 import { User, Mail, Lock, Shield, ShieldCheck, ShieldOff, CheckCircle, AlertTriangle, Euro, Share2, Phone, Calendar, RefreshCw } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppConfig } from '../context/appSliceContexts';
@@ -16,11 +16,6 @@ import { buildShortInviteLink } from '../config/appPaths';
 import { PUBLIC_APP_ORIGIN } from '../config/publicAppUrl';
 import type { User as UserType, Language, Department } from '../types';
 import { isPurelyManagementRole, isAdminOnly, isManagementRole, canUserEdit } from '../utils/permissions';
-import {
-  TIMESHEET_GRID_PLANNED_ONLY_KEY,
-  TIMESHEET_GRID_SHIFT_TIMES_FEATURE_KEY,
-  getTimesheetGridPrivacyMode,
-} from '../utils/timesheetGridPrivacy';
 import { translateRole } from '../utils/roles';
 import { getDepartments } from '../utils/departments';
 import { formatDepartmentDisplayForProfile, translateDepartmentValue } from '../utils/departmentLabels';
@@ -350,72 +345,6 @@ export function ProfileFormSelf({
         </button>
       )}
     </form>
-  );
-}
-
-/** Solo admin: limita la griglia Presenze dell’utente ai soli orari pianificati pubblicati/confermati. */
-export function AdminTimesheetGridPrivacyEditor({ user }: { user: UserType }) {
-  const { updateUser } = useAppUser();
-  const { showSuccess, showError } = useAppOverlay();
-  const t = useT();
-  const tv = t as Record<string, string>;
-  const plannedOnly = getTimesheetGridPrivacyMode(user) === 'planned_only';
-  const [busy, setBusy] = useState(false);
-  const inFlight = useRef(false);
-
-  const handleToggle = async () => {
-    if (inFlight.current) return;
-    inFlight.current = true;
-    setBusy(true);
-    try {
-      const fe: Record<string, boolean> = { ...(user.enabled_features ?? {}) };
-      if (plannedOnly) {
-        delete fe[TIMESHEET_GRID_PLANNED_ONLY_KEY];
-      } else {
-        fe[TIMESHEET_GRID_PLANNED_ONLY_KEY] = true;
-        delete fe[TIMESHEET_GRID_SHIFT_TIMES_FEATURE_KEY];
-      }
-      await updateUser(user.id, { enabled_features: fe });
-      showSuccess?.(tv.settings_operational_perm_saved ?? 'Salvato.');
-    } catch (e) {
-      console.error('[AdminTimesheetGridPrivacyEditor]', e);
-      showError?.(tv.save_error_retry ?? 'Errore durante il salvataggio.');
-    } finally {
-      inFlight.current = false;
-      setBusy(false);
-    }
-  };
-
-  return (
-    <div className="rounded-xl border border-white/20 bg-white/10 px-3 py-3">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold text-white">
-            {tv.admin_timesheet_grid_planned_only_label}
-          </p>
-          <p className="mt-1 text-[0.6875rem] leading-snug text-white/55">
-            {tv.admin_timesheet_grid_planned_only_hint}
-          </p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={plannedOnly}
-          aria-label={tv.admin_timesheet_grid_planned_only_label}
-          disabled={busy}
-          onClick={() => void handleToggle()}
-          className={`relative flex h-7 w-12 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-50 ${
- plannedOnly ? 'bg-accent' : ''
- }`}
-        >
-          <span
-            className={`absolute top-0.5 h-6 w-6 rounded-full toggle-knob transition-all duration-200 ease-in-out ${
- plannedOnly ? 'translate-x-5' : 'translate-x-0.5'
- }`}
-          />
-        </button>
-      </div>
-    </div>
   );
 }
 
@@ -779,10 +708,6 @@ export function ProfileFormAdmin({
           </select>
         </div>
 
-        {variant === 'edit' && isAdminOnly(currentUser) && !readOnly && (
-          <AdminTimesheetGridPrivacyEditor user={user} />
-        )}
-
         <div className="space-y-4">
           <div>
             <label className={labelClass}>
@@ -901,7 +826,7 @@ export function ProfileFormAdmin({
           <button
             type="button"
             onClick={onClose}
-className="flex-1 rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 surface-ghost-interactive font-sans transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+className="inline-flex flex-1 items-center justify-center h-8 rounded-xl border border-white/20 px-3 text-xs font-semibold text-white/80 surface-ghost-interactive font-sans transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           >
             {readOnly ? t.close ?? t.cancel : t.cancel}
           </button>
@@ -909,7 +834,7 @@ className="flex-1 rounded-xl border border-white/20 px-4 py-2 text-sm font-semib
             <button
               type="submit"
               disabled={isSaving || Boolean(activePinConflictMessage)}
-              className="flex-1 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 font-sans active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              className="inline-flex flex-1 items-center justify-center h-8 rounded-xl border border-white/20 bg-[var(--flow-primary-fill)] px-3 text-xs font-semibold text-white transition-colors hover:bg-[var(--brand-hover)] disabled:cursor-not-allowed disabled:opacity-50 font-sans active:brightness-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               {isSaving ? t.saving : variant === 'create' ? t.create_employee_submit : t.save_changes}
             </button>

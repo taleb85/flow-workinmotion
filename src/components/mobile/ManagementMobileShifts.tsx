@@ -382,7 +382,7 @@ function TeamShiftsSection({
             <button
               type="button"
               onClick={() => toggle(key)}
-              className="w-full flex items-center justify-between px-3 py-2.5 active:bg-white/12 transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2.5 active:bg-white/[0.12] transition-colors"
             >
               <div className="flex items-center gap-2 min-w-0">
                 <span className={`text-[0.6875rem] font-black uppercase tracking-widest truncate ${

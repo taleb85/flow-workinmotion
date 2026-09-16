@@ -231,7 +231,7 @@ export function PinPadModal({
           className="flex-1 h-14 rounded-2xl font-bold text-sm text-white/80 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           style={btnBase}>{cancelText}</button>
         <button type="button" disabled={pin.length !== 4 || isLoading} onClick={onConfirm}
-          className="flex-1 h-14 rounded-2xl text-white font-bold text-sm disabled:opacity-35 transition-colors flex items-center justify-center gap-2 hover:bg-white/12 hover:border-white/20 disabled:hover:bg-transparent disabled:hover:border-inherit hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+          className="flex-1 h-14 rounded-2xl text-white font-bold text-sm disabled:opacity-35 transition-colors flex items-center justify-center gap-2 hover:bg-white/[0.12] hover:border-white/20 disabled:hover:bg-transparent disabled:hover:border-inherit hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           style={btnBase}>
           {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : confirmText}
         </button>

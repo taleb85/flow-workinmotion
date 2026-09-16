@@ -34,8 +34,6 @@ const ENABLED_FEATURE_KEYS = [
   'approve_shifts',
   'export_pdf',
   'view_stats',
-  'view_estimated_cost',
-  'desktop_access',
   'home_tab',
   'ferie_tab',
   'admin_tab',
@@ -50,8 +48,6 @@ const DEFAULT_MANAGER_FEATURES = {
   timesheet_tab: true,
   export_pdf: false,
   view_stats: false,
-  view_estimated_cost: false,
-  desktop_access: true,
   ferie_tab: true,
   admin_tab: false,
 };
@@ -61,17 +57,16 @@ const DEFAULT_STAFF_FEATURES = {
   team_view: false,
 };
 
+/** Allineare a SETTINGS_OPERATIONAL_PERM_KEYS in settingsPermissionRows.ts */
 const OPERATIONAL_KEYS = [
-  'can_request_holidays',
   'can_punch_from_app',
   'can_create_shifts',
   'can_manage_drafts',
   'can_approve_shifts',
-  'can_view_total_hours',
-  'can_edit_staff_pins',
 ];
 
-const OPT_OUT = new Set(['can_request_holidays', 'can_punch_from_app']);
+/** Allineare a STAFF_PERMISSION_OPT_OUT_KEYS in staffPermissionDefaults.ts */
+const OPT_OUT = new Set(['can_punch_from_app']);
 
 function defaultOperationalTemplateBase() {
   return Object.fromEntries(OPERATIONAL_KEYS.map((k) => [k, OPT_OUT.has(k)]));
@@ -94,7 +89,6 @@ function buildDiskPayload() {
   return {
     management: serializeGroup(DEFAULT_MANAGER_FEATURES, true, op),
     assistant_manager: serializeGroup(DEFAULT_MANAGER_FEATURES, true, op),
-    capo: serializeGroup(DEFAULT_MANAGER_FEATURES, true, op),
     staff: serializeGroup(DEFAULT_STAFF_FEATURES, true, op),
   };
 }

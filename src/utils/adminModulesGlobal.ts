@@ -5,7 +5,6 @@ const MODULE_KEYS = [
   'visibility_management',
   'department_creation',
   'violation_rules',
-  'master_control_panel',
   'auto_breaks',
 ] as const;
 

@@ -32,14 +32,6 @@ import { isAppCloudSyncEnabled } from '../utils/appCloudSync';
 /** Evita 400 su jsonb / tipi non validi. */
 function sanitizeUserUpdatePayload(payload: Record<string, unknown>): Record<string, unknown> {
   const out = { ...payload };
-  if ('enabled_modules' in out) {
-    const m = out.enabled_modules;
-    if (Array.isArray(m)) {
-      out.enabled_modules = [...new Set(m.filter((x): x is string => typeof x === 'string'))];
-    } else {
-      delete out.enabled_modules;
-    }
-  }
   if (
     'enabled_features' in out &&
     out.enabled_features &&
@@ -110,8 +102,6 @@ function pickInsertKeys(obj: Record<string, unknown>, keys: readonly string[]): 
 const USER_INSERT_PATCH_KEYS = [
   'can_create_shifts',
   'can_approve_shifts',
-  'can_view_total_hours',
-  'can_edit_staff_pins',
   'can_manage_drafts',
   'department',
   'hourly_rate_eur',
@@ -327,10 +317,9 @@ export const database = {
     async update(id: string, updates: Partial<User>) {
       const safeKeys: (keyof User)[] = [
         'first_name', 'last_name', 'email', 'phone', 'role', 'pin', 'status', 'sort_order',
-        'language', 'theme', 'department', 'hourly_rate_eur', 'monthly_confirmed', 'enabled_modules', 'enabled_features', 'ui_section_overrides',
-        'can_create_shifts', 'can_approve_shifts', 'can_view_total_hours',
-        'can_edit_staff_pins', 'can_manage_drafts',
-        'can_request_holidays', 'can_punch_from_app',
+        'language', 'theme', 'department', 'hourly_rate_eur', 'monthly_confirmed', 'enabled_features', 'ui_section_overrides',
+        'can_create_shifts', 'can_approve_shifts', 'can_manage_drafts',
+        'can_punch_from_app',
         'hide_from_team_schedule',
         'avatar_url',
         'employment_start_date',
@@ -348,9 +337,8 @@ export const database = {
 
       const payload = sanitizeUserUpdatePayload(rawPayload);
 
-      const permKeys = ['can_request_holidays', 'can_punch_from_app', 'can_edit_staff_pins', 'can_create_shifts', 'can_approve_shifts', 'can_view_total_hours', 'can_manage_drafts'];
+      const permKeys = ['can_punch_from_app', 'can_create_shifts', 'can_approve_shifts', 'can_manage_drafts'];
       const optionalCols = [
-        'enabled_modules',
         'enabled_features',
         'ui_section_overrides',
         'monthly_confirmed',

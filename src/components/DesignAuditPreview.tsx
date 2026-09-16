@@ -8,7 +8,6 @@ const BG_OVERLAYS = [
   { id: 'install', label: 'Installa PWA', gradient: 'radial-gradient(ellipse at 50% 30%, rgba(107,107,107,0.12) 0%, transparent 60%)' },
   { id: 'app-bg', label: 'bg-app-bg', color: '#0a0a0c' },
   { id: 'admin-card', label: 'Admin card', gradient: 'linear-gradient(110deg, rgb(82, 82, 82), rgb(55, 65, 81))' },
-  { id: 'kiosk-btn', label: 'Kiosk button', gradient: 'linear-gradient(135deg, rgb(107, 107, 107), rgb(55, 65, 81))' },
   { id: 'mobile-home', label: 'MobileHome card', gradient: 'linear-gradient(120deg, #9c9c9c, #ffffff, #525252)' },
   { id: 'table-header', label: 'Tabella header', gradient: 'linear-gradient(135deg, #525252, #374151)' },
   { id: 'table-green', label: 'Riga approvata', gradient: 'linear-gradient(90deg, #e8f4e8, #f0faf0)' },

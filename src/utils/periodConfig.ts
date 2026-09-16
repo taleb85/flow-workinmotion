@@ -221,3 +221,106 @@ export function periodConfigFromStartDate(startDate: Date): PeriodConfig {
   const numWeeks: 4 | 5 = weeks === 5 ? 5 : 4;
   return { startDate: format(start, 'yyyy-MM-dd'), numWeeks };
 }
+
+// ── Regole di calcolo del periodo (personalizzabili) ─────────────────────────
+
+/** Elenco delle regole personalizzate (le regole di sistema NON sono incluse). */
+export const PERIOD_RULES_STORAGE_KEY = 'osteria_period_rules';
+/** Id della regola di calcolo attualmente selezionata. */
+export const PERIOD_RULE_SELECTED_KEY = 'osteria_period_rule';
+/** Evento emesso quando l'elenco delle regole cambia (salvataggio locale o remoto). */
+export const PERIOD_RULES_UPDATED_EVENT = 'osteria_period_rules_updated';
+
+export type PeriodRuleType = 'last_sunday' | 'fixed_start';
+
+export type PeriodRule = {
+  id: string;
+  name: string;
+  type: PeriodRuleType;
+};
+
+/** Regole di sistema: sempre presenti e non eliminabili (garantiscono un fallback valido). */
+export const BUILTIN_PERIOD_RULES: readonly PeriodRule[] = [
+  { id: 'last_sunday', name: 'Ultima domenica', type: 'last_sunday' },
+  { id: 'fixed_start', name: 'Primo giorno', type: 'fixed_start' },
+];
+
+export const DEFAULT_PERIOD_RULE_ID = BUILTIN_PERIOD_RULES[0].id;
+
+export function isBuiltinPeriodRule(id: string): boolean {
+  return BUILTIN_PERIOD_RULES.some((r) => r.id === id);
+}
+
+/** Notifica i componenti che l'elenco delle regole è cambiato. */
+export function dispatchPeriodRulesUpdated(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(PERIOD_RULES_UPDATED_EVENT));
+  }
+}
+
+/**
+ * Valida un elenco di regole proveniente da localStorage/remoto.
+ * Ritorna null se il valore non è un array (così il chiamante non sovrascrive nulla).
+ */
+export function coercePeriodRules(parsed: unknown): PeriodRule[] | null {
+  if (!Array.isArray(parsed)) return null;
+  const out: PeriodRule[] = [];
+  for (const item of parsed) {
+    if (!item || typeof item !== 'object') continue;
+    const o = item as Record<string, unknown>;
+    const id = typeof o.id === 'string' ? o.id.trim() : '';
+    const name = typeof o.name === 'string' ? o.name.trim() : '';
+    const type: PeriodRuleType | null =
+      o.type === 'fixed_start' ? 'fixed_start' : o.type === 'last_sunday' ? 'last_sunday' : null;
+    if (!id || !name || !type || isBuiltinPeriodRule(id)) continue;
+    if (out.some((r) => r.id === id)) continue;
+    out.push({ id, name: name.slice(0, 40), type });
+  }
+  return out;
+}
+
+/** Carica le regole personalizzate da localStorage. */
+export function loadCustomPeriodRules(): PeriodRule[] {
+  try {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return [];
+    const raw = localStorage.getItem(PERIOD_RULES_STORAGE_KEY);
+    if (!raw) return [];
+    return coercePeriodRules(JSON.parse(raw)) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Salva le regole personalizzate in localStorage. */
+export function saveCustomPeriodRules(rules: PeriodRule[]): void {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(PERIOD_RULES_STORAGE_KEY, JSON.stringify(rules));
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Id della regola selezionata (fallback: regola di sistema «Ultima domenica»). */
+export function loadSelectedPeriodRuleId(): string {
+  try {
+    const raw = localStorage.getItem(PERIOD_RULE_SELECTED_KEY);
+    return raw && raw.trim() ? raw.trim() : DEFAULT_PERIOD_RULE_ID;
+  } catch {
+    return DEFAULT_PERIOD_RULE_ID;
+  }
+}
+
+export function saveSelectedPeriodRuleId(id: string): void {
+  try {
+    localStorage.setItem(PERIOD_RULE_SELECTED_KEY, id);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Id univoco per una nuova regola personalizzata. */
+export function createPeriodRuleId(): string {
+  return `rule_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+}

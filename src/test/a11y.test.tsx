@@ -29,7 +29,7 @@ vi.mock('../context/appSliceContexts', () => ({
     clearLanguage: vi.fn(),
   }),
   useAppConfig: () => ({
-    featureFlags: { kiosk_active: true },
+    featureFlags: {},
   }),
 }));
 

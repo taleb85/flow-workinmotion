@@ -22,17 +22,15 @@ export function normalizeUserRoleFromRow(role: unknown): UserRole {
 }
 
 /**
- * Chiavi permesso “opt-out”: assenti/null nel DB = **consentito** (allineato a StaffPersonalDashboard `!== false`).
+ * Chiavi permesso “opt-out”: assenti/null nel DB = **consentito**.
  */
-export const STAFF_PERMISSION_OPT_OUT_KEYS = ['can_request_holidays', 'can_punch_from_app'] as const;
+export const STAFF_PERMISSION_OPT_OUT_KEYS = ['can_punch_from_app'] as const;
 export type StaffPermissionOptOutKey = (typeof STAFF_PERMISSION_OPT_OUT_KEYS)[number];
 
 const MGMT_FLAG_KEYS = [
   'can_create_shifts',
   'can_approve_shifts',
   'can_manage_drafts',
-  'can_view_total_hours',
-  'can_edit_staff_pins',
 ] as const;
 
 /** Valore effettivo mostrato nei toggle e usato nell’app (coerente tra Impostazioni e UI). */
@@ -63,22 +61,18 @@ export function toggledPermissionDbValue(user: User, key: keyof User): boolean {
  */
 export function defaultPermissionFieldsForNewUser(role: UserRole): Pick<
   User,
-  'can_create_shifts' | 'can_approve_shifts' | 'can_manage_drafts' | 'can_view_total_hours' | 'can_edit_staff_pins'
+  'can_create_shifts' | 'can_approve_shifts' | 'can_manage_drafts'
 > {
   const off = {
     can_create_shifts: false,
     can_approve_shifts: false,
     can_manage_drafts: false,
-    can_view_total_hours: false,
-    can_edit_staff_pins: false,
   };
   if (role === 'admin') {
     return {
       can_create_shifts: true,
       can_approve_shifts: true,
       can_manage_drafts: true,
-      can_view_total_hours: true,
-      can_edit_staff_pins: true,
     };
   }
   return off;
@@ -97,14 +91,10 @@ export function userRowToSessionUser(row: User): User {
     theme: row.theme ?? 'light',
     can_create_shifts: row.can_create_shifts ?? false,
     can_approve_shifts: row.can_approve_shifts ?? false,
-    can_view_total_hours: row.can_view_total_hours ?? false,
-    can_edit_staff_pins: row.can_edit_staff_pins ?? false,
     can_manage_drafts: row.can_manage_drafts ?? false,
-    can_request_holidays: row.can_request_holidays,
     can_punch_from_app: row.can_punch_from_app,
     monthly_confirmed: row.monthly_confirmed,
     department: row.department,
-    enabled_modules: row.enabled_modules,
     enabled_features: row.enabled_features,
     ui_section_overrides: row.ui_section_overrides,
     hourly_rate_eur: row.hourly_rate_eur,

@@ -8,7 +8,6 @@ import { canUserEdit, isAdminOnly } from '../utils/permissions';
 import { isUserPermissionEffective, toggledPermissionDbValue } from '../utils/staffPermissionDefaults';
 import { buildSettingsPermissionRows, type SettingsOperationalPermKey } from '../utils/settingsPermissionRows';
 import AdminRow from './ui/AdminRow';
-import { PERMISSION_SUMMARY_LIST_CLASS } from './RoleFeatureSectionsBlock';
 
 type Props = {
   user: User;
@@ -63,7 +62,8 @@ export default function StaffOperationalPermissionsEditor({ user, currentUser }:
         {formatTrans(t.settings_operational_perms_heading, { name: user.first_name ?? '' })}
       </p>
       <p className="text-[0.6875rem] text-white/60 mb-2 leading-snug">{t.settings_operational_perms_editable_hint}</p>
-      <div className={PERMISSION_SUMMARY_LIST_CLASS}>
+      {/* Niente overflow-hidden sul contenitore: taglierebbe i testi lunghi su più righe. */}
+      <div className="space-y-0 rounded-xl border border-white/[0.14] ring-1 ring-slate-100/70">
         {rows.map((perm) => {
           const enabled = isUserPermissionEffective(user, perm.key);
           const interactive = canTogglePerm(perm.adminOnly);

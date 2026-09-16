@@ -276,8 +276,8 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
       </div>
 
       {/* Nota branding — colore e logo fissi FLOW */}
-      <div className="rounded-xl border border-white/[0.14] bg-white/6 px-3.5 py-2.5 flex items-center gap-2.5">
-        <div className="w-6 h-6 rounded-full bg-brand-deep flex items-center justify-center shrink-0">
+      <div className="rounded-xl border border-white/[0.14] bg-white/[0.06] px-3.5 py-2.5 flex items-center gap-2.5">
+        <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">
           <span className="text-white text-[0.6875rem] font-bold">F</span>
         </div>
         <p className="text-[0.6875rem] text-white/55">
@@ -287,7 +287,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
 
       {/* Dati demo — solo per nuova sede */}
       {!initial?.id && onSeedDemoChange && (
-        <div className="rounded-xl border border-white/[0.14] bg-white/6 px-3.5 py-3 flex items-start gap-3">
+        <div className="rounded-xl border border-white/[0.14] bg-white/[0.06] px-3.5 py-3 flex items-start gap-3">
           <Toggle value={seedDemo} onChange={onSeedDemoChange} />
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white/80 leading-snug">
@@ -310,7 +310,7 @@ className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-accent px
           <Check className="w-4 h-4" />
           {saving ? 'Salvataggio…' : 'Salva'}
         </button>
-<button type="button" onClick={onCancel} className="rounded-xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white/80 hover:bg-white/14 transition active:bg-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+<button type="button" onClick={onCancel} className="rounded-xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white/80 hover:bg-white/[0.14] transition active:bg-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -504,10 +504,7 @@ function SuperAdminPanelInner() {
         theme:                'light',
         can_create_shifts:    true,
         can_approve_shifts:   true,
-        can_view_total_hours: true,
-        can_edit_staff_pins:  true,
         can_manage_drafts:    true,
-        can_request_holidays: false,
         can_punch_from_app:   true,
         hide_from_team_schedule: false,
         department:           null,
@@ -631,7 +628,7 @@ function SuperAdminPanelInner() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => { setShowImport(!showImport); setShowForm(false); setEditingTenant(null); }}
-              className={`flex items-center gap-1.5 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-sm font-bold transition ${showImport ? 'bg-amber-100 text-amber-700' : 'bg-white/10 text-white/55 hover:bg-white/14 hover:text-white/90'}`}
+              className={`flex items-center gap-1.5 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-sm font-bold transition ${showImport ? 'bg-amber-100 text-amber-700' : 'bg-white/10 text-white/55 hover:bg-white/[0.14] hover:text-white/90'}`}
             >
               <ChevronRight className="w-4 h-4 rotate-90" />
               <span className="hidden md:inline">Importa storico</span>
@@ -786,7 +783,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                             className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition ${
  expandedSettings === t.id
  ? 'bg-brand-mid/10 text-[#2255BB]'
- : 'bg-white/10 text-white/55 hover:bg-brand-mid/8 hover:text-[#2255BB]'
+ : 'bg-white/10 text-white/55 hover:bg-brand-mid/[0.08] hover:text-[#2255BB]'
  }`}
                           >
                             <Settings className="w-3.5 h-3.5" />
@@ -794,7 +791,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                           </button>
                           <button
                             onClick={() => { setEditingTenant(t); setShowForm(false); setExpandedSettings(null); }}
-                            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 bg-white/10 text-white/55 hover:bg-white/14 hover:text-white/90 text-xs font-semibold transition"
+                            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 bg-white/10 text-white/55 hover:bg-white/[0.14] hover:text-white/90 text-xs font-semibold transition"
                           >
                             <Pencil className="w-3.5 h-3.5" />
                             Modifica
@@ -804,7 +801,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                             className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition ${
  t.is_active
  ? 'bg-brand-mid/10 text-[#2255BB] hover:bg-red-50 hover:text-red-500'
- : 'bg-white/10 text-white/40 hover:bg-brand-mid/8 hover:text-[#2255BB]'
+ : 'bg-white/10 text-white/40 hover:bg-brand-mid/[0.08] hover:text-[#2255BB]'
  }`}
                           >
                             {t.is_active ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
@@ -838,7 +835,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                                 <div className="flex gap-2 pt-1">
                                   <button
                                     onClick={() => setConfirmDeleteId(null)}
-                                    className="flex-1 rounded-xl py-2 text-xs font-semibold bg-white/10 text-white/55 hover:bg-white/14 transition active:bg-white/80"
+                                    className="flex-1 rounded-xl py-2 text-xs font-semibold bg-white/10 text-white/55 hover:bg-white/[0.14] transition active:bg-white/80"
                                   >
                                     Annulla
                                   </button>

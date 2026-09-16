@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { User as UserIcon, Lock, Loader2, Eye, EyeOff, Fingerprint, Mail, Phone, Save } from 'lucide-react';
+import { User as UserIcon, Lock, Loader2, Eye, EyeOff, Mail, Phone, Save } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 
-import { useAppConfig } from '../context/appSliceContexts';
 import type { User as UserType, Language as LangType, Theme } from '../types';
 import { database } from '../lib/database';
 import { userRowToSessionUser } from '../utils/staffPermissionDefaults';
@@ -22,12 +21,6 @@ import {
 import { useTenant } from '../context/TenantContext';
 import FlowWaveIcon from './ui/FlowWaveIcon';
 import FlowLogoSvg from './FlowLogoSvg';
-import {
-  supportsPinUnlockWebAuthn,
-  hasAnyPinUnlockCredentialOnDevice,
-  authenticatePinUnlockAndResolveUserId,
-  hasPlatformBiometricAuthenticator,
-} from '../utils/pinUnlockWebAuthn';
 
 interface LoginPageProps {
   onLogin: () => void;
@@ -36,8 +29,6 @@ interface LoginPageProps {
 
 export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const { users, setCurrentUser, setLanguage, setIsSessionElevated } = useAppUser();
-  const { featureFlags } = useAppConfig();
-  const _kioskEnabled = featureFlags['kiosk_active'] !== false;
   const { tenant, loadTenantBySlug, error: tenantBootstrapError } = useTenant();
   const [searchParams] = useSearchParams();
 
@@ -80,8 +71,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const pinInputRef = useRef<HTMLInputElement>(null);
   const staffNameInputRef = useRef<HTMLInputElement>(null);
   const loginBtnRef = useRef<HTMLButtonElement>(null);
-  /** Un solo tentativo di login biometrico silenzioso per apertura form (device già registrato). */
-  const autoBiometricAttemptedRef = useRef(false);
   /** Impedisce auto-login multipli simultanei */
   const autoLoginInFlightRef = useRef(false);
   /** /profilo: lingua da browser/OS (navigator.languages), non ultimo profilo in localStorage */
@@ -94,7 +83,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const [showPinHelp, setShowPinHelp] = useState(false);
   const [pinFocused, setPinFocused] = useState(false);
   const [error, setError] = useState('');
-  const [deviceSuccess, setDeviceSuccess] = useState('');
   const shakeControls = useAnimation();
   useEffect(() => {
     if (!error) return;
@@ -105,16 +93,9 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
   const [isLoading, setIsLoading] = useState(false);
-  const [deviceLoading, setDeviceLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   // Credenziali in attesa che il tenant carichi (fallback Option B)
   const [pendingCreds, setPendingCreds] = useState<{ name: string; pin: string } | null>(null);
-
-  const webAuthnOk = supportsPinUnlockWebAuthn();
-  const hasDeviceLogin = hasAnyPinUnlockCredentialOnDevice();
-
-  // true solo se il dispositivo ha biometria integrata (Face ID / Touch ID / Windows Hello)
-  const [hasBiometric, setHasBiometric] = useState(false);
 
   // Invite onboarding — il nuovo dipendente compila i campi mancanti
   const [inviteEmail, setInviteEmail] = useState('');
@@ -160,17 +141,11 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       setInviteOnboardLoading(false);
     }
   }, [inviteUserId, inviteEmail, invitePhone, inviteOnboardLoading]);
-  useEffect(() => {
-    hasPlatformBiometricAuthenticator().then(setHasBiometric).catch(() => setHasBiometric(false));
-  }, []);
 
   const resolvedUser = useMemo(() => {
     const matches = findUsersMatchingName(users, staffName);
     return matches.length === 1 ? matches[0] : undefined;
   }, [users, staffName]);
-  // L'attivazione Face ID / impronta avviene esclusivamente dal profilo di ogni utente:
-  // la sezione qui sotto appare solo se il dispositivo ha già una credenziale salvata.
-  const showDeviceSection = webAuthnOk && hasBiometric && hasDeviceLogin;
 
   useEffect(() => {
     applyUnauthenticatedDocumentTheme();
@@ -308,7 +283,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const handleLogin = useCallback(async () => {
     if (!staffName.trim() || !password.trim() || isLoading) return;
     setError('');
-    setDeviceSuccess('');
     setIsLoading(true);
 
     const user = findUserByNameAndPinAnyStatus(users, staffName, password);
@@ -436,7 +410,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   useEffect(() => {
     if (!showForm || !resolvedUser) return;
     if (password.length !== 4) return;
-    if (isLoading || deviceLoading) return;
+    if (isLoading) return;
     if (autoLoginInFlightRef.current) return;
     autoLoginInFlightRef.current = true;
     const id = setTimeout(() => {
@@ -446,54 +420,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       clearTimeout(id);
       autoLoginInFlightRef.current = false;
     };
-  }, [password, resolvedUser, showForm, isLoading, deviceLoading, handleLogin]);
-
-  const runBiometricLogin = useCallback(
-    async (opts?: { silent?: boolean }): Promise<boolean> => {
-      const silent = opts?.silent ?? false;
-      if (!webAuthnOk || deviceLoading || isLoading) return false;
-      if (!silent) {
-        setError('');
-        setDeviceSuccess('');
-      }
-      setDeviceLoading(true);
-      try {
-        const userId = await authenticatePinUnlockAndResolveUserId();
-        if (!userId) {
-          if (!silent) setError(t.login_device_failed);
-          setDeviceLoading(false);
-          return false;
-        }
-        const user = users.find((u) => u.id === userId && u.status === 'active');
-        if (!user) {
-          if (!silent) setError(t.login_device_no_user);
-          setDeviceLoading(false);
-          return false;
-        }
-        finalizeSession(user, () => setDeviceLoading(false));
-        return true;
-      } catch {
-        if (!silent) setError(t.login_device_failed);
-        setDeviceLoading(false);
-        return false;
-      }
-    },
-    [webAuthnOk, deviceLoading, isLoading, users, finalizeSession, t]
-  );
-
-  const handleDeviceLogin = useCallback(() => runBiometricLogin({ silent: false }), [runBiometricLogin]);
-
-  useEffect(() => {
-    if (!showForm) autoBiometricAttemptedRef.current = false;
-  }, [showForm]);
-
-  useEffect(() => {
-    if (!showForm || !webAuthnOk || !hasBiometric || !hasDeviceLogin || isInviteLink) return;
-    if (users.length === 0) return;
-    if (autoBiometricAttemptedRef.current) return;
-    autoBiometricAttemptedRef.current = true;
-    void runBiometricLogin({ silent: true });
-  }, [showForm, webAuthnOk, hasBiometric, hasDeviceLogin, isInviteLink, users.length, runBiometricLogin]);
+  }, [password, resolvedUser, showForm, isLoading, handleLogin]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -691,7 +618,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                 inputMode="text"
                 autoCapitalize="words"
                 value={staffName}
-                onChange={(e) => { setStaffName(e.target.value); setError(''); setDeviceSuccess(''); }}
+                onChange={(e) => { setStaffName(e.target.value); setError(''); }}
                 onKeyDown={handleKeyDown}
                 placeholder={t.login_name_ph ?? 'Nome utente'}
                 aria-label={t.login_name_label}
@@ -806,23 +733,12 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               </motion.p>
             )}
 
-            {deviceSuccess && (
-              <motion.p
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-emerald-300 text-xs font-medium text-center rounded-xl px-3 py-2 leading-snug"
-                style={{ background: 'rgba(0,200,120,0.12)', border: '1px solid rgba(0,200,120,0.22)' }}
-              >
-                {deviceSuccess}
-              </motion.p>
-            )}
-
             {/* Accedi */}
             <button
               ref={loginBtnRef}
               type="button"
               onClick={handleLogin}
-              disabled={!staffName.trim() || !password.trim() || isLoading || deviceLoading}
+              disabled={!staffName.trim() || !password.trim() || isLoading}
               className="w-full py-3.5 rounded-2xl text-white font-semibold text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
               style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.20)' }}
             >
@@ -835,32 +751,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                 </>
               )}
             </button>
-
-            {/* Sezione biometrico — visibile solo se il dispositivo ha già una credenziale salvata */}
-            {showDeviceSection && (
-              <div className="space-y-3 pt-1">
-                <div className="flex items-center gap-2 text-white/30 text-[0.6875rem]">
-                  <span className="h-px flex-1 bg-white/12" aria-hidden />
-                  <span>{t.login_device_or ?? 'oppure'}</span>
-                  <span className="h-px flex-1 bg-white/12" aria-hidden />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleDeviceLogin}
-                  disabled={deviceLoading || isLoading}
-                  className="w-full py-3.5 rounded-2xl text-white/75 font-medium text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.20)' }}
-                >
-                  {deviceLoading ? (
-                    <Loader2 className="w-4.5 h-4.5 animate-spin" />
-                  ) : (
-                    <Fingerprint className="w-4.5 h-4.5 shrink-0" strokeWidth={1.75} aria-hidden />
-                  )}
-                  <span>{t.login_device_btn}</span>
-                </button>
-              </div>
-            )}
               </>
             )}
           </motion.div>
@@ -868,7 +758,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
         )}
         </AnimatePresence>
 
-        {/* Kiosk link rimosso — la timbratura avviene via QR Code */}
         </>
       </div>
     </motion.div>

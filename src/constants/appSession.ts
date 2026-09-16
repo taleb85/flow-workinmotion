@@ -11,3 +11,16 @@ export const FLOW_INVITE_NAME_STORAGE_KEY = 'flow-invite-name';
 
 /** Login: PIN precompilato dopo link invito `/i/:slug`. */
 export const FLOW_INVITE_PIN_STORAGE_KEY = 'flow-invite-pin';
+
+/**
+ * True se all'avvio dell'app esisteva già una sessione salvata: indica una **riapertura**
+ * dell'app (PWA chiusa e riaperta), non un login appena effettuato.
+ * Usato per il blocco di riapertura (Face ID / impronta / PIN).
+ */
+export const HAD_SAVED_SESSION_AT_BOOT = (() => {
+  try {
+    return Boolean(localStorage.getItem(APP_SESSION_STORAGE_KEY));
+  } catch {
+    return false;
+  }
+})();

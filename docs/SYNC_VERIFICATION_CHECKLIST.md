@@ -36,7 +36,7 @@ Serve un cambio che **incrementa** la revisione (es. modifica **ruolo**, **PIN**
 | 3.3 | Browser **B**: inserisci **PIN corretto** del profilo. | Blocco si toglie; dati e **config Storage** (flag, template, ecc.) risultano **allineati** (dopo sblocco è previsto un `pullRemoteConfig`). |
 | 3.4 | Browser **B**: PIN **errato** ripetuto. | Comportamento previsto dall’app (es. logout forzato): verificare che sia accettabile per il team. |
 
-**Kiosk / non loggato:** sulla **`/timbratura`** un refresh non deve mostrare il blocco PIN; la revisione viene solo **ack** in locale.
+**Senza sessione (rotte pubbliche):** su **`/profilo`** — e sulle vecchie `/timbratura` e `/login`, che ora reindirizzano lì — un refresh non deve mostrare il blocco PIN; la revisione viene solo **ack** in locale.
 
 ---
 

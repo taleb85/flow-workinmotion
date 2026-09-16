@@ -106,7 +106,12 @@ import {
   setLocalDeductExcludedRuleIds,
   clearLocalDeductExcludedRuleIds,
 } from '../utils/shiftDeductExclusionsLocal';
-import { loadTimesheetPeriodFromSupabase, applyRemoteTimesheetPeriod } from '../utils/timesheetPeriodSupabase';
+import {
+  loadTimesheetPeriodFromSupabase,
+  applyRemoteTimesheetPeriod,
+  loadPeriodRulesFromSupabase,
+  applyRemotePeriodRules,
+} from '../utils/timesheetPeriodSupabase';
 import { userRowToSessionUser, defaultPermissionFieldsForNewUser } from '../utils/staffPermissionDefaults';
 import { APP_SESSION_STORAGE_KEY } from '../constants/appSession';
 import { PATH_PROFILO } from '../config/appPaths';
@@ -182,11 +187,11 @@ const DEPARTMENTS_OWN_PUSH_GRACE_MS = 20000;
 /** Una tantum: flag geofence senza VITE_RESTAURANT_LAT/LNG. */
 let geofenceMissingEnvWarned = false;
 
-const staffDefaults = { language: 'it' as const, theme: 'light' as const, can_edit_staff_pins: false, can_manage_drafts: false, can_view_total_hours: false, can_create_shifts: false, can_approve_shifts: false };
+const staffDefaults = { language: 'it' as const, theme: 'light' as const, can_manage_drafts: false, can_create_shifts: false, can_approve_shifts: false };
 const initialStaff: Omit<User, 'id'>[] = [
   { first_name: 'Gustavo', last_name: 'Ghetta', email: 'gustavo.ghetta@flow-app.com', role: 'manager', pin: '1111', status: 'active', sort_order: 1, ...staffDefaults },
   { first_name: 'Alexis', last_name: 'Man', email: 'alexis.man@flow-app.com', role: 'assistant_manager', pin: '2222', status: 'active', sort_order: 2, ...staffDefaults },
-  { first_name: 'Taleb', last_name: 'Barikhan', email: 'taleb.barikhan@flow-app.com', role: 'admin', pin: '8888', status: 'active', sort_order: 3, ...staffDefaults, can_create_shifts: true, can_approve_shifts: true, can_manage_drafts: true, can_view_total_hours: true, can_edit_staff_pins: true },
+  { first_name: 'Taleb', last_name: 'Barikhan', email: 'taleb.barikhan@flow-app.com', role: 'admin', pin: '8888', status: 'active', sort_order: 3, ...staffDefaults, can_create_shifts: true, can_approve_shifts: true, can_manage_drafts: true },
   { first_name: 'Mauricio', last_name: 'Man', email: 'mauricio.man@flow-app.com', role: 'waiter', pin: '3333', status: 'active', sort_order: 4, ...staffDefaults },
   { first_name: 'Freddy', last_name: 'Junior', email: 'freddy.junior@flow-app.com', role: 'waiter', pin: '4444', status: 'active', sort_order: 5, ...staffDefaults },
   { first_name: 'Dany', last_name: 'Man', email: 'dany.man@flow-app.com', role: 'bartender', pin: '5555', status: 'active', sort_order: 6, ...staffDefaults },
@@ -242,7 +247,7 @@ function sessionUsersEqual(a: User, b: User): boolean {
     const va = a[k];
     const vb = b[k];
     if (va === vb) continue;
-    // Campi JSONB/nullable (enabled_modules, enabled_features, …): confronto strutturale leggero.
+    // Campi JSONB/nullable (enabled_features, …): confronto strutturale leggero.
     if (va && vb && typeof va === 'object' && typeof vb === 'object') {
       if (JSON.stringify(va) !== JSON.stringify(vb)) return false;
       continue;
@@ -510,7 +515,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  /** Lingua profilo in sessione, altrimenti preferenza persistita (login/kiosk senza sessione allineati). */
+  /** Lingua profilo in sessione, altrimenti preferenza persistita (login senza sessione allineato). */
   const effectiveLanguage: Language = useMemo(() => {
     if (currentUser?.language && ['it', 'en', 'es', 'fr'].includes(currentUser.language)) {
       return currentUser.language;
@@ -1816,14 +1821,10 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       markManagementDataTouched();
       const updatesRemoteConfig =
         'enabled_features' in updates ||
-        'enabled_modules' in updates ||
         'ui_section_overrides' in updates ||
         'can_manage_drafts' in updates ||
         'can_approve_shifts' in updates ||
-        'can_view_total_hours' in updates ||
         'can_create_shifts' in updates ||
-        'can_edit_staff_pins' in updates ||
-        'can_request_holidays' in updates ||
         'can_punch_from_app' in updates;
       const updatesProfileOrIdentity =
         'role' in updates ||
@@ -2191,13 +2192,17 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 
         const pullRemoteConfig = Boolean(iterationOpts.pullRemoteConfig && isAppCloudSyncEnabled());
 
-        // Carica sempre feature flags e periodo da Storage (entrambi i rami).
-        const [sbFlags, periodRemote] = await Promise.all([
+        // Carica sempre feature flags, periodo e regole di calcolo da Storage (entrambi i rami).
+        const [sbFlags, periodRemote, periodRulesRemote] = await Promise.all([
           loadFeatureFlagsFromSupabase().catch(() => null),
           loadTimesheetPeriodFromSupabase().catch(() => null),
+          loadPeriodRulesFromSupabase().catch(() => null),
         ]);
         if (periodRemote) {
           applyRemoteTimesheetPeriod(periodRemote);
+        }
+        if (periodRulesRemote) {
+          applyRemotePeriodRules(periodRulesRemote);
         }
 
         if (pullRemoteConfig) {

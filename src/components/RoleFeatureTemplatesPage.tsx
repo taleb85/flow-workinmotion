@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RotateCcw, Save, Loader2, Users, Info } from 'lucide-react';
+import { RotateCcw, Users, Info } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppConfig } from '../context/appSliceContexts';
 import { useAppOverlay } from '../context/appSliceContexts';
@@ -25,6 +25,7 @@ import {
 } from '../utils/roleFeatureTemplates';
 import { serializeAdminModulesForDisk } from '../utils/adminModulesGlobal';
 import { getAdminModuleLabel } from '../utils/translations';
+import { CenteredModalPortal } from './ui/CenteredModalPortal';
 import { buildSettingsPermissionRows, defaultOperationalTemplateBase } from '../utils/settingsPermissionRows';
 import {
   TIMESHEET_GRID_PLANNED_ONLY_KEY,
@@ -35,6 +36,40 @@ import type { User } from '../types';
 export type RoleFeatureTemplatesPanelVariant = 'page' | 'embedded';
 
 type Props = { variant?: RoleFeatureTemplatesPanelVariant };
+
+/** Attesa prima dell'autosave dopo l'ultimo toggle (ms). */
+const AUTOSAVE_DEBOUNCE_MS = 600;
+
+/**
+ * Payload utente del pannello: stesse chiavi per salvataggio manuale e autosave.
+ * `enabled_features` ingloba anche il flag privacy presenze.
+ */
+function buildUserPermissionPayload(
+  features: EnabledFeatures | undefined,
+  op: Record<SettingsOperationalPermKey, boolean> | undefined,
+  teamVisible: boolean,
+  plannedOnly: boolean
+): Partial<User> {
+  const mergedFeatures: Record<string, boolean> = { ...(features ?? {}) };
+  if (plannedOnly) mergedFeatures[TIMESHEET_GRID_PLANNED_ONLY_KEY] = true;
+  else delete mergedFeatures[TIMESHEET_GRID_PLANNED_ONLY_KEY];
+  return {
+    hide_from_team_schedule: !teamVisible,
+    ...((op ?? {}) as Partial<User>),
+    enabled_features: mergedFeatures,
+  };
+}
+
+/** Firma dello stato del pannello: usata per capire se ci sono modifiche pendenti. */
+function panelStateSignature(
+  features: Record<string, EnabledFeatures>,
+  op: Record<string, Record<SettingsOperationalPermKey, boolean>>,
+  teamVisible: Record<string, boolean>,
+  plannedOnly: Record<string, boolean>,
+  mods: Record<AdminModuleKey, boolean>
+): string {
+  return JSON.stringify({ f: features, o: op, t: teamVisible, p: plannedOnly, m: mods });
+}
 
 function roleColor(role: string): string {
   // Varianti scure (700/800) così il testo bianco sopra supera il contrasto AA
@@ -69,6 +104,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   const { saveRoleFeatureTemplates, saveAdminModulesGlobal, adminModulesRevision } = useAppConfig();
   const { showSuccess, showError } = useAppOverlay();
   const t = useT();
+  const tv = t as Record<string, string>;
   const permRows = useMemo(() => buildSettingsPermissionRows(t as Record<string, string>), [t]);
 
   // ─── Utenti non-admin attivi come colonne ────────────────────────────────
@@ -95,9 +131,28 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   // ─── Admin modules (globale) ─────────────────────────────────────────────
   const [mods, setMods] = useState<Record<AdminModuleKey, boolean>>(() => buildMergedAdminModulesForAdminEditor());
   const [saving, setSaving] = useState(false);
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false);
+  /** Stato mostrato nel footer: in salvataggio / salvato. */
+  const [autosaveState, setAutosaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   const templatePanelDirtyRef = useRef(false);
-  const markDirty = useCallback(() => { templatePanelDirtyRef.current = true; }, []);
+  /** Payload serializzato dell'ultimo salvataggio riuscito, per utente (= righe da non riscrivere). */
+  const savedPayloadRef = useRef<Record<string, string>>({});
+  const savedModsKeyRef = useRef<string | null>(null);
+  const autosaveTimerRef = useRef<number | null>(null);
+  /** Firma dell'ultimo stato renderizzato: serve a capire se restano modifiche pendenti dopo un salvataggio. */
+  const latestStateSignatureRef = useRef('');
+
+  const markDirty = useCallback(() => {
+    templatePanelDirtyRef.current = true;
+    setAutosaveState('saving');
+  }, []);
+
+  useEffect(() => {
+    latestStateSignatureRef.current = panelStateSignature(
+      userFeatures, userOp, userTeamVisible, userPlannedOnly, mods
+    );
+  }, [userFeatures, userOp, userTeamVisible, userPlannedOnly, mods]);
 
   // Inizializza stato dai dati utente
   useEffect(() => {
@@ -109,13 +164,10 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
     for (const u of nonAdminUsers) {
       features[u.id] = getEnabledFeatures(u);
       ops[u.id] = {
-        can_request_holidays: u.can_request_holidays ?? false,
         can_punch_from_app: u.can_punch_from_app ?? false,
         can_create_shifts: u.can_create_shifts ?? false,
         can_manage_drafts: u.can_manage_drafts ?? false,
         can_approve_shifts: u.can_approve_shifts ?? false,
-        can_view_total_hours: u.can_view_total_hours ?? false,
-        can_edit_staff_pins: u.can_edit_staff_pins ?? false,
       };
       teamVis[u.id] = !(u.hide_from_team_schedule === true);
       plannedOnly[u.id] = getTimesheetGridPrivacyMode(u) === 'planned_only';
@@ -124,11 +176,22 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
     setUserOp(ops);
     setUserTeamVisible(teamVis);
     setUserPlannedOnly(plannedOnly);
+    // Snapshot = stato appena letto: l'autosave riscriverà solo ciò che cambia.
+    const snapshot: Record<string, string> = {};
+    for (const u of nonAdminUsers) {
+      snapshot[u.id] = JSON.stringify(
+        buildUserPermissionPayload(features[u.id], ops[u.id], teamVis[u.id] ?? true, plannedOnly[u.id] ?? false)
+      );
+    }
+    savedPayloadRef.current = snapshot;
+    savedModsKeyRef.current = JSON.stringify(serializeAdminModulesForDisk(buildMergedAdminModulesForAdminEditor()));
+    setAutosaveState('idle');
   }, [nonAdminUsers]);
 
   useEffect(() => {
     if (templatePanelDirtyRef.current) return;
     setMods(buildMergedAdminModulesForAdminEditor());
+    savedModsKeyRef.current = JSON.stringify(serializeAdminModulesForDisk(buildMergedAdminModulesForAdminEditor()));
   }, [adminModulesRevision]);
 
   // ─── Toggle feature per utente ───────────────────────────────────────────
@@ -168,43 +231,96 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
     setMods(Object.fromEntries(ADMIN_MODULE_KEYS.map((k) => [k, true])) as Record<AdminModuleKey, boolean>);
   }, [markDirty]);
 
-  // ─── Salva ───────────────────────────────────────────────────────────────
+  // ─── Salva (autosave differenziale) ──────────────────────────────────────
   const handleSave = async () => {
-    setSaving(true);
-    try {
-      for (const u of nonAdminUsers) {
-        const features = userFeatures[u.id];
-        const op = userOp[u.id] ?? {};
-        const teamVis = userTeamVisible[u.id] ?? true;
-        const plannedOnly = userPlannedOnly[u.id] ?? false;
-        // Merge planned_only flag into enabled_features
-        const mergedFeatures: Record<string, boolean> = { ...(features as Record<string, boolean>) };
-        if (plannedOnly) {
-          mergedFeatures[TIMESHEET_GRID_PLANNED_ONLY_KEY] = true;
-        } else {
-          delete mergedFeatures[TIMESHEET_GRID_PLANNED_ONLY_KEY];
-        }
-        const payload: Partial<User> = {
-          hide_from_team_schedule: !teamVis,
-          ...(op as Partial<User>),
-          enabled_features: mergedFeatures,
-        };
-        await updateUser(u.id, payload);
-      }
-      await saveAdminModulesGlobal(serializeAdminModulesForDisk(mods));
+    const signatureAtStart = panelStateSignature(
+      userFeatures, userOp, userTeamVisible, userPlannedOnly, mods
+    );
+    const payloads = nonAdminUsers.map((u) => {
+      const payload = buildUserPermissionPayload(
+        userFeatures[u.id],
+        userOp[u.id],
+        userTeamVisible[u.id] ?? true,
+        userPlannedOnly[u.id] ?? false
+      );
+      return { id: u.id, payload, key: JSON.stringify(payload) };
+    });
+    // Autosave: scrive solo le righe effettivamente cambiate.
+    const toSave = payloads.filter((p) => savedPayloadRef.current[p.id] !== p.key);
+    const modsSerialized = serializeAdminModulesForDisk(mods);
+    const modsKey = JSON.stringify(modsSerialized);
+    const modsChanged = savedModsKeyRef.current !== modsKey;
+
+    if (toSave.length === 0 && !modsChanged) {
       templatePanelDirtyRef.current = false;
-      showSuccess?.(t.role_templates_save_success);
+      setAutosaveState('saved');
+      return;
+    }
+
+    setSaving(true);
+    setAutosaveState('saving');
+    try {
+      // Salvataggio in parallelo: più veloce e senza stato a metà se un utente fallisce.
+      const results = await Promise.all(
+        toSave.map(({ id, payload }) =>
+          updateUser(id, payload).then(
+            () => true,
+            (err) => {
+              console.error('[RoleFeatureTemplatesPanel] updateUser', id, err);
+              return false;
+            }
+          )
+        )
+      );
+      const failed = results.some((ok) => !ok);
+      if (!failed) {
+        for (const { id, key } of toSave) savedPayloadRef.current[id] = key;
+      }
+      if (modsChanged) {
+        await saveAdminModulesGlobal(modsSerialized);
+        savedModsKeyRef.current = modsKey;
+      }
+      if (failed) {
+        setAutosaveState('idle');
+        showError?.(t.role_templates_save_error);
+        return;
+      }
+      // Restano modifiche pendenti se nel frattempo lo stato è cambiato di nuovo.
+      if (latestStateSignatureRef.current === signatureAtStart) {
+        templatePanelDirtyRef.current = false;
+      }
+      setAutosaveState(latestStateSignatureRef.current === signatureAtStart ? 'saved' : 'saving');
     } catch (e) {
       console.error(e);
+      setAutosaveState('idle');
       showError?.(e instanceof Error ? e.message : t.role_templates_save_error);
     } finally {
       setSaving(false);
     }
   };
 
+  // Autosave: debounce dopo l'ultima modifica pendente.
+  useEffect(() => {
+    if (!templatePanelDirtyRef.current) return;
+    // Se un salvataggio è in corso si aspetta: l'effetto riparte quando `saving` torna false.
+    if (saving) return;
+    if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = window.setTimeout(() => {
+      autosaveTimerRef.current = null;
+      void handleSave();
+    }, AUTOSAVE_DEBOUNCE_MS);
+    return () => {
+      if (autosaveTimerRef.current) {
+        window.clearTimeout(autosaveTimerRef.current);
+        autosaveTimerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- l'effetto deve ripartire a ogni cambio di stato del pannello
+  }, [userFeatures, userOp, userTeamVisible, userPlannedOnly, mods, saving]);
+
   // ─── Azzera tutto ────────────────────────────────────────────────────────
   const handleResetAll = async () => {
-    if (!window.confirm('Vuoi davvero azzerare tutti i permessi ai valori predefiniti? L\'operazione è irreversibile.')) return;
+    setConfirmResetOpen(false);
     setSaving(true);
     try {
       // 1. Svuota i template per ruolo (→ i default codice verranno usati)
@@ -243,11 +359,25 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       setUserPlannedOnly(plannedOnlyReset);
       setMods(Object.fromEntries(ADMIN_MODULE_KEYS.map((k) => [k, true])) as Record<AdminModuleKey, boolean>);
 
+      // Snapshot allineato a quanto appena scritto: nessun autosave immediato dopo il reset.
+      const snapshot: Record<string, string> = {};
+      for (const u of nonAdminUsers) {
+        snapshot[u.id] = JSON.stringify(
+          buildUserPermissionPayload(features[u.id], ops[u.id], true, false)
+        );
+      }
+      savedPayloadRef.current = snapshot;
+      savedModsKeyRef.current = JSON.stringify(
+        serializeAdminModulesForDisk(
+          Object.fromEntries(ADMIN_MODULE_KEYS.map((k) => [k, true])) as Record<AdminModuleKey, boolean>
+        )
+      );
+      setAutosaveState('saved');
       templatePanelDirtyRef.current = false;
-      showSuccess?.('Permessi azzerati ai valori predefiniti.');
+      showSuccess?.(tv.role_templates_reset_success ?? 'Permessi azzerati ai valori predefiniti.');
     } catch (e) {
       console.error(e);
-      showError?.(e instanceof Error ? e.message : 'Errore durante il reset.');
+      showError?.(e instanceof Error ? e.message : (tv.role_templates_reset_error ?? 'Errore durante il reset.'));
     } finally {
       setSaving(false);
     }
@@ -268,15 +398,14 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   const colCount = nonAdminUsers.length + 1;
 
   const MatrixToggle = ({
-    enabled, onToggle, locked,
-  }: { enabled: boolean; onToggle: () => void; locked?: boolean }) => (
+    enabled, onToggle,
+  }: { enabled: boolean; onToggle: () => void }) => (
     <button
       type="button"
       role="switch"
       aria-checked={enabled}
-      disabled={locked}
       onClick={onToggle}
-      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${
  enabled ? 'bg-accent' : ''
  }`}
     >
@@ -290,7 +419,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
 
   const SectionHeader = ({ title, icon }: { title: string; icon?: React.ReactNode }) => (
     <tr className="bg-white/5">
-      <td colSpan={colCount} className="px-4 py-2 border-b border-white/10">
+      <td colSpan={colCount} className="px-4 py-2">
         <span className="flex items-center gap-2 text-[0.625rem] font-bold uppercase tracking-widest text-white/50">
           {icon}
           {title}
@@ -340,7 +469,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
           type="button"
           onClick={handleClick}
           className={`shrink-0 rounded-full p-0.5 transition-colors ml-1 ${open ? 'text-accent' : 'text-slate-300 hover:text-white/60'} active:text-white/60'} hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]`}
-          aria-label="Mostra anteprima"
+          aria-label={tv.role_template_preview_show_aria ?? 'Mostra anteprima'}
         >
           <Info className="w-3 h-3" />
         </button>
@@ -362,7 +491,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                 className="rounded-2xl border border-white/[0.14] p-3 w-[17.5rem] font-sans"
               >
                 <p className="text-[0.5625rem] font-bold uppercase tracking-wider text-white/50 mb-2">
-                  Anteprima — {previewTitle}
+                  {tv.role_template_preview_title_prefix ?? 'Anteprima —'} {previewTitle}
                 </p>
                 <div className="flex gap-2">
                   {off}
@@ -410,107 +539,67 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   );
 
   const NAV_TABS = [
-    { key: 'home', icon: '🏠', label: 'Home' },
-    { key: 'team', icon: '📅', label: 'Turni' },
-    { key: 'ts', icon: '🕐', label: 'Pres.' },
-    { key: 'ferie', icon: '🌴', label: 'Ferie' },
+    { key: 'home', icon: '🏠', label: tv.role_template_preview_nav_home ?? 'Home' },
+    { key: 'team', icon: '📅', label: tv.role_template_preview_nav_shifts ?? 'Turni' },
+    { key: 'ts', icon: '🕐', label: tv.role_template_preview_nav_timesheet ?? 'Pres.' },
+    { key: 'ferie', icon: '🌴', label: tv.role_template_preview_nav_holidays ?? 'Ferie' },
   ];
 
   type PermKey = string;
   const PERM_PREVIEWS: Record<PermKey, { title: string; off: React.ReactNode; on: React.ReactNode }> = {
     // ── Schede ──
-    home_tab: {
-      title: 'Scheda Panoramica',
-      off: <PreviewCard label="Spento"><div className="flex gap-1 items-center opacity-40"><span>🏠</span><span className="line-through">Panoramica</span></div><div className="text-[0.5625rem] mt-0.5">Tab assente</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div className="flex gap-1 items-center font-semibold"><span>🏠</span>Panoramica</div><div className="text-[0.5625rem] mt-0.5">Tab visibile</div></PreviewCard>,
-    },
     team_view: {
-      title: 'Scheda Turni',
-      off: <PreviewCard label="Spento"><MiniNav tabs={NAV_TABS.filter(t => t.key !== 'team')} /></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><MiniNav tabs={NAV_TABS} highlight="team" /></PreviewCard>,
-    },
-    timesheet_tab: {
-      title: 'Scheda Presenze',
-      off: <PreviewCard label="Spento"><MiniNav tabs={NAV_TABS.filter(t => t.key !== 'ts')} /></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><MiniNav tabs={NAV_TABS} highlight="ts" /></PreviewCard>,
-    },
-    ferie_tab: {
-      title: 'Scheda Ferie',
-      off: <PreviewCard label="Spento"><MiniNav tabs={NAV_TABS.filter(t => t.key !== 'ferie')} /></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><MiniNav tabs={NAV_TABS} highlight="ferie" /></PreviewCard>,
+      title: tv.role_template_preview_team_title ?? 'Scheda Turni',
+      off: <PreviewCard label={tv.role_template_preview_off ?? 'Spento'}><MiniNav tabs={NAV_TABS.filter(t => t.key !== 'team')} /></PreviewCard>,
+      on:  <PreviewCard label={tv.role_template_preview_on ?? 'Attivo'} active><MiniNav tabs={NAV_TABS} highlight="team" /></PreviewCard>,
     },
     // ── Operazioni Turni ──
     edit_shifts: {
-      title: 'Modifica Turni',
-      off: <PreviewCard label="Spento"><div className="font-semibold text-white/60">09:00 – 17:00</div><div className="text-[0.5rem] opacity-40 mt-0.5">✏️ assente</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div className="font-semibold">09:00 – 17:00</div><div className="rounded bg-white/20 text-accent text-[0.5rem] text-center py-0.5 font-bold mt-0.5">✏️ Modifica</div></PreviewCard>,
+      title: tv.role_template_preview_edit_shifts_title ?? 'Modifica Turni',
+      off: <PreviewCard label={tv.role_template_preview_off ?? 'Spento'}><div className="font-semibold text-white/60">09:00 – 17:00</div><div className="text-[0.5rem] opacity-40 mt-0.5">✏️ {tv.role_template_preview_edit_absent ?? 'assente'}</div></PreviewCard>,
+      on:  <PreviewCard label={tv.role_template_preview_on ?? 'Attivo'} active><div className="font-semibold">09:00 – 17:00</div><div className="rounded bg-white/20 text-accent text-[0.5rem] text-center py-0.5 font-bold mt-0.5">✏️ {tv.role_template_preview_edit_action ?? 'Modifica'}</div></PreviewCard>,
     },
     approve_shifts: {
-      title: 'Congelamento Turni',
-      off: <PreviewCard label="Spento"><div className="font-semibold text-white/60">Turno ✓</div><div className="text-[0.5rem] opacity-40 mt-0.5">🔒 Sola lettura</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div className="font-semibold">Turno ✓</div><div className="text-[0.5rem] text-green-600 font-semibold mt-0.5">❄️ Congela</div></PreviewCard>,
+      title: tv.role_template_preview_freeze_shifts_title ?? 'Congelamento Turni',
+      off: <PreviewCard label={tv.role_template_preview_off ?? 'Spento'}><div className="font-semibold text-white/60">{tv.role_template_preview_shift ?? 'Turno'} ✓</div><div className="text-[0.5rem] opacity-40 mt-0.5">🔒 {tv.role_template_preview_readonly ?? 'Sola lettura'}</div></PreviewCard>,
+      on:  <PreviewCard label={tv.role_template_preview_on ?? 'Attivo'} active><div className="font-semibold">{tv.role_template_preview_shift ?? 'Turno'} ✓</div><div className="text-[0.5rem] text-green-600 font-semibold mt-0.5">❄️ {tv.role_template_preview_freeze ?? 'Congela'}</div></PreviewCard>,
     },
     export_pdf: {
-      title: 'Download PDF',
-      off: <PreviewCard label="Spento"><div className="text-[0.5rem] opacity-40 line-through mt-0.5">⬇️ Scarica PDF</div><div className="text-[0.5rem]">Assente</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div className="rounded border border-white/40 text-accent text-[0.5rem] text-center py-0.5 font-semibold mt-0.5">⬇️ Scarica PDF</div></PreviewCard>,
+      title: tv.role_template_preview_export_pdf_title ?? 'Download PDF',
+      off: <PreviewCard label={tv.role_template_preview_off ?? 'Spento'}><div className="text-[0.5rem] opacity-40 line-through mt-0.5">⬇️ {tv.role_template_preview_download_pdf ?? 'Scarica PDF'}</div><div className="text-[0.5rem]">{tv.role_template_preview_absent ?? 'Assente'}</div></PreviewCard>,
+      on:  <PreviewCard label={tv.role_template_preview_on ?? 'Attivo'} active><div className="rounded border border-white/40 text-accent text-[0.5rem] text-center py-0.5 font-semibold mt-0.5">⬇️ {tv.role_template_preview_download_pdf ?? 'Scarica PDF'}</div></PreviewCard>,
     },
     // ── Altro ──
     view_stats: {
-      title: 'Ore nella scheda Presenze',
-      off: <PreviewCard label="Spento"><div>Presenze</div><div className="text-[0.5rem] opacity-40 mt-0.5">Sezione Ore nascosta</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>Presenze</div><div className="text-[0.5rem] font-semibold mt-0.5">📊 Ore visibili</div></PreviewCard>,
-    },
-    view_estimated_cost: {
-      title: 'Costo stimato lavoro',
-      off: <PreviewCard label="Spento"><div>Ore totali</div><div className="text-[0.5rem] opacity-40 line-through mt-0.5">€ — —</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>Ore totali</div><div className="text-[0.5rem] font-bold text-green-600 mt-0.5">€ 1.240 stimato</div></PreviewCard>,
-    },
-    profile_readonly: {
-      title: 'PC come telefono',
-      off: <PreviewCard label="Spento"><div>🖥️ Browser</div><div className="text-[0.5rem] mt-0.5">Tab standard</div><div className="text-[0.5rem] text-blue-500">Tutte cliccabili</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>🖥️ Browser</div><div className="text-[0.5rem] mt-0.5">Come telefono</div><div className="text-[0.5rem] font-semibold">↑ Scorri schede</div></PreviewCard>,
+      title: tv.role_template_preview_view_stats_title ?? 'Ore nella scheda Presenze',
+      off: <PreviewCard label={tv.role_template_preview_off ?? 'Spento'}><div>{tv.role_template_preview_tab_timesheet ?? 'Presenze'}</div><div className="text-[0.5rem] opacity-40 mt-0.5">{tv.role_template_preview_hours_section_hidden ?? 'Sezione Ore nascosta'}</div></PreviewCard>,
+      on:  <PreviewCard label={tv.role_template_preview_on ?? 'Attivo'} active><div>{tv.role_template_preview_tab_timesheet ?? 'Presenze'}</div><div className="text-[0.5rem] font-semibold mt-0.5">📊 {tv.role_template_preview_hours_visible ?? 'Ore visibili'}</div></PreviewCard>,
     },
     // ── Permessi Operativi ──
-    can_request_holidays: {
-      title: 'Richiedi Ferie',
-      off: <PreviewCard label="Spento"><div>🌴 Ferie</div><div className="text-[0.5rem] opacity-40 mt-0.5">+ assente</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>🌴 Ferie</div><div className="text-[0.5rem] font-semibold mt-0.5">+ Nuova richiesta</div></PreviewCard>,
-    },
     can_punch_from_app: {
-      title: 'Timbratura da App',
-      off: <PreviewCard label="Spento"><div>Dashboard</div><div className="text-[0.5rem] opacity-40 line-through mt-0.5">⏱ Timbra</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>Dashboard</div><div className="rounded bg-white/20 text-accent text-[0.5rem] text-center py-0.5 font-bold mt-0.5">⏱ Timbra</div></PreviewCard>,
+      title: tv.role_template_preview_punch_title ?? 'Timbratura da App',
+      off: <PreviewCard label={tv.role_template_preview_off ?? 'Spento'}><div>{tv.role_template_tab_group_dashboard ?? 'Dashboard'}</div><div className="text-[0.5rem] opacity-40 line-through mt-0.5">⏱ {tv.role_template_preview_punch ?? 'Timbra'}</div></PreviewCard>,
+      on:  <PreviewCard label={tv.role_template_preview_on ?? 'Attivo'} active><div>{tv.role_template_tab_group_dashboard ?? 'Dashboard'}</div><div className="rounded bg-white/20 text-accent text-[0.5rem] text-center py-0.5 font-bold mt-0.5">⏱ {tv.role_template_preview_punch ?? 'Timbra'}</div></PreviewCard>,
     },
     can_create_shifts: {
-      title: 'Crea Turni',
-      off: <PreviewCard label="Spento"><div>📅 Tabellone</div><div className="text-[0.5rem] opacity-40 mt-0.5">Cella bloccata</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>📅 Tabellone</div><div className="text-[0.5rem] font-semibold text-accent mt-0.5">+ Nuovo turno</div></PreviewCard>,
+      title: tv.role_template_preview_create_shifts_title ?? 'Crea Turni',
+      off: <PreviewCard label={tv.role_template_preview_off ?? 'Spento'}><div>📅 {tv.role_template_preview_board ?? 'Tabellone'}</div><div className="text-[0.5rem] opacity-40 mt-0.5">{tv.role_template_preview_cell_locked ?? 'Cella bloccata'}</div></PreviewCard>,
+      on:  <PreviewCard label={tv.role_template_preview_on ?? 'Attivo'} active><div>📅 {tv.role_template_preview_board ?? 'Tabellone'}</div><div className="text-[0.5rem] font-semibold text-accent mt-0.5">{tv.role_template_preview_new_shift ?? '+ Nuovo turno'}</div></PreviewCard>,
     },
     can_manage_drafts: {
-      title: 'Gestisci Bozze',
-      off: <PreviewCard label="Spento"><div>📋 Turno</div><div className="text-[0.5rem] opacity-40 mt-0.5">Bozze nascoste</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>📋 Turno</div><div className="mt-0.5"><span className="bg-amber-100 text-amber-700 rounded px-0.5 text-[0.5rem] font-bold">BOZZA</span></div></PreviewCard>,
+      title: tv.role_template_preview_manage_drafts_title ?? 'Gestisci Bozze',
+      off: <PreviewCard label={tv.role_template_preview_off ?? 'Spento'}><div>📋 {tv.role_template_preview_shift ?? 'Turno'}</div><div className="text-[0.5rem] opacity-40 mt-0.5">{tv.role_template_preview_drafts_hidden ?? 'Bozze nascoste'}</div></PreviewCard>,
+      on:  <PreviewCard label={tv.role_template_preview_on ?? 'Attivo'} active><div>📋 {tv.role_template_preview_shift ?? 'Turno'}</div><div className="mt-0.5"><span className="bg-amber-100 text-amber-700 rounded px-0.5 text-[0.5rem] font-bold">{tv.role_template_preview_draft_badge ?? 'BOZZA'}</span></div></PreviewCard>,
     },
     can_approve_shifts: {
-      title: 'Approva Turni',
-      off: <PreviewCard label="Spento"><div>Turno ✓</div><div className="text-[0.5rem] opacity-40 mt-0.5">Non approvabile</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>Turno ✓</div><div className="text-[0.5rem] font-semibold text-green-600 mt-0.5">✅ Approva</div></PreviewCard>,
-    },
-    can_view_total_hours: {
-      title: 'Ore Totali Team',
-      off: <PreviewCard label="Spento"><div>📊 Tabellone</div><div className="text-[0.5rem] opacity-40 mt-0.5">Col. TOTALE nascosta</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>📊 Tabellone</div><div className="text-[0.5rem] font-semibold mt-0.5">Col. TOTALE visibile</div></PreviewCard>,
-    },
-    can_edit_staff_pins: {
-      title: 'Modifica PIN Staff',
-      off: <PreviewCard label="Spento"><div>👤 Profilo</div><div className="text-[0.5rem] opacity-40 line-through mt-0.5">Cambia PIN</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>👤 Profilo</div><div className="text-[0.5rem] font-semibold mt-0.5">🔑 Cambia PIN</div></PreviewCard>,
+      title: tv.role_template_preview_approve_shifts_title ?? 'Approva Turni',
+      off: <PreviewCard label={tv.role_template_preview_off ?? 'Spento'}><div>{tv.role_template_preview_shift ?? 'Turno'} ✓</div><div className="text-[0.5rem] opacity-40 mt-0.5">{tv.role_template_preview_not_approvable ?? 'Non approvabile'}</div></PreviewCard>,
+      on:  <PreviewCard label={tv.role_template_preview_on ?? 'Attivo'} active><div>{tv.role_template_preview_shift ?? 'Turno'} ✓</div><div className="text-[0.5rem] font-semibold text-green-600 mt-0.5">✅ {tv.role_template_preview_approve ?? 'Approva'}</div></PreviewCard>,
     },
     team_schedule_visible: {
-      title: 'Visibile in tabellone',
-      off: <PreviewCard label="Spento"><div>📅 Tabellone</div><div className="text-[0.5rem] opacity-40 mt-0.5">Riga nascosta</div></PreviewCard>,
-      on:  <PreviewCard label="Attivo" active><div>📅 Tabellone</div><div className="text-[0.5rem] font-semibold mt-0.5">Riga visibile ✓</div></PreviewCard>,
+      title: tv.role_template_preview_board_visible_title ?? 'Visibile in tabellone',
+      off: <PreviewCard label={tv.role_template_preview_off ?? 'Spento'}><div>📅 {tv.role_template_preview_board ?? 'Tabellone'}</div><div className="text-[0.5rem] opacity-40 mt-0.5">{tv.role_template_preview_row_hidden ?? 'Riga nascosta'}</div></PreviewCard>,
+      on:  <PreviewCard label={tv.role_template_preview_on ?? 'Attivo'} active><div>📅 {tv.role_template_preview_board ?? 'Tabellone'}</div><div className="text-[0.5rem] font-semibold mt-0.5">{tv.role_template_preview_row_visible ?? 'Riga visibile'} ✓</div></PreviewCard>,
     },
   };
 
@@ -553,7 +642,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       >
         {/* header */}
         <div className="text-[0.5625rem] font-bold uppercase tracking-wider text-white/50 mb-1">
-          {planned ? 'Attivo' : 'Spento'}
+          {planned ? (tv.role_template_preview_on ?? 'Attivo') : (tv.role_template_preview_off ?? 'Spento')}
         </div>
         {/* orario pianificato — sempre visibile */}
         <div className="flex items-center gap-1 font-semibold text-white/80">
@@ -571,13 +660,13 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             </div>
             <div className="flex items-center gap-1 text-white/50">
               <span className="inline-block w-2 h-2 rounded-sm bg-purple-400/60 text-[0.4375rem] text-center leading-[0.5rem]">!</span>
-              badge audit
+              {tv.role_template_preview_audit_badge ?? 'badge audit'}
             </div>
           </>
         )}
         {planned && (
           <div className="text-white/50 text-[0.625rem] mt-0.5 italic">
-            delta e timbrature nascosti
+            {tv.role_template_preview_delta_hidden ?? 'delta e timbrature nascosti'}
           </div>
         )}
       </div>
@@ -596,7 +685,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
               type="button"
               onClick={handleOpen}
               className={`shrink-0 rounded-full p-0.5 transition-colors ${open ? 'text-accent' : 'text-white/50 hover:text-white/70'} active:text-white/70'} hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]`}
-              aria-label="Mostra anteprima"
+              aria-label={tv.role_template_preview_show_aria ?? 'Mostra anteprima'}
             >
               <Info className="w-3.5 h-3.5" />
             </button>
@@ -626,7 +715,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                 transition={{ duration: 0.12 }}
               >
                 <span className="text-[0.6875rem] text-white/50">
-                  Nasconde timbrature, delta e totali grezzi
+                  {tv.role_template_preview_privacy_hint_short ?? 'Nasconde timbrature, delta e totali grezzi'}
                 </span>
               </motion.div>
             )}
@@ -637,7 +726,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
               onClick={() => setHintExpanded(v => !v)}
               className="text-[0.625rem] font-semibold text-white/70 hover:text-accent transition-colors mt-0.5 leading-none active:text-accent"
             >
-              {hintExpanded ? '↑ meno' : '↓ di più'}
+              {hintExpanded ? `↑ ${tv.role_template_preview_hint_less ?? 'meno'}` : `↓ ${tv.role_template_preview_hint_more ?? 'di più'}`}
             </button>
           )}
         </div>
@@ -660,7 +749,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                 className="rounded-2xl border border-white/[0.14] p-3 w-[17.5rem] font-sans"
               >
                 <p className="text-[0.625rem] font-bold uppercase tracking-wider text-white/60 mb-2">
-                  Anteprima cella presenze
+                  {tv.role_template_preview_timesheet_cell_title ?? 'Anteprima cella presenze'}
                 </p>
                 <div className="flex gap-2">
                   <ShiftCell planned={false} active={false} />
@@ -676,8 +765,8 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   }
 
   // ─── Vista mobile: user chip + lista permessi ────────────────────────────
-  const MobileRow = ({ label, enabled, onToggle, locked, sublabel }: {
-    label: React.ReactNode; enabled: boolean; onToggle: () => void; locked?: boolean; sublabel?: string;
+  const MobileRow = ({ label, enabled, onToggle, sublabel }: {
+    label: React.ReactNode; enabled: boolean; onToggle: () => void; sublabel?: string;
   }) => (
     <div className="flex items-center justify-between px-4 py-3 gap-3">
       <div className="flex-1 min-w-0">
@@ -688,9 +777,8 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
         type="button"
         role="switch"
         aria-checked={enabled}
-        disabled={locked}
         onClick={onToggle}
-        className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full transition-all duration-200 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed ${enabled ? 'bg-accent' : ''}`}
+        className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full transition-all duration-200 focus:outline-none ${enabled ? 'bg-accent' : ''}`}
       >
         <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full toggle-knob transition-all duration-200 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
       </button>
@@ -732,22 +820,18 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       {mobileUser && (
         <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.10)' }}>
           {/* Schede e Navigazione */}
-          <MobileSectionHeader title="Schede e Navigazione" />
-          {ROLE_TEMPLATE_FEATURE_SECTIONS.find(s => s.id === 'tabs_nav')?.rows.map(({ key }) => {
-            const locked = key === 'home_tab' || (key === 'admin_tab' && (mobileUser.role === 'manager' || mobileUser.role === 'assistant_manager'));
-            return (
-              <MobileRow
-                key={key}
-                label={<>{FEATURE_LABELS_TAB_FIRST[key]}{key === 'home_tab' && <span className="ml-1 text-[0.625rem] text-white/50"> sempre attiva</span>}</>}
-                enabled={(userFeatures[mobileUser.id]?.[key]) === true}
-                locked={locked}
-                onToggle={() => toggleFeature(mobileUser.id, key)}
-              />
-            );
-          })}
+          <MobileSectionHeader title={tv.role_template_section_tabs_nav ?? 'Schede e Navigazione'} />
+          {ROLE_TEMPLATE_FEATURE_SECTIONS.find(s => s.id === 'tabs_nav')?.rows.map(({ key }) => (
+            <MobileRow
+              key={key}
+              label={FEATURE_LABELS_TAB_FIRST[key]}
+              enabled={(userFeatures[mobileUser.id]?.[key]) === true}
+              onToggle={() => toggleFeature(mobileUser.id, key)}
+            />
+          ))}
 
           {/* Operazioni Turni */}
-          <MobileSectionHeader title="Operazioni Turni" />
+          <MobileSectionHeader title={tv.role_template_section_shift_ops ?? 'Operazioni Turni'} />
           {ROLE_TEMPLATE_FEATURE_SECTIONS.find(s => s.id === 'shift_ops')?.rows.map(({ key }) => (
             <MobileRow
               key={key}
@@ -758,7 +842,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
           ))}
 
           {/* Altro */}
-          <MobileSectionHeader title="Altro" />
+          <MobileSectionHeader title={tv.role_template_section_other ?? 'Altro'} />
           {ROLE_TEMPLATE_FEATURE_SECTIONS.find(s => s.id === 'other')?.rows.map(({ key }) => (
             <MobileRow
               key={key}
@@ -768,14 +852,14 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             />
           ))}
           <MobileRow
-            label="Solo orario pianificato"
-            sublabel="Nasconde orari effettivi nel foglio presenze"
+            label={tv.admin_timesheet_grid_planned_only_label ?? 'Presenze: solo orario pianificato'}
+            sublabel={tv.admin_timesheet_grid_planned_only_hint ?? 'Nasconde timbrature, delta e totali grezzi'}
             enabled={userPlannedOnly[mobileUser.id] ?? false}
             onToggle={() => togglePlannedOnly(mobileUser.id)}
           />
 
           {/* Permessi Operativi */}
-          <MobileSectionHeader title="Permessi Operativi" />
+          <MobileSectionHeader title={tv.role_templates_operational_heading ?? 'Permessi Operativi'} />
           {permRows.map(perm => (
             <MobileRow
               key={perm.key}
@@ -787,50 +871,53 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
           ))}
 
           {/* Visibilità nel tabellone */}
-          <MobileSectionHeader title="Visibilità nel Tabellone Turni" />
+          <MobileSectionHeader title={tv.role_template_section_board_visibility ?? 'Visibilità nel Tabellone Turni'} />
           <MobileRow
             label={t.settings_visible_on_schedule_row}
-            sublabel="Appare nel tabellone turni e nelle presenze di squadra"
+            sublabel={tv.role_templates_team_visible_desc ?? 'Appare nel tabellone turni e nelle presenze di squadra'}
             enabled={userTeamVisible[mobileUser.id] ?? true}
             onToggle={() => toggleTeamVisible(mobileUser.id)}
           />
         </div>
       )}
 
-      {/* Footer salva */}
-      <div className="flex items-center justify-end gap-3 border-t border-white/10 bg-white/6 px-4 py-3">
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => void handleSave()}
-          className="bg-accent inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-md disabled:opacity-60 transition-opacity"
+      {/* Footer: indicatore autosave */}
+      <div className="flex items-center justify-end gap-3 border-t border-white/10 bg-white/[0.06] px-4 py-3">
+        <span
+          aria-live="polite"
+          className={`text-[0.6875rem] font-semibold uppercase tracking-wider ${
+            autosaveState === 'saved' ? 'text-emerald-400' : 'text-white/60'
+          }`}
         >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          {t.role_templates_save_all}
-        </button>
+          {autosaveState === 'saving'
+            ? (tv.role_templates_autosave_saving ?? 'Salvataggio…')
+            : autosaveState === 'saved'
+              ? (tv.role_templates_autosave_saved ?? 'Salvato')
+              : ''}
+        </span>
       </div>
     </div>
   );
 
   const renderMatrix = () => (
-    <div className="hidden md:block rounded-xl border border-white/[0.14] overflow-hidden rounded-2xl">
-      <div className="overflow-x-auto">
-        <table className="border-collapse text-sm" style={{ minWidth: `${Math.max(640, 200 + nonAdminUsers.length * 90)}px`, width: '100%' }}>
+    <div className="hidden md:block rounded-2xl border border-white/[0.14]">
+      <table className="perm-matrix-table table-fixed w-full text-sm">
 
-          {/* Intestazione colonne: dipendenti */}
-          <thead>
-            <tr className="border-b" style={{ borderColor: 'rgba(255,255,255,0.10)' }}>
-              <th className="sticky left-0 z-10 px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-white/50"
-                style={{ minWidth: 180 }}
-              >
-                Permesso
-              </th>
+        {/* Intestazione colonne: dipendenti — sticky sotto la barra dell'app, così i nomi non finiscono mai sotto l'header.
+            Il vetro sta sulle singole celle: solo così gli angoli del pannello in sovrapposizione possono essere arrotondati. */}
+        <thead className="sticky top-[var(--app-sticky-header-offset,5rem)] z-20">
+          <tr>
+            <th className="sticky left-0 z-30 bg-white/[0.06] backdrop-blur-xl px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-white/50"
+              style={{ width: 200 }}
+            >
+              {tv.role_templates_col_permission ?? 'Permesso'}
+            </th>
               {nonAdminUsers.map((u) => {
                 const color = roleColor(u.role);
                 const badge = roleBadgeLabel(u.role, t as Record<string, string>);
                 return (
-                  <th key={u.id} className="px-2 py-2 text-center" style={{ minWidth: 80 }}>
-                    <div className="flex flex-col items-center gap-1">
+                  <th key={u.id} className="bg-white/[0.06] backdrop-blur-xl px-2 py-2 text-center">
+                    <div className="flex min-w-0 flex-col items-center gap-1">
                       {/* Avatar */}
                       <div
                         className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-[0.6875rem] font-bold shrink-0"
@@ -839,11 +926,11 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                         {initials(u)}
                       </div>
                       {/* Nome */}
-                      <span className="text-[0.6875rem] font-semibold text-white/80 leading-tight text-center max-w-[4.75rem] truncate" title={u.first_name}>{u.first_name}
+                      <span className="block w-full truncate text-[0.6875rem] font-semibold text-white/80 leading-tight text-center" title={u.first_name}>{u.first_name}
                       </span>
                       {/* Ruolo */}
                       <span
-                        className="text-[0.5625rem] font-bold px-1.5 py-0.5 rounded-full text-white leading-none"
+                        className="inline-block max-w-full truncate text-[0.5625rem] font-bold px-1.5 py-0.5 rounded-full text-white leading-none"
                         style={{ backgroundColor: color }}
                       >
                         {badge}
@@ -855,18 +942,15 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             </tr>
           </thead>
 
-          <tbody className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.10)' }}>
+          <tbody>
 
             {/* ── Schede & Navigazione ── */}
-            <SectionHeader title="Schede e Navigazione" />
+            <SectionHeader title={tv.role_template_section_tabs_nav ?? 'Schede e Navigazione'} />
             {ROLE_TEMPLATE_FEATURE_SECTIONS.find((s) => s.id === 'tabs_nav')?.rows.map(({ key }) => (
               <tr key={key} className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/10 transition-colors active:bg-white/10">
                 <td className="sticky left-0 z-10 px-4 py-2.5">
                   <div className="flex items-center gap-0.5 text-[0.8125rem] text-white/80">
                     {FEATURE_LABELS_TAB_FIRST[key]}
-                    {key === 'home_tab' && (
-                      <span className="ml-1 text-[0.625rem] text-white/50">sempre attiva</span>
-                    )}
                     {PERM_PREVIEWS[key] && (
                       <PermInfoButton
                         previewTitle={PERM_PREVIEWS[key].title}
@@ -876,24 +960,19 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                     )}
                   </div>
                 </td>
-                {nonAdminUsers.map((u) => {
-                  const locked = key === 'home_tab'
-                    || (key === 'admin_tab' && (u.role === 'manager' || u.role === 'assistant_manager'));
-                  return (
-                    <td key={u.id} className="px-2 py-2.5 text-center">
-                      <MatrixToggle
-                        enabled={(userFeatures[u.id]?.[key]) === true}
-                        locked={locked}
-                        onToggle={() => toggleFeature(u.id, key)}
-                      />
-                    </td>
-                  );
-                })}
+                {nonAdminUsers.map((u) => (
+                  <td key={u.id} className="px-2 py-2.5 text-center">
+                    <MatrixToggle
+                      enabled={(userFeatures[u.id]?.[key]) === true}
+                      onToggle={() => toggleFeature(u.id, key)}
+                    />
+                  </td>
+                ))}
               </tr>
             ))}
 
             {/* ── Operazioni Turni ── */}
-            <SectionHeader title="Operazioni Turni" />
+            <SectionHeader title={tv.role_template_section_shift_ops ?? 'Operazioni Turni'} />
             {ROLE_TEMPLATE_FEATURE_SECTIONS.find((s) => s.id === 'shift_ops')?.rows.map(({ key }) => (
               <tr key={key} className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/10 transition-colors active:bg-white/10">
                 <td className="sticky left-0 z-10 px-4 py-2.5">
@@ -920,7 +999,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             ))}
 
             {/* ── Altro ── costo stimato, profilo su browser, presenze privacy ── */}
-            <SectionHeader title="Altro" />
+            <SectionHeader title={tv.role_template_section_other ?? 'Altro'} />
             {ROLE_TEMPLATE_FEATURE_SECTIONS.find((s) => s.id === 'other')?.rows.map(({ key }) => (
               <tr key={key} className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/10 transition-colors active:bg-white/10">
                 <td className="sticky left-0 z-10 px-4 py-2.5">
@@ -946,7 +1025,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
               </tr>
             ))}
             {/* Presenze: solo orario pianificato (privacy griglia) */}
-            <tr className="transition-colors">
+            <tr className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/10 transition-colors active:bg-white/10">
               <td className="sticky left-0 z-10 px-4 py-2.5">
                 <TimesheetPrivacyPreviewCell
                   t={t as Record<string, string>}
@@ -964,7 +1043,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             </tr>
 
             {/* ── Permessi Operativi ── */}
-            <SectionHeader title="Permessi Operativi" />
+            <SectionHeader title={tv.role_templates_operational_heading ?? 'Permessi Operativi'} />
             {permRows.map((perm) => (
               <tr key={perm.key} className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/10 transition-colors active:bg-white/10">
                 <td className="sticky left-0 z-10 px-4 py-2.5">
@@ -996,7 +1075,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             ))}
 
             {/* ── Visibilità Tabellone ── */}
-            <SectionHeader title="Visibilità nel Tabellone Turni" icon={<Users className="h-3 w-3" />} />
+            <SectionHeader title={tv.role_template_section_board_visibility ?? 'Visibilità nel Tabellone Turni'} icon={<Users className="h-3 w-3" />} />
             <tr className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/10 transition-colors active:bg-white/10">
               <td className="sticky left-0 z-10 px-4 py-2.5">
                 <div className="flex items-center gap-0.5 text-[0.8125rem] text-white/80">
@@ -1008,7 +1087,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                   />
                 </div>
                 <div className="text-[0.6875rem] text-white/50 leading-snug mt-0.5">
-                  Appare nel tabellone turni e nelle presenze di squadra
+                  {tv.role_templates_team_visible_desc ?? 'Appare nel tabellone turni e nelle presenze di squadra'}
                 </div>
               </td>
               {nonAdminUsers.map((u) => (
@@ -1022,7 +1101,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             </tr>
 
             {/* ── Moduli Scheda Admin (globale) ── */}
-            <SectionHeader title="Moduli Scheda Admin (globale)" />
+            <SectionHeader title={tv.role_templates_admin_modules_heading ?? 'Moduli Scheda Admin (globale)'} />
             {ADMIN_MODULE_KEYS.map((key) => (
               <tr key={key} className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/10 transition-colors active:bg-white/10">
                 <td className="sticky left-0 z-10 px-4 py-2.5 text-[0.8125rem] text-white/85">
@@ -1030,7 +1109,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                 </td>
                 <td colSpan={nonAdminUsers.length} className="px-3 py-2.5">
                   <div className="flex items-center justify-center gap-3">
-                    <span className="text-[0.6875rem] text-white/50">Globale</span>
+                    <span className="text-[0.6875rem] text-white/50">{tv.role_templates_global_label ?? 'Globale'}</span>
                     <MatrixToggle
                       enabled={mods[key] === true}
                       onToggle={() => toggleMod(key)}
@@ -1041,11 +1120,10 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             ))}
 
           </tbody>
-        </table>
-      </div>
+      </table>
 
       {/* Footer */}
-      <div className="flex flex-wrap items-center justify-between border-t border-white/10 bg-white/6 px-4 py-3 gap-3">
+      <div className="flex flex-wrap items-center justify-between bg-white/[0.06] px-4 py-3 gap-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -1054,29 +1132,73 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-white/60 hover:bg-white/10 transition-colors disabled:opacity-50 active:bg-white/10 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           >
             <RotateCcw className="w-3 h-3" />
-            Reset moduli
+            {tv.role_templates_reset_modules_btn ?? 'Reset moduli'}
           </button>
           <button
             type="button"
-            onClick={() => void handleResetAll()}
+            onClick={() => setConfirmResetOpen(true)}
             disabled={saving}
             className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/40 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-red-400 hover:bg-red-500/15 transition-colors disabled:opacity-50 active:bg-red-500/80"
           >
             <RotateCcw className="w-3 h-3" />
-            Azzera tutto
+            {tv.role_templates_reset_all_btn ?? 'Azzera tutto'}
           </button>
         </div>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => void handleSave()}
-          className="bg-accent inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-md disabled:opacity-60 transition-opacity"
+        <span
+          aria-live="polite"
+          className={`text-[0.6875rem] font-semibold uppercase tracking-wider ${
+            autosaveState === 'saved' ? 'text-emerald-400' : 'text-white/60'
+          }`}
         >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          {t.role_templates_save_all}
-        </button>
+          {autosaveState === 'saving'
+            ? (tv.role_templates_autosave_saving ?? 'Salvataggio…')
+            : autosaveState === 'saved'
+              ? (tv.role_templates_autosave_saved ?? 'Salvato')
+              : ''}
+        </span>
       </div>
     </div>
+  );
+
+  const renderResetConfirm = () => (
+    <CenteredModalPortal
+      open={confirmResetOpen}
+      onClose={() => setConfirmResetOpen(false)}
+      ariaLabel={tv.role_templates_reset_confirm_title ?? 'Azzerare tutti i permessi?'}
+    >
+      <div className="space-y-4 p-5">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-500/15">
+            <RotateCcw className="h-4 w-4 text-red-400" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-white/90">
+              {tv.role_templates_reset_confirm_title ?? 'Azzerare tutti i permessi?'}
+            </p>
+            <p className="mt-1 text-xs leading-snug text-white/60">
+              {tv.role_templates_reset_confirm_body ?? ''}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={() => setConfirmResetOpen(false)}
+            className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-semibold text-white/80 transition-colors hover:bg-white/10"
+          >
+            {t.cancel}
+          </button>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => void handleResetAll()}
+            className="rounded-xl bg-red-500/90 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-red-500 disabled:opacity-50"
+          >
+            {t.confirm}
+          </button>
+        </div>
+      </div>
+    </CenteredModalPortal>
   );
 
   if (variant === 'embedded') {
@@ -1085,6 +1207,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
         {/* miniature preview — intentional: text-[8–10px] nelle anteprime compatte / matrix */}
         {renderMobileView()}
         {renderMatrix()}
+        {renderResetConfirm()}
       </div>
     );
   }
@@ -1096,6 +1219,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
         {renderMobileView()}
         {renderMatrix()}
       </motion.div>
+      {renderResetConfirm()}
     </div>
   );
 }

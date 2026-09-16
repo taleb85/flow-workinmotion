@@ -104,11 +104,7 @@ export interface User {
   theme: Theme;
   can_create_shifts: boolean;
   can_approve_shifts: boolean;
-  can_view_total_hours: boolean;
-  can_edit_staff_pins: boolean;
   can_manage_drafts: boolean;
-  /** Permette allo staff di richiedere ferie/permessi dalla dashboard personale */
-  can_request_holidays?: boolean;
   /** Permette allo staff di timbrare entrata/uscita dalla dashboard personale */
   can_punch_from_app?: boolean;
   /** Ore e turni confermati per mese. Chiave: "YYYY-MM", valore: { minutes, shiftsCount } */
@@ -117,16 +113,12 @@ export interface User {
   hourly_rate_eur?: number | null;
   /** Reparto: valori fissi sala | kitchen | bar */
   department?: Department;
-  /** Moduli abilitati per questo profilo. Se vuoto, si usano i default per ruolo. */
-  enabled_modules?: string[];
   /** Funzionalità abilitate (JSONB). Controlla visibilità dinamica: tabellone, PDF, Ore, ecc. */
   enabled_features?: Record<string, boolean>;
   /** Sezioni UI nascoste per scheda (`false` = non mostrare). Chiavi dal registro `UI_SCREEN_WIDGETS`. */
   ui_section_overrides?: Record<string, boolean>;
   /** Se true: account attivo ma non compare nel tabellone turni, presenze collettive e ore di gruppo (es. solo back-office). */
   hide_from_team_schedule?: boolean;
-  /** Visibilità nel planning settimanale (template ruoli / Profili); `false` = nascosto dal planning. */
-  team_schedule_visible?: boolean;
   /** Foto profilo (data URL o URL pubblico); opzionale, può non esistere come colonna su DB. */
   avatar_url?: string | null;
   /** Inizio rapporto (yyyy-MM-dd), opzionale */
@@ -204,7 +196,7 @@ export interface PunchRecord {
   calculated_time?: string;
   clock_out_time?: string | null;
   type: 'in' | 'out';
-  /** kiosk = terminale / app self; manual = inserimento da Presenze; manager = responsabile per altro utente */
+  /** kiosk = timbratura fatta dall’utente dall’app (nome storico della sorgente); manual = inserimento da Presenze; manager = responsabile per altro utente */
   source?: PunchRecordSource | null;
   /** ID admin che ha eseguito il quick-switch prima di questa timbratura (audit impersonazione). */
   impersonated_by?: string | null;

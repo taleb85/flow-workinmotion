@@ -143,10 +143,7 @@ export default function DipendentiTab({ tenantId }: { tenantId: string }) {
           theme: 'light',
           can_create_shifts: false,
           can_approve_shifts: false,
-          can_view_total_hours: false,
-          can_edit_staff_pins: false,
           can_manage_drafts: false,
-          can_request_holidays: true,
           can_punch_from_app: true,
         });
         if (err) throw err;
@@ -295,7 +292,7 @@ className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-accent 
                   {saving ? 'Salvataggio…' : 'Salva'}
                 </button>
                 <button type="button" onClick={() => { setEditingId(null); setError(null); }}
-                  className="rounded-xl bg-white/10 px-3 py-2 text-sm font-bold text-white/70 hover:bg-white/14 transition">
+                  className="rounded-xl bg-white/10 px-3 py-2 text-sm font-bold text-white/70 hover:bg-white/[0.14] transition">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -378,7 +375,7 @@ className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-accent 
                 <button
                   type="button"
                   onClick={() => setConfirmClearDemo(false)}
-                  className="flex-1 rounded-xl py-1.5 text-xs font-semibold bg-white/10 text-white/50 hover:bg-white/12 transition active:bg-white/80"
+                  className="flex-1 rounded-xl py-1.5 text-xs font-semibold bg-white/10 text-white/50 hover:bg-white/[0.12] transition active:bg-white/80"
                 >
                   Annulla
                 </button>

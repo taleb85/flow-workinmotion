@@ -17,13 +17,9 @@ export const PERMISSION_MATRIX_KEYS = [
   'approve_shifts',
   'export_pdf',
   'view_stats',
-  /** KPI “Costo stimato” (€/h × ore approvate) in Ore — utile soprattutto a chi cura contabilità / costi. */
-  'view_estimated_cost',
-  'desktop_access',
-  'profile_readonly',
 ] as const;
 
-/** Schede aggiuntive in dashboard (oltre alla matrice da 6). */
+/** Schede aggiuntive in dashboard (oltre alla matrice). */
 export const DASHBOARD_TAB_FEATURE_KEYS = ['home_tab', 'ferie_tab', 'admin_tab', 'timesheet_tab'] as const;
 
 export const ENABLED_FEATURE_KEYS = [
@@ -44,9 +40,6 @@ export const FEATURE_LABELS: Record<EnabledFeatureKey, string> = {
   approve_shifts: 'Congelamento Turni (approvazione finale)',
   export_pdf: 'Download PDF — tabellone turni',
   view_stats: 'Visualizzazione Ore',
-  view_estimated_cost: 'Costo stimato del lavoro',
-  desktop_access: 'Accesso Browser Desktop (deprecato — il gate PWA è unificato)',
-  profile_readonly: 'Navigazione su PC come telefono (schede in sola lettura)',
   home_tab: 'Visualizza scheda Dashboard',
   ferie_tab: 'Visualizza scheda Ferie',
   admin_tab: 'Visualizza scheda Admin (Impostazioni)',
@@ -77,15 +70,14 @@ export type RoleTemplateSection = {
 /**
  * Ordine e raggruppamento permessi in UI (template ruoli, gestione profili, anteprima).
  * Ogni chiave in ENABLED_FEATURE_KEYS compare una sola volta.
+ * `tabs_nav` contiene solo `team_view`: le altre schede della barra sono fisse
+ * (sempre attive), quindi non hanno un toggle per-utente.
  */
 export const ROLE_TEMPLATE_FEATURE_SECTIONS: readonly RoleTemplateSection[] = [
   {
     id: 'tabs_nav',
     rows: [
-      { kind: 'feature', key: 'home_tab' },      // Panoramica
-      { kind: 'feature', key: 'team_view' },      // Turni
-      { kind: 'feature', key: 'timesheet_tab' },  // Presenze
-      { kind: 'feature', key: 'ferie_tab' },      // Ferie
+      { kind: 'feature', key: 'team_view' },      // Turni — tabellone team
     ],
   },
   {
@@ -100,70 +92,15 @@ export const ROLE_TEMPLATE_FEATURE_SECTIONS: readonly RoleTemplateSection[] = [
     id: 'other',
     rows: [
       { kind: 'feature', key: 'view_stats' },           // Ore (dentro Presenze)
-      { kind: 'feature', key: 'view_estimated_cost' }, // Costo stimato
-      { kind: 'feature', key: 'profile_readonly' },    // Profilo sola lettura su browser
     ],
   },
 ] as const;
-
-export function roleTemplateSectionTitleKey(id: RoleTemplateSectionId): string {
-  switch (id) {
-    case 'tabs_nav':
-      return 'role_template_section_tabs_nav';
-    case 'shift_ops':
-      return 'role_template_section_shift_ops';
-    default:
-      return 'role_template_section_other';
-  }
-}
-
-/** Raggruppamento UI template: 5 schede barra → espandi per i singoli permessi. */
-export const ROLE_TEMPLATE_TAB_SHEET_GROUPS = [
-  { id: 'dashboard', titleKey: 'role_template_tab_group_dashboard' as const, keys: ['home_tab'] as const },
-  {
-    id: 'turni',
-    titleKey: 'role_template_tab_group_turni' as const,
-    keys: ['team_view', 'export_pdf', 'edit_shifts', 'approve_shifts'] as const,
-  },
-  { id: 'ferie', titleKey: 'role_template_tab_group_ferie' as const, keys: ['ferie_tab'] as const },
-  { id: 'presenze', titleKey: 'role_template_tab_group_presenze' as const, keys: ['timesheet_tab'] as const },
-  {
-    id: 'ore',
-    titleKey: 'role_template_tab_group_statistiche' as const,
-    keys: ['view_stats', 'view_estimated_cost'] as const,
-  },
-] as const;
-
-export type RoleTemplateTabSheetGroupId = (typeof ROLE_TEMPLATE_TAB_SHEET_GROUPS)[number]['id'];
-
-const TAB_SHEET_GROUP_KEY_SET = new Set<EnabledFeatureKey>(
-  ROLE_TEMPLATE_TAB_SHEET_GROUPS.flatMap((g) => [...g.keys])
-);
-
-export function isFeatureKeyInTabSheetGroups(key: EnabledFeatureKey): boolean {
-  return TAB_SHEET_GROUP_KEY_SET.has(key);
-}
-
-/** Sezione etichette per riga figlia (tab-first vs nome funzione). */
-export function featureKeyTemplateSection(key: EnabledFeatureKey): RoleTemplateSectionId {
-  if (
-    key === 'home_tab' ||
-    key === 'team_view' ||
-    key === 'timesheet_tab' ||
-    key === 'ferie_tab'
-  ) {
-    return 'tabs_nav';
-  }
-  if (key === 'edit_shifts' || key === 'approve_shifts' || key === 'export_pdf') return 'shift_ops';
-  return 'other';
-}
 
 /** Funzioni della scheda Impostazioni: config globale (solo Admin modifica), stessi valori per tutti i profili gestionali. */
 export const ADMIN_MODULE_KEYS = [
   'visibility_management',
   'department_creation',
   'violation_rules',
-  'master_control_panel',
   'auto_breaks',
 ] as const;
 
@@ -183,8 +120,6 @@ const DEFAULT_MANAGER_FEATURES: EnabledFeatures = {
   timesheet_tab: true,
   export_pdf: false,
   view_stats: false,
-  view_estimated_cost: false,
-  desktop_access: true,
   ferie_tab: true,
   /** Scheda in barra per Manager/Assistant viene forzata attiva in `getEnabledFeatures` (team delegato). */
   admin_tab: false,
@@ -272,46 +207,19 @@ export function getEnabledFeatures(user: { role: string; enabled_features?: unkn
     result.timesheet_tab = true;
     return result;
   }
-  const grp = getRolePermissionGroup(user.role);
-  if (grp === 'admin') return base;
+  /** L'admin è già uscito sopra: qui il ruolo appartiene sempre a un template. */
+  const grp = getRolePermissionGroup(user.role) as RoleTemplateGroup;
   const merged = mergeUserFeatureOverrides(applyDiskTemplateToBase(base, grp), user.enabled_features);
-  /** In barra: Manager / Assistant aprono la scheda team delegata (solo dipendenti operativi). Altri non-admin: mai. */
-  if (user.role === 'manager' || user.role === 'assistant_manager') {
-    merged.admin_tab = true;
-  } else {
-    merged.admin_tab = false;
-  }
-  applyLegacyTimesheetTabWhenUnset(merged, grp, user.enabled_features);
+  /**
+   * Schede a visibilità fissa (Panoramica, Presenze, Ferie, Admin): non hanno
+   * un toggle in UI, quindi nessun template o override residuo può nasconderle.
+   * Admin/Manager/Vice aprono la scheda Impostazioni, gli altri no.
+   */
+  merged.home_tab = true;
+  merged.timesheet_tab = true;
+  merged.ferie_tab = true;
+  merged.admin_tab = user.role === 'manager' || user.role === 'assistant_manager';
   return merged;
-}
-
-/**
- * Template/DB creati prima della chiave `timesheet_tab`: la barra Presenze seguiva `export_pdf`.
- * Finché `timesheet_tab` non è esplicito su disco o su `users.enabled_features`, si mantiene quel comportamento.
- */
-function userJsonHasExplicitTimesheetTab(raw: unknown): boolean {
-  return !!(
-    raw &&
-    typeof raw === 'object' &&
-    !Array.isArray(raw) &&
-    typeof (raw as Record<string, unknown>).timesheet_tab === 'boolean'
-  );
-}
-
-function diskTemplateHasExplicitTimesheetTab(group: RoleTemplateGroup): boolean {
-  const partial = getRoleFeatureTemplatesCache()?.[group];
-  return !!(partial && typeof (partial as Record<string, unknown>).timesheet_tab === 'boolean');
-}
-
-function applyLegacyTimesheetTabWhenUnset(
-  merged: EnabledFeatures,
-  group: RoleTemplateGroup,
-  rawUser: unknown
-): void {
-  if (userJsonHasExplicitTimesheetTab(rawUser) || diskTemplateHasExplicitTimesheetTab(group)) {
-    return;
-  }
-  merged.timesheet_tab = merged.export_pdf === true;
 }
 
 /** Override per-utente da colonna `users.enabled_features` (JSONB), se presente. */

@@ -15,10 +15,7 @@ export const MOCK_USER: User = {
   theme: 'dark',
   can_create_shifts: false,
   can_approve_shifts: false,
-  can_view_total_hours: false,
-  can_edit_staff_pins: false,
   can_manage_drafts: false,
-  can_request_holidays: true,
   can_punch_from_app: true,
   department: 'sala',
   hourly_rate_eur: 12.50,
@@ -33,8 +30,6 @@ export const MOCK_MANAGER: User = {
   pin: '0000',
   can_create_shifts: true,
   can_approve_shifts: true,
-  can_view_total_hours: true,
-  can_edit_staff_pins: true,
   can_manage_drafts: true,
 };
 

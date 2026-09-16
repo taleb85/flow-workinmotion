@@ -23,12 +23,7 @@ import type { EnabledFeatures } from '../utils/enabledFeatures';
 import { translateRole } from '../utils/roles';
 import { isAdminOnly, isManagementRole } from '../utils/permissions';
 import { FEATURE_LABELS, type EnabledFeatureKey } from '../utils/enabledFeatures';
-import {
-  getEnabledModules,
-  ENABLED_MODULES,
-  type AppNavTab,
-  type EnabledModule,
-} from '../utils/enabledModules';
+import { type AppNavTab } from '../utils/enabledModules';
 import ProfileTabRichPreview from './profilePreview/ProfileTabRichPreview';
 import {
   PROFILE_VISIBILITY_FEATURE_KEYS,
@@ -36,11 +31,8 @@ import {
   getTemplateBaselineFeatures,
   isFeatureExplicitlyOverridden,
   computeNextEnabledFeaturesOverride,
-  toggleStaffModule,
-  getModuleLabel,
   screenGroupToPreviewTab,
   featureKeyToPreviewTab,
-  staffModuleToPreviewTab,
 } from '../utils/profileVisibilityHub';
 import {
   computeNextUiSectionOverrides,
@@ -151,13 +143,11 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
 
   // Local state for immediate preview updates without DB save
   const [localFeatures, setLocalFeatures] = useState<EnabledFeatures | null>(null);
-  const [localModules, setLocalModules] = useState<EnabledModule[] | null>(null);
   const [localUiOverrides, setLocalUiOverrides] = useState<Record<string, boolean> | null>(null);
 
   // Keep track of original state to allow "Discard changes"
   const [originalState, setOriginalState] = useState<{
     features: EnabledFeatures;
-    modules: EnabledModule[];
     ui: Record<string, boolean>;
   } | null>(null);
 
@@ -193,16 +183,13 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
   useEffect(() => {
     if (selected) {
       const features = { ...selected.enabled_features } as EnabledFeatures;
-      const modules = [...(selected.enabled_modules || [])] as import('../utils/enabledModules').EnabledModule[];
       const ui = { ...selected.ui_section_overrides };
-      setOriginalState({ features, modules, ui });
+      setOriginalState({ features, ui });
       setLocalFeatures(features);
-      setLocalModules(modules);
       setLocalUiOverrides(ui);
     } else {
       setOriginalState(null);
       setLocalFeatures(null);
-      setLocalModules(null);
       setLocalUiOverrides(null);
     }
   }, [selected]);
@@ -222,10 +209,9 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
     return {
       ...selected,
       enabled_features: localFeatures ?? selected.enabled_features,
-      enabled_modules: localModules ?? selected.enabled_modules,
       ui_section_overrides: localUiOverrides ?? selected.ui_section_overrides,
     };
-  }, [selected, localFeatures, localModules, localUiOverrides]);
+  }, [selected, localFeatures, localUiOverrides]);
 
   const isSelectedAdmin = selected?.role === 'admin';
   // Forza isMgmt a false per vedere i widget dello staff se il ruolo non è gestionale
@@ -269,23 +255,12 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
     [isSelectedAdmin]
   );
 
-  const handleModuleToggle = useCallback(
-    (u: User, mod: EnabledModule, on: boolean) => {
-      if (isSelectedAdmin || isManagementRole(u.role)) return;
-      const next = toggleStaffModule(u, mod, on);
-      setLocalModules(next);
-      setHasUnsavedChanges(true);
-    },
-    [isSelectedAdmin]
-  );
-
   const handleSmartRestore = useCallback(() => {
     if (!selected || isSelectedAdmin) return;
 
     if (hasUnsavedChanges && originalState) {
       // Discard unsaved changes: restore to original state
       setLocalFeatures({ ...originalState.features });
-      setLocalModules([...originalState.modules]);
       setLocalUiOverrides({ ...originalState.ui });
       setHasUnsavedChanges(false);
       showSuccess?.(tv.profile_visibility_changes_discarded ?? 'Modifiche annullate.');
@@ -294,7 +269,6 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
       if (!window.confirm(tv.profile_visibility_reset_confirm ?? 'Rimuovere tutte le personalizzazioni e tornare al template di ruolo?')) return;
       
       setLocalFeatures({});
-      setLocalModules([]);
       setLocalUiOverrides({});
       setHasUnsavedChanges(true);
       showSuccess?.(tv.profile_visibility_reset_done ?? 'Eccezioni rimosse: vale il template di ruolo.');
@@ -305,7 +279,6 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
     if (!selected || !hasUnsavedChanges) return;
     const success = await updateUser(selected.id, {
       enabled_features: localFeatures ?? {},
-      enabled_modules: localModules ?? [],
       ui_section_overrides: localUiOverrides ?? {},
     });
     if (success) {
@@ -313,12 +286,11 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
       // Update original state to current state after save
       setOriginalState({
         features: { ...(localFeatures ?? {}) },
-        modules: [...(localModules ?? [])],
         ui: { ...(localUiOverrides ?? {}) },
       });
       showSuccess?.(tv.profile_visibility_saved_hint ?? 'Modifiche salvate e applicate.');
     }
-  }, [selected, hasUnsavedChanges, localFeatures, localModules, localUiOverrides, updateUser, showSuccess, tv.profile_visibility_saved_hint]);
+  }, [selected, hasUnsavedChanges, localFeatures, localUiOverrides, updateUser, showSuccess, tv.profile_visibility_saved_hint]);
 
   const handleDeleteUser = useCallback(async () => {
     if (!selected || isDeleting) return;
@@ -362,18 +334,11 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
     return out;
   }, [previewUser, activeHubTab, uiGroups]);
 
-  const staffModulesForActiveTab = useMemo(() => {
-    if (!previewUser || isManagementRole(previewUser.role)) return [] as EnabledModule[];
-    return ENABLED_MODULES.filter((m) => staffModuleToPreviewTab(m, false) === activeHubTab);
-  }, [previewUser, activeHubTab]);
-
   const activeTabPanelEmpty =
     featuresForActiveTab.length === 0 &&
-    layoutGroupsForActiveTab.length === 0 &&
-    staffModulesForActiveTab.length === 0;
+    layoutGroupsForActiveTab.length === 0;
 
-  const showScreenMock =
-    layoutGroupsForActiveTab.length > 0 || staffModulesForActiveTab.length > 0;
+  const showScreenMock = layoutGroupsForActiveTab.length > 0;
 
   const handleUiWidgetToggle = useCallback(
     (u: User, key: string, visible: boolean) => {
@@ -677,59 +642,6 @@ className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-3
                             onUiToggle={(key, vis) => handleUiWidgetToggle(previewUser, key, vis)}
                             navLabel={navLabels[activeHubTab]}
                           />
-                          {staffModulesForActiveTab.length > 0 && (
-                            <div className="space-y-1 border-t border-white/10 pt-1.5">
-                              <p className="px-1 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">
-                                {tv.profile_visibility_tab_staff_modules ?? 'Moduli area personale'}
-                              </p>
-                              {staffModulesForActiveTab.map((mod) => {
-                                const enabled = getEnabledModules(previewUser).includes(mod);
-                                return (
-                                  <div
-                                    key={mod}
-                                    className={`flex min-h-[2.75rem] items-stretch gap-0 rounded-lg border-2 ${
- enabled
- ? 'border-white/[0.14] rounded-xl border border-white/[0.14]'
- : 'border-dashed border-white/[0.14] bg-slate-300/40'
- }`}
-                                  >
-                                    <div
-                                      className={`w-[0.1875rem] shrink-0 ${enabled ? 'bg-accent' : 'bg-slate-400'}`}
-                                      aria-hidden
-                                    />
-                                    <div className="flex min-w-0 flex-1 items-center justify-between gap-2 py-1.5 pl-2 pr-1.5">
-                                      <p
-                                        className={`text-xs font-semibold ${
- enabled
- ? 'text-white'
- : 'text-white/60 line-through'
- }`}
-                                      >
-                                        {getModuleLabel(mod, effectiveLanguage)}
-                                      </p>
-                                      {!isSelectedAdmin && (
-                                        <button
-                                          type="button"
-                                          role="switch"
-                                          aria-checked={enabled}
-                                          onClick={() => handleModuleToggle(previewUser, mod, !enabled)}
-                                          className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/35 focus:ring-offset-2 ${
- enabled ? 'bg-accent' : ''
- }`}
-                                        >
-                                          <span
-                                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full toggle-knob transition-all duration-200 ease-in-out ${
- enabled ? 'translate-x-5' : 'translate-x-1'
- }`}
-                                          />
-                                        </button>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
                         </>
                       )}
 
@@ -775,11 +687,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-3
                               return (
                                 <AdminRow
                                   key={key}
-                                  className={`rounded-lg border border-white/[0.14] !border-b-0 !p-2 ${
- key === 'view_estimated_cost'
- ? '[&_.font-bold]:border-l-2 [&_.font-bold]:border-white/30 [&_.font-bold]:pl-2'
- : ''
- }`}
+                                  className="rounded-lg border border-white/[0.14] !border-b-0 !p-2"
                                   label={FEATURE_LABELS[key]}
                                   description={desc}
                                   action={

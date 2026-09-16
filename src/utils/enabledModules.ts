@@ -1,105 +1,13 @@
-import { getEnabledFeatures, getRolePermissionGroup } from './enabledFeatures';
+import { getEnabledFeatures } from './enabledFeatures';
 import type { FeatureFlags } from './featureFlags';
 import type { User } from '../types';
-import { isUserPermissionEffective } from './staffPermissionDefaults';
 
-/** Dati minimi per barra tab + coerenza Presenze / timbratura. */
-export type UnifiedNavUser = Pick<User, 'role' | 'enabled_modules' | 'enabled_features' | 'can_punch_from_app'>;
+/** Dati minimi per la barra tab. */
+export type UnifiedNavUser = Pick<User, 'role' | 'enabled_features'>;
 
 /** Richieste ferie/permessi: disattivabile dal Master Control (`staff_requests`). */
 export function isStaffRequestsFeatureEnabled(featureFlags?: FeatureFlags | null): boolean {
   return featureFlags == null || featureFlags.staff_requests !== false;
-}
-
-/**
- * Moduli abilitabili per profilo utente.
- * Ogni modulo controlla la visibilità di una scheda nella dashboard.
- */
-export const ENABLED_MODULES = [
-  'my_shifts',
-  'team_schedule',
-  'stats_hours',
-  'financial_reports',
-  'vacation_requests',
-  'pdf_export',
-] as const;
-
-export type EnabledModule = (typeof ENABLED_MODULES)[number];
-
-/** Mappa modulo → tab (management) */
-export const MODULE_TO_TAB_MANAGEMENT: Record<EnabledModule, string | null> = {
-  my_shifts: 'home',
-  team_schedule: 'turni',
-  stats_hours: 'reports',
-  financial_reports: 'reports',
-  vacation_requests: 'ferie',
-  pdf_export: 'timesheet',
-};
-
-/** Mappa modulo → tab (staff - StaffPersonalDashboard) */
-export const MODULE_TO_TAB_STAFF: Record<EnabledModule, string | null> = {
-  my_shifts: 'home',
-  team_schedule: 'shifts',
-  stats_hours: 'stats',
-  financial_reports: 'stats',
-  vacation_requests: 'holidays',
-  pdf_export: null, // staff non ha timesheet diretto
-};
-
-/** Moduli di default per admin (tutti) */
-const DEFAULT_ADMIN: EnabledModule[] = [...ENABLED_MODULES];
-
-/** Moduli di default per staff (solo my_shifts) */
-const DEFAULT_STAFF: EnabledModule[] = ['my_shifts'];
-
-export function getDefaultEnabledModules(role: string): EnabledModule[] {
-  if (role === 'admin' || role === 'manager' || role === 'assistant_manager') {
-    return DEFAULT_ADMIN;
-  }
-  return DEFAULT_STAFF;
-}
-
-export function getEnabledModules(user: { role: string; enabled_modules?: unknown }): EnabledModule[] {
-  // Admin: sempre tutti i moduli hub (come `isFeatureEnabled`); JSONB non restringe la sessione.
-  if (user.role === 'admin') {
-    return [...DEFAULT_ADMIN];
-  }
-  const arr = user.enabled_modules;
-  // Solo null/undefined = mai salvato → default per ruolo. [] esplicito = nessun modulo (non ripristinare “tutti attivi”).
-  if (arr === null || arr === undefined) {
-    return getDefaultEnabledModules(user.role);
-  }
-  if (Array.isArray(arr)) {
-    return arr.filter((m): m is EnabledModule => ENABLED_MODULES.includes(m as EnabledModule));
-  }
-  return getDefaultEnabledModules(user.role);
-}
-
-/**
- * Tab management: matrice permessi (`getEnabledFeatures`) + flag globali (stessi su web, mobile, PWA).
- * `featureFlags` da `useApp()`; se omesso, i gate globali non si applicano (solo test).
- */
-function isTimesheetNavTabEnabled(user: UnifiedNavUser, feat: ReturnType<typeof getEnabledFeatures>): boolean {
-  if (feat.timesheet_tab === true) return true;
-  /** Staff sala/cucina/bar: se può timbrare dall’app, mostra Presenze anche senza scheda abilitata nel template. */
-  if (getRolePermissionGroup(user.role) === 'staff') {
-    return isUserPermissionEffective(user as User, 'can_punch_from_app');
-  }
-  return false;
-}
-
-/** Tab staff: stessa logica ovunque (browser / installato). */
-export function getVisibleStaffTabs(
-  user: { role: string; enabled_modules?: unknown; enabled_features?: unknown },
-  featureFlags?: FeatureFlags | null
-): string[] {
-  const tabs = new Set<string>();
-  const feat = getEnabledFeatures(user);
-  if (feat.home_tab) tabs.add('home');
-  if (feat.team_view) tabs.add('shifts');
-  if (feat.view_stats) tabs.add('stats');
-  if (feat.ferie_tab && isStaffRequestsFeatureEnabled(featureFlags)) tabs.add('holidays');
-  return Array.from(tabs);
 }
 
 /** Tab principali app (bottom bar unificata PWA — stessi id per gestione e staff). */
@@ -134,7 +42,8 @@ const STAFF_BOTTOM_NAV_ORDER: AppNavTab[] = ['home', 'timesheet', 'ferie', 'prof
 
 /**
  * Voci bottom bar: stessa struttura per tutti i profili (come PWA).
- * Ogni voce dipende da `enabled_features` (template + eccezioni utente), tranne admin cablato.
+ * Panoramica e Presenze sono sempre presenti; Ferie dipende dal flag globale
+ * `staff_requests`, Impostazioni dal ruolo.
  */
 export function getUnifiedNavTabs(
   user: UnifiedNavUser,
@@ -142,13 +51,10 @@ export function getUnifiedNavTabs(
   featureFlags?: FeatureFlags | null
 ): AppNavTab[] {
   const feat = getEnabledFeatures(user);
-  const ferieOk = feat.ferie_tab === true && isStaffRequestsFeatureEnabled(featureFlags);
-  const timesheetOk = isTimesheetNavTabEnabled(user, feat);
   const out: AppNavTab[] = [];
   for (const id of UNIFIED_NAV_ORDER) {
-    if (id === 'home' && feat.home_tab) out.push('home');
-    else if (id === 'ferie' && ferieOk) out.push('ferie');
-    else if (id === 'timesheet' && timesheetOk) out.push('timesheet');
+    if (id === 'home' || id === 'timesheet') out.push(id);
+    else if (id === 'ferie' && isStaffRequestsFeatureEnabled(featureFlags)) out.push('ferie');
     // 'reports' removed from nav — Statistics is now a sub-tab inside 'timesheet'
     else if (id === 'profile') out.push('profile');
     else if (id === 'settings' && feat.admin_tab) out.push('settings');

@@ -13,13 +13,11 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
   { slug: 'unlock_with_pin', defaultEnabled: true },
   { slug: 'auto_breaks', defaultEnabled: true },
   { slug: 'staff_requests', defaultEnabled: true },
-  { slug: 'kiosk_active', defaultEnabled: true },
   /** GPS entro raggio del locale per timbrare (`geofence.json` su Storage o VITE_*), salvo manager che timbra per altri. */
   { slug: 'geofence_punch', defaultEnabled: false },
   { slug: 'visibility_management', defaultEnabled: true },
   { slug: 'department_creation', defaultEnabled: true },
   { slug: 'violation_rules', defaultEnabled: true },
-  { slug: 'master_control_panel', defaultEnabled: true },
 ];
 
 export type FeatureFlags = Record<string, boolean>;

@@ -5,7 +5,7 @@ export const LANG_STORAGE_KEY = 'appLanguage';
 
 /**
  * Ultima lingua UI usata da un profilo (login, sessione, logout).
- * Serve a /kiosk e /login senza sessione: stessa lingua dell’area autenticata.
+ * Serve alle rotte pubbliche senza sessione: stessa lingua dell’area autenticata.
  */
 export const LAST_PROFILE_LANG_KEY = 'osteria_last_profile_language';
 

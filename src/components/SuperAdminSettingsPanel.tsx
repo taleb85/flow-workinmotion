@@ -30,12 +30,10 @@ const LANGUAGES = [
 const FEATURE_DEFS: { slug: string; label: string; defaultEnabled: boolean; dangerous?: boolean }[] = [
   { slug: 'auto_breaks',          label: 'Pause automatiche',       defaultEnabled: true },
   { slug: 'staff_requests',       label: 'Richieste ferie / turni', defaultEnabled: true },
-  { slug: 'kiosk_active',         label: 'Modalità kiosk',          defaultEnabled: true },
   { slug: 'geofence_punch',       label: 'Geofence timbrature',     defaultEnabled: false },
   { slug: 'visibility_management',label: 'Gestione visibilità',     defaultEnabled: true },
   { slug: 'department_creation',  label: 'Gestione reparti',        defaultEnabled: true },
   { slug: 'violation_rules',      label: 'Regole violazioni',       defaultEnabled: true },
-  { slug: 'master_control_panel', label: 'Pannello di controllo',   defaultEnabled: true },
   { slug: 'unlock_with_pin',      label: 'Sblocco con PIN',         defaultEnabled: true },
   { slug: 'maintenance_mode',     label: 'Modalità manutenzione',   defaultEnabled: false, dangerous: true },
 ];

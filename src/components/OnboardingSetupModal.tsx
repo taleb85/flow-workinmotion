@@ -178,8 +178,8 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
               animate={{ scale: 1, opacity: 1 }}
               className="flex flex-col items-center justify-center gap-4 py-8 text-center"
             >
-              <div className="w-16 h-16 rounded-full bg-brand-deep/10 flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-brand-deep" strokeWidth={2} />
+              <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-white" strokeWidth={2} />
               </div>
               <p className="text-lg font-bold text-white">
                 {lang === 'it' ? 'Profilo configurato!' : lang === 'es' ? '¡Perfil configurado!' : lang === 'fr' ? 'Profil configuré !' : 'Profile set up!'}
@@ -193,7 +193,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
               {/* EMAIL */}
               <div>
                 <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">
-                  <Mail className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-brand-deep" />
+                  <Mail className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-white" />
                   {lang === 'it' ? 'Email personale' : lang === 'es' ? 'Email personal' : lang === 'fr' ? 'Email personnelle' : 'Personal email'}
                 </label>
                 <input
@@ -221,7 +221,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
               {/* TELEFONO */}
               <div>
                 <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">
-                  <Phone className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-brand-deep" />
+                  <Phone className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-white" />
                   {lang === 'it' ? 'Numero di telefono' : lang === 'es' ? 'Número de teléfono' : lang === 'fr' ? 'Numéro de téléphone' : 'Phone number'}
                 </label>
                 <input
@@ -251,7 +251,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
               {/* NUOVO PIN */}
               <div>
                 <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">
-                  <Lock className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-brand-deep" />
+                  <Lock className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-white" />
                   {lang === 'it' ? 'Nuovo PIN (4 cifre)' : lang === 'es' ? 'Nuevo PIN (4 dígitos)' : lang === 'fr' ? 'Nouveau PIN (4 chiffres)' : 'New PIN (4 digits)'}
                 </label>
                 <div className="flex gap-2.5 justify-center">
@@ -260,7 +260,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                       key={i}
                       className={`flex h-12 w-12 items-center justify-center rounded-xl border-2 text-xl font-bold transition-colors select-none ${
  pinDigits.length > i
- ? 'border-brand-deep bg-brand-deep/8 text-brand-deep'
+ ? 'border-white/45 bg-white/10 text-white'
  : pinError
  ? 'border-red-300 bg-red-50/50'
  : 'border-white/20 bg-white/10'

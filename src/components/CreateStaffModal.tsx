@@ -24,8 +24,6 @@ const PHANTOM_USER: UserType = {
   theme: 'light',
   can_create_shifts: false,
   can_approve_shifts: false,
-  can_view_total_hours: false,
-  can_edit_staff_pins: false,
   can_manage_drafts: false,
 };
 

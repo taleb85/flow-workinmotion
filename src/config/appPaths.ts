@@ -1,5 +1,6 @@
 /**
- * Percorsi pubblici: accesso profili staff/manager; rotte legacy (`/kiosk`, `/login`, `/timbratura`) reindirizzate in `App.tsx`.
+ * Percorsi pubblici: accesso profili staff/manager; rotte legacy (`/login`, `/timbratura`)
+ * reindirizzate in `AppShell.tsx` (`AppContent`).
  */
 export const PATH_PROFILO = '/profilo';
 
