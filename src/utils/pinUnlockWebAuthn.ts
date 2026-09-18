@@ -156,14 +156,23 @@ export async function authenticatePinUnlockCredential(userId: string): Promise<b
 
   const challenge = crypto.getRandomValues(new Uint8Array(32));
 
-  const assertion = (await navigator.credentials.get({
-    publicKey: {
-      challenge: toBufferSource(challenge),
-      allowCredentials: [{ id: toBufferSource(credId), type: 'public-key' }],
-      userVerification: 'required',
-      timeout: 60000,
-    },
-  })) as PublicKeyCredential | null;
+  let assertion: PublicKeyCredential | null;
+  try {
+    assertion = (await navigator.credentials.get({
+      publicKey: {
+        challenge: toBufferSource(challenge),
+        allowCredentials: [{ id: toBufferSource(credId), type: 'public-key' }],
+        userVerification: 'required',
+        timeout: 60000,
+      },
+    })) as PublicKeyCredential | null;
+  } catch (e) {
+    // Safari/iOS rifiuta la cerimonia (NotAllowedError) se manca l'attivazione utente
+    // o se l'utente annulla: senza questo catch l'errore risaliva come unhandled rejection
+    // e la UI non mostrava alcun messaggio.
+    console.warn('[pinUnlockWebAuthn] authenticate fallita', e);
+    return false;
+  }
 
   return !!assertion?.rawId?.byteLength;
 }

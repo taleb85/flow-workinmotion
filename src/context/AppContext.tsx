@@ -2814,11 +2814,16 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   const registerPinUnlockDevice = useCallback(
     async (pin: string): Promise<{ ok: boolean; wrongPin: boolean }> => {
       if (!currentUser) return { ok: false, wrongPin: false };
-      let freshUser: User | null = null;
-      try {
-        freshUser = await database.users.getById(currentUser.id);
-      } catch {
-        freshUser = users.find((u) => u.id === currentUser.id) ?? null;
+      /** Safari scade l'attivazione utente se tra il tap e `credentials.create()` c'è
+       *  un giro di rete: si verifica il PIN sui dati già in memoria e si ricorre al
+       *  fetch dal DB solo se l'utente non è nella lista. */
+      let freshUser: User | null = users.find((u) => u.id === currentUser.id) ?? null;
+      if (!freshUser) {
+        try {
+          freshUser = await database.users.getById(currentUser.id);
+        } catch {
+          freshUser = null;
+        }
       }
       if (!freshUser || !pinMatchesStored(freshUser, pin)) {
         return { ok: false, wrongPin: true };
