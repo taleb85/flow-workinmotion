@@ -54,14 +54,6 @@ export interface AppContextType {
   /** Dopo PIN OK: schermata «aggiornamento» e reload pagina (stato resetta al reload). */
   postUnlockReloadPending: boolean;
   unlockAfterRefresh: (pin: string) => Promise<boolean>;
-  /** Sblocco con Face ID / Touch ID / impronta (se il dispositivo è stato collegato). */
-  unlockAfterRefreshWithDevice: () => Promise<boolean>;
-  /** Registra questo browser/dispositivo dopo verifica PIN a 4 cifre. */
-  registerPinUnlockDevice: (pin: string) => Promise<{ ok: boolean; wrongPin: boolean }>;
-  /** True se per l’utente corrente esiste già una credenziale WebAuthn su questo host. */
-  pinUnlockDeviceRegistered: boolean;
-  /** Rimuove la credenziale di questo dispositivo per l'utente corrente. */
-  removePinUnlockDevice: () => boolean;
   cancelRefreshLock: () => void;
   /** Ordine in attesa di conferma PIN (mostra overlay e alla conferma salva su DB e aggiorna app). */
   pendingOrderIds: string[] | null;

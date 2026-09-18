@@ -37,16 +37,6 @@ vi.mock('../context/TenantContext', () => ({
   useTenant: () => ({ tenant: null, loadTenantBySlug: vi.fn() }),
 }));
 
-/** Evita chiamate WebAuthn in jsdom */
-vi.mock('../utils/pinUnlockWebAuthn', () => ({
-  supportsPinUnlockWebAuthn: () => false,
-  registerPinUnlockCredential: vi.fn(),
-  hasAnyPinUnlockCredentialOnDevice: () => Promise.resolve(false),
-  authenticatePinUnlockAndResolveUserId: vi.fn(),
-  hasPinUnlockCredential: () => Promise.resolve(false),
-  hasPlatformBiometricAuthenticator: () => Promise.resolve(false),
-}));
-
 expect.extend(toHaveNoViolations);
 
 describe('a11y', () => {

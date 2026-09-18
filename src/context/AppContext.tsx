@@ -154,11 +154,6 @@ import {
   type AppGlobalSettingsBundle,
 } from '../utils/globalSettingsCloud';
 import { withTimeout, TimeoutError } from '../utils/promiseTimeout';
-import { authenticatePinUnlockCredential,
-  hasPinUnlockCredential,
-  registerPinUnlockCredential,
-  removePinUnlockCredential,
-} from '../utils/pinUnlockWebAuthn';
 import { pinMatchesStored, findActiveUserWithSamePin } from '../utils/loginIdentifier';
 import { isAppCloudSyncEnabled } from '../utils/appCloudSync';
 import { loadDepartmentsFromSupabase, saveDepartmentsToSupabase } from '../utils/departmentsCloud';
@@ -349,8 +344,6 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   }, [postRefreshLocked]);
   const [pendingOrderIds, setPendingOrderIds] = useState<string[] | null>(null);
   const [pendingPublishWeekStart, setPendingPublishWeekStart] = useState<string | null>(null);
-  /** Forza ricalcolo credenziale WebAuthn PIN lock (localStorage) dopo registrazione. */
-  const [pinUnlockDeviceTick, setPinUnlockDeviceTick] = useState(0);
   const [managementDataTouchedSinceLastSync, setManagementDataTouchedSinceLastSync] = useState(false);
   const markManagementDataTouched = useCallback(() => {
     setManagementDataTouchedSinceLastSync(true);
@@ -2797,64 +2790,6 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     [currentUser, users, runPostUnlockRefreshActions]
   );
 
-  const unlockAfterRefreshWithDevice = useCallback(async (): Promise<boolean> => {
-    if (!currentUser) return false;
-    try {
-      const ok = await authenticatePinUnlockCredential(currentUser.id);
-      if (!ok) return false;
-      const done = await runPostUnlockRefreshActions();
-      if (done) setPostUnlockReloadPending(true);
-      return done;
-    } catch {
-      return false;
-    }
-  }, [currentUser, runPostUnlockRefreshActions]);
-
-  const registerPinUnlockDevice = useCallback(
-    async (pin: string): Promise<{ ok: boolean; wrongPin: boolean }> => {
-      if (!currentUser) return { ok: false, wrongPin: false };
-      /** Safari scade l'attivazione utente se tra il tap e `credentials.create()` c'è
-       *  un giro di rete: si verifica il PIN sui dati già in memoria e si ricorre al
-       *  fetch dal DB solo se l'utente non è nella lista. */
-      let freshUser: User | null = users.find((u) => u.id === currentUser.id) ?? null;
-      if (!freshUser) {
-        try {
-          freshUser = await database.users.getById(currentUser.id);
-        } catch {
-          freshUser = null;
-        }
-      }
-      if (!freshUser || !pinMatchesStored(freshUser, pin)) {
-        return { ok: false, wrongPin: true };
-      }
-      if (freshUser.status !== 'active') {
-        return { ok: false, wrongPin: false };
-      }
-      try {
-        const displayName = `${freshUser.first_name} ${freshUser.last_name ?? ''}`.trim() || freshUser.email;
-        const reg = await registerPinUnlockCredential(currentUser.id, displayName, freshUser.email);
-        if (reg) setPinUnlockDeviceTick((n) => n + 1);
-        return reg ? { ok: true, wrongPin: false } : { ok: false, wrongPin: false };
-      } catch {
-        return { ok: false, wrongPin: false };
-      }
-    },
-    [currentUser, users]
-  );
-
-  const removePinUnlockDevice = useCallback((): boolean => {
-    if (!currentUser) return false;
-    const removed = removePinUnlockCredential(currentUser.id);
-    if (removed) setPinUnlockDeviceTick((n) => n + 1);
-    return removed;
-  }, [currentUser]);
-
-  const pinUnlockDeviceRegistered = useMemo(
-    () => (currentUser ? hasPinUnlockCredential(currentUser.id) : false),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- pinUnlockDeviceTick busts memo dopo registrazione WebAuthn
-    [currentUser, pinUnlockDeviceTick]
-  );
-
   const requestConfirmAndSaveOrder = useCallback((orderedIds: string[]) => {
     setPendingOrderIds(orderedIds.length > 0 ? orderedIds : null);
     postRefreshLockedRef.current = true;
@@ -2964,10 +2899,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     postRefreshLocked, postUnlockReloadPending,
     showError, showSuccess,
     silentRefreshData, hardReloadFromDatabase,
-    unlockAfterRefresh, unlockAfterRefreshWithDevice,
+    unlockAfterRefresh,
     cancelRefreshLock,
-    registerPinUnlockDevice, pinUnlockDeviceRegistered,
-    removePinUnlockDevice,
     pendingOrderIds, pendingPublishWeekStart,
     requestConfirmAndSaveOrder, requestConfirmAndPublishWeek,
   }), [
@@ -2975,10 +2908,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     postRefreshLocked, postUnlockReloadPending,
     showError, showSuccess,
     silentRefreshData, hardReloadFromDatabase,
-    unlockAfterRefresh, unlockAfterRefreshWithDevice,
+    unlockAfterRefresh,
     cancelRefreshLock,
-    registerPinUnlockDevice, pinUnlockDeviceRegistered,
-    removePinUnlockDevice,
     pendingOrderIds, pendingPublishWeekStart,
     requestConfirmAndSaveOrder, requestConfirmAndPublishWeek,
   ]);
@@ -2989,7 +2920,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     addShift, updateShift, approveShift, deleteShift, deleteShifts, copyShift, bulkCopyPreviousWeek,
     publishWeekShifts, publishDayShifts, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
     updateUser, createUser, deleteUser, reorderUsers, setUsersSortOrder, updateUserPreferences, effectiveLanguage, setLanguage, clearLanguage, showError, showSuccess, forceGlobalRefresh, hardResetTestData, seedDemoProfileForUser, silentRefreshData, hardReloadFromDatabase, isGlobalRefreshing, syncStage, dataSyncInProgress,
-    postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, unlockAfterRefreshWithDevice, registerPinUnlockDevice, pinUnlockDeviceRegistered, removePinUnlockDevice, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
+    postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
     featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,
     presenceVerificationConfig, savePresenceVerificationConfig,
     workRules, setWorkRules, breakRules, setBreakRules,
@@ -3005,7 +2936,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     addShift, updateShift, approveShift, deleteShift, deleteShifts, copyShift, bulkCopyPreviousWeek,
     publishWeekShifts, publishDayShifts, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
     updateUser, createUser, deleteUser, reorderUsers, setUsersSortOrder, updateUserPreferences, effectiveLanguage, setLanguage, clearLanguage, showError, showSuccess, forceGlobalRefresh, hardResetTestData, seedDemoProfileForUser, silentRefreshData, hardReloadFromDatabase, isGlobalRefreshing, syncStage, dataSyncInProgress,
-    postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, unlockAfterRefreshWithDevice, registerPinUnlockDevice, pinUnlockDeviceRegistered, removePinUnlockDevice, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
+    postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
     featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,
     presenceVerificationConfig, savePresenceVerificationConfig,
     workRules, setWorkRules, breakRules, setBreakRules,

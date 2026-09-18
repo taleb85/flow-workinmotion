@@ -1,17 +1,9 @@
 import { motion } from 'framer-motion';
-import { Lock, ShieldCheck, Delete, Fingerprint, Loader2, ScanFace } from 'lucide-react';
-import React, { ReactNode, useEffect, useState, useCallback, useRef } from 'react';
+import { Lock, ShieldCheck, Delete, Loader2 } from 'lucide-react';
+import React, { ReactNode, useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 import { useT } from '../../hooks/useT';
-import {
-  supportsPinUnlockWebAuthn,
-  hasPinUnlockCredential,
-  authenticatePinUnlockCredential,
-  hasPlatformBiometricAuthenticator,
-  hasAnyPinUnlockCredentialOnDevice,
-  authenticatePinUnlockAndResolveUserId,
-} from '../../utils/pinUnlockWebAuthn';
 
 interface PinPadModalProps {
   title: string;
@@ -28,14 +20,6 @@ interface PinPadModalProps {
   leftActionButton?: ReactNode;
   /** Non più usato: lo sfondo scuro è `bg-black/40`, uniforme a tutte le modali. */
   backdropClass?: string;
-  /** ID utente per biometrica interna (usato solo se leftActionButton non è fornito) */
-  userId?: string;
-  /** Nome visualizzato per la registrazione biometrica */
-  userDisplayName?: string;
-  /** Email per la registrazione biometrica */
-  userEmail?: string;
-  /** Chiamato quando l'autenticazione biometrica riesce. Se assente, viene chiamato onConfirm() direttamente. */
-  onBiometricSuccess?: () => void | Promise<void>;
 }
 
 export function PinPadModal({
@@ -50,59 +34,17 @@ export function PinPadModal({
   cancelLabel,
   leftActionButton,
   backdropClass: _backdropClass,
-  userId,
-  userDisplayName: _userDisplayName,
-  userEmail: _userEmail,
-  onBiometricSuccess,
 }: PinPadModalProps) {
   const t = useT();
   const confirmText = confirmLabel ?? t.confirm;
   const cancelText = cancelLabel ?? t.cancel;
   useBodyScrollLock(true);
 
-  // ── Biometrica interna (solo se leftActionButton non è fornito) ─────────────
-  const [hasBiometric, setHasBiometric] = useState(false);
-  useEffect(() => {
-    if (!leftActionButton && supportsPinUnlockWebAuthn()) {
-      hasPlatformBiometricAuthenticator().then(setHasBiometric);
-    }
-  }, [leftActionButton]);
-  const webAuthnOk = !leftActionButton && hasBiometric;
-  // Mostra impronta se l'utente corrente ha una credenziale OPPURE se ce n'è una qualsiasi sul dispositivo
-  const credRegistered = webAuthnOk && (userId ? hasPinUnlockCredential(userId) : hasAnyPinUnlockCredentialOnDevice());
-  const [bioLoading, setBioLoading] = useState(false);
-  const [bioHint, setBioHint] = useState('');
   const pinAreaRef = useRef<HTMLDivElement>(null);
 
   // Autofocus dell'area PIN all'apertura (senza aprire la tastiera nativa mobile)
   useEffect(() => {
     pinAreaRef.current?.focus();
-  }, []);
-
-  const handleBiometric = useCallback(async () => {
-    if (bioLoading || isLoading) return;
-    setBioLoading(true);
-    try {
-      let ok = false;
-      if (userId) {
-        ok = await authenticatePinUnlockCredential(userId);
-      } else {
-        const resolvedId = await authenticatePinUnlockAndResolveUserId();
-        ok = !!resolvedId;
-      }
-      if (ok) {
-        if (onBiometricSuccess) await onBiometricSuccess();
-        else onConfirm();
-      }
-    } finally {
-      setBioLoading(false);
-    }
-  }, [userId, bioLoading, isLoading, onBiometricSuccess, onConfirm]);
-
-  // Auto-trigger biometrica al mount se credenziale già registrata
-  useEffect(() => {
-    if (credRegistered && !bioLoading) void handleBiometric();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto-conferma quando il PIN raggiunge 4 cifre (con animazione lucchetto rosso→verde)
@@ -121,7 +63,6 @@ export function PinPadModal({
 
   const handleKey = (n: number | 'del') => {
     if (isLoading) return;
-    setBioHint('');
     if (n === 'del') {
       onPinChange(pin.slice(0, -1));
     } else if (pin.length < 4) {
@@ -207,19 +148,8 @@ export function PinPadModal({
           ))}
           {leftActionButton ? (
             <div className="h-16 sm:h-14 md:h-12 rounded-2xl flex items-center justify-center" style={btnBase}>{leftActionButton}</div>
-          ) : webAuthnOk && credRegistered ? (
-            <button type="button" onClick={handleBiometric} disabled={bioLoading || isLoading}
-              className="h-16 sm:h-14 md:h-12 rounded-2xl flex items-center justify-center gap-1.5 text-emerald-400 transition-colors disabled:opacity-50 hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-              style={btnBase} title="Usa Face ID / impronta">
-              {bioLoading ? <Loader2 className="w-7 h-7 sm:w-6 sm:h-6 animate-spin" /> : (<><ScanFace className="w-6 h-6 sm:w-5 sm:h-5" /><Fingerprint className="w-6 h-6 sm:w-5 sm:h-5" /></>)}
-            </button>
           ) : (
-            <button type="button" onClick={() => setBioHint('Attiva Face ID / impronta dalla scheda Sicurezza nel tuo Profilo.')} disabled={isLoading}
-              className="h-16 sm:h-14 md:h-12 rounded-2xl flex items-center justify-center gap-1.5 text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-              style={btnBase} title="Attiva Face ID / impronta">
-              <ScanFace className="w-6 h-6 sm:w-5 sm:h-5" />
-              <Fingerprint className="w-6 h-6 sm:w-5 sm:h-5" />
-            </button>
+            <div className="h-16 sm:h-14 md:h-12 rounded-2xl" style={btnBase} aria-hidden />
           )}
           <button type="button" onClick={() => handleKey(0)}
             className="h-16 sm:h-14 md:h-12 rounded-2xl font-bold text-3xl sm:text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"
@@ -230,9 +160,6 @@ export function PinPadModal({
             <Delete className="w-7 h-7 sm:w-6 sm:h-6" />
           </button>
         </div>
-        {bioHint && (
-          <p className="text-center text-xs text-white/70 mt-2 px-1">{bioHint}</p>
-        )}
       </div>
 
       {/* Action buttons */}

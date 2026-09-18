@@ -2518,14 +2518,6 @@ className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-m
                 isLoading={false}
                 confirmLabel="Sblocca"
                 cancelLabel="Annulla"
-                userId={currentUser?.id}
-                userDisplayName={[currentUser?.first_name, currentUser?.last_name].filter(Boolean).join(' ')}
-                userEmail={currentUser?.email ?? ''}
-                onBiometricSuccess={() => {
-                  setDataToolsLocked(false);
-                  setShowDataToolsPinPad(false);
-                  setDataToolsPin('');
-                }}
               />
             )}
           </SettingsAccordionSection>

@@ -40,7 +40,7 @@ import {
   getAppRootScrollY,
 } from '../utils/mainAppViewRestore';
 import { useIsMobileViewport } from '../hooks/useIsMobileViewport';
-import { isAdminOnly, isManagementRole, findFreezeVerifierById } from '../utils/permissions';
+import { isAdminOnly, isManagementRole } from '../utils/permissions';
 import AdminGate from '../components/AdminGate';
 import { MaintenancePage } from '../components/MaintenancePage';
 
@@ -129,7 +129,6 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
   const {
     currentUser,
     effectiveLanguage,
-    users,
     globalPinSessionId,
     setGlobalPinSessionId,
     isSessionElevated,
@@ -841,15 +840,6 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   onConfirm={() => handleGlobalPinSubmit(globalPinValue)}
                   onCancel={closePinMenu}
                   confirmLabel={t.ts_drawer_unlock_btn}
-                  userId={currentUser.id}
-                  userDisplayName={[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ')}
-                  userEmail={currentUser.email ?? ''}
-                  onBiometricSuccess={() => {
-                    const verifier = findFreezeVerifierById(users, currentUser.id);
-                    if (!verifier) { setGlobalPinError(t.global_pin_unlock_insufficient_role); return; }
-                    setGlobalPinSessionId(Date.now().toString());
-                    closePinMenu();
-                  }}
                 />
               )}
             </AnimatePresence>,

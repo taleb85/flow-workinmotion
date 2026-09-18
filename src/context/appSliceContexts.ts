@@ -166,11 +166,7 @@ export interface OverlaySlice {
   }) => Promise<void>;
   hardReloadFromDatabase: () => Promise<void>;
   unlockAfterRefresh: (pin: string) => Promise<boolean>;
-  unlockAfterRefreshWithDevice: () => Promise<boolean>;
   cancelRefreshLock: () => void;
-  registerPinUnlockDevice: (pin: string) => Promise<{ ok: boolean; wrongPin: boolean }>;
-  pinUnlockDeviceRegistered: boolean;
-  removePinUnlockDevice: () => boolean;
   pendingOrderIds: string[] | null;
   pendingPublishWeekStart: string | null;
   requestConfirmAndSaveOrder: (orderedIds: string[]) => void;

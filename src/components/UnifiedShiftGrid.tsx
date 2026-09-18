@@ -25,7 +25,7 @@ import { TimeInputField } from './ui/TimeInputField';
 import { ShiftSlotPresetsSection } from './shifts/ShiftSlotPresetsSection';
 import { database } from '../lib/database';
 import { useAppUser, useAppData, useAppConfig, useAppOverlay, authorizeFrozenDelete } from '../context/AppContext';
-import { isManagementRole, canEditTeamShifts, canPublishScheduleDrafts, canApproveShiftActions, findFreezeVerifierByPin, findFreezeVerifierById, isUserVisibleOnTeamSchedule, isAdminOnly } from '../utils/permissions';
+import { isManagementRole, canEditTeamShifts, canPublishScheduleDrafts, canApproveShiftActions, findFreezeVerifierByPin, isUserVisibleOnTeamSchedule, isAdminOnly } from '../utils/permissions';
 import { getShiftViolations, DEFAULT_WORK_RULES } from '../utils/workRules';
 import { isShiftPayrollFrozen } from '../utils/timesheetFreezeCriteria';
 import { logShiftAudit, formatAuditDate } from '../utils/shiftAuditLog';
@@ -3140,14 +3140,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           isLoading={saving}
           confirmLabel={t.confirm ?? 'Conferma'}
           cancelLabel={t.cancel ?? 'Annulla'}
-          userId={currentUser?.id}
-          userDisplayName={[currentUser?.first_name, currentUser?.last_name].filter(Boolean).join(' ')}
-          userEmail={currentUser?.email ?? ''}
-          onBiometricSuccess={() => {
-            const verifier = findFreezeVerifierById(users, currentUser?.id ?? '');
-            if (!verifier) { setPanelPinError(t.wst_freeze_pin_invalid ?? 'PIN non valido'); return; }
-            void handlePinConfirm();
-          }}
         />
       )}
     </div>
