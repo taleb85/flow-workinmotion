@@ -570,7 +570,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
 
                 {/* Error */}
                 {error && (
-                  <p className="text-red-300 text-[0.6875rem] text-center rounded-lg px-3 py-1.5" style={{ background: 'rgba(255,80,80,0.16)' }}>{error}</p>
+                  <p className="error-text text-red-300 text-[0.6875rem] text-center rounded-lg px-3 py-1.5" style={{ background: 'rgba(255,80,80,0.16)' }}>{error}</p>
                 )}
 
                 <button
@@ -720,7 +720,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-red-300 text-xs font-medium text-center rounded-xl px-3 py-2 leading-snug"
+                className="error-text text-red-300 text-xs font-medium text-center rounded-xl px-3 py-2 leading-snug"
                 style={{ background: 'rgba(255,80,80,0.16)', border: '1px solid rgba(255,100,100,0.22)' }}
               >
                 {error}

@@ -1880,6 +1880,13 @@ thead th {
   color: #ffffff !important;
 }
 
+/* ── Eccezione: i messaggi di errore restano rossi ──
+ * La regola qui sopra forza il bianco su tutti i <p>: senza questa eccezione
+ * l'errore di login (rosso su sfondo rossastro) diventava illeggibile. */
+[data-theme="dark"] p.error-text {
+  color: #fca5a5 !important;
+}
+
 /* ── main, table, tbody, tfoot, td: sempre trasparenti ── */
 [data-theme="dark"] main,
 [data-theme="dark"] table,
