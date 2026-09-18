@@ -3038,7 +3038,18 @@ function AppProviderInner({ children }: { children: ReactNode }) {
                     aria-busy
                     aria-label="Caricamento"
                   >
-                    <FlowWaveIcon size={120} radius={34} />
+                    {/* Stessa geometria della schermata "Tap to start" (LoginPage): logo 112px
+                        con lo stesso alone, e lo spazio della scritta reso invisibile invece che
+                        rimosso, così quando la splash si dissolve il logo non si sposta. */}
+                    <div className="animate-pulse-glow" style={{ borderRadius: 28 }}>
+                      <FlowWaveIcon size={112} radius={28} />
+                    </div>
+                    <p
+                      aria-hidden
+                      className="invisible mt-8 text-[0.6875rem] font-semibold tracking-[0.25em] uppercase"
+                    >
+                      Tap to start
+                    </p>
                   </motion.div>
                 ) : null}
               </AnimatePresence>
