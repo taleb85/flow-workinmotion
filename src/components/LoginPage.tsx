@@ -20,7 +20,6 @@ import {
 } from '../utils/loginIdentifier';
 import { useTenant } from '../context/TenantContext';
 import FlowWaveIcon from './ui/FlowWaveIcon';
-import FlowLogoSvg from './FlowLogoSvg';
 
 interface LoginPageProps {
   onLogin: () => void;
@@ -445,24 +444,16 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
         </div>
       ) : null}
 
-      {/* F watermark di sfondo */}
-      <div
-        aria-hidden
-        className="pointer-events-none select-none absolute inset-0 flex items-center justify-center"
-      >
-        <FlowLogoSvg
-          variant="icon-only"
-          color="orange"
-          className="w-full max-w-[53.75rem] min-w-[20rem] h-auto overflow-x-hidden"
-          style={{ opacity: 0.055, filter: 'saturate(0) brightness(0) blur(6px)' }}
-        />
-      </div>
-
       <div className="w-full max-w-lg flex flex-col items-center">
         <>
         {/* Schermata iniziale — identica al boot screen AppProvider */}
+        <AnimatePresence>
         {!showForm && (
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeIn' } }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
           className="fixed inset-0 flex flex-col items-center justify-center select-none cursor-pointer"
           onClick={() => { if (!showForm) setShowForm(true); }}
           onPointerDown={() => { if (!showForm) setShowForm(true); }}
@@ -489,8 +480,9 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
           >
             Tap to start
           </p>
-        </div>
+        </motion.div>
         )}
+        </AnimatePresence>
 
         {/* Popup login — overlay centrato */}
         {/* Form stato — schermata intera, stile preview */}
