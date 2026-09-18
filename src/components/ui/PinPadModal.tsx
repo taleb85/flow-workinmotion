@@ -174,7 +174,7 @@ export function PinPadModal({
       </div>
 
       {/* PIN display */}
-      <div className="flex flex-col items-center gap-2 px-8 mt-2">
+      <div className="flex flex-col items-center gap-2 px-5 sm:px-8 mt-2">
         <div className="flex items-center gap-1.5 text-white/75 mb-1">
           <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
           <span className="text-sm font-bold uppercase tracking-widest">{pinLabel}</span>
@@ -198,36 +198,36 @@ export function PinPadModal({
       </div>
 
       {/* Numpad */}
-      <div className="flex-1 flex flex-col justify-center px-8 mt-2 md:flex-none">
-        <div className="grid grid-cols-3 gap-2">
+      <div className="flex-1 flex flex-col justify-center px-5 sm:px-8 mt-2 md:flex-none">
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-2">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
             <button key={n} type="button" onClick={() => handleKey(n)}
-              className="h-14 md:h-12 rounded-2xl font-bold text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"
+              className="h-16 sm:h-14 md:h-12 rounded-2xl font-bold text-3xl sm:text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"
               style={btnBase}>{n}</button>
           ))}
           {leftActionButton ? (
-            <div className="h-14 md:h-12 rounded-2xl flex items-center justify-center" style={btnBase}>{leftActionButton}</div>
+            <div className="h-16 sm:h-14 md:h-12 rounded-2xl flex items-center justify-center" style={btnBase}>{leftActionButton}</div>
           ) : webAuthnOk && credRegistered ? (
             <button type="button" onClick={handleBiometric} disabled={bioLoading || isLoading}
-              className="h-14 md:h-12 rounded-2xl flex items-center justify-center gap-1.5 text-emerald-400 transition-colors disabled:opacity-50 hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              className="h-16 sm:h-14 md:h-12 rounded-2xl flex items-center justify-center gap-1.5 text-emerald-400 transition-colors disabled:opacity-50 hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               style={btnBase} title="Usa Face ID / impronta">
-              {bioLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (<><ScanFace className="w-5 h-5" /><Fingerprint className="w-5 h-5" /></>)}
+              {bioLoading ? <Loader2 className="w-7 h-7 sm:w-6 sm:h-6 animate-spin" /> : (<><ScanFace className="w-6 h-6 sm:w-5 sm:h-5" /><Fingerprint className="w-6 h-6 sm:w-5 sm:h-5" /></>)}
             </button>
           ) : (
             <button type="button" onClick={() => setBioHint('Attiva Face ID / impronta dalla scheda Sicurezza nel tuo Profilo.')} disabled={isLoading}
-              className="h-14 md:h-12 rounded-2xl flex items-center justify-center gap-1.5 text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              className="h-16 sm:h-14 md:h-12 rounded-2xl flex items-center justify-center gap-1.5 text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
               style={btnBase} title="Attiva Face ID / impronta">
-              <ScanFace className="w-5 h-5" />
-              <Fingerprint className="w-5 h-5" />
+              <ScanFace className="w-6 h-6 sm:w-5 sm:h-5" />
+              <Fingerprint className="w-6 h-6 sm:w-5 sm:h-5" />
             </button>
           )}
           <button type="button" onClick={() => handleKey(0)}
-            className="h-14 md:h-12 rounded-2xl font-bold text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"
+            className="h-16 sm:h-14 md:h-12 rounded-2xl font-bold text-3xl sm:text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"
             style={btnBase}>0</button>
           <button type="button" onClick={() => handleKey('del')}
-            className="h-14 md:h-12 rounded-2xl flex items-center justify-center text-white/70 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20"
+            className="h-16 sm:h-14 md:h-12 rounded-2xl flex items-center justify-center text-white/70 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20"
             style={btnBase}>
-            <Delete className="w-6 h-6" />
+            <Delete className="w-7 h-7 sm:w-6 sm:h-6" />
           </button>
         </div>
         {bioHint && (
@@ -236,7 +236,7 @@ export function PinPadModal({
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-3 px-8 pb-6 md:pb-4 mt-2">
+      <div className="flex gap-3 px-5 sm:px-8 pb-6 md:pb-4 mt-2">
         <button type="button" onClick={onCancel}
           className="flex-1 h-12 rounded-2xl font-bold text-sm text-white/80 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           style={btnBase}>{cancelText}</button>
@@ -267,7 +267,7 @@ export function PinPadModal({
         transition={{ type: 'spring', stiffness: 360, damping: 30, mass: 0.9 }}
         ref={pinAreaRef}
         tabIndex={-1}
-        className="pinpad-card flex flex-col w-full max-w-[21.25rem] mx-4 rounded-2xl overflow-hidden outline-none"
+        className="pinpad-card flex flex-col w-full max-w-[23rem] md:max-w-[21.25rem] mx-4 rounded-2xl overflow-hidden outline-none"
         style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.40)', boxShadow: '0 32px 80px rgba(0,0,0,0.75)' }}
         onClick={e => e.stopPropagation()}
       >
