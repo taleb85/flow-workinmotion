@@ -70,7 +70,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const isInviteLink = Boolean(inviteUserId || inviteNameFromUrl || invitePinFromUrl);
   const pinInputRef = useRef<HTMLInputElement>(null);
   const staffNameInputRef = useRef<HTMLInputElement>(null);
-  const loginBtnRef = useRef<HTMLButtonElement>(null);
   /** Impedisce auto-login multipli simultanei */
   const autoLoginInFlightRef = useRef(false);
   /** /profilo: lingua da browser/OS (navigator.languages), non ultimo profilo in localStorage */
@@ -203,17 +202,9 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
 
   useEffect(() => {
     if (!showForm || !isInviteLink) return;
-    const hasNameHint =
-      Boolean(inviteNameFromUrl) ||
-      Boolean(
-        inviteUserId &&
-          linkedUser &&
-          `${linkedUser.first_name} ${linkedUser.last_name ?? ''}`.trim()
-      );
     const id = requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        if (invitePinFromUrl && hasNameHint) loginBtnRef.current?.focus();
-        else if (invitePinFromUrl) pinInputRef.current?.focus();
+        if (invitePinFromUrl) pinInputRef.current?.focus();
         else staffNameInputRef.current?.focus();
       });
     });
@@ -406,9 +397,12 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
     return () => cancelAnimationFrame(id);
   }, [resolvedUser, showForm, isLoading, password.length]);
 
-  /** Auto‑login quando il PIN raggiunge 4 cifre (corretto o errato, per dare feedback immediato) */
+  /** Auto‑login quando il PIN raggiunge 4 cifre (corretto o errato, per dare feedback immediato).
+   *  Unico modo di inviare il form: non dipende dal nome riconosciuto, così anche nome errato
+   *  o omonimo ricevono il proprio messaggio d'errore. `staffName` è in dipendenza perché il PIN
+   *  può essere digitato prima del nome (senza, il form resterebbe senza invio). */
   useEffect(() => {
-    if (!showForm || !resolvedUser) return;
+    if (!showForm) return;
     if (password.length !== 4) return;
     if (isLoading) return;
     if (autoLoginInFlightRef.current) return;
@@ -420,7 +414,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       clearTimeout(id);
       autoLoginInFlightRef.current = false;
     };
-  }, [password, resolvedUser, showForm, isLoading, handleLogin]);
+  }, [password, staffName, showForm, isLoading, handleLogin]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -733,24 +727,13 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               </motion.p>
             )}
 
-            {/* Accedi */}
-            <button
-              ref={loginBtnRef}
-              type="button"
-              onClick={handleLogin}
-              disabled={!staffName.trim() || !password.trim() || isLoading}
-              className="w-full py-3.5 rounded-2xl text-white font-semibold text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
-              style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.20)' }}
-            >
-              {isLoading ? (
+            {/* Accesso automatico al 4° dígito del PIN: nessun pulsante di invio, solo l'attesa */}
+            {isLoading && (
+              <div role="status" className="flex items-center justify-center gap-2 text-white/70 text-xs font-medium py-3.5">
                 <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  <span aria-hidden className="text-base leading-none">→</span>
-                  <span>{t.login_btn ?? 'Accedi'}</span>
-                </>
-              )}
-            </button>
+                <span>{t.login_btn ?? 'Accedi'}…</span>
+              </div>
+            )}
               </>
             )}
           </motion.div>
