@@ -3026,12 +3026,13 @@ function AppProviderInner({ children }: { children: ReactNode }) {
             <OverlaySliceContext.Provider value={overlaySlice}>
               {/* Splash durante boot: senza questo `#root` resta vuoto → “pagina bianca”.
                   Sfondo trasparente: traspare il mesh di `#root`, identico a quello dell'app.
-                  Alla fine del boot si dissolve (fade-out) rivelando l'app. */}
+                  Alla fine del boot si dissolve (fade-out) rivelando l'app.
+                  `pointer-events-none`: non deve rubare i tap mentre svanisce (è invisibile). */}
               <AnimatePresence>
                 {isLoading ? (
                   <motion.div
                     key="boot-splash"
-                    className="fixed inset-0 z-[200] flex items-center justify-center font-sans"
+                    className="pointer-events-none fixed inset-0 z-[200] flex items-center justify-center font-sans"
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0, transition: { duration: 0.55, ease: 'easeInOut' } }}
                     aria-busy
