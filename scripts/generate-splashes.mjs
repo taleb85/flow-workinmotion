@@ -1,10 +1,9 @@
 /**
- * Rigenera le splash screen iOS (`apple-touch-startup-image`) fotografando la schermata
- * "Tap to start" della pagina di login.
+ * Rigenera le splash screen iOS (`apple-touch-startup-image`) fotografando la pagina di login.
  *
- * La scritta resta nel layout ma viene resa invisibile: la splash ha così la stessa
- * geometria della pagina (logo nella stessa posizione e stessa dimensione) senza testo,
- * quindi il passaggio splash → pagina non sposta nulla.
+ * Logo e scritta vengono nascosti lasciando il solo sfondo dell'app: la splash non mostra
+ * il marchio (compare una volta sola, con la schermata "Tap to start") e il passaggio
+ * splash → pagina non ha salti.
  *
  * Requisiti: dev server attivo (`npm run dev` — oppure passa l'URL di produzione).
  * Uso: node scripts/generate-splashes.mjs [url]
@@ -52,10 +51,10 @@ for (const { width, height, scale } of TARGETS) {
     .catch(() => {});
   await page.waitForTimeout(900);
 
-  // Scritta nascosta ma presente (occupa spazio) e animazioni infinite congelate:
-  // la PNG deve essere identica alla pagina e deterministica.
+  // Logo e scritta nascosti (occupano comunque lo spazio): la splash resta il solo sfondo.
+  // Animazioni infinite congelate: la PNG deve essere deterministica.
   await page.addStyleTag({
-    content: `${TAP_BUTTON} + p { visibility: hidden !important; }
+    content: `${TAP_BUTTON}, ${TAP_BUTTON} + p { visibility: hidden !important; }
               *, *::before, *::after { animation-play-state: paused !important; }`,
   });
   await page.waitForTimeout(150);
@@ -68,12 +67,7 @@ for (const { width, height, scale } of TARGETS) {
     .png({ palette: true, colors: 128, dither: 0, effort: 8, compressionLevel: 9 })
     .toBuffer();
   writeFileSync(file, png);
-
-  const rect = await page.locator(TAP_BUTTON).boundingBox();
-  const deltaY = rect ? (rect.y + rect.height / 2 - height / 2).toFixed(1) : 'n/d';
-  console.log(
-    `${path.basename(file)}  logo ${rect?.width}x${rect?.height} CSS px  centro ${deltaY}px dal centro viewport  ${(png.length / 1024).toFixed(0)} KB`
-  );
+  console.log(`${path.basename(file)}  ${(png.length / 1024).toFixed(0)} KB`);
 
   await context.close();
 }

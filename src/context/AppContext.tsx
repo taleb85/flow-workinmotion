@@ -34,7 +34,6 @@ function consumeFrozenDeleteAuth(shiftId: string): boolean {
   return false;
 }
 import Toast from '../components/Toast';
-import FlowWaveIcon from '../components/ui/FlowWaveIcon';
 import { DevMissingEnvBanner } from '../components/DevMissingEnvBanner';
 import { formatTrans, getTranslations } from '../utils/translations';
 import { countUnreadNotifications } from '../utils/notifications';
@@ -3038,18 +3037,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
                     aria-busy
                     aria-label="Caricamento"
                   >
-                    {/* Stessa geometria della schermata "Tap to start" (LoginPage): logo 112px
-                        con lo stesso alone, e lo spazio della scritta reso invisibile invece che
-                        rimosso, così quando la splash si dissolve il logo non si sposta. */}
-                    <div className="animate-pulse-glow" style={{ borderRadius: 28 }}>
-                      <FlowWaveIcon size={112} radius={28} />
-                    </div>
-                    <p
-                      aria-hidden
-                      className="invisible mt-8 text-[0.6875rem] font-semibold tracking-[0.25em] uppercase"
-                    >
-                      Tap to start
-                    </p>
+                    {/* Solo sfondo: il logo compare con la schermata "Tap to start", così
+                        non viene mostrato due volte né si sposta quando la splash svanisce. */}
                   </motion.div>
                 ) : null}
               </AnimatePresence>
