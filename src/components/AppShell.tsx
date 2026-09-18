@@ -30,7 +30,7 @@ import { PinPadModal } from '../components/ui/PinPadModal';
 import { lockBodyScroll, unlockBodyScroll } from '../utils/bodyScrollLock';
 import { persistStoredUiLanguage } from '../utils/uiLanguagePreference';
 import { PATH_PROFILO } from '../config/appPaths';
-import { APP_SESSION_STORAGE_KEY, HAD_SAVED_SESSION_AT_BOOT } from '../constants/appSession';
+import { APP_SESSION_STORAGE_KEY, HAD_SAVED_SESSION_AT_BOOT, isAppSessionWithinGrace, markAppSessionActive } from '../constants/appSession';
 import { getUnifiedNavTabs, getBottomNavTabsForMainApp, type AppNavTab } from '../utils/enabledModules';
 import {
   readMainViewState,
@@ -179,14 +179,31 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
   // ── Blocco alla riapertura dell'app (Face ID / impronta o PIN) ──────────────
   // Attivo solo se all'avvio esisteva già una sessione salvata: subito dopo un login
   // l'utente è già autenticato e non deve riconfermare nulla.
+  // Finestra di grazia: se l'ultimo uso è recente (APP_UNLOCK_GRACE_MS) non si chiede nulla.
   const [appUnlockRequired, setAppUnlockRequired] = useState(false);
   useEffect(() => {
     if (!HAD_SAVED_SESSION_AT_BOOT) return;
     // I reload interni (update service worker, riavvio post-sblocco) non sono riaperture.
     if (new URLSearchParams(window.location.search).has('_r')) return;
+    if (isAppSessionWithinGrace()) return;
     setAppUnlockRequired(true);
   }, []);
   const appLockVisible = appUnlockRequired && Boolean(currentUser);
+
+  // Ultimo uso reale: memorizzato quando l'app va in background o viene chiusa, così la
+  // finestra di grazia decorre dall'ultimo utilizzo e non dall'ultimo sblocco.
+  useEffect(() => {
+    const mark = () => markAppSessionActive();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') mark();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('pagehide', mark);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('pagehide', mark);
+    };
+  }, []);
 
   const t = useT();
   const isManagement = useMemo(
@@ -952,7 +969,10 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         <RefreshLockOverlay
           key="app-open-lock"
           mode="app-open"
-          onUnlocked={() => setAppUnlockRequired(false)}
+          onUnlocked={() => {
+            markAppSessionActive();
+            setAppUnlockRequired(false);
+          }}
         />
       )}
 

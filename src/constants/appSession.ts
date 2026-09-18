@@ -24,3 +24,34 @@ export const HAD_SAVED_SESSION_AT_BOOT = (() => {
     return false;
   }
 })();
+
+/** Ultimo utilizzo reale dell'app: base di calcolo della finestra di grazia. */
+export const APP_LAST_ACTIVITY_STORAGE_KEY = 'app_last_activity_at';
+
+/**
+ * Finestra di grazia dello sblocco alla riapertura: entro questo intervallo l'app non
+ * richiede Face ID/PIN. Da tarare qui se serve una soglia diversa.
+ */
+export const APP_UNLOCK_GRACE_MS = 5 * 60 * 1000;
+
+/** Memorizza l'ultimo utilizzo (app in background o chiusa): usato alla riapertura. */
+export function markAppSessionActive(): void {
+  try {
+    localStorage.setItem(APP_LAST_ACTIVITY_STORAGE_KEY, String(Date.now()));
+  } catch {
+    /* storage non disponibile: lo sblocco resterà richiesto a ogni riapertura */
+  }
+}
+
+/** True se l'ultimo utilizzo è più recente della finestra di grazia. */
+export function isAppSessionWithinGrace(): boolean {
+  try {
+    const raw = localStorage.getItem(APP_LAST_ACTIVITY_STORAGE_KEY);
+    if (!raw) return false;
+    const ts = Number(raw);
+    if (!Number.isFinite(ts)) return false;
+    return Date.now() - ts < APP_UNLOCK_GRACE_MS;
+  } catch {
+    return false;
+  }
+}
