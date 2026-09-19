@@ -2972,8 +2972,8 @@ function BreakRuleForm({
             <GradientIconButton
               type="submit"
               label={isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
-              gradientFrom="#e5e7eb"
-              gradientTo="#64748b"
+              gradientFrom="#94a3b8"
+              gradientTo="#475569"
               className="rounded-lg bg-white/20 p-2 text-white hover:bg-white/30 active:brightness-95"
             >
               <Check className="h-4 w-4 shrink-0" />
