@@ -15,7 +15,7 @@ export default function UnifiedShiftsPage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="w-full min-h-0 flex flex-col pb-2 pt-3 font-sans md:h-full"
+      className="w-full min-h-0 flex flex-col font-sans md:h-full"
     >
       {/* Titolo pagina per screen reader (il design non mostra un h1 visibile) */}
       <h1 className="sr-only">
