@@ -149,6 +149,7 @@ export default function MobileProfileHeader({
           <GradientIconButton
             label={t.header_logout}
             onClick={() => { triggerHapticFeedback('click'); onLogout?.(); }}
+            hidePillOnMobile
             gradientFrom="#f87171"
             gradientTo="#dc2626"
             style={{ background: 'rgba(255, 255, 255, 0.16)', border: '1px solid rgba(255,255,255,0.20)', display: 'flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s', flexShrink: 0 }}

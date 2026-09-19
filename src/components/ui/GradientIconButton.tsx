@@ -12,6 +12,8 @@ export interface GradientIconButtonProps {
   className?: string;
   /** Stili inline del pulsante (es. sfondi già esistenti). */
   style?: CSSProperties;
+  /** Nasconde la pill sotto md (es. pulsanti header su mobile, dove non serve). */
+  hidePillOnMobile?: boolean;
   /** Colore iniziale del gradiente della pill. */
   gradientFrom: string;
   /** Colore finale del gradiente della pill. */
@@ -35,6 +37,7 @@ export const GradientIconButton = memo(function GradientIconButton({
   disabled,
   className = '',
   style,
+  hidePillOnMobile = false,
   gradientFrom,
   gradientTo,
   children,
@@ -54,7 +57,7 @@ export const GradientIconButton = memo(function GradientIconButton({
       {/* Pill con l'etichetta: appare sotto il pulsante */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-full z-30 flex justify-center pt-2"
+        className={`pointer-events-none absolute inset-x-0 top-full z-30 justify-center pt-2 ${hidePillOnMobile ? 'hidden md:flex' : 'flex'}`}
       >
         <span className="invisible origin-top scale-90 whitespace-nowrap rounded-full border border-white/20 bg-[linear-gradient(45deg,var(--gradient-from),var(--gradient-to))] px-3 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-white opacity-0 shadow-lg transition-all duration-300 group-hover:visible group-hover:scale-100 group-hover:opacity-100">
           {label}
