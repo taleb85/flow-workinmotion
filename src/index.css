@@ -2376,7 +2376,6 @@ select.bg-slate-100, select.bg-slate-200 {
 }
 
 /* ── Badge ── */
-.liquid-glass-green,
 [class*="badge-green"],
 [class*="badge"][class*="success"] {
   background: rgba(34, 211, 238, 0.15) !important;
@@ -2389,14 +2388,12 @@ select.bg-slate-100, select.bg-slate-200 {
   color: #22d3ee !important;
   border: 1px solid rgba(34, 211, 238, 0.25) !important;
 }
-.liquid-glass-amber,
 [class*="badge-amber"],
 [class*="badge"][class*="warning"] {
   background: rgba(249, 156, 0, 0.15) !important;
   color: #f99c00 !important;
   border: 1px solid rgba(249, 156, 0, 0.25) !important;
 }
-.liquid-glass-red,
 [class*="badge"][class*="error"],
 [class*="badge"][class*="danger"] {
   background: rgba(239, 68, 68, 0.15) !important;

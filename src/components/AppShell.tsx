@@ -761,14 +761,14 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
           compact={staffMobileCompactHeader}
           hideToolbarAvatar={false}
           rightExtra={
-            <div className="hidden md:flex items-center gap-1.5">
+            <div className="hidden md:flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={handleHardRefresh}
                 disabled={isRefreshing || dataSyncInProgress}
                 title={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso...' : 'Sincronizza dati'}
                 aria-label={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso' : 'Sincronizza dati'}
-                className={`group flex items-center gap-0 overflow-hidden rounded-xl p-2 text-xs md:text-[0.6875rem] font-bold transition-all duration-200 touch-manipulation liquid-glass hover:gap-1.5 hover:pr-2.5 ${
+                className={`flex items-center rounded-xl p-2 text-xs md:text-[0.6875rem] font-bold transition-all duration-200 touch-manipulation liquid-glass ${
                   isRefreshing || dataSyncInProgress
                     ? 'text-amber-500 liquid-glass-amber'
                     : isSynced
@@ -786,9 +786,6 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                 ) : (
                   <CloudOff className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
                 )}
-                <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[14rem]">
-                  {isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso...' : 'Sincronizza dati'}
-                </span>
               </button>
               {featureFlags['unlock_with_pin'] !== false && currentUser && isManagement && (
                 <button
@@ -796,7 +793,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   onClick={() => setShowPinMenu(true)}
                   title={globalPinSessionId ? 'Sessione PIN attiva' : 'Sblocca sessione PIN'}
                   aria-label={globalPinSessionId ? 'Gestisci sessione PIN' : 'Sblocca sessione PIN'}
-                  className={`group flex items-center gap-0 overflow-hidden rounded-xl p-2 text-xs md:text-[0.6875rem] font-bold transition-all duration-200 touch-manipulation liquid-glass hover:gap-1.5 hover:pr-2.5 ${
+                  className={`flex items-center rounded-xl p-2 text-xs md:text-[0.6875rem] font-bold transition-all duration-200 touch-manipulation liquid-glass ${
                     globalPinSessionId
                       ? 'text-emerald-500 liquid-glass-green'
                       : 'text-red-500 liquid-glass-red'
@@ -805,9 +802,6 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   {globalPinSessionId
                     ? <Unlock className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
                     : <Lock className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />}
-                  <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[10rem]">
-                    {globalPinSessionId ? 'Sessione PIN attiva' : 'Sblocca sessione PIN'}
-                  </span>
                 </button>
               )}
             </div>

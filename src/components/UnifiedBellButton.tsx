@@ -108,7 +108,7 @@ export function UnifiedBellButton({
             ? `Errore caricamento notifiche`
             : `Campanella notifiche${totalUnread > 0 ? ` con ${totalUnread} nuovi messaggi` : ''}`
         }
-        className={`group relative flex items-center gap-0 rounded-xl p-2 transition-all duration-200 touch-manipulation liquid-glass text-accent hover:gap-1.5 hover:pr-2.5 ${
+        className={`relative flex items-center rounded-xl p-2 transition-all duration-200 touch-manipulation liquid-glass text-accent ${
           isDisabled
             ? 'opacity-50 cursor-not-allowed'
             : ' '
@@ -126,10 +126,6 @@ export function UnifiedBellButton({
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
-
-        <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[5.5rem]">
-          {(getTranslations(effectiveLanguage) as Record<string, string>).notifications ?? 'Notifiche'}
-        </span>
 
         {/* Badge numero notifiche non lette - Rosso acceso con numero bianco */}
         {totalUnread > 0 && (
