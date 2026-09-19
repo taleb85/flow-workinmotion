@@ -1864,7 +1864,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       <div ref={contentAboveRef}>
        {/* Toolbar sticky; su mobile glass stile bottom nav quando sovrapposta al contenuto */}
        <div ref={toolbarBandRef}
-        className={`ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mb-4 w-full min-w-0 sticky top-[var(--app-sticky-header-offset,5rem)] z-50 py-2 md:overflow-x-auto ${toolbarOverlapping ? 'toolbar-band-over-content' : ''}`}
+        className={`ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mt-3 mb-4 w-full min-w-0 sticky top-[calc(var(--app-sticky-header-offset,5rem)_+_0.75rem)] z-50 py-2 md:overflow-x-auto ${toolbarOverlapping ? 'toolbar-band-over-content' : ''}`}
         data-toolbar-mode={mode}>
         {/* MOBILE: ◀ e ▶ occupano lo spazio ai lati; Oggi + data al centro */}
         <div className="flex w-full min-w-0 items-center gap-1.5 md:hidden">
