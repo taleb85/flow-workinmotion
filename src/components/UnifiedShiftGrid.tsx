@@ -2624,10 +2624,14 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     </div>
                   )}
                   {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
-                    <button type="button" onClick={() => handleFreezeShift(selectedShift)}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600/20 text-emerald-300 transition-colors hover:bg-emerald-600/30" title={t.ts_drawer_freeze_btn ?? 'Congela'} aria-label={t.ts_drawer_freeze_btn ?? 'Congela'}>
+                    <GradientIconButton
+                      label={t.ts_drawer_freeze_btn ?? 'Congela'}
+                      onClick={() => handleFreezeShift(selectedShift)}
+                      gradientFrom="#34d399"
+                      gradientTo="#059669"
+                      className="h-8 w-8 rounded-full bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/30">
                       <Unlock className="h-4 w-4 shrink-0" />
-                    </button>
+                    </GradientIconButton>
                   )}
                   {isAdminOnly(currentUser) && shiftAuditEntries && shiftAuditEntries.length > 0 && (
                     <GradientIconButton
