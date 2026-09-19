@@ -27,6 +27,7 @@ import InviteRedirect from '../components/InviteRedirect';
 import { RotateCw, Cloud, CloudOff, Lock, Unlock, ShieldCheck, ShieldOff, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { PinPadModal } from '../components/ui/PinPadModal';
+import { GradientIconButton } from '../components/ui/GradientIconButton';
 import { lockBodyScroll, unlockBodyScroll } from '../utils/bodyScrollLock';
 import { persistStoredUiLanguage } from '../utils/uiLanguagePreference';
 import { PATH_PROFILO } from '../config/appPaths';
@@ -762,13 +763,14 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
           hideToolbarAvatar={false}
           rightExtra={
             <div className="hidden md:flex items-center gap-2.5">
-              <button
-                type="button"
+              <GradientIconButton
+                label={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso…' : 'Sincronizza dati'}
+                ariaLabel={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso' : 'Sincronizza dati'}
                 onClick={handleHardRefresh}
                 disabled={isRefreshing || dataSyncInProgress}
-                title={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso...' : 'Sincronizza dati'}
-                aria-label={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso' : 'Sincronizza dati'}
-                className={`flex items-center rounded-xl p-2 text-xs md:text-[0.6875rem] font-bold transition-all duration-200 touch-manipulation liquid-glass ${
+                gradientFrom={isRefreshing || dataSyncInProgress ? '#fbbf24' : isSynced ? '#34d399' : '#94a3b8'}
+                gradientTo={isRefreshing || dataSyncInProgress ? '#f59e0b' : isSynced ? '#059669' : '#475569'}
+                className={`rounded-xl p-2 text-xs md:text-[0.6875rem] font-bold touch-manipulation liquid-glass ${
                   isRefreshing || dataSyncInProgress
                     ? 'text-amber-500 liquid-glass-amber'
                     : isSynced
@@ -786,14 +788,15 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                 ) : (
                   <CloudOff className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
                 )}
-              </button>
+              </GradientIconButton>
               {featureFlags['unlock_with_pin'] !== false && currentUser && isManagement && (
-                <button
-                  type="button"
+                <GradientIconButton
+                  label={globalPinSessionId ? 'Sessione PIN attiva' : 'Sblocca sessione PIN'}
+                  ariaLabel={globalPinSessionId ? 'Gestisci sessione PIN' : 'Sblocca sessione PIN'}
                   onClick={() => setShowPinMenu(true)}
-                  title={globalPinSessionId ? 'Sessione PIN attiva' : 'Sblocca sessione PIN'}
-                  aria-label={globalPinSessionId ? 'Gestisci sessione PIN' : 'Sblocca sessione PIN'}
-                  className={`flex items-center rounded-xl p-2 text-xs md:text-[0.6875rem] font-bold transition-all duration-200 touch-manipulation liquid-glass ${
+                  gradientFrom={globalPinSessionId ? '#34d399' : '#f87171'}
+                  gradientTo={globalPinSessionId ? '#059669' : '#dc2626'}
+                  className={`rounded-xl p-2 text-xs md:text-[0.6875rem] font-bold touch-manipulation liquid-glass ${
                     globalPinSessionId
                       ? 'text-emerald-500 liquid-glass-green'
                       : 'text-red-500 liquid-glass-red'
@@ -802,7 +805,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   {globalPinSessionId
                     ? <Unlock className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
                     : <Lock className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />}
-                </button>
+                </GradientIconButton>
               )}
             </div>
           }

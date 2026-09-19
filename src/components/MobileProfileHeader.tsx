@@ -6,6 +6,7 @@ import { useT } from '../hooks/useT';
 // import { getRoleScopeHint } from '../utils/roleScopeHint'; // unused
 import { getAppNavTabTitle, type AppNavTab } from '../utils/enabledModules';
 import { UnifiedBellButton } from './UnifiedBellButton';
+import { GradientIconButton } from './ui/GradientIconButton';
 import { useState, useEffect, useRef } from 'react';
 // import { isUiWidgetVisible } from '../utils/uiScreenWidgets'; // unused
 // import { useMessages } from '../hooks/useMessages'; // unused
@@ -145,16 +146,16 @@ export default function MobileProfileHeader({
 
         {/* Logout */}
         {onLogout && !hideHeaderLogout && (
-          <button
-            type="button"
+          <GradientIconButton
+            label={t.header_logout}
             onClick={() => { triggerHapticFeedback('click'); onLogout?.(); }}
-            title={t.header_logout}
-            aria-label={t.header_logout}
+            gradientFrom="#f87171"
+            gradientTo="#dc2626"
             style={{ background: 'rgba(255, 255, 255, 0.16)', border: '1px solid rgba(255,255,255,0.20)', display: 'flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s', flexShrink: 0 }}
-            className="items-center rounded-xl p-2 text-white/70 transition-all duration-200 touch-manipulation hover:bg-white/15 hover:text-white"
+            className="rounded-xl p-2 text-white/70 touch-manipulation hover:bg-white/15 hover:text-white"
           >
             <LogOut className="h-4 w-4 md:h-3.5 md:w-3.5 shrink-0" strokeWidth={2} color="#ef4444" aria-hidden />
-          </button>
+          </GradientIconButton>
         )}
       </div>
     </div>

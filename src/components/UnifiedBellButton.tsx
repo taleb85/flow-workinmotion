@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useMessages } from '../hooks/useMessages';
 import { useMultisensorialFeedback } from '../hooks/useMultisensorialFeedback';
 import { useAppUser, useAppData } from '../context/AppContext';
 import { NotificationModal } from './NotificationModal';
 import { countUnreadNotifications } from '../utils/notifications';
 import { getTranslations } from '../utils/translations';
+import { GradientIconButton } from './ui/GradientIconButton';
 
 interface UnifiedBellButtonProps {
   userId?: string;
@@ -27,7 +28,6 @@ export function UnifiedBellButton({
   const { messages, unreadCount: msgUnread, markAsRead, markAllAsRead, loadMessages, error, sendMessage, deleteMessage } = useMessages(userId, isAdmin);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Conteggio unificato: messaggi non letti + notifiche turni/ferie non lette
   const shiftNotifUnread = useMemo(() => {
@@ -82,9 +82,13 @@ export function UnifiedBellButton({
   return (
     <div className="relative shrink-0">
       {/* Pulsante Campanella */}
-      <button
-        ref={buttonRef}
-        type="button"
+      <GradientIconButton
+        label={totalUnread > 0 ? `Notifiche (${totalUnread})` : 'Notifiche'}
+        ariaLabel={
+          error
+            ? `Errore caricamento notifiche`
+            : `Campanella notifiche${totalUnread > 0 ? ` con ${totalUnread} nuovi messaggi` : ''}`
+        }
         onClick={() => {
           if (!isDisabled) {
             // Richiedi permesso notifiche al primo click (gesto utente obbligatorio)
@@ -98,17 +102,9 @@ export function UnifiedBellButton({
           }
         }}
         disabled={isDisabled}
-        title={
-          error
-            ? `Errore caricamento notifiche: ${error}`
-            : `Notifiche${totalUnread > 0 ? ` (${totalUnread} non lette)` : ''}`
-        }
-        aria-label={
-          error
-            ? `Errore caricamento notifiche`
-            : `Campanella notifiche${totalUnread > 0 ? ` con ${totalUnread} nuovi messaggi` : ''}`
-        }
-        className={`relative flex items-center rounded-xl p-2 transition-all duration-200 touch-manipulation liquid-glass text-accent ${
+        gradientFrom="#0a84ff"
+        gradientTo="#0062cc"
+        className={`rounded-xl p-2 touch-manipulation liquid-glass text-accent ${
           isDisabled
             ? 'opacity-50 cursor-not-allowed'
             : ' '
@@ -133,7 +129,7 @@ export function UnifiedBellButton({
             {totalUnread > 9 ? '9+' : totalUnread}
           </span>
         )}
-      </button>
+      </GradientIconButton>
 
       {/* Modal Notifiche Centrato */}
       <NotificationModal
