@@ -532,27 +532,30 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       if (oy === 'auto' || oy === 'scroll' || oy === 'overlay') { scroller = node; break; }
       node = node.parentElement;
     }
-    let initialTop: number | null = null;
     const update = () => {
-      const top = band.getBoundingClientRect().top;
-      // Senza contenitore scrollabile interno lo scroll è quello del documento.
-      const atScrollTop = scroller ? scroller.scrollTop <= 1 : window.scrollY <= 1;
-      if (initialTop === null || atScrollTop) {
-        initialTop = top;
+      // "In cima" = né il documento né un eventuale contenitore interno sono scrollati.
+      const atScrollTop = window.scrollY <= 1 && (!scroller || scroller.scrollTop <= 1);
+      if (atScrollTop) {
         setToolbarOverlapping(false);
         return;
       }
-      setToolbarOverlapping(top < initialTop - 1);
+      // La toolbar è sovrapposta quando il suo bordo superiore ha raggiunto l'offset
+      // sticky: confrontare con la posizione iniziale non funziona perché qui la
+      // toolbar nasce già alla quota sticky e il suo top non cambia mai.
+      const stickyTop = parseFloat(getComputedStyle(band).top);
+      const pinned = Number.isFinite(stickyTop)
+        ? band.getBoundingClientRect().top <= stickyTop + 1
+        : true;
+      setToolbarOverlapping(pinned);
     };
     update();
-    if (scroller) scroller.addEventListener('scroll', update, { passive: true });
-    else window.addEventListener('scroll', update, { passive: true });
+    // capture: intercetta sia lo scroll del documento sia quello di contenitori interni.
+    document.addEventListener('scroll', update, { passive: true, capture: true });
     window.addEventListener('resize', update);
     const ro = new ResizeObserver(update);
     ro.observe(band);
     return () => {
-      if (scroller) scroller.removeEventListener('scroll', update);
-      else window.removeEventListener('scroll', update);
+      document.removeEventListener('scroll', update, { capture: true });
       window.removeEventListener('resize', update);
       ro.disconnect();
     };
