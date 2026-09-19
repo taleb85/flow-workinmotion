@@ -733,6 +733,13 @@ const baseIt = {
 
   // WeeklyShiftsTable — toast / errori
   shift_deleted: 'Turno eliminato.',
+  select_shifts: 'Seleziona turni',
+  shifts_selected: '{n} turni selezionati',
+  select_all: 'Seleziona tutti',
+  deselect_all: 'Deseleziona tutti',
+  delete_shifts_title: 'Eliminare {n} turni?',
+  delete_shifts_irreversible: 'L\'operazione non può essere annullata.',
+  shifts_deleted: '{n} turni eliminati.',
   shift_delete_blocked_frozen:
     'Questo turno è congelato (validato): non può essere eliminato. Usa «Non ha lavorato» se il dipendente non si è presentato.',
   shift_delete_blocked_published:
@@ -1648,6 +1655,13 @@ const baseEn: Record<string, string> = {
   save_error: 'Error while saving.',
   ts_period_weeks_abbr: '{n} wk',
   shift_deleted: 'Shift deleted.',
+  select_shifts: 'Select shifts',
+  shifts_selected: '{n} shifts selected',
+  select_all: 'Select all',
+  deselect_all: 'Deselect all',
+  delete_shifts_title: 'Delete {n} shifts?',
+  delete_shifts_irreversible: 'This action cannot be undone.',
+  shifts_deleted: '{n} shifts deleted.',
   shift_delete_blocked_frozen:
     'This shift is frozen (validated): it cannot be deleted. Use “Did not work” if the employee was absent.',
   shift_delete_blocked_published:
@@ -2564,6 +2578,13 @@ const baseEs: Record<string, string> = {
   save_error: 'Error al guardar.',
   ts_period_weeks_abbr: '{n} sem.',
   shift_deleted: 'Turno eliminado.',
+  select_shifts: 'Seleccionar turnos',
+  shifts_selected: '{n} turnos seleccionados',
+  select_all: 'Seleccionar todos',
+  deselect_all: 'Deseleccionar todos',
+  delete_shifts_title: '¿Eliminar {n} turnos?',
+  delete_shifts_irreversible: 'Esta acción no se puede deshacer.',
+  shifts_deleted: '{n} turnos eliminados.',
   shift_delete_blocked_frozen:
     'Este turno está congelado (validado): no se puede eliminar. Usa «No trabajó» si el empleado no se presentó.',
   shift_delete_blocked_published:
@@ -3174,6 +3195,13 @@ const baseFr: Record<string, string> = {
   ts_drawer_manual_punch_in: 'Heure d’entrée',
   ts_drawer_manual_punch_out: 'Heure de sortie',
   shift_deleted: 'Shift supprimé.',
+  select_shifts: 'Sélectionner des shifts',
+  shifts_selected: '{n} shifts sélectionnés',
+  select_all: 'Tout sélectionner',
+  deselect_all: 'Tout désélectionner',
+  delete_shifts_title: 'Supprimer {n} shifts ?',
+  delete_shifts_irreversible: 'Cette action est irréversible.',
+  shifts_deleted: '{n} shifts supprimés.',
   shift_delete_blocked_frozen:
     'Ce shift est gelé (validé) : il ne peut pas être supprimé. Utilisez « N’a pas travaillé » si l’employé était absent.',
   shift_delete_blocked_published:

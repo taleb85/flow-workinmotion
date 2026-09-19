@@ -4,7 +4,7 @@ import {
   CalendarDays, AlertTriangle, Check, Lock, Plus, Clock,
   ChevronLeft, ChevronRight, Send, Filter, FileDown,
   Trash2, Save, X, ChevronDown, Unlock, Menu, ChevronUp, Pencil,
-  History, Sun, Moon,
+  History, Sun, Moon, CheckSquare,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Shift, PunchRecord, User, ShiftAuditEntry } from '../types';
@@ -195,7 +195,7 @@ type GridRenderHelpers = {
 
 const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
   user, totals, isExpanded, hasShifts, weekDays, weekDateStrings, dayGroupsByUserDate,
-  canEdit, dropTargetKey, t, locale,
+  canEdit, isSelectionMode, dropTargetKey, t, locale,
   renderGroupButton,
   onToggleExpanded, onCreateShift, onDragOver, onDragLeave, onDrop,
 }: ShiftGridMobileCardProps) {
@@ -277,7 +277,7 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
                 <div className="flex-1 flex min-w-0 gap-1">
                   {(() => {
                     const { lunch, evening, extraLunchGroups, extraEveningGroups } = splitDayGroupsBySlot(groups);
-                    const canAddSecond = canEdit && groups.length < 2;
+                    const canAddSecond = canEdit && !isSelectionMode && groups.length < 2;
                     const slots: ReactNode[] = [];
                     if (lunch) slots.push(renderGroupButton(lunch, 'mobile', false, extraLunchGroups));
                     else if (canAddSecond) slots.push(
@@ -320,6 +320,7 @@ type ShiftGridMobileCardProps = {
   weekDateStrings: string[];
   dayGroupsByUserDate: Map<string, DayShiftGroup[]>;
   canEdit: boolean;
+  isSelectionMode: boolean;
   dropTargetKey: string | null;
   t: ReturnType<typeof getTranslations>;
   locale: Locale;
@@ -333,7 +334,7 @@ type ShiftGridMobileCardProps = {
 
 const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
   user, totals, weekDays, dayGroupsByUserDate,
-  isPeriodView, compactGrid, canEdit, hScrolled, slotRowHeight, slotCellHeight,
+  isPeriodView, compactGrid, canEdit, isSelectionMode, hScrolled, slotRowHeight, slotCellHeight,
   dropTargetKey, t,
   renderGroupButton,
   onCreateShift, onDragOver, onDragLeave, onDrop, onReviewClick,
@@ -343,7 +344,7 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
   return (
     <tr className="wst-employee-row">
       <td className={`sticky left-0 z-10 px-2 py-1.5 border-b border-r border-white/10 cursor-pointer hover:bg-white/[0.08] transition-colors duration-200 ${hScrolled ? 'wst-col-scrolled' : ''}`}
-        onClick={() => onReviewClick(user)}>
+        onClick={() => { if (!isSelectionMode) onReviewClick(user); }}>
         <div className="flex items-center gap-1 min-w-0 ml-2">
           <span className="text-xs font-bold text-white truncate">{user.first_name} {user.last_name?.[0] ?? ''}</span>
         </div>
@@ -364,7 +365,7 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
                 onDragLeave={onDragLeave}
                 onDrop={(e) => onDrop(e, user.id, dateStr, 'lunch')}
               >
-                {canEdit ? (
+                {canEdit && !isSelectionMode ? (
                   <button type="button" onClick={() => onCreateShift(user.id, dateStr)}
                     className={`rounded-lg border border-dashed border-white flex items-center justify-center text-[0.625rem] font-bold transition-colors opacity-0 group-hover:opacity-100 text-white [color:#fff_!important] px-3 py-2`}
                     onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
@@ -379,7 +380,7 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
             ) : (
               (() => {
                 const { lunch, evening, extraLunchGroups, extraEveningGroups } = splitDayGroupsBySlot(groups);
-                const canAddSecond = canEdit && groups.length < 2;
+                const canAddSecond = canEdit && !isSelectionMode && groups.length < 2;
                 const emptySlot = (slot: 'lunch' | 'evening', label: string) => (
                   canAddSecond && !(slot === 'lunch' ? lunch : evening) ? (
                     <button type="button" onClick={() => onCreateShift(user.id, dateStr, slot)}
@@ -449,6 +450,7 @@ type ShiftGridDesktopRowProps = {
   isPeriodView: boolean;
   compactGrid: boolean;
   canEdit: boolean;
+  isSelectionMode: boolean;
   hScrolled: boolean;
   slotRowHeight: number;
   slotCellHeight: number;
@@ -468,7 +470,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const sessionActive = isSessionElevated || !!globalPinSessionId;
   const {
     shifts: allShifts, punchRecords: allPunchRecords,
-    deleteShift, publishWeekShifts,
+    deleteShift, deleteShifts, publishWeekShifts,
     addPunchRecord, updatePunchRecord, addShift, updateShift,
   } = useAppData();
   const { breakRules, featureFlags } = useAppConfig();
@@ -909,7 +911,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const [panelPinTargetShiftId, setPanelPinTargetShiftId] = useState<string | null>(null);
   const [panelPinError, setPanelPinError] = useState('');
   const [panelPin, setPanelPin] = useState('');
-  const [panelPinMode, setPanelPinMode] = useState<'freeze' | 'unfreeze' | 'delete'>('unfreeze');
+  const [panelPinMode, setPanelPinMode] = useState<'freeze' | 'unfreeze' | 'delete' | 'bulk-delete'>('unfreeze');
+
+  // ── Selezione multipla turni ──
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedShiftIds, setSelectedShiftIds] = useState<Set<string>>(() => new Set());
+  /** Conferma eliminazione multipla (sessioni elevate: nessun PIN). */
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+  /** Id in attesa di autorizzazione PIN (sessione non elevata). */
+  const [pendingBulkDeleteIds, setPendingBulkDeleteIds] = useState<string[] | null>(null);
 
   useEffect(() => {
     try {
@@ -1345,7 +1355,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   }, [sessionActive, updateShift, setSelectedShift, showSuccess, t]);
 
   const handlePinConfirm = useCallback(async () => {
-    if (!panelPinTargetShiftId) return;
+    if (!panelPinTargetShiftId && panelPinMode !== 'bulk-delete') return;
     setSaving(true);
     try {
       const verifier = findFreezeVerifierByPin(users, panelPin);
@@ -1354,6 +1364,25 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         setSaving(false);
         return;
       }
+      if (panelPinMode === 'bulk-delete') {
+        const ids = pendingBulkDeleteIds ?? [];
+        for (const id of ids) {
+          const s = allShifts.find(x => x.id === id);
+          if (s && isFrozen(s)) authorizeFrozenDelete(id);
+        }
+        await deleteShifts(ids);
+        showSuccess((t.shifts_deleted ?? '{n} turni eliminati.').replace('{n}', String(ids.length)));
+        setPanelPinModalOpen(false);
+        setPendingBulkDeleteIds(null);
+        setPanelPin('');
+        setPanelPinError('');
+        setIsSelectionMode(false);
+        setSelectedShiftIds(new Set());
+        setBulkDeleteConfirmOpen(false);
+        setSaving(false);
+        return;
+      }
+      if (!panelPinTargetShiftId) return;
       if (panelPinMode === 'delete') {
         authorizeFrozenDelete(panelPinTargetShiftId);
         await deleteShift(panelPinTargetShiftId);
@@ -1375,7 +1404,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       setPanelPinError('');
     } catch { showError(t.error_generic ?? 'Errore.'); }
     finally { setSaving(false); }
-  }, [panelPinTargetShiftId, panelPin, panelPinMode, users, updateShift, deleteShift, setSelectedShift, showSuccess, showError, t]);
+  }, [panelPinTargetShiftId, panelPin, panelPinMode, pendingBulkDeleteIds, allShifts, users, updateShift, deleteShift, deleteShifts, setSelectedShift, showSuccess, showError, t]);
 
   const _handleSaveManualPunch = useCallback(async () => {
     if (!selectedShift) return;
@@ -1580,6 +1609,85 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setDrawerOpen(true);
   }, [users, getPunchForShift, weekShifts]);
 
+  // ── Selezione multipla ──
+  /** Turni della vista corrente effettivamente eliminabili: gli unici selezionabili. */
+  const selectableShiftIds = useMemo(
+    () => new Set(weekShifts.filter(canDeleteShift).map(s => s.id)),
+    [weekShifts, canDeleteShift]
+  );
+
+  const toggleShiftSelection = useCallback((shiftId: string) => {
+    setSelectedShiftIds(prev => {
+      const next = new Set(prev);
+      if (next.has(shiftId)) next.delete(shiftId);
+      else next.add(shiftId);
+      return next;
+    });
+  }, []);
+
+  const exitSelectionMode = useCallback(() => {
+    setIsSelectionMode(false);
+    setSelectedShiftIds(new Set());
+    setBulkDeleteConfirmOpen(false);
+    setPendingBulkDeleteIds(null);
+  }, []);
+
+  const enterSelectionMode = useCallback(() => {
+    closeActionsDrawer();
+    setSelectedShiftIds(new Set());
+    setIsSelectionMode(true);
+  }, [closeActionsDrawer]);
+
+  const toggleSelectAllShifts = useCallback(() => {
+    setSelectedShiftIds(prev =>
+      prev.size === selectableShiftIds.size ? new Set() : new Set(selectableShiftIds)
+    );
+  }, [selectableShiftIds]);
+
+  /** In modalità selezione il tap seleziona il turno; altrimenti apre il dettaglio. */
+  const handleShiftActivate = useCallback((shift: Shift) => {
+    if (isSelectionMode) {
+      if (canDeleteShift(shift)) toggleShiftSelection(shift.id);
+      return;
+    }
+    handleOpenDrawer(shift);
+  }, [isSelectionMode, canDeleteShift, toggleShiftSelection, handleOpenDrawer]);
+
+  /** Avvia l'eliminazione multipla: PIN se la sessione non è elevata, altrimenti conferma. */
+  const requestBulkDelete = useCallback(() => {
+    const ids = Array.from(selectedShiftIds);
+    if (ids.length === 0) return;
+    if (sessionActive) {
+      setBulkDeleteConfirmOpen(true);
+      return;
+    }
+    setPendingBulkDeleteIds(ids);
+    setPanelPinMode('bulk-delete');
+    setPanelPinError('');
+    setPanelPin('');
+    setPanelPinModalOpen(true);
+  }, [selectedShiftIds, sessionActive]);
+
+  /** Eliminazione multipla effettiva (autorizza i turni congelati, poi delega al context). */
+  const performBulkDelete = useCallback(async (ids: string[]) => {
+    if (ids.length === 0) return;
+    for (const id of ids) {
+      const s = allShifts.find(x => x.id === id);
+      if (s && isFrozen(s)) authorizeFrozenDelete(id);
+    }
+    await deleteShifts(ids);
+    showSuccess((t.shifts_deleted ?? '{n} turni eliminati.').replace('{n}', String(ids.length)));
+    exitSelectionMode();
+  }, [allShifts, deleteShifts, showSuccess, t, exitSelectionMode]);
+
+  /** Cambio di settimana/periodo: i turni selezionati non sono più visibili → esci. */
+  const selectionScopeRef = useRef(weekDateStrings);
+  useEffect(() => {
+    if (selectionScopeRef.current === weekDateStrings) return;
+    selectionScopeRef.current = weekDateStrings;
+    if (isSelectionMode) exitSelectionMode();
+  }, [weekDateStrings, isSelectionMode, exitSelectionMode]);
+
   // ── Drag & Drop handlers ──
   const handleDragStart = useCallback((e: React.DragEvent, shiftId: string) => {
     e.dataTransfer.setData('text/plain', shiftId);
@@ -1710,9 +1818,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           type="button"
           title={title}
           aria-label={title}
-          onClick={() => handleOpenDrawer(ex.shift, { isExtra: true })}
+          onClick={() => (isSelectionMode ? handleShiftActivate(ex.shift) : handleOpenDrawer(ex.shift, { isExtra: true }))}
           onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          draggable={canEdit}
+          draggable={canEdit && !isSelectionMode}
           onDragStart={(e) => handleDragStart(e, ex.shift.id)}
           onDragEnd={handleDragEnd}
           className={
@@ -1727,7 +1835,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         </button>
       );
     });
-  }, [t, handleOpenDrawer, handleDragStart, handleDragEnd, canEdit, extraRowHeight]);
+  }, [t, handleOpenDrawer, handleShiftActivate, isSelectionMode, handleDragStart, handleDragEnd, canEdit, extraRowHeight]);
 
   const renderGroupButton = useCallback((g: DayShiftGroup, layout: 'desktop' | 'mobile', compact = false, extraGroups: DayShiftGroup[] = []) => {
     const isDraft = g.shift.approval_status === 'draft';
@@ -1744,6 +1852,24 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     if (g.violations?.length && g.violations.length > 0) glow = 'ring-1 ring-rose-400/40';
     // Turno congelato: sfondo verde pieno
     if (isFrozen(g.shift)) { borderColor = 'border-emerald-400/80'; bgColor = 'bg-emerald-600/25'; }
+
+    // Selezione multipla: il tap seleziona invece di aprire il dettaglio.
+    const selectionDisabled = isSelectionMode && !canDeleteShift(g.shift);
+    const selected = isSelectionMode && selectedShiftIds.has(g.shift.id);
+    const selectionClass = selected
+      ? 'ring-2 ring-rose-400'
+      : selectionDisabled
+        ? 'opacity-40 cursor-not-allowed'
+        : '';
+
+    const selectionBadge = (
+      <span
+        className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border ${selected ? 'border-rose-400 bg-rose-500 text-white' : 'border-white/50 text-transparent'}`}
+        aria-hidden
+      >
+        <Check className="h-2 w-2" strokeWidth={4} />
+      </span>
+    );
 
     const timeOnly = (
       <span className={`font-bold tabular-nums whitespace-nowrap ${layout === 'mobile' ? 'text-xs' : compact ? 'text-[0.6875rem]' : 'text-xs'} ${g.isAbsent ? 'text-rose-400 line-through' : display.missingOut ? 'text-red-400' : 'text-white'}`}>
@@ -1766,13 +1892,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     if (layout === 'mobile') {
       return (
         <div className="flex flex-col gap-1">
-          <button type="button" onClick={() => handleOpenDrawer(g.shift)} title={display.title}
-            onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
-            draggable={canEdit}
+          <button type="button" onClick={() => handleShiftActivate(g.shift)} title={display.title}
+            aria-pressed={isSelectionMode ? selected : undefined}
+            onContextMenu={(e) => { if (isSelectionMode) { e.preventDefault(); return; } handleShiftContextMenu(e, g.shift, g); }}
+            draggable={canEdit && !isSelectionMode}
             onDragStart={(e) => handleDragStart(e, g.shift.id)}
             onDragEnd={handleDragEnd}
-              className={`w-full text-left rounded-lg border-l-4 ${borderColor} ${bgColor} ${glow} px-2.5 py-2 transition-colors ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''}`}>
+              className={`w-full text-left rounded-lg border-l-4 ${borderColor} ${bgColor} ${glow} ${selectionClass} px-2.5 py-2 transition-colors ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''}`}>
               <div className="flex items-center justify-between gap-1">
+              {isSelectionMode ? selectionBadge : null}
               {timeLabel}
               <div className="flex items-center gap-1 shrink-0">
                 {g.isMissingPunch ? <AlertTriangle className="h-3 w-3 text-white" /> : isApproved ? <Check className="h-3 w-3 text-white" /> : isFrozen(g.shift) ? <Lock className="h-3 w-3 text-white" /> : null}
@@ -1790,12 +1918,16 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 
     return (
       <div className={`flex w-full min-w-0 flex-col ${hasExtras ? 'gap-0.5 justify-center' : ''}`}>
-        <button type="button" onClick={() => handleOpenDrawer(g.shift)} title={display.title}
-          onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
-          draggable={canEdit}
+        <button type="button" onClick={() => handleShiftActivate(g.shift)} title={display.title}
+          aria-pressed={isSelectionMode ? selected : undefined}
+          onContextMenu={(e) => { if (isSelectionMode) { e.preventDefault(); return; } handleShiftContextMenu(e, g.shift, g); }}
+          draggable={canEdit && !isSelectionMode}
           onDragStart={(e) => handleDragStart(e, g.shift.id)}
           onDragEnd={handleDragEnd}
-          className={`relative w-full min-w-0 text-left rounded-lg border ${borderColor} ${bgColor} ${glow} transition-colors ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''} px-0.5 py-0.5`}>
+          className={`relative w-full min-w-0 text-left rounded-lg border ${borderColor} ${bgColor} ${glow} ${selectionClass} transition-colors ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''} px-0.5 py-0.5`}>
+          {isSelectionMode && (
+            <span className="absolute left-0.5 top-0.5 z-10">{selectionBadge}</span>
+          )}
           <div
             className="flex items-end justify-center w-full gap-1 px-2 whitespace-nowrap overflow-hidden"
             style={{ minHeight: mainRowHeight, height: mainRowHeight }}
@@ -1812,10 +1944,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         {renderExtraShiftRows(extraGroups, 'desktop')}
       </div>
     );
-  }, [t, mode, weekPunchRecords, handleOpenDrawer, handleShiftContextMenu, handleDragStart, handleDragEnd, canEdit, extraRowHeight, slotRowHeight, renderExtraShiftRows]);
+  }, [t, mode, weekPunchRecords, handleShiftActivate, isSelectionMode, selectedShiftIds, canDeleteShift, handleShiftContextMenu, handleDragStart, handleDragEnd, canEdit, extraRowHeight, slotRowHeight, renderExtraShiftRows]);
 
   return (
-    <div ref={gridRootRef} className="w-full flex-none min-h-0 flex flex-col font-sans md:flex-1">
+    <div ref={gridRootRef} className={`w-full flex-none min-h-0 flex flex-col font-sans md:flex-1 ${isSelectionMode ? 'pb-20' : ''}`}>
       {/* Linea divisoria tra dipendenti */}
       <style>{`.wst-employee-row td { border-bottom: 1px solid rgba(255,255,255,0.10) !important; }
 .wst-employee-row td { border-top: 1px solid rgba(255,255,255,0.10) !important; }
@@ -2143,6 +2275,23 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 </>
               )}
 
+              {canEdit && (
+                <button
+                  type="button"
+                  onClick={enterSelectionMode}
+                  disabled={selectableShiftIds.size === 0}
+                  className="flex w-full items-center justify-between gap-2 border-b border-white/10 px-4 py-2.5 text-left transition-colors hover:bg-white/10 disabled:opacity-40"
+                >
+                  <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-white">
+                    <CheckSquare className="h-4 w-4 shrink-0 text-white/50" strokeWidth={2.25} />
+                    {t.select_shifts ?? 'Seleziona turni'}
+                  </span>
+                  <span className="shrink-0 text-[0.625rem] font-bold tabular-nums text-white/40">
+                    {selectableShiftIds.size}
+                  </span>
+                </button>
+              )}
+
               {/* ── Vista ── */}
               {canEdit && (
                 <>
@@ -2259,12 +2408,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             key={user.id}
             user={user}
             totals={totalsByUser[user.id] ?? { planned: 0, actual: 0 }}
-            isExpanded={expandedUserIds.has(user.id)}
+            isExpanded={isSelectionMode || expandedUserIds.has(user.id)}
             hasShifts={usersWithShifts.has(user.id)}
             weekDays={weekDays}
             weekDateStrings={weekDateStrings}
             dayGroupsByUserDate={dayGroupsByUserDate}
             canEdit={canEdit}
+            isSelectionMode={isSelectionMode}
             dropTargetKey={dropTargetKey}
             t={t}
             locale={locale}
@@ -2334,6 +2484,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 isPeriodView={isPeriodView}
                 compactGrid={compactGrid}
                 canEdit={canEdit}
+                isSelectionMode={isSelectionMode}
                 hScrolled={hScrolled}
                 slotRowHeight={slotRowHeight}
                 slotCellHeight={slotCellHeight}
@@ -3106,10 +3257,86 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         document.body,
       )}
 
+      {/* ── Barra selezione multipla ── */}
+      {isSelectionMode && createPortal(
+        <div
+          className="fixed bottom-[calc(var(--app-bottom-nav-offset,64px)+0.5rem)] left-1/2 z-[10060] flex -translate-x-1/2 items-center gap-1.5 rounded-2xl border border-white/[0.14] px-2 py-2 shadow-2xl md:bottom-6 md:gap-2 md:px-2.5"
+          style={{ background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
+        >
+          <span className="whitespace-nowrap px-1 text-xs font-bold tabular-nums text-white">
+            {(t.shifts_selected ?? '{n} turni selezionati').replace('{n}', String(selectedShiftIds.size))}
+          </span>
+          <button
+            type="button"
+            onClick={toggleSelectAllShifts}
+            disabled={selectableShiftIds.size === 0}
+            className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[0.625rem] font-bold uppercase tracking-wider text-white/70 transition-colors hover:text-white disabled:opacity-40"
+          >
+            {selectedShiftIds.size > 0 && selectedShiftIds.size === selectableShiftIds.size
+              ? (t.deselect_all ?? 'Deseleziona tutti')
+              : (t.select_all ?? 'Seleziona tutti')}
+          </button>
+          <button
+            type="button"
+            onClick={requestBulkDelete}
+            disabled={selectedShiftIds.size === 0}
+            className="flex items-center gap-1 rounded-lg bg-rose-600 px-2.5 py-1.5 text-[0.625rem] font-bold uppercase tracking-wider text-white transition-colors hover:bg-rose-700 disabled:opacity-40"
+          >
+            <Trash2 className="h-3 w-3 shrink-0" />
+            {t.delete ?? 'Elimina'}
+          </button>
+          <button
+            type="button"
+            onClick={exitSelectionMode}
+            className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[0.625rem] font-bold uppercase tracking-wider text-white/70 transition-colors hover:text-white"
+          >
+            {t.cancel ?? 'Annulla'}
+          </button>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Conferma eliminazione multipla (sessione elevata: senza PIN) ── */}
+      {bulkDeleteConfirmOpen && createPortal(
+        <div className="fixed inset-0 z-[10070] flex items-center justify-center px-4" onClick={() => setBulkDeleteConfirmOpen(false)}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div
+            className="relative w-full max-w-sm rounded-2xl border border-white/[0.14] p-5 shadow-2xl"
+            style={{ background: 'rgba(10,10,10,0.94)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-1 text-base font-bold text-white">
+              {(t.delete_shifts_title ?? 'Eliminare {n} turni?').replace('{n}', String(selectedShiftIds.size))}
+            </h3>
+            <p className="mb-4 text-xs text-white/60">{t.delete_shifts_irreversible ?? 'L\'operazione non può essere annullata.'}</p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setBulkDeleteConfirmOpen(false)}
+                className="rounded-lg bg-white/10 px-3 py-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white/70 transition-colors hover:text-white"
+              >
+                {t.cancel ?? 'Annulla'}
+              </button>
+              <button
+                type="button"
+                onClick={() => void performBulkDelete(Array.from(selectedShiftIds))}
+                className="rounded-lg bg-rose-600 px-3 py-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:bg-rose-700"
+              >
+                {t.wst_confirm_delete_btn ?? 'Conferma elimina'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* ── PinPad Modal per congelare / sbloccare / eliminare turno ── */}
       {panelPinModalOpen && (
         <PinPadModal
           title={(() => {
+            if (panelPinMode === 'bulk-delete') {
+              return (t.delete_shifts_title ?? 'Eliminare {n} turni?').replace('{n}', String(pendingBulkDeleteIds?.length ?? 0));
+            }
             if (panelPinMode === 'delete') {
               const targetShift = panelPinTargetShiftId ? allShifts.find(s => s.id === panelPinTargetShiftId) : null;
               const statusLabel = targetShift?.approval_status === 'draft' ? 'bozza'
@@ -3122,12 +3349,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             }
             return panelPinMode === 'freeze' ? (t.ts_drawer_freeze_title ?? 'Congela questo turno') : (t.wst_freeze_pin_title ?? 'Sblocca turno');
           })()}
-          subtitle={panelPinMode === 'delete' ? 'Inserisci il PIN per confermare l\'eliminazione' : panelPinMode === 'freeze' ? (t.ts_drawer_freeze_subtitle ?? 'Inserisci il PIN del manager/assistant per congelare il turno') : (t.wst_freeze_pin_subtitle ?? 'Inserisci il PIN del manager/assistant per sbloccare il turno')}
+          subtitle={panelPinMode === 'bulk-delete' ? 'Inserisci il PIN per confermare l\'eliminazione' : panelPinMode === 'delete' ? 'Inserisci il PIN per confermare l\'eliminazione' : panelPinMode === 'freeze' ? (t.ts_drawer_freeze_subtitle ?? 'Inserisci il PIN del manager/assistant per congelare il turno') : (t.wst_freeze_pin_subtitle ?? 'Inserisci il PIN del manager/assistant per sbloccare il turno')}
           pinLabel={t.wst_pin_label ?? 'PIN'}
           pin={panelPin}
           onPinChange={setPanelPin}
           onConfirm={handlePinConfirm}
-          onCancel={() => { setPanelPinModalOpen(false); setPanelPinTargetShiftId(null); setPanelPin(''); setPanelPinError(''); }}
+          onCancel={() => { setPanelPinModalOpen(false); setPanelPinTargetShiftId(null); setPendingBulkDeleteIds(null); setPanelPin(''); setPanelPinError(''); }}
           error={panelPinError}
           isLoading={saving}
           confirmLabel={t.confirm ?? 'Conferma'}
