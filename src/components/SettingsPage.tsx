@@ -2939,8 +2939,8 @@ function BreakRuleForm({
   const chipClass = (active: boolean) =>
     `cursor-pointer px-2.5 py-1 text-xs font-semibold transition-colors ${
       active
-        ? 'rounded-full border border-emerald-500 bg-emerald-500/20 text-emerald-400'
-        : 'rounded-xl border border-white/20 !rounded-full text-white/70 surface-ghost-interactive hover:border-accent hover:text-accent'
+        ? 'rounded-full border border-white/60 bg-white/25 text-white'
+        : 'rounded-xl border border-white/20 !rounded-full text-white/70 surface-ghost-interactive hover:border-white/45 hover:text-white'
     }`;
 
   return (
@@ -2962,7 +2962,7 @@ function BreakRuleForm({
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
-                  activeTab === tab.id ? 'bg-accent text-white' : 'text-white/60 hover:text-white'
+                  activeTab === tab.id ? 'bg-white/25 text-white' : 'text-white/60 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 {tab.label}
@@ -2972,9 +2972,9 @@ function BreakRuleForm({
             <GradientIconButton
               type="submit"
               label={isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
-              gradientFrom="#0a84ff"
-              gradientTo="#0062cc"
-              className="rounded-lg bg-accent p-2 text-white active:brightness-95"
+              gradientFrom="#e5e7eb"
+              gradientTo="#64748b"
+              className="rounded-lg bg-white/20 p-2 text-white hover:bg-white/30 active:brightness-95"
             >
               <Check className="h-4 w-4 shrink-0" />
             </GradientIconButton>
@@ -3017,8 +3017,8 @@ function BreakRuleForm({
                       title={getBreakRuleIconLabel(key, t)}
                       className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
                         icon === key
-                          ? 'border-accent bg-white/20 text-accent'
-                          : 'border-white/20 text-white/60 surface-ghost-interactive hover:border-accent hover:text-accent'
+                          ? 'border-white/60 bg-white/25 text-white'
+                          : 'border-white/20 text-white/60 surface-ghost-interactive hover:border-white/45 hover:text-white'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
