@@ -1989,12 +1989,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               type="button"
               onClick={() => void handlePublishWeek()}
               aria-label={t.publish_week ?? 'Pubblica settimana'}
-              className="group hidden md:flex shrink-0 items-center gap-0 overflow-hidden rounded-xl p-1.5 text-[0.625rem] md:text-[0.6875rem] font-bold uppercase tracking-wider text-emerald-300 liquid-glass liquid-glass-green transition-all duration-200 hover:gap-1.5 hover:pr-2.5"
+              title={t.publish_week ?? 'Pubblica settimana'}
+              className="hidden md:flex shrink-0 items-center justify-center rounded-xl p-1.5 text-emerald-300 liquid-glass liquid-glass-green transition-colors"
             >
               <Send className="h-3 w-3 shrink-0" />
-              <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none transition-all duration-200 group-hover:max-w-[10.5rem]">
-                {t.publish_week ?? 'Pubblica settimana'}
-              </span>
             </button>
           )}
           {isMgmt && canFreezeWeek && (
@@ -2468,11 +2466,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 <div className="flex items-center gap-2">
                   {canDeleteShift(selectedShift) && !drawerDeleteConfirm && (
                     <button type="button" onClick={() => setDrawerDeleteConfirm(true)}
-                      className="group flex items-center gap-0 overflow-hidden rounded-lg bg-rose-600/20 p-2 text-rose-300 transition-all duration-200 hover:gap-1.5 hover:bg-rose-600/30 hover:pr-2.5" title={t.delete ?? 'Elimina'}>
+                      className="flex items-center justify-center rounded-lg bg-rose-600/20 p-2 text-rose-300 transition-colors hover:bg-rose-600/30" title={t.delete ?? 'Elimina'} aria-label={t.delete ?? 'Elimina'}>
                       <Trash2 className="h-4 w-4 shrink-0" />
-                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[5rem]">
-                        {t.delete ?? 'Elimina'}
-                      </span>
                     </button>
                   )}
                   {canDeleteShift(selectedShift) && drawerDeleteConfirm && (
@@ -2489,33 +2484,24 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   )}
                   {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
                     <button type="button" onClick={() => handleFreezeShift(selectedShift)}
-                      className="group flex items-center gap-0 overflow-hidden rounded-lg bg-emerald-600/20 p-2 text-emerald-300 transition-all duration-200 hover:gap-1.5 hover:bg-emerald-600/30 hover:pr-2.5" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
+                      className="flex items-center justify-center rounded-lg bg-emerald-600/20 p-2 text-emerald-300 transition-colors hover:bg-emerald-600/30" title={t.ts_drawer_freeze_btn ?? 'Congela'} aria-label={t.ts_drawer_freeze_btn ?? 'Congela'}>
                       <Unlock className="h-4 w-4 shrink-0" />
-                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[5rem]">
-                        {t.ts_drawer_freeze_btn ?? 'Congela'}
-                      </span>
                     </button>
                   )}
                   {isAdminOnly(currentUser) && shiftAuditEntries && shiftAuditEntries.length > 0 && (
                     <button type="button" onClick={() => setShowShiftAuditModal(true)}
-                      className="group flex items-center gap-0 overflow-hidden rounded-lg bg-white/10 p-2 text-white/50 transition-all duration-200 hover:gap-1.5 hover:text-white hover:bg-white/20 hover:pr-2.5 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+                      className="flex items-center justify-center rounded-lg bg-white/10 p-2 text-white/50 transition-colors hover:text-white hover:bg-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                       title={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
                       aria-label={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}>
                       <History className="h-4 w-4 shrink-0" />
-                      <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[9rem]">
-                        {(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
-                      </span>
                     </button>
                   )}
                 </div>
                 <button type="button" onClick={handleCloseDrawer}
-                  className="group flex items-center gap-0 overflow-hidden rounded-lg bg-white/10 p-2 text-white/50 transition-all duration-200 hover:gap-1.5 hover:text-white hover:bg-white/20 hover:pr-2.5 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+                  className="flex items-center justify-center rounded-lg bg-white/10 p-2 text-white/50 transition-colors hover:text-white hover:bg-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
                   aria-label={t.cancel ?? 'Chiudi'}
                   title={t.cancel ?? 'Chiudi'}>
                   <X className="h-4 w-4 shrink-0" />
-                  <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[4rem]">
-                    {t.cancel ?? 'Chiudi'}
-                  </span>
                 </button>
               </div>
             </div>
