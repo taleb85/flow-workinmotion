@@ -8,6 +8,8 @@ import { motion } from 'framer-motion';
 import { Mail, Phone, Lock, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useMultisensorialFeedback } from '../hooks/useMultisensorialFeedback';
+import { UnlockPinModal } from './ui/UnlockPinModal';
+import { getAppLockStatus } from '../utils/appLock';
 import FlowLogo from './FlowLogo';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -39,6 +41,8 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState('');
+  /** Dopo il salvataggio del profilo si propone l'impostazione del PIN di sblocco app. */
+  const [showUnlockSetup, setShowUnlockSetup] = useState(false);
 
   const emailRef = useRef<HTMLInputElement>(null);
 
@@ -83,6 +87,15 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
     setter(digits);
   }, []);
 
+  const completeOnboarding = useCallback(async () => {
+    setShowUnlockSetup(false);
+    setSaved(true);
+    triggerHapticFeedback('success');
+    await playNotificationSound();
+    // Piccola pausa per mostrare il feedback visivo
+    setTimeout(() => onComplete(), 1200);
+  }, [triggerHapticFeedback, playNotificationSound, onComplete]);
+
   const handleSave = useCallback(async () => {
     setTouched({ email: true, phone: true, pin: true, confirmPin: true });
     if (!isFormValid || !currentUser) return;
@@ -98,11 +111,13 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
       });
 
       if (ok) {
-        setSaved(true);
-        triggerHapticFeedback('success');
-        await playNotificationSound();
-        // Piccola pausa per mostrare il feedback visivo
-        setTimeout(() => onComplete(), 1200);
+        // Proponi l'impostazione del PIN di sblocco (saltata se le RPC non sono disponibili).
+        const status = await getAppLockStatus(currentUser.id);
+        if (status.available && !status.configured) {
+          setShowUnlockSetup(true);
+        } else {
+          await completeOnboarding();
+        }
       } else {
         setSaveError('Errore nel salvataggio. Riprova.');
         triggerHapticFeedback('error');
@@ -113,7 +128,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
     } finally {
       setSaving(false);
     }
-  }, [isFormValid, currentUser, email, phone, pinDigits, updateUser, triggerHapticFeedback, playNotificationSound, onComplete]);
+  }, [isFormValid, currentUser, email, phone, pinDigits, updateUser, triggerHapticFeedback, completeOnboarding]);
 
   // Enter su ultimo campo → salva
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -420,6 +435,14 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
         </motion.div>
         </div>
       </div>
+
+      {showUnlockSetup && (
+        <UnlockPinModal
+          mode="set"
+          onDone={() => void completeOnboarding()}
+          onCancel={() => void completeOnboarding()}
+        />
+      )}
     </motion.div>
   );
 }
