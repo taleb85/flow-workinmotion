@@ -7,7 +7,6 @@ import {
   History, Sun, Moon,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CenteredModalPortal } from './ui/CenteredModalPortal';
 import type { Shift, PunchRecord, User, ShiftAuditEntry } from '../types';
 // import type { BreakRule } from '../utils/breakRules';
 import {
@@ -802,6 +801,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       setShowPeriodPopover(false);
       setDeptDropdownOpen(false);
       setActionsDrawerOpen(false);
+      setActionsDrawerSection(null);
       // Chiudi modale creazione turno
       setCreateModal(null);
       // Chiudi drawer dettaglio (solo se nessuna modifica non salvata)
@@ -841,6 +841,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [actionsDrawerOpen, setActionsDrawerOpen] = useState(false);
   const [actionsDrawerSection, setActionsDrawerSection] = useState<'templates' | 'reorder' | null>(null);
+  /** Posizione del dropdown Azioni (portal su body: la fascia toolbar ha overflow-y:hidden). */
+  const [actionsDropdownStyle, setActionsDropdownStyle] = useState<React.CSSProperties>({});
   const actionsDrawerTriggerRef = useRef<HTMLDivElement>(null);
   const actionsDrawerPanelRef = useRef<HTMLDivElement>(null);
 
@@ -888,6 +890,18 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     };
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
+  }, [actionsDrawerOpen, closeActionsDrawer]);
+
+  /** Il dropdown è ancorato (fixed) al pulsante: se la pagina scorre si stacca, quindi si chiude.
+      Lo scroll interno al pannello non lo chiude. */
+  useEffect(() => {
+    if (!actionsDrawerOpen) return;
+    const onScroll = (e: Event) => {
+      if (actionsDrawerPanelRef.current?.contains(e.target as Node)) return;
+      closeActionsDrawer();
+    };
+    document.addEventListener('scroll', onScroll, { passive: true, capture: true });
+    return () => document.removeEventListener('scroll', onScroll, { capture: true });
   }, [actionsDrawerOpen, closeActionsDrawer]);
 
   // ── Freeze / PinPad state ──
@@ -2024,7 +2038,22 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           <div className="relative shrink-0" ref={actionsDrawerTriggerRef}>
             <button
               type="button"
-              onClick={() => setActionsDrawerOpen((open) => !open)}
+              onClick={() => {
+                if (!actionsDrawerOpen && actionsDrawerTriggerRef.current) {
+                  const rect = actionsDrawerTriggerRef.current.getBoundingClientRect();
+                  const width = Math.min(320, window.innerWidth - 24);
+                  const height = Math.min(480, window.innerHeight - 24);
+                  const gap = 8;
+                  // Sotto il pulsante; se non c'è spazio, sopra.
+                  const top = rect.bottom + gap + height > window.innerHeight
+                    ? Math.max(8, rect.top - gap - height)
+                    : rect.bottom + gap;
+                  // Allineato a destra del pulsante, senza uscire dallo schermo.
+                  const left = Math.min(window.innerWidth - width - 12, Math.max(12, rect.right - width));
+                  setActionsDropdownStyle({ top, left, width });
+                }
+                setActionsDrawerOpen((open) => !open);
+              }}
               className={`hidden md:flex shrink-0 items-center gap-1 rounded-lg bg-white/10 px-2 py-1.5 text-[0.625rem] md:text-[0.6875rem] font-bold uppercase tracking-wider transition-colors md:px-2.5 ${
  actionsDrawerOpen ? 'text-white' : 'text-white/60 hover:text-white'
  }`}
@@ -2038,16 +2067,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             </button>
           </div>
 
-          {actionsDrawerOpen && (
-            <CenteredModalPortal
-              open
-              onClose={closeActionsDrawer}
-              panelRef={actionsDrawerPanelRef}
-              backdropAriaLabel={t.cancel ?? 'Chiudi'}
-              ariaLabel={t.actions ?? 'Azioni'}
-              maxWidthClass="max-w-md"
-              maxHeightClass="max-h-[min(90dvh,720px)]"
-              panelClassName="py-1"
+          {actionsDrawerOpen && createPortal(
+            <div
+              ref={actionsDrawerPanelRef}
+              role="menu"
+              aria-label={t.actions ?? 'Azioni'}
+              className="fixed z-[10050] max-h-[min(80dvh,480px)] overflow-y-auto overscroll-contain rounded-2xl border border-white/[0.14] py-1 shadow-2xl"
+              style={{ ...actionsDropdownStyle, background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
             >
               <div className="mb-1 flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-white">{t.actions ?? 'Azioni'}</span>
@@ -2204,7 +2230,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 </>
               )}
 
-            </CenteredModalPortal>
+            </div>,
+            document.body
           )}
           </>
           )}
