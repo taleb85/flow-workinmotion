@@ -2790,7 +2790,7 @@ className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-m
       )}
 
       {showImportConfirm && importFile && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
+        <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/40 p-4">
           <div className="modal-glass-panel w-full max-w-sm rounded-2xl p-6">
             <h3 className="mb-2 text-sm font-semibold text-white">{t.attention}</h3>
             <p className="mb-4 text-sm text-white/80">{t.import_warning}</p>
@@ -2944,7 +2944,7 @@ function BreakRuleModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/40 p-4"
       onClick={onClose}
     >
       <motion.form
