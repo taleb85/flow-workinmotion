@@ -2544,10 +2544,11 @@ body {
   color: #60a5fa !important;
 }
 
-/* ── Override background solidi ── */
-[class*="surface-"] {
-  background: rgba(10, 10, 10, 0.82) !important;
-}
+/* NB: qui c'era `[class*="surface-"] { background: rgba(10,10,10,0.82) !important }`.
+   Il selettore era troppo largo: colpiva anche `surface-ghost-interactive`,
+   `surface-ghost`, `surface-glass*` (es. i pulsanti data del date picker),
+   imponendo un fondo quasi nero che annullava il vetro trasparente definito
+   più sopra. Ogni classe `surface-*` gestisce ora il proprio fondo. */
 
 /* ── Force page-level containers transparent ── */
 main,
