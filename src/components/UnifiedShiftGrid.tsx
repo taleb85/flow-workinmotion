@@ -2693,7 +2693,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       <TimeInputField value={editEndTime} onChange={setEditEndTime} size="md" className="w-full" disabled={selectedShift.approval_status !== 'draft'} />
                     </div>
                     <button type="button" onClick={handleSaveShiftEdit} disabled={saving || selectedShift.approval_status !== 'draft'}
-                      className="w-full rounded-lg bg-accent px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
+                      className="min-h-[2.75rem] w-full rounded-lg bg-white/20 px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-white/30 disabled:opacity-40 transition-colors uppercase tracking-wider">
                       {saving ? (t.saving ?? 'Salvataggio...') : <><Save className="h-3.5 w-3.5 inline-block mr-1.5" />{t.save_changes ?? 'Salva modifiche'}</>}
                     </button>
                   </div>
