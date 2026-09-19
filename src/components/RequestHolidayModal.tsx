@@ -98,7 +98,7 @@ export default function RequestHolidayModal({ isOpen, onClose, userId }: Request
   };
 
   const inputCls =
-    'w-full px-3 py-2.5 text-base rounded-2xl border border-white/20 focus:border-accent focus:ring-2 focus:ring-white/20 outline-none text-white placeholder:text-white/40 transition-colors bg-white/10' as const;
+    'w-full px-3 py-2.5 text-base rounded-2xl border border-white/20 focus:border-white/45 focus:ring-2 focus:ring-white/20 outline-none text-white placeholder:text-white/40 transition-colors bg-white/10' as const;
   const labelClsFull = 'block text-xs font-bold uppercase tracking-wider mb-1 text-white/80';
 
   if (!isOpen) return null;
@@ -175,7 +175,7 @@ export default function RequestHolidayModal({ isOpen, onClose, userId }: Request
                   lightHaptic();
                   handleClose();
                 }}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-white/15 active:bg-white/80"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-white/20 active:bg-white/80"
                 aria-label={t.cancel}
               >
                 <X className="h-4 w-4" />
@@ -195,14 +195,14 @@ export default function RequestHolidayModal({ isOpen, onClose, userId }: Request
                   lightHaptic();
                   handleClose();
                 }}
-                className="min-h-[3.25rem] rounded-2xl border border-white/20 text-base font-bold text-white/80 transition-colors"
+                className="min-h-[3.25rem] rounded-2xl border border-white/20 text-base font-bold text-white/80 transition-colors hover:bg-white/10 hover:text-white"
               >
                 {t.cancel}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !startDate || !endDate}
-                className="flex min-h-[3.25rem] items-center justify-center gap-2 rounded-2xl bg-accent text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-white/20 transition-colors hover:shadow-xl hover:shadow-white/30 disabled:cursor-not-allowed disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+                className="flex min-h-[3.25rem] items-center justify-center gap-2 rounded-2xl bg-white/20 text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-white/20 transition-colors hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
               >
                 {isSubmitting ? (
                   <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -237,8 +237,7 @@ export default function RequestHolidayModal({ isOpen, onClose, userId }: Request
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           onSubmit={handleSubmit}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-md rounded-2xl border border-white/[0.14] p-6 bg-transparent"
-          style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', boxShadow: '0 32px 80px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08)' }}
+          className="modal-glass-panel w-full max-w-md rounded-2xl p-6"
         >
           <div className="mb-5 flex items-center justify-between">
             <h3 className="text-base font-semibold text-white">{title}</h3>
@@ -259,7 +258,7 @@ export default function RequestHolidayModal({ isOpen, onClose, userId }: Request
           <button
             type="submit"
             disabled={isSubmitting || !startDate || !endDate}
-            className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-accent text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-white/20 transition-colors hover:shadow-xl hover:shadow-white/30 disabled:cursor-not-allowed disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+            className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white/20 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-white/20 transition-colors hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-50 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           >
             {isSubmitting ? (
               <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
