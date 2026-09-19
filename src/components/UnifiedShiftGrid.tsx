@@ -484,7 +484,7 @@ const GradientIconButton = memo(function GradientIconButton({
   children: ReactNode;
   gradientFrom: string;
   gradientTo: string;
-  /** Classi di espansione a hover del pulsante: larghezza + margini negativi (metà) per crescere dal centro senza spostare i vicini. Es. 'hover:w-[9.5rem] hover:-mx-[3.75rem]' */
+  /** Classi di espansione a hover del pulsante: larghezza + margine sinistro negativo (metà) per crescere dal centro spingendo i vicini. Es. 'hover:w-[9.5rem] hover:-ml-[3.75rem]' */
   expandClass: string;
   baseClass: string;
 }) {
@@ -2527,7 +2527,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => setDrawerDeleteConfirm(true)}
                       gradientFrom="#fb7185"
                       gradientTo="#e11d48"
-                      expandClass="hover:w-[5.5rem] hover:-mx-[1.75rem]"
+                      expandClass="hover:w-[5.5rem] hover:-ml-[1.75rem]"
                       baseClass="bg-rose-600/20 text-rose-300">
                       <Trash2 className="h-4 w-4" />
                     </GradientIconButton>
@@ -2557,7 +2557,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => setShowShiftAuditModal(true)}
                       gradientFrom="#22d3ee"
                       gradientTo="#0a84ff"
-                      expandClass="hover:w-[9.5rem] hover:-mx-[3.75rem]"
+                      expandClass="hover:w-[9.5rem] hover:-ml-[3.75rem]"
                       baseClass="bg-white/10 text-white/50">
                       <History className="h-4 w-4" />
                     </GradientIconButton>
@@ -2569,7 +2569,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   onClick={handleCloseDrawer}
                   gradientFrom="#94a3b8"
                   gradientTo="#475569"
-                  expandClass="hover:w-[5.5rem] hover:-mx-[1.75rem]"
+                  expandClass="hover:w-[5.5rem] hover:-ml-[1.75rem]"
                   baseClass="bg-white/10 text-white/50">
                   <X className="h-4 w-4" />
                 </GradientIconButton>
