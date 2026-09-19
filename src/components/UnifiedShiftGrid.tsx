@@ -2740,7 +2740,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             className={`w-full ${editOut ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
                         </div>
                         <button type="button" onClick={() => void handleConfirmPunches()} disabled={!showEditFields || saving || (!editIn && !editOut)}
-                          className={`${punchActionRequired ? 'glow-pulse ' : ''}w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider disabled:opacity-40`}>
+                          className={`${punchActionRequired ? 'glow-pulse ' : ''}min-h-[2.75rem] w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider disabled:opacity-40`}>
                           <Check className="h-3.5 w-3.5 inline-block mr-1.5" />{t.confirm_punches ?? 'Conferma timbrature'}
                         </button>
                         {isFrozen(selectedShift) && (
