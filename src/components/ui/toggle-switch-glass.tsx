@@ -73,7 +73,7 @@ export default function ToggleSwitch({
 
   const shouldReduceMotion = useReducedMotion();
 
-  const { trackWidth, trackHeight, knobWidth, knobHeight, knobMargin, indicatorWidth, indicatorHeight, indicatorOffset, circleSize } = sizeConfig[size];
+  const { trackWidth, trackHeight, knobWidth, knobMargin, indicatorWidth, indicatorHeight, indicatorOffset, circleSize } = sizeConfig[size];
 
   const calculateTravel = () => {
     return trackWidth - knobWidth - knobMargin * 2;

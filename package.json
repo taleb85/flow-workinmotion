@@ -39,7 +39,8 @@
     "db:migrate-shift-audit-log": "node --dns-result-order=ipv4first scripts/run-shift-audit-log-migration.mjs",
     "icons:pwa": "node scripts/generate-pwa-icons.mjs",
     "db:dedupe-shifts": "node scripts/dedupe-shifts-rest.mjs",
-    "db:dedupe-shifts:execute": "node scripts/dedupe-shifts-rest.mjs --execute"
+    "db:dedupe-shifts:execute": "node scripts/dedupe-shifts-rest.mjs --execute",
+    "db:migrate-app-security": "node --dns-result-order=ipv4first scripts/run-migration-app-security.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

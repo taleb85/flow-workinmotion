@@ -243,8 +243,9 @@
     </script>
 
     <!-- Favicon + PWA (logo Flow — barre arancioni su #1a2744) -->
-    <!-- Cache-buster statico: nessuna dipendenza da env (un %VITE_% non definito
-         in CI faceva fallire la build con "URI malformed" nel plugin PWA). -->
+    <!-- Cache-buster statico: nessuna dipendenza da variabili d'ambiente
+         (una variabile Vite non definita in CI faceva fallire la build con
+         "URI malformed" nel plugin PWA). -->
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=v9" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png?v=v9" />
     <link rel="shortcut icon" href="/favicon.ico?v=v9" />
