@@ -465,8 +465,8 @@ type ShiftGridDesktopRowProps = {
 
 /**
  * Pulsante a icona con effetto "gradient pill" al hover:
- * il cerchio si allarga, entra il gradiente (con alone sfocato dietro),
- * l'icona si riduce a 0 e compare l'etichetta con un ritardo.
+ * la pill si espande dal centro (l'icona resta ferma e si riduce a 0),
+ * entra il gradiente con alone sfocato e compare l'etichetta con un ritardo.
  */
 const GradientIconButton = memo(function GradientIconButton({
   label,
@@ -484,7 +484,7 @@ const GradientIconButton = memo(function GradientIconButton({
   children: ReactNode;
   gradientFrom: string;
   gradientTo: string;
-  /** Larghezza a hover, es. 'hover:w-[9.5rem]' */
+  /** Classi di espansione a hover: larghezza + margini negativi (metà) per crescere dal centro senza spostare i vicini. Es. 'group-hover:w-[9.5rem] group-hover:-mx-[3.75rem]' */
   expandClass: string;
   baseClass: string;
 }) {
@@ -495,7 +495,7 @@ const GradientIconButton = memo(function GradientIconButton({
       title={title}
       aria-label={title}
       style={{ '--gradient-from': gradientFrom, '--gradient-to': gradientTo } as CSSProperties}
-      className={`group relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-500 ${expandClass} ${baseClass}`}
+      className={`group relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-500 hover:z-20 ${expandClass} ${baseClass}`}
     >
       {/* Gradiente di sfondo (hover) */}
       <span
@@ -505,13 +505,13 @@ const GradientIconButton = memo(function GradientIconButton({
       {/* Alone sfocato (hover) */}
       <span
         aria-hidden
-        className="absolute inset-x-0 top-[8px] -z-10 h-full rounded-full bg-[linear-gradient(45deg,var(--gradient-from),var(--gradient-to))] opacity-0 blur-[15px] transition-all duration-500 group-hover:opacity-50"
+        className="absolute inset-x-0 top-[6px] -z-10 h-full rounded-full bg-[linear-gradient(45deg,var(--gradient-from),var(--gradient-to))] opacity-0 blur-[15px] transition-all duration-500 group-hover:opacity-50"
       />
-      {/* Icona: si riduce a 0 per lasciare spazio all'etichetta */}
+      {/* Icona: resta al centro e si riduce a 0 per lasciare spazio all'etichetta */}
       <span className="relative z-10 flex shrink-0 items-center justify-center transition-all duration-500 group-hover:scale-0">
         {children}
       </span>
-      {/* Etichetta: compare in ritardo */}
+      {/* Etichetta: compare in ritardo, centrata sulla pill */}
       <span className="absolute scale-0 whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider text-white transition-all duration-500 delay-150 group-hover:scale-100">
         {label}
       </span>
@@ -2527,7 +2527,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => setDrawerDeleteConfirm(true)}
                       gradientFrom="#fb7185"
                       gradientTo="#e11d48"
-                      expandClass="hover:w-[5.5rem]"
+                      expandClass="group-hover:w-[5.5rem] group-hover:-mx-[1.75rem]"
                       baseClass="bg-rose-600/20 text-rose-300">
                       <Trash2 className="h-4 w-4" />
                     </GradientIconButton>
@@ -2557,7 +2557,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => setShowShiftAuditModal(true)}
                       gradientFrom="#22d3ee"
                       gradientTo="#0a84ff"
-                      expandClass="hover:w-[9.5rem]"
+                      expandClass="group-hover:w-[9.5rem] group-hover:-mx-[3.75rem]"
                       baseClass="bg-white/10 text-white/50">
                       <History className="h-4 w-4" />
                     </GradientIconButton>
@@ -2569,7 +2569,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   onClick={handleCloseDrawer}
                   gradientFrom="#94a3b8"
                   gradientTo="#475569"
-                  expandClass="hover:w-[5.5rem]"
+                  expandClass="group-hover:w-[5.5rem] group-hover:-mx-[1.75rem]"
                   baseClass="bg-white/10 text-white/50">
                   <X className="h-4 w-4" />
                 </GradientIconButton>
