@@ -13,8 +13,7 @@ import { isManagementRole, isAdminOnly } from '../utils/permissions';
 import { translateRole } from '../utils/roles';
 import { translateDepartmentValue } from '../utils/departmentLabels';
 import { PinPadModal } from './ui/PinPadModal';
-import { UnlockPinModal } from './ui/UnlockPinModal';
-import { getAppLockStatus, resetAppLock, type AppLockStatus } from '../utils/appLock';
+import { getAppLockStatus, type AppLockStatus } from '../utils/appLock';
 import { isCurrentDeviceRegistered, revokeCurrentDevice } from '../utils/userDevices';
 import { ProfileFormSelf, type ProfileFormSelfData } from './UserProfile';
 import ProfilePhotoSourceSheet from './profile/ProfilePhotoSourceSheet';
@@ -338,9 +337,8 @@ export default function ProfileNavTabPanel({
   const [expanded, setExpanded] = useState<'settings' | 'notif' | 'lang' | 'security' | null>(null);
   const toggleSection = (s: typeof expanded) => setExpanded(prev => prev === s ? null : s);
 
-  // ── Sicurezza: PIN di sblocco + riconoscimento dispositivo ─────────────────
+  // ── Sicurezza: PIN del profilo + riconoscimento dispositivo ────────────────
   const [appLock, setAppLock] = useState<AppLockStatus | null>(null);
-  const [unlockPinModal, setUnlockPinModal] = useState<'set' | 'change' | null>(null);
   const [deviceRegistered, setDeviceRegistered] = useState<boolean | null>(null);
   const [deviceBusy, setDeviceBusy] = useState(false);
 
@@ -358,18 +356,6 @@ export default function ProfileNavTabPanel({
     void refreshSecurityInfo();
   }, [refreshSecurityInfo]);
 
-  const handleRemoveUnlockPin = useCallback(async () => {
-    if (!currentUser) return;
-    if (!window.confirm(tv.unlock_pin_remove ?? 'Rimuovi')) return;
-    const ok = await resetAppLock(currentUser.id);
-    if (ok) {
-      showSuccess(tv.unlock_pin_removed ?? 'PIN di sblocco rimosso.');
-      await refreshSecurityInfo();
-    } else {
-      showError(tv.unlock_pin_error ?? 'Operazione non riuscita. Riprova.');
-    }
-  }, [currentUser, tv, showSuccess, showError, refreshSecurityInfo]);
-
   const handleRevokeDevice = useCallback(async () => {
     if (!currentUser || deviceBusy) return;
     setDeviceBusy(true);
@@ -379,12 +365,12 @@ export default function ProfileNavTabPanel({
         showSuccess(tv.profile_tab_device_revoked_ok ?? 'Dispositivo rimosso.');
         setDeviceRegistered(false);
       } else {
-        showError(tv.unlock_pin_error ?? 'Operazione non riuscita. Riprova.');
+        showError(t.save_error_retry ?? 'Errore nel salvataggio. Riprova.');
       }
     } finally {
       setDeviceBusy(false);
     }
-  }, [currentUser, deviceBusy, tv, showSuccess, showError]);
+  }, [currentUser, deviceBusy, tv, showSuccess, showError, t.save_error_retry]);
 
   const [savedLang, setSavedLang] = useState<import('../types').Language | null>(() => readStoredUiLanguage());
   const [pendingLang, setPendingLang] = useState<import('../types').Language | null>(() => readStoredUiLanguage());
@@ -736,37 +722,18 @@ export default function ProfileNavTabPanel({
                 <div className="rounded-2xl px-4 py-4 text-white space-y-4" style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
                   <p className="text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.55)' }}>{tv.profile_tab_security_desc ?? ''}</p>
 
-                  {/* PIN di sblocco */}
+                  {/* PIN di sblocco = PIN del profilo */}
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)' }}>
                       <KeyRound className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.85)' }} aria-hidden />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>{tv.app_lock_setup_title ?? 'PIN di sblocco'}</p>
+                      <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>{tv.pin_for_profile ?? 'PIN del profilo'}</p>
                       <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                        {appLock?.configured ? (tv.unlock_pin_status_on ?? 'Attivo su questo dispositivo') : (tv.unlock_pin_status_off ?? 'Non impostato')}
+                        {appLock?.locked ? (tv.unlock_pin_status_off ?? 'Bloccato per troppi tentativi') : (tv.unlock_pin_status_on ?? 'In uso per lo sblocco')}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setUnlockPinModal(appLock?.configured ? 'change' : 'set')}
-                      className="rounded-xl px-3 py-2 text-xs font-bold flex-shrink-0"
-                      style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.20)' }}
-                    >
-                      {appLock?.configured ? (tv.unlock_pin_change ?? 'Cambia PIN') : (tv.unlock_pin_set ?? 'Imposta PIN')}
-                    </button>
                   </div>
-
-                  {appLock?.configured && (
-                    <button
-                      type="button"
-                      onClick={() => void handleRemoveUnlockPin()}
-                      className="text-xs font-semibold underline underline-offset-4"
-                      style={{ color: 'rgba(248,113,113,0.95)' }}
-                    >
-                      {tv.unlock_pin_remove ?? 'Rimuovi PIN'}
-                    </button>
-                  )}
 
                   {/* Dispositivo riconosciuto */}
                   <div className="flex items-center gap-3">
@@ -827,19 +794,6 @@ export default function ProfileNavTabPanel({
 
         </div>
       </motion.div>
-
-      {/* PIN di sblocco app — imposta/cambia + codice di recupero */}
-      {unlockPinModal && currentUser && (
-        <UnlockPinModal
-          mode={unlockPinModal}
-          onDone={() => {
-            setUnlockPinModal(null);
-            showSuccess(tv.unlock_pin_saved ?? 'PIN di sblocco salvato.');
-            void refreshSecurityInfo();
-          }}
-          onCancel={() => setUnlockPinModal(null)}
-        />
-      )}
 
       {/* PIN pad modal Area Gestionale */}
       <AnimatePresence>

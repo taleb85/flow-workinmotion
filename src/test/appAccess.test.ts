@@ -7,13 +7,10 @@ vi.mock('../lib/supabase', () => ({
 }));
 
 import {
-  formatRecoveryCode,
   isValidUnlockPin,
   minutesUntil,
   getAppLockStatus,
-  setAppLockPin,
   verifyAppLockPin,
-  recoverAppLockPin,
   resetAppLock,
 } from '../utils/appLock';
 import {
@@ -64,11 +61,6 @@ describe('appLock helpers', () => {
     expect(isValidUnlockPin('')).toBe(false);
   });
 
-  test('formatRecoveryCode raggruppa in blocchi da 4', () => {
-    expect(formatRecoveryCode('abcd1234ef56')).toBe('ABCD-1234-EF56');
-    expect(formatRecoveryCode('ABCD-1234-EF56')).toBe('ABCD-1234-EF56');
-  });
-
   test('minutesUntil arrotonda per eccesso e gestisce valori nulli', () => {
     expect(minutesUntil(null)).toBe(0);
     expect(minutesUntil(new Date(Date.now() + 1000).toISOString())).toBe(1);
@@ -78,70 +70,61 @@ describe('appLock helpers', () => {
 });
 
 describe('appLock client', () => {
-  test('status: configurazione assente', async () => {
-    rpcMock.mockResolvedValue({ data: { ok: true, configured: false, locked: false, failed_attempts: 0 }, error: null });
+  test('status: nessun lockout', async () => {
+    rpcMock.mockResolvedValue({ data: { ok: true, locked: false, locked_until: null, failed_attempts: 0 }, error: null });
+    expect(await getAppLockStatus('u1')).toEqual({
+      available: true,
+      locked: false,
+      lockedUntil: null,
+      failedAttempts: 0,
+    });
+    expect(rpcMock).toHaveBeenCalledWith('app_lock_status', { p_user_id: 'u1' });
+  });
+
+  test('status: lockout attivo', async () => {
+    const until = new Date(Date.now() + 600_000).toISOString();
+    rpcMock.mockResolvedValue({ data: { ok: true, locked: true, locked_until: until, failed_attempts: 0 }, error: null });
     const status = await getAppLockStatus('u1');
-    expect(status).toEqual({ available: true, configured: false, locked: false, lockedUntil: null, failedAttempts: 0 });
+    expect(status.locked).toBe(true);
+    expect(status.lockedUntil).toBe(until);
   });
 
   test('status: RPC assente → unavailable', async () => {
     rpcMock.mockResolvedValue(MISSING_FUNCTION);
-    const status = await getAppLockStatus('u1');
-    expect(status.available).toBe(false);
+    expect((await getAppLockStatus('u1')).available).toBe(false);
+  });
+
+  test('verify: verifica il PIN del profilo lato server', async () => {
+    rpcMock.mockResolvedValue({ data: { ok: true }, error: null });
+    expect(await verifyAppLockPin('u1', '1234')).toEqual({ ok: true });
+    expect(rpcMock).toHaveBeenCalledWith('app_lock_verify', { p_user_id: 'u1', p_pin: '1234' });
   });
 
   test('verify: PIN errato con tentativi rimasti', async () => {
     rpcMock.mockResolvedValue({ data: { ok: false, reason: 'wrong_pin', remaining_attempts: 3 }, error: null });
-    const res = await verifyAppLockPin('u1', '0000');
-    expect(res).toEqual({ ok: false, reason: 'wrong_pin', remainingAttempts: 3 });
+    expect(await verifyAppLockPin('u1', '0000')).toEqual({ ok: false, reason: 'wrong_pin', remainingAttempts: 3 });
   });
 
   test('verify: blocco attivo', async () => {
     const until = new Date(Date.now() + 600_000).toISOString();
     rpcMock.mockResolvedValue({ data: { ok: false, reason: 'locked', locked_until: until }, error: null });
-    const res = await verifyAppLockPin('u1', '0000');
-    expect(res).toEqual({ ok: false, reason: 'locked', lockedUntil: until });
+    expect(await verifyAppLockPin('u1', '0000')).toEqual({ ok: false, reason: 'locked', lockedUntil: until });
   });
 
-  test('verify: successo', async () => {
-    rpcMock.mockResolvedValue({ data: { ok: true }, error: null });
-    expect(await verifyAppLockPin('u1', '1234')).toEqual({ ok: true });
-    expect(rpcMock).toHaveBeenCalledWith('app_lock_verify_pin', { p_user_id: 'u1', p_pin: '1234' });
+  test('verify: utente non trovato', async () => {
+    rpcMock.mockResolvedValue({ data: { ok: false, reason: 'not_found' }, error: null });
+    expect(await verifyAppLockPin('u1', '0000')).toEqual({ ok: false, reason: 'not_found' });
   });
 
-  test('set: PIN formalmente non valido viene rifiutato senza chiamare il server', async () => {
-    const res = await setAppLockPin('u1', '12');
-    expect(res).toEqual({ ok: false, reason: 'invalid_pin' });
-    expect(rpcMock).not.toHaveBeenCalled();
+  test('verify: RPC assente → unavailable (fallback locale)', async () => {
+    rpcMock.mockResolvedValue(MISSING_FUNCTION);
+    expect(await verifyAppLockPin('u1', '0000')).toEqual({ ok: false, reason: 'unavailable' });
   });
 
-  test('set: ritorna il codice di recupero una sola volta', async () => {
-    rpcMock.mockResolvedValue({ data: { ok: true, recovery_code: 'ABCD-1234-EF56' }, error: null });
-    expect(await setAppLockPin('u1', '1234')).toEqual({ ok: true, recoveryCode: 'ABCD-1234-EF56' });
-  });
-
-  test('recover: codice troppo corto rifiutato localmente', async () => {
-    const res = await recoverAppLockPin('u1', 'abc', '1234');
-    expect(res).toEqual({ ok: false, reason: 'wrong_code' });
-    expect(rpcMock).not.toHaveBeenCalled();
-  });
-
-  test('recover: codice valido → nuovo PIN e nuovo codice', async () => {
-    rpcMock.mockResolvedValue({ data: { ok: true, recovery_code: 'ZZZZ-9999-0000' }, error: null });
-    expect(await recoverAppLockPin('u1', 'abcd-1234-ef56', '5678')).toEqual({
-      ok: true,
-      recoveryCode: 'ZZZZ-9999-0000',
-    });
-  });
-
-  test('recover: codice errato', async () => {
-    rpcMock.mockResolvedValue({ data: { ok: false, reason: 'wrong_code' }, error: null });
-    expect(await recoverAppLockPin('u1', 'abcd-1234-ef56', '5678')).toEqual({ ok: false, reason: 'wrong_code' });
-  });
-
-  test('reset: rimuove il PIN di sblocco', async () => {
+  test('reset: azzera il lockout', async () => {
     rpcMock.mockResolvedValue({ data: { ok: true }, error: null });
     expect(await resetAppLock('u1')).toBe(true);
+    expect(rpcMock).toHaveBeenCalledWith('app_lock_reset', { p_user_id: 'u1' });
   });
 
   test('reset: errore server → false', async () => {

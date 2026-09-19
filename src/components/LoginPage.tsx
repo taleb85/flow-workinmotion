@@ -12,6 +12,7 @@ import { applyUnauthenticatedDocumentTheme } from '../utils/theme';
 import { decodeProfiloAccessToken } from '../config/appPaths';
 import { APP_SESSION_STORAGE_KEY, FLOW_INVITE_NAME_STORAGE_KEY, FLOW_INVITE_PIN_STORAGE_KEY } from '../constants/appSession';
 import { getDeviceUiLanguage } from '../utils/uiLanguagePreference';
+import { resetAppLock } from '../utils/appLock';
 import {
   findUserByNameAndPinAnyStatus,
   findUserByNameAndSecondaryPin,
@@ -242,6 +243,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
         theme: (user.theme ?? 'light') as Theme,
       } as UserType);
       setCurrentUser(safeUser);
+      // Il login completo (nome + PIN del profilo) azzera l'eventuale lockout di sblocco.
+      void resetAppLock(user.id);
       setTimeout(() => {
         clearLoading();
         onLogin();
