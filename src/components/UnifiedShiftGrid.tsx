@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo, useLayoutEffect, mem
 import { createPortal } from 'react-dom';
 import {
   CalendarDays, AlertTriangle, Check, Lock, Plus, Clock,
-  ChevronLeft, ChevronRight, Copy, Send, Filter, FileDown,
+  ChevronLeft, ChevronRight, Send, Filter, FileDown,
   Trash2, Save, X, ChevronDown, Unlock, Menu, ChevronUp, Pencil,
   History, Sun, Moon,
 } from 'lucide-react';
@@ -468,7 +468,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const sessionActive = isSessionElevated || !!globalPinSessionId;
   const {
     shifts: allShifts, punchRecords: allPunchRecords,
-    deleteShift, bulkCopyPreviousWeek, publishWeekShifts,
+    deleteShift, publishWeekShifts,
     addPunchRecord, updatePunchRecord, addShift, updateShift,
   } = useAppData();
   const { breakRules, featureFlags } = useAppConfig();
@@ -1183,13 +1183,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     if (count > 0) showSuccess((t.week_frozen ?? '{n} turni congelati.').replace('{n}', String(count)));
     else showError(t.no_shifts_to_freeze ?? 'Nessun turno da congelare.');
   }, [weekShifts, updateShift, showSuccess, showError, t]);
-
-  const handleCopyWeek = useCallback(async () => {
-    try {
-      const n = await bulkCopyPreviousWeek(weekStart);
-      showSuccess(n > 0 ? (t.copied_n_shifts ?? '{n} turni copiati.').replace('{n}', String(n)) : (t.no_shifts_to_copy ?? 'Nessun turno da copiare.'));
-    } catch { showError(t.error_generic ?? 'Errore.'); }
-  }, [bulkCopyPreviousWeek, weekStart, showSuccess, showError, t]);
 
   const handleExportPdf = useCallback(async () => {
     try {
@@ -2086,20 +2079,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
-
-              {isMgmt && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    closeActionsDrawer();
-                    void handleCopyWeek();
-                  }}
-                  className="flex w-full items-center gap-2 border-b border-white/10 px-4 py-2.5 text-left text-sm font-semibold text-white transition-colors hover:bg-white/10"
-                >
-                  <Copy className="h-4 w-4 shrink-0 text-white/50" strokeWidth={2.25} />
-                  {t.copy_week ?? 'Copia settimana'}
-                </button>
-              )}
 
               {canEdit && (
                 <>
