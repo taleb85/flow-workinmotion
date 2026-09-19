@@ -2610,6 +2610,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       <Unlock className="h-4 w-4 shrink-0" />
                     </GradientIconButton>
                   )}
+                  {canEdit && isFrozen(selectedShift) && (
+                    <button type="button" onClick={() => handleUnfreezeShift(selectedShift)}
+                      className="flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-white/20 px-3 text-[0.6875rem] font-bold text-accent hover:bg-white/30 transition-colors">
+                      <Lock className="h-3.5 w-3.5" />{t.wst_unfreeze_btn ?? 'Sblocca'}
+                    </button>
+                  )}
                   {isAdminOnly(currentUser) && shiftAuditEntries && shiftAuditEntries.length > 0 && (
                     <GradientIconButton
                       label={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
@@ -2838,8 +2844,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   </div>
                 );
               })()}
-              {/* Bottom row: Action buttons */}
-              <div className="col-span-1 md:col-span-2 flex flex-wrap gap-2">
+              {/* Bottom row: Action buttons (solo mobile: su desktop lo Scongela è accanto alle icone) */}
+              <div className="col-span-1 flex flex-wrap gap-2 md:hidden">
                 {canEdit && isFrozen(selectedShift) && (
                   <button type="button" onClick={() => handleUnfreezeShift(selectedShift)}
                     className="ml-auto flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-2 text-[0.6875rem] font-bold text-accent hover:bg-white/30 transition-colors border border-transparent hover:border-white/30">
