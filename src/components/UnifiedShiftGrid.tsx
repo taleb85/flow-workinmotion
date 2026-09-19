@@ -352,7 +352,6 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
       {weekDays.map((day, dIdx) => {
         const dateStr = format(day, 'yyyy-MM-dd');
         const groups = dayGroupsByUserDate.get(`${user.id}|${dateStr}`) ?? EMPTY_GROUPS;
-        const _weekStripe = isPeriodView && Math.floor(dIdx / 7) % 2 === 1;
         const weekEnd = isPeriodView && day.getDay() === 0;
         return (
           <td key={dIdx}
@@ -368,11 +367,11 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
               >
                 {canEdit ? (
                   <button type="button" onClick={() => onCreateShift(user.id, dateStr)}
-                    className={`rounded-lg border border-dashed border-white flex items-center justify-center text-[0.625rem] font-bold transition-colors opacity-0 group-hover:opacity-100 text-white [color:#fff_!important] ${isPeriodView ? 'w-7 h-7' : 'px-3 py-2'}`}
+                    className={`rounded-lg border border-dashed border-white flex items-center justify-center text-[0.625rem] font-bold transition-colors opacity-0 group-hover:opacity-100 text-white [color:#fff_!important] px-3 py-2`}
                     onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                   >
-                    <Plus className="h-3 w-3 inline-block" />{!isPeriodView && <span className="ml-1">{t.add_shift ?? 'Aggiungi'}</span>}
+                    <Plus className="h-3 w-3 inline-block" /><span className="ml-1">{t.add_shift ?? 'Aggiungi'}</span>
                   </button>
                 ) : (
                   <span className="text-[0.625rem] text-white/20 font-medium">&mdash;</span>
@@ -385,24 +384,24 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
                 const emptySlot = (slot: 'lunch' | 'evening', label: string) => (
                   canAddSecond && !(slot === 'lunch' ? lunch : evening) ? (
                     <button type="button" onClick={() => onCreateShift(user.id, dateStr, slot)}
-                      className={`w-full rounded-md border border-dashed border-white flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 text-white [color:#fff_!important] ${isPeriodView ? '' : 'text-[0.625rem] font-bold'}`}
-                      style={{ height: isPeriodView ? slotRowHeight - 2 : slotRowHeight }}
+                      className={`w-full rounded-md border border-dashed border-white flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 text-white [color:#fff_!important] text-[0.625rem] font-bold`}
+                      style={{ height: slotRowHeight }}
                       title={label}
                       onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                     >
-                      <Plus className={`${isPeriodView ? 'h-3 w-3' : 'inline-block h-3 w-3 mr-0.5'}`} />
-                      {!isPeriodView && label}
+                      <Plus className="inline-block h-3 w-3 mr-0.5" />
+                      {label}
                     </button>
                   ) : (
-                    <div style={{ height: isPeriodView ? slotRowHeight - 2 : slotRowHeight }} />
+                    <div style={{ height: slotRowHeight }} />
                   )
                 );
                 return (
-                  <div className={`flex flex-col ${isPeriodView ? 'gap-px' : ''}`} style={{ height: slotCellHeight }}>
+                  <div className="flex flex-col" style={{ height: slotCellHeight }}>
                     <div
                       className={`flex items-center flex-1 ${dropTargetKey ===`${user.id}_${dateStr}_lunch` ? 'ring-2 ring-inset ring-amber-400/50 rounded' : ''}`}
-                      style={{ ...(isPeriodView ? {} : { borderBottom: '1px solid rgba(255,255,255,0.10)', paddingLeft: '1px', paddingRight: '1px' }) }}
+                      style={{ borderBottom: '1px solid rgba(255,255,255,0.10)', paddingLeft: '1px', paddingRight: '1px' }}
                       onDragOver={(e) => onDragOver(e, `${user.id}_${dateStr}_lunch`)}
                       onDragLeave={onDragLeave}
                       onDrop={(e) => onDrop(e, user.id, dateStr, 'lunch')}
@@ -414,8 +413,8 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
                       ) : emptySlot('lunch', t.add_shift ?? 'Aggiungi')}
                     </div>
                     <div
-                      className={`flex items-center flex-1 ${isPeriodView ? 'border-t border-white/10' : ''} ${dropTargetKey ===`${user.id}_${dateStr}_evening` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
-                      style={{ ...(isPeriodView ? {} : { paddingLeft: '1px', paddingRight: '1px' }) }}
+                      className={`flex items-center flex-1 ${dropTargetKey ===`${user.id}_${dateStr}_evening` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+                      style={{ paddingLeft: '1px', paddingRight: '1px' }}
                       onDragOver={(e) => onDragOver(e, `${user.id}_${dateStr}_evening`)}
                       onDragLeave={onDragLeave}
                       onDrop={(e) => onDrop(e, user.id, dateStr, 'evening')}
@@ -968,7 +967,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const tableWidthStyle = isPeriodView
     ? { minWidth: tableMinWidth, width: tableMinWidth }
     : { minWidth: `min(${tableMinWidth}px, 100%)` };
-  const slotRowHeight = isPeriodView ? 28 : dayCount > 7 ? 28 : 36;
+  /** Altezza riga slot: identica nelle due viste (la vista periodo resta più densa
+      solo per larghezza colonne: 88px fissi + scroll orizzontale). */
+  const slotRowHeight = 36;
   const slotCellHeight = slotRowHeight * 2 + 16;
   const extraRowHeight = 16;
   const compactGrid = isPeriodView || dayCount > 7;
@@ -1725,7 +1726,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     const isDraft = g.shift.approval_status === 'draft';
     const isApproved = g.shift.approval_status === 'approved';
     const _isConfirmed = g.shift.approval_status === 'confirmed';
-    const display = getShiftCellDisplay(g, mode, weekPunchRecords, compact || isPeriodView);
+    const display = getShiftCellDisplay(g, mode, weekPunchRecords, compact);
     let borderColor = 'border-cyan-400/50';
     let bgColor = 'bg-white/[0.06]';
     let glow = '';
@@ -1738,7 +1739,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     if (isFrozen(g.shift)) { borderColor = 'border-emerald-400/80'; bgColor = 'bg-emerald-600/25'; }
 
     const timeOnly = (
-      <span className={`font-bold tabular-nums whitespace-nowrap ${layout === 'mobile' ? 'text-xs' : compact || isPeriodView ? 'text-[0.6875rem]' : 'text-xs'} ${g.isAbsent ? 'text-rose-400 line-through' : display.missingOut ? 'text-red-400' : 'text-white'}`}>
+      <span className={`font-bold tabular-nums whitespace-nowrap ${layout === 'mobile' ? 'text-xs' : compact ? 'text-[0.6875rem]' : 'text-xs'} ${g.isAbsent ? 'text-rose-400 line-through' : display.missingOut ? 'text-red-400' : 'text-white'}`}>
         {display.main}
       </span>
     );
@@ -1747,11 +1748,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         {display.breakSuffix}
       </span>
     ) : null;
-    const breakBesideIcons = layout === 'desktop' && !isPeriodView;
+    const breakBesideIcons = layout === 'desktop';
     const timeLabel = breakBesideIcons ? timeOnly : (
       <span className="inline-flex items-center gap-0.5 max-w-full">
         {timeOnly}
-        {!isPeriodView && breakBadge}
+        {breakBadge}
       </span>
     );
 
@@ -1778,35 +1779,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     const hasExtras = extraGroups.length > 0;
     const mainRowHeight = hasExtras
       ? Math.max(18, slotRowHeight - extraGroups.length * extraRowHeight - (extraGroups.length > 0 ? 2 : 0))
-      : slotRowHeight - (layout === 'desktop' && isPeriodView ? 2 : 4);
+      : slotRowHeight - 4;
 
-    if (layout === 'desktop' && isPeriodView) {
-      let accent = 'border-cyan-400';
-      if (isDraft) accent = 'border-blue-400';
-      else if (isApproved) accent = 'border-emerald-400';
-      else if (g.isAbsent) accent = 'border-rose-400';
-      else if (g.isMissingPunch) accent = 'border-amber-400';
-      else if (display.missingOut) accent = 'border-red-400';
-      else if (mode === 'realtime' && g.punchIn) accent = 'border-emerald-400/80';
-      return (
-        <div className={`flex w-full min-w-0 flex-col ${hasExtras ? 'gap-0.5 justify-center' : ''}`} style={{ minHeight: slotRowHeight - 2 }}>
-          <button
-            type="button"
-            title={display.title ?? formatShiftTimeRangeFull(g.shift.start_time, g.shift.end_time)}
-            onClick={() => handleOpenDrawer(g.shift)}
-            onContextMenu={(e) => handleShiftContextMenu(e, g.shift, g)}
-            draggable={canEdit}
-            onDragStart={(e) => handleDragStart(e, g.shift.id)}
-            onDragEnd={handleDragEnd}
-            className={`w-full flex items-center justify-center rounded-md border-l-[0.1875rem] ${accent} transition-colors ${g.isAbsent ? 'opacity-70' : ''} ${!isApproved && !isFrozen(g.shift) ? 'border-dashed' : ''}`}
-            style={{ height: mainRowHeight, minHeight: mainRowHeight }}
-          >
-            {timeLabel}
-          </button>
-          {renderExtraShiftRows(extraGroups, 'desktop')}
-        </div>
-      );
-    }
     return (
       <div className={`flex w-full min-w-0 flex-col ${hasExtras ? 'gap-0.5 justify-center' : ''}`}>
         <button type="button" onClick={() => handleOpenDrawer(g.shift)} title={display.title}
@@ -1831,7 +1805,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         {renderExtraShiftRows(extraGroups, 'desktop')}
       </div>
     );
-  }, [t, mode, weekPunchRecords, isPeriodView, handleOpenDrawer, handleShiftContextMenu, handleDragStart, handleDragEnd, canEdit, extraRowHeight, slotRowHeight, renderExtraShiftRows]);
+  }, [t, mode, weekPunchRecords, handleOpenDrawer, handleShiftContextMenu, handleDragStart, handleDragEnd, canEdit, extraRowHeight, slotRowHeight, renderExtraShiftRows]);
 
   return (
     <div ref={gridRootRef} className="w-full flex-none min-h-0 flex flex-col font-sans md:flex-1">
@@ -2321,7 +2295,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 {t.employee ?? 'Dipendente'}
               </th>
               {weekDays.map((day, i) => {
-                const _weekStripe = isPeriodView && Math.floor(i / 7) % 2 === 1;
                 const weekEnd = isPeriodView && day.getDay() === 0;
                 return (
                   <th
@@ -2329,20 +2302,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     title={format(day, 'EEEE d MMMM', { locale })}
                     className={`px-1.5 py-1.5 text-center border-b border-white/10 ${weekEnd ? 'border-r-2 border-r-white/20' : ''} ${isToday(day) ? '!border-b-white' : ''}`}
                   >
-                    {isPeriodView ? (
-                      <>
-                        <div className={`text-[0.5625rem] font-bold uppercase leading-none ${isToday(day) ? 'text-white/60' : 'text-white/20'}`}>{format(day, 'EEEEE', { locale })}</div>
-                        <div className={`text-sm font-black leading-tight ${isToday(day) ? 'text-white' : 'text-white/45'}`}>{format(day, 'd')}</div>
-                      </>
-                    ) : (
-                      <>
-                        <div className={`text-[0.625rem] font-bold uppercase tracking-wider ${isToday(day) ? 'text-white/80' : 'text-white/25'}`}>{format(day, 'EEE', { locale })}</div>
-                        <div className={`text-sm font-black ${isToday(day) ? 'text-white' : 'text-white/50'}`}>
-                          {format(day, 'd')}
-                          <span className="ml-1 text-[0.625rem] font-bold uppercase">{format(day, 'MMM', { locale })}</span>
-                        </div>
-                      </>
-                    )}
+                    <div className={`text-[0.625rem] font-bold uppercase tracking-wider ${isToday(day) ? 'text-white/80' : 'text-white/25'}`}>{format(day, 'EEE', { locale })}</div>
+                    <div className={`text-sm font-black ${isToday(day) ? 'text-white' : 'text-white/50'}`}>
+                      {format(day, 'd')}
+                      <span className="ml-1 text-[0.625rem] font-bold uppercase">{format(day, 'MMM', { locale })}</span>
+                    </div>
                   </th>
                 );
               })}
@@ -2376,8 +2340,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               />
             ))}
           </tbody>
-          {/* ── Riepilogo persone in turno (divise pranzo/cena) — solo vista settimanale ── */}
-          {!isPeriodView && (
+          {/* ── Riepilogo persone in turno (divise pranzo/cena) ── */}
           <tfoot className="sticky bottom-0 z-20 bg-transparent backdrop-blur-lg">
             <tr>
               <th className={`sticky left-0 z-30 text-left px-2 py-1.5 text-[0.625rem] font-bold uppercase tracking-wider text-white/50 border-t border-white/10 bg-transparent backdrop-blur-lg`}>
@@ -2405,7 +2368,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               <td className="px-1 py-1.5 text-center border-t border-white/10" />
             </tr>
           </tfoot>
-          )}
         </table>
       </div>
 
