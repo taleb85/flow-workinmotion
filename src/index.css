@@ -2304,13 +2304,13 @@ a.border-neutral-500 {
   background: rgba(10, 10, 10, 0.82) !important;
 }
 
-/* Dropdown panels — esclusi i form control (select/input/textarea) e il wrapper del calendario
-   (rdp-dropdown_root) che usano il proprio stile */
+/* Dropdown panels — esclusi i form control (select/input/textarea), il wrapper del calendario
+   (rdp-dropdown_root) e i menu che gestiscono il proprio vetro (presenze-actions-glass) */
 [class*="dropdown"]:not(select):not(input):not(textarea):not(.rdp-dropdown_root),
 [class*="popover"]:not(select):not(input):not(textarea),
 [data-radix-popper-content-wrapper] > div,
 [role="listbox"],
-[role="menu"] {
+[role="menu"]:not(.presenze-actions-glass) {
   background: rgba(5, 5, 5, 0.92) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
