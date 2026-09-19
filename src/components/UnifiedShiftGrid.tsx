@@ -1846,11 +1846,19 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
 .wst-col-scrolled.wst-col-scrolled { background-color: transparent !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
 .wst-col-scrolled th { color: #ffffff !important; }
 /* Toolbar Presenze: vetro trasparente (solo blur, nessun colore) quando sovrapposta
-   al contenuto durante lo scroll — vale su mobile e desktop. */
+   al contenuto durante lo scroll — vale su mobile e desktop.
+   Il vetro è "totale": la fascia esce dal gutter orizzontale del contenuto e copre
+   tutta la larghezza dello schermo; il padding interno tiene allineati i pulsanti. */
 .toolbar-band-over-content {
   background: transparent;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
+  width: auto;
+  max-width: none;
+  margin-left: calc(-1 * (env(safe-area-inset-left, 0px) + var(--layout-app-px, 1rem)));
+  margin-right: calc(-1 * (env(safe-area-inset-right, 0px) + var(--layout-app-px, 1rem)));
+  padding-left: calc(env(safe-area-inset-left, 0px) + var(--layout-app-px, 1rem));
+  padding-right: calc(env(safe-area-inset-right, 0px) + var(--layout-app-px, 1rem));
 }`}</style>
       {mode === 'planning' && (
         <style>{`
