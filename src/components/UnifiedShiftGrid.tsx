@@ -2707,7 +2707,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 {selectedShift && selectedShift.approval_status !== 'draft' && (() => {
                   const { in: punchIn, out: punchOut } = getPunchForShift(selectedShift);
                   const hasIn = !!punchIn; const hasOut = !!punchOut;
-                  const showEditFields = canEdit && !isFrozen(selectedShift);
+                  // Turno approvato: timbrature in sola lettura (nessuna modifica dal drawer).
+                  const showEditFields = canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'approved';
                   return (
                     <div className="space-y-3">
                       <div className={`flex items-center gap-2 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-600/10 p-3 ${(!hasIn && !hasOut) ? 'border-2 border-amber-500/60 animate-pulse' : ''}`}>
