@@ -2198,7 +2198,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               role="menu"
               aria-label={t.actions ?? 'Azioni'}
               className="fixed z-[10050] max-h-[min(80dvh,480px)] overflow-y-auto overscroll-contain rounded-2xl border border-white/[0.14] py-1 shadow-2xl"
-              style={{ ...actionsDropdownStyle, background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
+              style={{ ...actionsDropdownStyle, background: 'transparent', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
             >
               <div className="mb-1 flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-white">{t.actions ?? 'Azioni'}</span>
@@ -3261,7 +3261,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {isSelectionMode && createPortal(
         <div
           className="fixed bottom-[calc(var(--app-bottom-nav-offset,64px)+0.5rem)] left-1/2 z-[10060] flex -translate-x-1/2 items-center gap-1.5 rounded-2xl border border-white/[0.14] px-2 py-2 shadow-2xl md:bottom-6 md:gap-2 md:px-2.5"
-          style={{ background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
+          style={{ background: 'transparent', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
         >
           <span className="whitespace-nowrap px-1 text-xs font-bold tabular-nums text-white">
             {(t.shifts_selected ?? '{n} turni selezionati').replace('{n}', String(selectedShiftIds.size))}
