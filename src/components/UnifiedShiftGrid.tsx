@@ -2777,7 +2777,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 })();
                 const frozen = isFrozen(selectedShift);
                 return (
-                  <div className="col-span-1 md:col-span-2">
+                  <div className="col-span-1 md:col-span-2 order-first">
                     <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-pink-600/10 px-2.5 py-1.5">
                       <div className="flex min-h-[1.875rem] items-center justify-between gap-3">
                         {/* Lato sinistro: riepilogo ore */}
