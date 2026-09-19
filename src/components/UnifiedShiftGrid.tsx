@@ -535,7 +535,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     let initialTop: number | null = null;
     const update = () => {
       const top = band.getBoundingClientRect().top;
-      if (initialTop === null || (scroller && scroller.scrollTop <= 1)) {
+      // Senza contenitore scrollabile interno lo scroll è quello del documento.
+      const atScrollTop = scroller ? scroller.scrollTop <= 1 : window.scrollY <= 1;
+      if (initialTop === null || atScrollTop) {
         initialTop = top;
         setToolbarOverlapping(false);
         return;
@@ -543,12 +545,14 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       setToolbarOverlapping(top < initialTop - 1);
     };
     update();
-    scroller?.addEventListener('scroll', update, { passive: true });
+    if (scroller) scroller.addEventListener('scroll', update, { passive: true });
+    else window.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', update);
     const ro = new ResizeObserver(update);
     ro.observe(band);
     return () => {
-      scroller?.removeEventListener('scroll', update);
+      if (scroller) scroller.removeEventListener('scroll', update);
+      else window.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
       ro.disconnect();
     };
@@ -1841,13 +1845,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
    senza colore — solo blur, niente fondo nero. */
 .wst-col-scrolled.wst-col-scrolled { background-color: transparent !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
 .wst-col-scrolled th { color: #ffffff !important; }
-/* Toolbar Presenze mobile: vetro trasparente (solo blur, nessun colore) quando sovrapposta */
-@media (max-width: 767px) {
-  .toolbar-band-over-content {
-    background: transparent;
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
-  }
+/* Toolbar Presenze: vetro trasparente (solo blur, nessun colore) quando sovrapposta
+   al contenuto durante lo scroll — vale su mobile e desktop. */
+.toolbar-band-over-content {
+  background: transparent;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }`}</style>
       {mode === 'planning' && (
         <style>{`
