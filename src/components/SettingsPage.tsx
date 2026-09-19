@@ -2940,7 +2940,7 @@ function BreakRuleForm({
     `cursor-pointer px-2.5 py-1 text-xs font-semibold transition-colors ${
       active
         ? 'rounded-full border border-white/60 bg-white/25 text-white'
-        : 'rounded-xl border border-white/20 !rounded-full text-white/70 surface-ghost-interactive hover:border-white/45 hover:text-white'
+        : 'rounded-xl border border-white/20 !rounded-full text-white/70 hover:border-white/45 hover:bg-white/10 hover:text-white'
     }`;
 
   return (
@@ -3018,7 +3018,7 @@ function BreakRuleForm({
                       className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
                         icon === key
                           ? 'border-white/60 bg-white/25 text-white'
-                          : 'border-white/20 text-white/60 surface-ghost-interactive hover:border-white/45 hover:text-white'
+                          : 'border-white/20 text-white/60 hover:border-white/45 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -3152,13 +3152,13 @@ function BreakRuleForm({
                     <button
                       type="button"
                       onClick={() => setMinHours((h) => Math.max(0.5, Math.round((h - 0.5) * 10) / 10))}
-                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 font-bold text-white/80 surface-ghost-interactive"
+                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 font-bold text-white/80 hover:border-white/45 hover:bg-white/10 hover:text-white"
                     >−</button>
                     <span className="w-16 text-center text-sm font-bold text-white">{minHours}h</span>
                     <button
                       type="button"
                       onClick={() => setMinHours((h) => Math.min(12, Math.round((h + 0.5) * 10) / 10))}
-                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 font-bold text-white/80 surface-ghost-interactive"
+                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 font-bold text-white/80 hover:border-white/45 hover:bg-white/10 hover:text-white"
                     >+</button>
                   </div>
                 )}
