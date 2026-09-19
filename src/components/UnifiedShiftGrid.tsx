@@ -2793,9 +2793,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                           <span className="text-xs font-bold text-white tabular-nums" title={t.gross_hours ?? 'Ore lorde'}>{formatMinutesToHoursAndMinutes(grossMins)}</span>
                           <span className="text-xs text-white/25">→</span>
                           <span className="text-xs font-black text-emerald-400 tabular-nums" title={t.net_hours ?? 'Ore nette'}>{formatMinutesToHoursAndMinutes(netMins)}</span>
-                          {breakMins > 0 && (
-                            <span className="text-xs font-bold text-amber-400 tabular-nums" title={t.break_deduction ?? 'Detrazione pausa'}>−{breakMins}' {t.break_label_short ?? 'Pausa'}</span>
-                          )}
+                          <span className="text-xs font-bold text-amber-400 tabular-nums" title={t.break_deduction ?? 'Detrazione pausa'}>−{breakMins}' {t.break_label_short ?? 'Pausa'}</span>
                         </div>
                         {/* Lato destro: pausa + navigazione revisione */}
                         <div className="flex shrink-0 items-center gap-3">
