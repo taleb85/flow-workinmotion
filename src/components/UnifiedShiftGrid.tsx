@@ -2576,13 +2576,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 <p className="min-w-0 truncate text-base md:text-sm text-white font-semibold uppercase">· {format(parseISO(selectedShift.date), 'EEE d/MM', { locale })} — {selectedShift.start_time?.slice(0, 5)}-{selectedShift.end_time?.slice(0, 5)}</p>
               </div>
               <div className="hidden md:flex shrink-0 items-center gap-2">
-                {reviewQueue && (
-                  <>
-                    <span className="text-[0.625rem] font-bold text-white/50 tabular-nums">{reviewIdx + 1}/{reviewQueue.length}</span>
-                    <button type="button" disabled={reviewIdx <= 0} onClick={() => { const next = reviewIdx - 1; if (next >= 0) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg border border-white/20 bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-4 w-4" /></button>
-                    <button type="button" disabled={reviewIdx >= reviewQueue.length - 1} onClick={() => { const next = reviewIdx + 1; if (next < reviewQueue.length) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg border border-white/20 bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-4 w-4" /></button>
-                  </>
-                )}
                 {/* Desktop: azioni a icona (l'orario del turno è già visibile a sinistra) */}
                 <div className="flex items-center gap-2">
                   {canDeleteShift(selectedShift) && !drawerDeleteConfirm && (
@@ -2789,9 +2782,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             <span className="text-xs font-bold text-amber-400 tabular-nums" title={t.break_deduction ?? 'Detrazione pausa'}>−{breakMins}'</span>
                           )}
                         </div>
-                        {/* Lato destro: pulsante Salva (affianco alla spunta) + toggle pausa */}
-                        {!frozen && showBreakOptions && (
-                          <div className="flex shrink-0 items-center gap-3">
+                        {/* Lato destro: pausa + navigazione revisione */}
+                        <div className="flex shrink-0 items-center gap-3">
+                          {!frozen && showBreakOptions && (
+                            <>
                             <AnimatePresence>
                               {breakUnsaved && (
                                 <motion.button
@@ -2829,8 +2823,16 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                                 <span className="text-[0.625rem] font-bold text-amber-400 whitespace-nowrap">{autoBreakLabel}</span>
                               </label>
                             )}
-                          </div>
-                        )}
+                            </>
+                          )}
+                          {reviewQueue && (
+                            <>
+                              <span className="text-[0.625rem] font-bold text-white/50 tabular-nums">{reviewIdx + 1}/{reviewQueue.length}</span>
+                              <button type="button" disabled={reviewIdx <= 0} onClick={() => { const next = reviewIdx - 1; if (next >= 0) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg border border-white/20 bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-4 w-4" /></button>
+                              <button type="button" disabled={reviewIdx >= reviewQueue.length - 1} onClick={() => { const next = reviewIdx + 1; if (next < reviewQueue.length) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg border border-white/20 bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-4 w-4" /></button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
