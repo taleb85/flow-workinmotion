@@ -2827,7 +2827,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                           )}
                         </div>
                         {reviewQueue && (
-                          <div className="ml-auto flex shrink-0 items-center gap-2">
+                          <div className="ml-auto hidden shrink-0 items-center gap-2 md:flex">
                             <span className="text-[0.625rem] font-bold text-white/50 tabular-nums">{reviewIdx + 1}/{reviewQueue.length}</span>
                             <button type="button" disabled={reviewIdx <= 0} onClick={() => { const next = reviewIdx - 1; if (next >= 0) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg border border-white/20 bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-4 w-4" /></button>
                             <button type="button" disabled={reviewIdx >= reviewQueue.length - 1} onClick={() => { const next = reviewIdx + 1; if (next < reviewQueue.length) { setReviewIdx(next); handleOpenDrawer(reviewQueue[next]); } }} className="rounded-lg border border-white/20 bg-white/10 px-4 py-1 text-white/50 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronRight className="h-4 w-4" /></button>
