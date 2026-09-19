@@ -2687,33 +2687,18 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 })()}
                 {canEdit && (selectedShift.approval_status === 'draft' || selectedShift.approval_status === 'confirmed' || selectedShift.approval_status === 'approved') && (
                   <div className="rounded-xl bg-gradient-to-br from-sky-500/10 to-blue-600/10 p-3 space-y-3">
-                    {selectedShift.approval_status === 'draft' ? (
-                      <>
-                        <div>
-                          <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.start_time ?? 'Inizio'}</label>
-                          <TimeInputField value={editStartTime} onChange={setEditStartTime} size="md" className="w-full" />
-                        </div>
-                        <div>
-                          <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.end_time ?? 'Fine'}</label>
-                          <TimeInputField value={editEndTime} onChange={setEditEndTime} size="md" className="w-full" />
-                        </div>
-                        <button type="button" onClick={handleSaveShiftEdit} disabled={saving}
-                          className={`${timeUnsaved ? 'glow-pulse ' : ''}w-full rounded-lg bg-accent px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
-                          {saving ? (t.saving ?? 'Salvataggio...') : <><Save className="h-3.5 w-3.5 inline-block mr-1.5" />{t.save_changes ?? 'Salva modifiche'}</>}
-                        </button>
-                      </>
-                    ) : (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[0.625rem] font-bold text-white/50 uppercase tracking-wider">{t.start_time ?? 'Ora inizio'}</span>
-                          <span className="text-[0.6875rem] font-bold text-white tabular-nums">{editStartTime || '—'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[0.625rem] font-bold text-white/50 uppercase tracking-wider">{t.end_time ?? 'Ora fine'}</span>
-                          <span className="text-[0.6875rem] font-bold text-white tabular-nums">{editEndTime || '—'}</span>
-                        </div>
-                      </div>
-                    )}
+                    <div>
+                      <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.start_time ?? 'Inizio'}</label>
+                      <TimeInputField value={editStartTime} onChange={setEditStartTime} size="md" className="w-full" disabled={selectedShift.approval_status !== 'draft'} />
+                    </div>
+                    <div>
+                      <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.end_time ?? 'Fine'}</label>
+                      <TimeInputField value={editEndTime} onChange={setEditEndTime} size="md" className="w-full" disabled={selectedShift.approval_status !== 'draft'} />
+                    </div>
+                    <button type="button" onClick={handleSaveShiftEdit} disabled={saving || selectedShift.approval_status !== 'draft'}
+                      className={`${timeUnsaved ? 'glow-pulse ' : ''}w-full rounded-lg bg-accent px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
+                      {saving ? (t.saving ?? 'Salvataggio...') : <><Save className="h-3.5 w-3.5 inline-block mr-1.5" />{t.save_changes ?? 'Salva modifiche'}</>}
+                    </button>
                   </div>
                 )}
               </div>
@@ -2757,14 +2742,18 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                             </button>
                           </>
                         ) : (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[0.625rem] font-bold text-white/50 uppercase tracking-wider">{t.punch_in ?? 'Entrata'}</span>
-                              <span className="text-[0.6875rem] font-bold text-white tabular-nums">{editIn || '—'}</span>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">
+                                {t.punch_in ?? 'Entrata'}
+                              </label>
+                              <TimeInputField value={editIn} onChange={setEditIn} size="md" className="w-full" disabled />
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-[0.625rem] font-bold text-white/50 uppercase tracking-wider">{t.punch_out ?? 'Uscita'}</span>
-                              <span className="text-[0.6875rem] font-bold text-white tabular-nums">{editOut || '—'}</span>
+                            <div>
+                              <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">
+                                {t.punch_out ?? 'Uscita'}
+                              </label>
+                              <TimeInputField value={editOut} onChange={setEditOut} size="md" className="w-full" disabled />
                             </div>
                             {isFrozen(selectedShift) && (
                               <p className="text-[0.625rem] text-amber-400/70 text-center pt-2">{t.wst_frozen_readonly_hint ?? 'Turno congelato — sola lettura'}</p>
