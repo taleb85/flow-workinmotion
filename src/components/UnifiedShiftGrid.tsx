@@ -3260,7 +3260,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* ── Barra selezione multipla ── */}
       {isSelectionMode && createPortal(
         <div
-          className="fixed bottom-[calc(var(--app-bottom-nav-offset,64px)+0.5rem)] left-1/2 z-[10060] flex -translate-x-1/2 items-center gap-1.5 rounded-2xl border border-white/[0.14] px-2 py-2 shadow-2xl md:bottom-6 md:gap-2 md:px-2.5"
+          className="fixed bottom-[calc(var(--app-bottom-nav-offset,64px)+0.25rem)] left-1/2 z-[10060] flex -translate-x-1/2 items-center gap-1.5 rounded-2xl border border-white/[0.14] px-2 py-2 shadow-2xl md:bottom-3 md:gap-2 md:px-2.5"
           style={{ background: 'transparent', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
         >
           <span className="whitespace-nowrap px-1 text-xs font-bold tabular-nums text-white">
