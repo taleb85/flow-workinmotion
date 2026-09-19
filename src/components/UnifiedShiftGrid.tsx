@@ -2573,7 +2573,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     {t.extra_shift ?? 'Turno aggiuntivo'}
                   </span>
                 )}
-                <p className="min-w-0 truncate text-base md:text-sm text-white font-semibold uppercase">· {format(parseISO(selectedShift.date), 'EEEE d MMMM', { locale })} — {selectedShift.start_time?.slice(0, 5)}-{selectedShift.end_time?.slice(0, 5)}</p>
+                <p className="min-w-0 truncate text-base md:text-sm text-white font-semibold uppercase">· {format(parseISO(selectedShift.date), 'EEE d/MM', { locale })} — {selectedShift.start_time?.slice(0, 5)}-{selectedShift.end_time?.slice(0, 5)}</p>
               </div>
               <div className="hidden md:flex shrink-0 items-center gap-2">
                 {reviewQueue && (
