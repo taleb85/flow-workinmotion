@@ -9,6 +9,15 @@ export interface GDPRExportData {
   holidayRequests: HolidayRequest[];
   departments?: string[];
   settings?: Record<string, unknown>;
+  /** Dispositivi riconosciuti (identificativo opaco, senza dati hardware). */
+  devices?: Array<{
+    id: string;
+    platform: string | null;
+    label: string | null;
+    created_at: string;
+    last_seen_at: string;
+    revoked_at: string | null;
+  }>;
 }
 
 export async function exportUserData(userId: string): Promise<GDPRExportData> {
@@ -16,6 +25,10 @@ export async function exportUserData(userId: string): Promise<GDPRExportData> {
   const { data: shifts } = await supabase!.from('shifts').select('*').eq('user_id', userId);
   const { data: punchRecords } = await supabase!.from('punch_records').select('*').eq('user_id', userId);
   const { data: holidayRequests } = await supabase!.from('holiday_requests').select('*').eq('user_id', userId);
+  const { data: devices } = await supabase!
+    .from('user_devices')
+    .select('id, platform, label, created_at, last_seen_at, revoked_at')
+    .eq('user_id', userId);
 
   return {
     exportedAt: new Date().toISOString(),
@@ -23,6 +36,7 @@ export async function exportUserData(userId: string): Promise<GDPRExportData> {
     shifts: shifts ?? [],
     punchRecords: punchRecords ?? [],
     holidayRequests: holidayRequests ?? [],
+    devices: (devices ?? []) as GDPRExportData['devices'],
   };
 }
 

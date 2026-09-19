@@ -155,6 +155,7 @@ import {
 } from '../utils/globalSettingsCloud';
 import { withTimeout, TimeoutError } from '../utils/promiseTimeout';
 import { pinMatchesStored, findActiveUserWithSamePin } from '../utils/loginIdentifier';
+import { registerCurrentDevice } from '../utils/userDevices';
 import { isAppCloudSyncEnabled } from '../utils/appCloudSync';
 import { loadDepartmentsFromSupabase, saveDepartmentsToSupabase } from '../utils/departmentsCloud';
 import {
@@ -299,6 +300,12 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   }, [tenant]);
   const currentUserRef = useRef<User | null>(null);
   useEffect(() => { currentUserRef.current = currentUser; }, [currentUser]);
+
+  // Riconoscimento dispositivo: registra/aggiorna il device corrente all'avvio della sessione.
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    void registerCurrentDevice(currentUser.id, tenantId ?? currentUser.tenant_id ?? null);
+  }, [currentUser?.id, currentUser?.tenant_id, tenantId]);
 
   const originalAdminUserRef = useRef<User | null>(null);
   useEffect(() => { originalAdminUserRef.current = originalAdminUser; }, [originalAdminUser]);
