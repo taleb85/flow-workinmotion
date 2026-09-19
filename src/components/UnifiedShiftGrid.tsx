@@ -464,56 +464,43 @@ type ShiftGridDesktopRowProps = {
 };
 
 /**
- * Pulsante a icona con effetto "gradient pill" al hover:
- * la pill si espande dal centro (l'icona resta ferma e si riduce a 0),
- * entra il gradiente con alone sfocato e compare l'etichetta con un ritardo.
+ * Pulsante a icona: al hover appare sotto una pill con l'etichetta.
+ * Il pulsante non cambia dimensione, quindi gli altri comandi non si spostano.
  */
 const GradientIconButton = memo(function GradientIconButton({
   label,
-  title,
   onClick,
   children,
   gradientFrom,
   gradientTo,
-  expandClass,
   baseClass,
 }: {
   label: string;
-  title: string;
   onClick: () => void;
   children: ReactNode;
   gradientFrom: string;
   gradientTo: string;
-  /** Classi di espansione a hover del pulsante: larghezza + margine sinistro negativo (metà) per crescere dal centro spingendo i vicini. Es. 'hover:w-[9.5rem] hover:-ml-[3.75rem]' */
-  expandClass: string;
   baseClass: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      title={title}
-      aria-label={title}
+      aria-label={label}
       style={{ '--gradient-from': gradientFrom, '--gradient-to': gradientTo } as CSSProperties}
-      className={`group relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-500 hover:z-20 ${expandClass} ${baseClass}`}
+      className={`group relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-300 hover:z-20 ${baseClass}`}
     >
-      {/* Gradiente di sfondo (hover) */}
-      <span
-        aria-hidden
-        className="absolute inset-0 rounded-full bg-[linear-gradient(45deg,var(--gradient-from),var(--gradient-to))] opacity-0 transition-all duration-500 group-hover:opacity-100"
-      />
-      {/* Alone sfocato (hover) */}
-      <span
-        aria-hidden
-        className="absolute inset-x-0 top-[6px] -z-10 h-full rounded-full bg-[linear-gradient(45deg,var(--gradient-from),var(--gradient-to))] opacity-0 blur-[15px] transition-all duration-500 group-hover:opacity-50"
-      />
-      {/* Icona: resta al centro e si riduce a 0 per lasciare spazio all'etichetta */}
-      <span className="relative z-10 flex shrink-0 items-center justify-center transition-all duration-500 group-hover:scale-0">
+      <span className="relative z-10 flex shrink-0 items-center justify-center">
         {children}
       </span>
-      {/* Etichetta: compare in ritardo, centrata sulla pill */}
-      <span className="absolute scale-0 whitespace-nowrap text-[0.625rem] font-bold uppercase tracking-wider text-white transition-all duration-500 delay-150 group-hover:scale-100">
-        {label}
+      {/* Pill con l'etichetta: appare sotto il pulsante */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-full z-30 flex justify-center pt-2"
+      >
+        <span className="origin-top scale-90 whitespace-nowrap rounded-full bg-[linear-gradient(45deg,var(--gradient-from),var(--gradient-to))] px-3 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-white opacity-0 shadow-lg transition-all duration-300 group-hover:scale-100 group-hover:opacity-100">
+          {label}
+        </span>
       </span>
     </button>
   );
@@ -2523,12 +2510,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   {canDeleteShift(selectedShift) && !drawerDeleteConfirm && (
                     <GradientIconButton
                       label={t.delete ?? 'Elimina'}
-                      title={t.delete ?? 'Elimina'}
                       onClick={() => setDrawerDeleteConfirm(true)}
                       gradientFrom="#fb7185"
                       gradientTo="#e11d48"
-                      expandClass="hover:w-[5.5rem] hover:-ml-[1.75rem]"
-                      baseClass="bg-rose-600/20 text-rose-300">
+                      baseClass="bg-rose-600/20 text-rose-300 hover:bg-rose-600/30">
                       <Trash2 className="h-4 w-4" />
                     </GradientIconButton>
                   )}
@@ -2553,24 +2538,20 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   {isAdminOnly(currentUser) && shiftAuditEntries && shiftAuditEntries.length > 0 && (
                     <GradientIconButton
                       label={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
-                      title={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
                       onClick={() => setShowShiftAuditModal(true)}
                       gradientFrom="#22d3ee"
                       gradientTo="#0a84ff"
-                      expandClass="hover:w-[9.5rem] hover:-ml-[3.75rem]"
-                      baseClass="bg-white/10 text-white/50">
+                      baseClass="bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
                       <History className="h-4 w-4" />
                     </GradientIconButton>
                   )}
                 </div>
                 <GradientIconButton
                   label={t.cancel ?? 'Chiudi'}
-                  title={t.cancel ?? 'Chiudi'}
                   onClick={handleCloseDrawer}
                   gradientFrom="#94a3b8"
                   gradientTo="#475569"
-                  expandClass="hover:w-[5.5rem] hover:-ml-[1.75rem]"
-                  baseClass="bg-white/10 text-white/50">
+                  baseClass="bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
                   <X className="h-4 w-4" />
                 </GradientIconButton>
               </div>
