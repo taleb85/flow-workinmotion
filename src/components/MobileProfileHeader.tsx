@@ -3,13 +3,10 @@ import { type ReactNode } from 'react';
 import { LogOut, ShieldCheck } from 'lucide-react';
 import { useAppUser } from '../context/AppContext';
 import { useT } from '../hooks/useT';
-import { getDateLocale } from '../utils/translations';
 // import { getRoleScopeHint } from '../utils/roleScopeHint'; // unused
 import { getAppNavTabTitle, type AppNavTab } from '../utils/enabledModules';
 import { UnifiedBellButton } from './UnifiedBellButton';
 import { useState, useEffect, useRef } from 'react';
-import { format } from 'date-fns';
-import { it as itLocale } from 'date-fns/locale';
 // import { isUiWidgetVisible } from '../utils/uiScreenWidgets'; // unused
 // import { useMessages } from '../hooks/useMessages'; // unused
 import { useMultisensorialFeedback } from '../hooks/useMultisensorialFeedback';
@@ -76,14 +73,6 @@ export default function MobileProfileHeader({
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Orologio live
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30_000);
-    return () => clearInterval(id);
-  }, []);
-  const dateLabel = format(now, 'EEE d MMM · HH:mm', { locale: getDateLocale(effectiveLanguage) ?? itLocale });
-
   const t = useT();
   if (!currentUser) return null;
 
@@ -144,17 +133,6 @@ export default function MobileProfileHeader({
       {/* Destra: data | separatore | azioni (extra + campanella + logout) —
           visibile anche su mobile (campanella e logout in alto a destra) */}
       <div className="flex shrink-0 items-center gap-2.5">
-        {/* Status: live dot + data — solo desktop */}
-        <span
-          className="hidden md:inline text-[0.8125rem] font-medium whitespace-nowrap capitalize tabular-nums"
-          style={{ color: 'rgba(255,255,255,0.60)', letterSpacing: '0.01em' }}
-        >
-          {dateLabel}
-        </span>
-
-        {/* Separatore verticale — solo desktop */}
-        <span className="hidden md:block w-px h-4 bg-white/15 shrink-0 mx-0.5" />
-
         {/* Slot azioni (sync + PIN dall'esterno) */}
         {rightExtra}
 

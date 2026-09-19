@@ -407,6 +407,7 @@ export default function HomePage({
     <HomeManagerView
       currentUser={currentUser}
       t={t}
+      effectiveLanguage={effectiveLanguage}
       now={now}
       todayStr={todayStr}
       todayShiftsEnriched={todayShiftsEnriched}

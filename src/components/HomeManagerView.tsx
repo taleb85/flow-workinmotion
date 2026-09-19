@@ -7,12 +7,13 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { safeFormatDate } from '../utils/safeDateFormat';
+import { getDateLocale } from '../utils/translations';
 import { formatMinutesToHoursAndMinutes } from '../utils/timeCalculations';
 import { isPurelyManagementRole } from '../utils/permissions';
 import { TimeInputField } from './ui/TimeInputField';
 import { HomeManagementShiftCard } from './HomeManagementShiftCard';
 import TeamBoard from './TeamBoard';
-import type { User, Shift, HolidayRequest } from '../types';
+import type { User, Shift, HolidayRequest, Language } from '../types';
 
 export interface EnrichedShift {
   shift: Shift;
@@ -46,6 +47,8 @@ interface CloseShiftModal {
 interface HomeManagerViewProps {
   currentUser: User;
   t: Record<string, string>;
+  /** Lingua effettiva dell'app (per lingua data/ora). */
+  effectiveLanguage: Language;
   now: Date;
   todayStr: string;
   // Enriched shift data
@@ -108,7 +111,8 @@ interface HomeManagerViewProps {
 export default memo(function HomeManagerView({
   currentUser,
   t,
-  now: _now,
+  effectiveLanguage,
+  now,
   todayStr: _todayStr,
   todayShiftsEnriched,
   criticalShifts,
@@ -156,6 +160,10 @@ export default memo(function HomeManagerView({
   getCardStyle,
 }: HomeManagerViewProps) {
   const locale = it;
+  /** Data + ora accanto al saluto (spostata dall'header). */
+  const greetingDateLabel = safeFormatDate(now, 'EEE d MMM · HH:mm', {
+    locale: getDateLocale(effectiveLanguage) ?? it,
+  });
 
   const handleDismissCloseModal = () => {
     onDismissCloseModal();
@@ -171,11 +179,17 @@ export default memo(function HomeManagerView({
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
           className="flex flex-col gap-4">
 
-          {/* ── Saluto ────────────────────────────────────────────────── */}
-          <div className="pt-3 md:pt-6">
+          {/* ── Saluto + data/ora ─────────────────────────────────────── */}
+          <div className="pt-3 md:pt-6 flex items-baseline justify-between gap-3">
             <h1 className="text-xl font-extrabold tracking-tight leading-tight text-white">
               {t.home_greeting.replace('{name}', currentUser.first_name)}
             </h1>
+            <span
+              className="hidden md:inline text-[0.8125rem] font-medium whitespace-nowrap capitalize tabular-nums"
+              style={{ color: 'rgba(255,255,255,0.60)', letterSpacing: '0.01em' }}
+            >
+              {greetingDateLabel}
+            </span>
           </div>
 
           {/* ── Profilo amministratore (solo Admin) ───────────────────── */}
