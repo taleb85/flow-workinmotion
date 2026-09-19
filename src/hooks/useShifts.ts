@@ -11,7 +11,6 @@ export interface UseShiftsReturn {
   deleteShift: (id: string) => Promise<void>;
   deleteShifts: (ids: string[]) => Promise<void>;
   copyShift: (shift: Shift, newDate: string) => Promise<Shift | null>;
-  bulkCopyPreviousWeek: (currentWeekStart: Date) => Promise<number>;
   publishWeekShifts: (weekStart: Date) => void;
   publishDayShifts: (dateStr: string) => Promise<void>;
   approveShift: (shiftId: string, opts?: {
@@ -23,7 +22,6 @@ export interface UseShiftsReturn {
 }
 
 import type { User } from '../types';
-import { format, addDays } from 'date-fns';
 
 export function useShifts(): UseShiftsReturn {
   const [shifts, setShifts] = useState<Shift[]>([]);
@@ -101,22 +99,6 @@ export function useShifts(): UseShiftsReturn {
     }
   }, [addShift]);
 
-  const bulkCopyPreviousWeek = useCallback(async (currentWeekStart: Date): Promise<number> => {
-    try {
-      const prevWeekStart = addDays(currentWeekStart, -7);
-      const prevWeekEnd = addDays(currentWeekStart, -1);
-      const prevShifts = await database.shifts.getIdsByDateRange(
-        format(prevWeekStart, 'yyyy-MM-dd'),
-        format(prevWeekEnd, 'yyyy-MM-dd'),
-      );
-      // Questa implementazione va integrata con la logica di copia bulk
-      return prevShifts.length;
-    } catch (e) {
-      console.error('[useShifts] bulkCopyPreviousWeek error:', e);
-      return 0;
-    }
-  }, []);
-
   const publishWeekShifts = useCallback((_weekStart: Date) => {
     // Placeholder — logica da implementare con PIN confirmation
     console.warn('[useShifts] publishWeekShifts not fully implemented');
@@ -159,7 +141,6 @@ export function useShifts(): UseShiftsReturn {
     deleteShift,
     deleteShifts,
     copyShift,
-    bulkCopyPreviousWeek,
     publishWeekShifts,
     publishDayShifts,
     approveShift,

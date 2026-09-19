@@ -82,7 +82,6 @@ export interface AppContextType {
   deleteShift: (id: string) => void;
   deleteShifts: (ids: string[]) => void;
   copyShift: (shift: Shift, newDate: string) => void;
-  bulkCopyPreviousWeek: (currentWeekStart: Date) => Promise<number>;
   publishWeekShifts: (weekStart: Date) => void;
   publishDayShifts: (dateStr: string) => Promise<void>;
   addHolidayRequest: (request: Omit<HolidayRequest, 'id' | 'created_at' | 'status'>) => Promise<{ ok: boolean; emailSent?: boolean; error?: string }>;

@@ -64,7 +64,6 @@ export interface DataSlice {
   deleteShift: (id: string) => void;
   deleteShifts: (ids: string[]) => void;
   copyShift: (shift: Shift, newDate: string) => void;
-  bulkCopyPreviousWeek: (currentWeekStart: Date) => Promise<number>;
   publishWeekShifts: (weekStart: Date) => void;
   publishDayShifts: (dateStr: string) => Promise<void>;
   approveShift: (shiftId: string, opts?: any) => Promise<void>;
