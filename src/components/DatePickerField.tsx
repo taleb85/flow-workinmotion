@@ -173,6 +173,10 @@ const DatePickerField = forwardRef<HTMLButtonElement, DatePickerFieldProps>(func
         }}
         locale={locale}
         captionLayout="dropdown"
+        formatters={{
+          formatMonthDropdown: (month) => format(month, 'MMM', { locale }),
+          formatYearDropdown: (year) => format(year, 'yy'),
+        }}
         startMonth={startMonthNav}
         endMonth={endMonthNav}
         month={visibleMonth}

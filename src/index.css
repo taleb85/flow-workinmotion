@@ -1010,14 +1010,16 @@ button[role="switch"][class~="bg-accent"] {
   margin-inline: auto;
 }
 
+/* Il select mese/anno è invisibile (rdp lo sovrappone alla caption «set 26»):
+   azzera il box model ereditato dai select dell'app, che altrimenti gonfia il riquadro. */
 .rdp-modern.rdp-root .rdp-dropdown_root select {
-  border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.20);
-  background: rgba(255, 255, 255, 0.15);
-  padding: 0.1rem 0.35rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.90);
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: inherit !important;
 }
 
 .rdp-modern.rdp-root .rdp-button_previous,
@@ -2306,7 +2308,7 @@ a.border-neutral-500 {
 
 /* Dropdown panels — esclusi i form control (select/input/textarea), il wrapper del calendario
    (rdp-dropdown_root) e i menu che gestiscono il proprio vetro (presenze-actions-glass) */
-[class*="dropdown"]:not(select):not(input):not(textarea):not(.rdp-dropdown_root),
+[class*="dropdown"]:not(select):not(input):not(textarea):not(.rdp-dropdown_root):not(.rdp-dropdowns),
 [class*="popover"]:not(select):not(input):not(textarea),
 [data-radix-popper-content-wrapper] > div,
 [role="listbox"],
