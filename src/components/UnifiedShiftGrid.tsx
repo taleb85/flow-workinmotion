@@ -2745,12 +2745,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               </div>
               {/* Componente unico in basso: riepilogo ore + detrae pausa */}
               {selectedShift && (() => {
-                // Ore del turno = durata pianificata (start→end), non la timbratura:
-                // da qui si detrae la pausa per ottenere le ore nette.
+                // Riepilogo indipendente dallo stato del turno (bozza/pubblicato/approvato/congelato):
+                // sempre ore del turno (start→end) − pausa calcolata dalle regole pausa.
                 const grossMins = calculateShiftMinutesGross(selectedShift.start_time ?? '', selectedShift.end_time ?? '');
                 const shiftUser = users.find((u) => u.id === selectedShift.user_id);
-                const breakMins = getBreakMinutesForShift({ ...selectedShift, deduct_break: deductBreak }, grossMins, shiftUser ?? null, breakRules,
-                  editIn && editOut ? { breakRuleWindow: { start: editIn, end: editOut } } : undefined);
+                const breakMins = getBreakMinutesForShift({ ...selectedShift, deduct_break: deductBreak }, grossMins, shiftUser ?? null, breakRules);
                 const netMins = Math.max(0, grossMins - breakMins);
                 const canAutoBreak = getAutoBreakMinutesForGross(grossMins) > 0;
                 const _hasAutoBreak = canAutoBreak && isAutoBreak;
