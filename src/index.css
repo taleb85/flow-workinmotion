@@ -2344,10 +2344,6 @@ a.border-neutral-500 {
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
-.surface-ghost-interactive:hover {
-  background: rgba(10, 10, 10, 0.55) !important;
-}
-
 /* ── Tailwind bg-* → dark glass ── */
 body .bg-white:not(input):not(textarea):not(select):not([class*="modal"]):not([class*="pin"]) {
   background-color: rgba(10, 10, 10, 0.82) !important;
