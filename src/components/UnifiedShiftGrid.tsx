@@ -1520,13 +1520,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     return iv.deductBreak !== deductBreak || iv.isAutoBreak !== isAutoBreak;
   }, [drawerOpen, deductBreak, isAutoBreak]);
 
-  // Orario del turno modificato → "Salva modifiche" richiede l'azione
-  const timeUnsaved = useMemo(() => {
-    if (!drawerOpen) return false;
-    const iv = initialValuesRef.current;
-    return iv.editStartTime !== editStartTime || iv.editEndTime !== editEndTime;
-  }, [drawerOpen, editStartTime, editEndTime]);
-
   const handleSaveBreakSettings = useCallback(async () => {
     if (!selectedShift) return;
     setSaving(true);
@@ -2689,7 +2682,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       <TimeInputField value={editEndTime} onChange={setEditEndTime} size="md" className="w-full" disabled={selectedShift.approval_status !== 'draft'} />
                     </div>
                     <button type="button" onClick={handleSaveShiftEdit} disabled={saving || selectedShift.approval_status !== 'draft'}
-                      className={`${timeUnsaved ? 'glow-pulse ' : ''}w-full rounded-lg bg-accent px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
+                      className="w-full rounded-lg bg-accent px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]">
                       {saving ? (t.saving ?? 'Salvataggio...') : <><Save className="h-3.5 w-3.5 inline-block mr-1.5" />{t.save_changes ?? 'Salva modifiche'}</>}
                     </button>
                   </div>
