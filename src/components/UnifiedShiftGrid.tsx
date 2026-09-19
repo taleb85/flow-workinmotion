@@ -1862,6 +1862,14 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   margin-right: calc(-1 * (env(safe-area-inset-right, 0px) + var(--layout-app-px, 1rem)));
   padding-left: calc(env(safe-area-inset-left, 0px) + var(--layout-app-px, 1rem));
   padding-right: calc(env(safe-area-inset-right, 0px) + var(--layout-app-px, 1rem));
+}
+/* La fascia ha overflow-y:hidden (serve per lo scroll orizzontale della toolbar),
+   quindi la pill che sborda sotto il pulsante verrebbe tagliata. Mentre si passa il
+   mouse sul pulsante Pubblica le diamo lo spazio per contenerla, compensando con un
+   margine negativo così il contenuto sotto non si sposta. */
+.ui-toolbar-page-band-presences:has(.toolbar-publish-btn:hover) {
+  padding-bottom: 2rem;
+  margin-bottom: -0.5rem;
 }`}</style>
       {mode === 'planning' && (
         <style>{`
@@ -2008,7 +2016,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               onClick={() => void handlePublishWeek()}
               gradientFrom="#34d399"
               gradientTo="#059669"
-              className="hidden md:flex rounded-xl p-1.5 text-emerald-300 liquid-glass liquid-glass-green"
+              className="hidden md:flex rounded-xl p-1.5 text-emerald-300 liquid-glass liquid-glass-green toolbar-publish-btn"
             >
               <Send className="h-3 w-3 shrink-0" />
             </GradientIconButton>
