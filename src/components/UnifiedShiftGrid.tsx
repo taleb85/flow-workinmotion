@@ -1861,7 +1861,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       )}
 
       {/* ── Sezione superiore fissa (toolbar + selezioni + mobile view) ── */}
-      <div ref={contentAboveRef} className="h-[60px]">
+      {/* Mobile: `contents` (nessun box) così la toolbar sticky ha come contenitore il grid
+          completo e resta agganciata durante lo scroll dell'elenco card.
+          Desktop: box reale alto 60px, serve per misurare lo spazio sopra la tabella. */}
+      <div ref={contentAboveRef} className="contents md:block md:h-[60px]">
        {/* Toolbar sticky; su mobile glass stile bottom nav quando sovrapposta al contenuto */}
        <div ref={toolbarBandRef}
         className={`ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mt-3 mb-4 w-full min-w-0 sticky top-[calc(var(--app-sticky-header-offset,5rem)_+_0.75rem)] z-50 py-2 md:overflow-x-auto ${toolbarOverlapping ? 'toolbar-band-over-content' : ''}`}
