@@ -2200,8 +2200,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               className="presenze-actions-glass fixed z-[10050] max-h-[min(80dvh,480px)] overflow-y-auto overscroll-contain rounded-2xl border border-white/[0.14] py-1 shadow-2xl"
               style={{ ...actionsDropdownStyle, background: 'transparent', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
             >
-              <div className="mb-1 flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-white">{t.actions ?? 'Azioni'}</span>
+              <div className="mb-1 flex items-center justify-end gap-2 border-b border-white/10 px-4 py-2">
                 <button
                   type="button"
                   onClick={closeActionsDrawer}
