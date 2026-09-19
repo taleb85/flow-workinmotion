@@ -1787,13 +1787,22 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               })}
               <button
                 type="button"
-                onClick={() => setCreatingBreakRule(true)}
+                onClick={() => { setEditingBreakRule(null); setCreatingBreakRule((v) => !v); }}
                 className="rounded-xl border border-white/[0.14] flex min-h-[3rem] flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-white/[0.14] p-2 text-white/55 transition-colors hover:border-white/30 hover:bg-white/5 hover:text-white active:text-white"
               >
                 <Plus className="w-6 h-6" />
                 <span className="text-xs font-semibold">{t.settings_break_new_rule}</span>
               </button>
             </div>
+
+            {(creatingBreakRule || editingBreakRule) && (
+              <BreakRuleForm
+                key={editingBreakRule?.id ?? 'new'}
+                rule={editingBreakRule ?? undefined}
+                onSave={handleSaveBreakRule}
+                onClose={() => { setCreatingBreakRule(false); setEditingBreakRule(null); }}
+              />
+            )}
           </SettingsAccordionSection>
         )}
 
@@ -2623,14 +2632,6 @@ className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-m
         />
       )}
 
-      {(creatingBreakRule || editingBreakRule) && (
-        <BreakRuleModal
-          rule={editingBreakRule ?? undefined}
-          onSave={handleSaveBreakRule}
-          onClose={() => { setCreatingBreakRule(false); setEditingBreakRule(null); }}
-        />
-      )}
-
       {/* Modale eliminazione regola di calcolo periodo */}
       {deletingPeriodRule && (
         <CenteredModalPortal
@@ -2821,7 +2822,7 @@ className="flex-1 rounded-xl bg-accent py-2.5 text-xs font-semibold uppercase te
   );
 }
 
-// ── BreakRuleModal ─────────────────────────────────────────────────────────────
+// ── BreakRuleForm (pannello inline, come la creazione regola di periodo) ───────
 
 const BREAK_MODAL_ROLE_VALUES: UserRole[] = ['waiter', 'server', 'bartender', 'cook', 'chef', 'dishwasher'];
 
@@ -2829,7 +2830,7 @@ function makeId() {
   return Math.random().toString(36).slice(2, 11);
 }
 
-function BreakRuleModal({
+function BreakRuleForm({
   rule,
   onSave,
   onClose,
@@ -2943,22 +2944,18 @@ function BreakRuleModal({
     }`;
 
   return (
-    <div
-      className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
+    <motion.form
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', damping: 30, stiffness: 380 }}
+      onSubmit={handleSubmit}
+      className="mt-2 space-y-3 rounded-xl border-2 border-dashed border-white/20 bg-white/5 p-3 font-sans"
     >
-      <motion.form
-        initial={{ scale: 0.93, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.93, opacity: 0, y: 20 }}
-        transition={{ type: 'spring', damping: 28, stiffness: 380 }}
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={handleSubmit}
-        className="modal-glass-panel flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-2xl font-sans"
-      >
-        {/* Header — tab + azioni in un unico elemento */}
-        <div className="sticky top-0 z-10 flex shrink-0 items-center bg-app-bg/80 px-5 pt-4 pb-4 backdrop-blur-md">
-          <div className="flex w-full items-center gap-1 rounded-xl border border-white/[0.14] bg-white/5 p-1">
+        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
+          {isEdit ? t.settings_break_save_changes : t.settings_break_new_rule}
+        </p>
+        {/* Tab + azioni in un unico elemento */}
+        <div className="flex items-center gap-1 rounded-xl border border-white/[0.14] bg-white/5 p-1">
             {tabOptions.map((tab) => (
               <button
                 key={tab.id}
@@ -2991,12 +2988,10 @@ function BreakRuleModal({
               <X className="h-4 w-4 shrink-0" />
             </GradientIconButton>
           </div>
-        </div>
 
         {/* Contenuto — si apre come un cassetto al cambio tab (altezza minima = max contenuto) */}
         <div
           ref={tabContentRef}
-          className="min-h-0 flex-1 overflow-y-auto px-5 py-5"
           style={maxTabContentHeight !== null ? { minHeight: maxTabContentHeight } : undefined}
         >
           <AnimatePresence mode="wait" initial={false}>
@@ -3209,7 +3204,6 @@ function BreakRuleModal({
             </motion.div>
           </AnimatePresence>
         </div>
-      </motion.form>
-    </div>
+    </motion.form>
   );
 }
