@@ -2197,7 +2197,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               ref={actionsDrawerPanelRef}
               role="menu"
               aria-label={t.actions ?? 'Azioni'}
-              className="presenze-actions-glass fixed z-[10050] max-h-[min(80dvh,480px)] overflow-y-auto overscroll-contain rounded-2xl border border-white/[0.14] py-1 shadow-2xl"
+              className="presenze-actions-glass fixed z-[10050] max-h-[min(80dvh,480px)] overflow-y-auto overscroll-contain rounded-2xl border border-white/[0.14] py-1 shadow-2xl [&>*:last-child]:border-b-0"
               style={{ ...actionsDropdownStyle, background: 'transparent', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
             >
               {canEdit && (
