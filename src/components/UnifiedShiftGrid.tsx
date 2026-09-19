@@ -2625,7 +2625,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   )}
                   {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
                     <button type="button" onClick={() => handleFreezeShift(selectedShift)}
-                      className="flex items-center justify-center rounded-lg bg-emerald-600/20 p-2 text-emerald-300 transition-colors hover:bg-emerald-600/30" title={t.ts_drawer_freeze_btn ?? 'Congela'} aria-label={t.ts_drawer_freeze_btn ?? 'Congela'}>
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600/20 text-emerald-300 transition-colors hover:bg-emerald-600/30" title={t.ts_drawer_freeze_btn ?? 'Congela'} aria-label={t.ts_drawer_freeze_btn ?? 'Congela'}>
                       <Unlock className="h-4 w-4 shrink-0" />
                     </button>
                   )}
