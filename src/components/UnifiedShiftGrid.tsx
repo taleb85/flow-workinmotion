@@ -2685,17 +2685,17 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     </div>
                   );
                 })()}
-                {canEdit && (selectedShift.approval_status === 'draft' || selectedShift.approval_status === 'confirmed') && (
+                {canEdit && (selectedShift.approval_status === 'draft' || selectedShift.approval_status === 'confirmed' || selectedShift.approval_status === 'approved') && (
                   <div className="rounded-xl bg-gradient-to-br from-sky-500/10 to-blue-600/10 p-3 space-y-3">
                     <div>
                       <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.start_time ?? 'Inizio'}</label>
-                      <TimeInputField value={editStartTime} onChange={setEditStartTime} size="md" className="w-full" disabled={selectedShift.approval_status === 'confirmed'} />
+                      <TimeInputField value={editStartTime} onChange={setEditStartTime} size="md" className="w-full" disabled={selectedShift.approval_status !== 'draft'} />
                     </div>
                     <div>
                       <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.end_time ?? 'Fine'}</label>
-                      <TimeInputField value={editEndTime} onChange={setEditEndTime} size="md" className="w-full" disabled={selectedShift.approval_status === 'confirmed'} />
+                      <TimeInputField value={editEndTime} onChange={setEditEndTime} size="md" className="w-full" disabled={selectedShift.approval_status !== 'draft'} />
                     </div>
-                    <button type="button" onClick={handleSaveShiftEdit} disabled={saving || selectedShift.approval_status === 'confirmed'}
+                    <button type="button" onClick={handleSaveShiftEdit} disabled={saving || selectedShift.approval_status !== 'draft'}
                       className={`${timeUnsaved ? 'glow-pulse ' : ''}w-full rounded-lg bg-accent px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-accent-hover disabled:opacity-40 transition-colors uppercase tracking-wider hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]`}>
                       {saving ? (t.saving ?? 'Salvataggio...') : <><Save className="h-3.5 w-3.5 inline-block mr-1.5" />{t.save_changes ?? 'Salva modifiche'}</>}
                     </button>
