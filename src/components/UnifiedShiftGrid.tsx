@@ -200,7 +200,6 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
   onToggleExpanded, onCreateShift, onDragOver, onDragLeave, onDrop,
 }: ShiftGridMobileCardProps) {
   const { effectiveLanguage } = useAppUser();
-  const totalNet = totals.planned;
   const totalActual = totals.actual;
   return (
     <div className="rounded-xl border border-white/[0.14] overflow-hidden p-4 shadow-sm">
@@ -233,9 +232,6 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
           <div className="text-[0.625rem] font-bold text-white/40 uppercase tracking-tight">{t.total_hours ?? 'Ore'}</div>
           <div className="text-sm font-bold text-white tabular-nums">
             {formatMinutesToHoursAndMinutes(totalActual)}
-          </div>
-          <div className={`text-[0.625rem] font-bold tabular-nums ${totalActual > totalNet ? 'text-accent' : 'text-emerald-400'}`}>
-            {totalActual > totalNet ? '+' : ''}{formatMinutesToHoursAndMinutes(Math.abs(totalActual - totalNet))}
           </div>
         </div>
       </div>
@@ -339,7 +335,6 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
   renderGroupButton,
   onCreateShift, onDragOver, onDragLeave, onDrop, onReviewClick,
 }: ShiftGridDesktopRowProps) {
-  const totalNet = totals.planned;
   const totalActual = totals.actual;
   return (
     <tr className="wst-employee-row">
@@ -434,9 +429,6 @@ const ShiftGridDesktopRow = memo(function ShiftGridDesktopRow({
       })}
       <td className={`px-1 py-1 text-center align-middle border-b border-white/10 ${compactGrid ? 'text-[0.625rem]' : ''}`}>
         <div className={`${compactGrid ? 'text-[0.625rem]' : 'text-xs'} font-bold text-white tabular-nums`}>{formatMinutesToHoursAndMinutes(totalActual)}</div>
-        <div className={`${compactGrid ? 'text-[0.5625rem]' : 'text-[0.625rem]'} font-bold tabular-nums ${totalActual > totalNet ? 'text-accent' : 'text-emerald-400'}`}>
-          {totalActual > totalNet ? '+' : ''}{formatMinutesToHoursAndMinutes(Math.abs(totalActual - totalNet))}
-        </div>
       </td>
     </tr>
   );
