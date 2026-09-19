@@ -2730,9 +2730,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                           className="min-h-[2.75rem] w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider disabled:opacity-40">
                           <Check className="h-3.5 w-3.5 inline-block mr-1.5" />{t.confirm_punches ?? 'Conferma timbrature'}
                         </button>
-                        {isFrozen(selectedShift) && (
-                          <p className="text-[0.625rem] text-amber-400/70 text-center pt-2">{t.wst_frozen_readonly_hint ?? 'Turno congelato — sola lettura'}</p>
-                        )}
                       </div>
                     </div>
                   );
