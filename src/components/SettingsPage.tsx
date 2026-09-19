@@ -1788,7 +1788,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
               <button
                 type="button"
                 onClick={() => { setEditingBreakRule(null); setCreatingBreakRule((v) => !v); }}
-                className="rounded-xl border border-white/[0.14] flex min-h-[3rem] flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-white/[0.14] p-2 text-white/55 transition-colors hover:border-white/30 hover:bg-white/5 hover:text-white active:text-white"
+                className="flex min-h-[3rem] flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-white/20 p-2 text-white/55 transition-colors hover:border-white/30 hover:bg-white/5 hover:text-white active:text-white"
               >
                 <Plus className="w-6 h-6" />
                 <span className="text-xs font-semibold">{t.settings_break_new_rule}</span>
@@ -2955,7 +2955,7 @@ function BreakRuleForm({
           {isEdit ? t.settings_break_save_changes : t.settings_break_new_rule}
         </p>
         {/* Tab + azioni in un unico elemento */}
-        <div className="flex items-center gap-1 rounded-xl border border-white/[0.14] bg-white/5 p-1">
+        <div className="flex items-center gap-1 rounded-xl border border-white/20 bg-white/10 p-1">
             {tabOptions.map((tab) => (
               <button
                 key={tab.id}
@@ -2983,7 +2983,7 @@ function BreakRuleForm({
               onClick={onClose}
               gradientFrom="#94a3b8"
               gradientTo="#475569"
-              className="rounded-lg bg-white/10 p-2 text-white/55 hover:bg-white/15 hover:text-white"
+              className="rounded-lg bg-white/20 p-2 text-white/70 hover:bg-white/30 hover:text-white"
             >
               <X className="h-4 w-4 shrink-0" />
             </GradientIconButton>
@@ -3130,7 +3130,7 @@ function BreakRuleForm({
           {activeTab === 'apply' && (
             <div className="space-y-3">
               {/* Soglia turno: condizione di applicazione (durata minima del turno) */}
-              <div className="space-y-3 rounded-xl border border-white/[0.14] bg-white/5/70 p-3">
+              <div className="space-y-3 rounded-xl border border-white/[0.14] bg-white/5 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-white/80">{t.settings_break_shift_threshold_title}</p>
@@ -3147,7 +3147,7 @@ function BreakRuleForm({
                   />
                 </div>
                 {minShiftThresholdOn && (
-                  <div className="flex items-center gap-3 border-t border-white/10/90 pt-1">
+                  <div className="flex items-center gap-3 border-t border-white/10 pt-1">
                     <span className="shrink-0 text-[0.6875rem] font-semibold uppercase text-white/55">{t.settings_break_min_label}</span>
                     <button
                       type="button"
