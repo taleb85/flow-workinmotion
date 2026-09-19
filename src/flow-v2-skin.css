@@ -21,14 +21,14 @@
   --flow-input: rgba(120, 120, 128, 0.2);
   --flow-ring: rgba(255, 255, 255, 0.60);
 
-  /* ── Brand (Apple blue) ─────────────────────────────── */
-  --flow-primary: #0a84ff;
+  /* ── Brand (neutro: nessun accento colore) ──────────── */
+  --flow-primary: #ffffff;
   --flow-primary-foreground: #ffffff;
-  --flow-primary-hover: #409cff;
+  --flow-primary-hover: #ffffff;
   /* Tinta di RIEMPIMENTO dei CTA pieni: neutra (vetro bianco), senza accento colore. */
   --flow-primary-fill: rgba(255, 255, 255, 0.20);
-  --flow-primary-soft: rgba(10, 132, 255, 0.18);
-  --flow-primary-softer: rgba(10, 132, 255, 0.1);
+  --flow-primary-soft: rgba(255, 255, 255, 0.18);
+  --flow-primary-softer: rgba(255, 255, 255, 0.1);
 
   /* ── Stati semantici Apple ──────────────────────────── */
   --state-success: #30d158;
@@ -80,25 +80,25 @@
   --text-on-glass: #f5f5f7;
   --text-on-glass-secondary: rgba(245, 245, 247, 0.62);
 
-  --brand: #0a84ff;
-  --brand-from: #0a84ff;
-  --brand-to: #409cff;
-  --brand-gradient: #0a84ff;
-  --brand-rgb: 10 132 255;
-  --brand-500: #0a84ff;
-  --brand-600: #0071e3;
-  --brand-hover: #409cff;
-  --brand-dark: #0071e3;
-  --brand-light: #64b1ff;
-  --brand-muted: rgba(10, 132, 255, 0.18);
-  --accent: #0a84ff;
-  --accent-hover: #409cff;
-  --accent-dark: #0071e3;
-  --accent-light: #64b1ff;
-  --color-accent: #0a84ff;
-  --accent-blue: #0a84ff;
-  --ring: #0a84ff;
-  --ring-color: #0a84ff;
+  --brand: #ffffff;
+  --brand-from: #ffffff;
+  --brand-to: #ffffff;
+  --brand-gradient: #ffffff;
+  --brand-rgb: 255 255 255;
+  --brand-500: #ffffff;
+  --brand-600: #ffffff;
+  --brand-hover: #ffffff;
+  --brand-dark: #ffffff;
+  --brand-light: #ffffff;
+  --brand-muted: rgba(255, 255, 255, 0.12);
+  --accent: #ffffff;
+  --accent-hover: #ffffff;
+  --accent-dark: #ffffff;
+  --accent-light: #ffffff;
+  --color-accent: #ffffff;
+  --accent-blue: #ffffff;
+  --ring: #ffffff;
+  --ring-color: #ffffff;
 
   font-family: var(--flow-font-sans);
 }
@@ -434,51 +434,53 @@ hr { border-color: rgba(255, 255, 255, 0.1) !important; }
 ::-webkit-scrollbar-thumb { background: rgba(120, 120, 128, 0.4); border-radius: 999px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* ── Selezione testo (blu Apple) ── */
-::selection { background: rgba(10, 132, 255, 0.35); }
+/* ── Selezione testo (neutra) ── */
+::selection { background: rgba(255, 255, 255, 0.28); }
 
 /* ── Tap highlight iOS ── */
 * { -webkit-tap-highlight-color: transparent; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   FORZA BRAND BLU APPLE — override del rebranding JS (TenantContext)
+   TEMA NEUTRO — nessun colore di brand
    L'app imposta --brand/--accent/--flow-primary a #ffffff via inline;
-   !important vince sullo stile inline, quindi il blu Apple resta attivo.
+   !important vince sullo stile inline, quindi qui si fissa la stessa
+   scala neutra (bianco/grigio) prodotta dal tema JS (TenantContext).
    ═══════════════════════════════════════════════════════════════════ */
 :root {
-  --flow-primary: #0a84ff !important;
-  --brand: #0a84ff !important;
-  --brand-rgb: 10 132 255 !important;
-  --accent: #0a84ff !important;
-  --color-accent: #0a84ff !important;
-  --brand-hover: #409cff !important;
-  --accent-hover: #409cff !important;
-  --brand-dark: #0071e3 !important;
-  --brand-light: #64b1ff !important;
-  --accent-dark: #0071e3 !important;
-  --accent-light: #64b1ff !important;
-  --brand-muted: rgba(10, 132, 255, 0.18) !important;
+  --flow-primary: #ffffff !important;
+  --brand: #ffffff !important;
+  --brand-rgb: 255 255 255 !important;
+  --accent: #ffffff !important;
+  --color-accent: #ffffff !important;
+  --accent-blue: #ffffff !important;
+  --brand-hover: #ffffff !important;
+  --accent-hover: #ffffff !important;
+  --brand-dark: #ffffff !important;
+  --brand-light: #ffffff !important;
+  --accent-dark: #ffffff !important;
+  --accent-light: #ffffff !important;
+  --brand-muted: rgba(255, 255, 255, 0.12) !important;
 
-  --brand-50:  #eaf3ff !important;
-  --brand-100: #d5e8ff !important;
-  --brand-200: #add2ff !important;
-  --brand-300: #7db8ff !important;
-  --brand-400: #4a9cff !important;
-  --brand-500: #0a84ff !important;
-  --brand-600: #0071e3 !important;
-  --brand-700: #005ac1 !important;
-  --brand-800: #004499 !important;
-  --brand-900: #003166 !important;
+  --brand-50:  #ffffff !important;
+  --brand-100: #ffffff !important;
+  --brand-200: #ffffff !important;
+  --brand-300: #ffffff !important;
+  --brand-400: #ffffff !important;
+  --brand-500: #ffffff !important;
+  --brand-600: #ffffff !important;
+  --brand-700: #ffffff !important;
+  --brand-800: #ffffff !important;
+  --brand-900: #ffffff !important;
 
-  --brand-nav-from: rgba(10, 132, 255, 0.92) !important;
-  --brand-nav-to: rgba(0, 113, 227, 0.88) !important;
-  --brand-nav-dark-from: rgba(10, 132, 255, 0.88) !important;
-  --brand-nav-dark-to: rgba(0, 90, 193, 0.84) !important;
+  --brand-nav-from: rgba(255, 255, 255, 0.92) !important;
+  --brand-nav-to: rgba(255, 255, 255, 0.88) !important;
+  --brand-nav-dark-from: rgba(255, 255, 255, 0.88) !important;
+  --brand-nav-dark-to: rgba(255, 255, 255, 0.84) !important;
 
-  --shadow-card-accent: 0 4px 16px -4px rgba(10, 132, 255, 0.22), 0 2px 8px -4px rgba(15, 23, 42, 0.08) !important;
+  --shadow-card-accent: 0 4px 16px -4px rgba(107, 107, 107, 0.14), 0 2px 8px -4px rgba(15, 23, 42, 0.08) !important;
 
-  --rdp-accent-color: #0a84ff !important;
-  --rdp-accent-background-color: rgba(10, 132, 255, 0.16) !important;
+  --rdp-accent-color: #ffffff !important;
+  --rdp-accent-background-color: rgba(255, 255, 255, 0.18) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════

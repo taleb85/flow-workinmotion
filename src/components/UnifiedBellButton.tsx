@@ -103,8 +103,8 @@ export function UnifiedBellButton({
         }}
         disabled={isDisabled}
         hidePillOnMobile
-        gradientFrom="#0a84ff"
-        gradientTo="#0062cc"
+        gradientFrom="#ffffff"
+        gradientTo="#e5e7eb"
         className={`rounded-xl p-2 touch-manipulation liquid-glass text-accent ${
           isDisabled
             ? 'opacity-50 cursor-not-allowed'

@@ -2633,8 +2633,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     <GradientIconButton
                       label={(t as Record<string, string>).shift_edit_history ?? 'Storico modifiche'}
                       onClick={() => setShowShiftAuditModal(true)}
-                      gradientFrom="#22d3ee"
-                      gradientTo="#0a84ff"
+                      gradientFrom="#ffffff"
+                      gradientTo="#e5e7eb"
                       className="h-8 w-8 rounded-full bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
                       <History className="h-4 w-4" />
                     </GradientIconButton>
