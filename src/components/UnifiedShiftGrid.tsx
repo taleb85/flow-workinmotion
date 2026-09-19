@@ -2341,7 +2341,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             ))}
           </tbody>
           {/* ── Riepilogo persone in turno (divise pranzo/cena) ── */}
-          <tfoot className="sticky bottom-0 z-20 bg-transparent backdrop-blur-lg">
+          {/* Il blur sta sulle celle, non sulla tfoot: un backdrop-filter sulla tfoot
+              crea un backdrop-root e annulla il vetro della cella sticky "In turno". */}
+          <tfoot className="sticky bottom-0 z-20 bg-transparent">
             <tr>
               <th className={`sticky left-0 z-30 text-left px-2 py-1.5 text-[0.625rem] font-bold uppercase tracking-wider text-white/50 border-t border-white/10 bg-transparent backdrop-blur-lg`}>
                 {t.people_on_shift ?? 'In turno'}
@@ -2352,7 +2354,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 const evening = entry?.evening.size ?? 0;
                 const weekEnd = isPeriodView && day.getDay() === 0;
                 return (
-                  <td key={i} className={`px-1 py-1.5 text-center border-t border-white/10 ${weekEnd ? 'border-r-2 border-r-white/20' : ''}`}>
+                  <td key={i} className={`px-1 py-1.5 text-center border-t border-white/10 backdrop-blur-lg ${weekEnd ? 'border-r-2 border-r-white/20' : ''}`}>
                     <div className="flex items-center justify-center gap-1">
                       <span className={`flex items-center gap-0.5 text-[0.6875rem] font-bold tabular-nums leading-none ${lunch > 0 ? 'text-amber-300' : 'text-white/25'}`}>
                         <Sun className="h-3 w-3" aria-label={t.lunch_label ?? 'Pranzo'} /> {lunch}
@@ -2365,7 +2367,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   </td>
                 );
               })}
-              <td className="px-1 py-1.5 text-center border-t border-white/10" />
+              <td className="px-1 py-1.5 text-center border-t border-white/10 backdrop-blur-lg" />
             </tr>
           </tfoot>
         </table>
