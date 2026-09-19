@@ -834,7 +834,7 @@ className="inline-flex flex-1 items-center justify-center h-8 rounded-xl border 
             <button
               type="submit"
               disabled={isSaving || Boolean(activePinConflictMessage)}
-              className="inline-flex flex-1 items-center justify-center h-8 rounded-xl border border-white/20 bg-[var(--flow-primary-fill)] px-3 text-xs font-semibold text-white transition-colors hover:bg-[var(--brand-hover)] disabled:cursor-not-allowed disabled:opacity-50 font-sans active:brightness-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+              className="inline-flex flex-1 items-center justify-center h-8 rounded-xl border border-white/20 bg-[var(--flow-primary-fill)] px-3 text-xs font-semibold text-white transition-colors hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-50 font-sans active:brightness-95 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               {isSaving ? t.saving : variant === 'create' ? t.create_employee_submit : t.save_changes}
             </button>

@@ -25,9 +25,8 @@
   --flow-primary: #0a84ff;
   --flow-primary-foreground: #ffffff;
   --flow-primary-hover: #409cff;
-  /* Tinta di RIEMPIMENTO dei CTA pieni: più scura di --flow-primary
-     così il testo bianco sopra supera il contrasto AA (≥4.5:1). */
-  --flow-primary-fill: #0071e3;
+  /* Tinta di RIEMPIMENTO dei CTA pieni: neutra (vetro bianco), senza accento colore. */
+  --flow-primary-fill: rgba(255, 255, 255, 0.20);
   --flow-primary-soft: rgba(10, 132, 255, 0.18);
   --flow-primary-softer: rgba(10, 132, 255, 0.1);
 
