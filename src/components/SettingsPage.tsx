@@ -69,6 +69,7 @@ import { TimeInputField } from './ui/TimeInputField';
 import { isAdminModuleEnabled } from '../utils/enabledFeatures';
 import { SettingsAccordionSection } from './ui/SettingsAccordionSection';
 import { CenteredModalPortal } from './ui/CenteredModalPortal';
+import { GradientIconButton } from './ui/GradientIconButton';
 import { RoleFeatureTemplatesPanel } from './RoleFeatureTemplatesPage';
 import ProfileVisibilityHub from './ProfileVisibilityHub';
 import ElevatedAccessPanel from './ElevatedAccessPanel';
@@ -2971,29 +2972,24 @@ function BreakRuleModal({
               </button>
             ))}
             <div className="mx-1 h-5 w-px shrink-0 bg-white/20" aria-hidden />
-            <button
+            <GradientIconButton
               type="submit"
-              title={isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
-              aria-label={isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
-              className="group flex items-center gap-0 overflow-hidden rounded-lg bg-accent p-2 text-white transition-all duration-200 hover:gap-1.5 hover:pr-2.5 active:brightness-95"
+              label={isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
+              gradientFrom="#0a84ff"
+              gradientTo="#0062cc"
+              className="rounded-lg bg-accent p-2 text-white active:brightness-95"
             >
               <Check className="h-4 w-4 shrink-0" />
-              <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[15rem]">
-                {isEdit ? t.settings_break_save_changes : t.settings_break_create_rule}
-              </span>
-            </button>
-            <button
-              type="button"
+            </GradientIconButton>
+            <GradientIconButton
+              label={t.close}
               onClick={onClose}
-              aria-label={t.close}
-              title={t.close}
-              className="group flex items-center gap-0 overflow-hidden rounded-lg bg-white/10 p-2 text-white/55 transition-all duration-200 hover:gap-1.5 hover:bg-white/15 hover:text-white hover:pr-2.5 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+              gradientFrom="#94a3b8"
+              gradientTo="#475569"
+              className="rounded-lg bg-white/10 p-2 text-white/55 hover:bg-white/15 hover:text-white"
             >
               <X className="h-4 w-4 shrink-0" />
-              <span className="min-w-0 max-w-0 overflow-hidden whitespace-nowrap leading-none text-[0.625rem] font-bold uppercase tracking-wider transition-all duration-200 group-hover:max-w-[4rem]">
-                {t.close}
-              </span>
-            </button>
+            </GradientIconButton>
           </div>
         </div>
 

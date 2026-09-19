@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo, useLayoutEffect, memo, type ReactNode, type CSSProperties } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo, useLayoutEffect, memo, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import {
   CalendarDays, AlertTriangle, Check, Lock, Plus, Clock,
@@ -22,6 +22,7 @@ import { getBreakMinutesForShift, getAutoBreakThresholdMinutes, getAutoBreakMinu
 import { shiftPastPlannedEndWithoutClockIn, punchTimeHHMM, getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
 import { exportSchedulePDF } from '../utils/exportSchedulePDF';
 import { TimeInputField } from './ui/TimeInputField';
+import { GradientIconButton } from './ui/GradientIconButton';
 import { ShiftSlotPresetsSection } from './shifts/ShiftSlotPresetsSection';
 import { database } from '../lib/database';
 import { useAppUser, useAppData, useAppConfig, useAppOverlay, authorizeFrozenDelete } from '../context/AppContext';
@@ -462,49 +463,6 @@ type ShiftGridDesktopRowProps = {
   onDrop: (e: React.DragEvent, targetUserId: string, targetDate: string, targetSlot?: 'lunch' | 'evening') => void;
   onReviewClick: (user: User) => void;
 };
-
-/**
- * Pulsante a icona: al hover appare sotto una pill con l'etichetta.
- * Il pulsante non cambia dimensione, quindi gli altri comandi non si spostano.
- */
-const GradientIconButton = memo(function GradientIconButton({
-  label,
-  onClick,
-  children,
-  gradientFrom,
-  gradientTo,
-  baseClass,
-}: {
-  label: string;
-  onClick: () => void;
-  children: ReactNode;
-  gradientFrom: string;
-  gradientTo: string;
-  baseClass: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      style={{ '--gradient-from': gradientFrom, '--gradient-to': gradientTo } as CSSProperties}
-      className={`group relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-300 hover:z-20 ${baseClass}`}
-    >
-      <span className="relative z-10 flex shrink-0 items-center justify-center">
-        {children}
-      </span>
-      {/* Pill con l'etichetta: appare sotto il pulsante */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-full z-30 flex justify-center pt-2"
-      >
-        <span className="origin-top scale-90 whitespace-nowrap rounded-full bg-[linear-gradient(45deg,var(--gradient-from),var(--gradient-to))] px-3 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-white opacity-0 shadow-lg transition-all duration-300 group-hover:scale-100 group-hover:opacity-100">
-          {label}
-        </span>
-      </span>
-    </button>
-  );
-});
 
 export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, filterUserId }: { mode: GridMode; onModeChange: (m: GridMode) => void; filterUserId?: string }) {
   const t = useT();
@@ -2028,15 +1986,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           </button>
 
           {isMgmt && hasWeekDraftShifts && (
-            <button
-              type="button"
+            <GradientIconButton
+              label={t.publish_week ?? 'Pubblica settimana'}
               onClick={() => void handlePublishWeek()}
-              aria-label={t.publish_week ?? 'Pubblica settimana'}
-              title={t.publish_week ?? 'Pubblica settimana'}
-              className="hidden md:flex shrink-0 items-center justify-center rounded-xl p-1.5 text-emerald-300 liquid-glass liquid-glass-green transition-colors"
+              gradientFrom="#34d399"
+              gradientTo="#059669"
+              className="hidden md:flex rounded-xl p-1.5 text-emerald-300 liquid-glass liquid-glass-green"
             >
               <Send className="h-3 w-3 shrink-0" />
-            </button>
+            </GradientIconButton>
           )}
           {isMgmt && canFreezeWeek && (
             <button
@@ -2513,7 +2471,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => setDrawerDeleteConfirm(true)}
                       gradientFrom="#fb7185"
                       gradientTo="#e11d48"
-                      baseClass="bg-rose-600/20 text-rose-300 hover:bg-rose-600/30">
+                      className="h-8 w-8 rounded-full bg-rose-600/20 text-rose-300 hover:bg-rose-600/30">
                       <Trash2 className="h-4 w-4" />
                     </GradientIconButton>
                   )}
@@ -2541,7 +2499,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => setShowShiftAuditModal(true)}
                       gradientFrom="#22d3ee"
                       gradientTo="#0a84ff"
-                      baseClass="bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
+                      className="h-8 w-8 rounded-full bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
                       <History className="h-4 w-4" />
                     </GradientIconButton>
                   )}
@@ -2551,7 +2509,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   onClick={handleCloseDrawer}
                   gradientFrom="#94a3b8"
                   gradientTo="#475569"
-                  baseClass="bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
+                  className="h-8 w-8 rounded-full bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
                   <X className="h-4 w-4" />
                 </GradientIconButton>
               </div>
