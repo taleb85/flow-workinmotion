@@ -1812,9 +1812,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* Linea divisoria tra dipendenti */}
       <style>{`.wst-employee-row td { border-bottom: 1px solid rgba(255,255,255,0.10) !important; }
 .wst-employee-row td { border-top: 1px solid rgba(255,255,255,0.10) !important; }
-/* Header tabella opaco su scroll: solo vetro satinato senza colore, offusca il contenuto sottostante */
-.wst-header-scrolled { background: transparent !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }
-.wst-header-scrolled th { color: #ffffff !important; border-bottom-color: rgba(255,255,255,0.12) !important; }
+/* Header tabella opaco su scroll: solo vetro satinato senza colore, offusca il contenuto sottostante.
+   Il blur sta sulle th e non sulla thead: un backdrop-filter sull'antenato crea un
+   backdrop-root e annulla il vetro della cella sticky "Dipendente". */
+.wst-header-scrolled { background: transparent !important; }
+.wst-header-scrolled th { background: transparent !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; color: #ffffff !important; border-bottom-color: rgba(255,255,255,0.12) !important; }
 .wst-header-scrolled th.border-b-white { border-bottom-color: white !important; }
 .wst-header-scrolled th div { color: #ffffff !important; }
 .wst-header-scrolled .text-accent { color: #ffffff !important; }
