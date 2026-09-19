@@ -2745,18 +2745,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               </div>
               {/* Componente unico in basso: riepilogo ore + detrae pausa */}
               {selectedShift && (() => {
-                const { in: punchIn, out: punchOut } = getPunchForShift(selectedShift);
-                const hasActual = !!(punchIn?.calculated_time || punchIn?.timestamp) && !!(punchOut?.calculated_time || punchOut?.timestamp);
-                const actualStart = hasActual ? (punchIn!.calculated_time || punchIn!.timestamp) : null;
-                const actualEnd = hasActual ? (punchOut!.calculated_time || punchOut!.timestamp) : null;
-                const grossMins = actualStart && actualEnd
-                  ? (() => {
-                      const startMs = new Date(actualStart).getTime();
-                      let endMs = new Date(actualEnd).getTime();
-                      if (endMs <= startMs) endMs += 24 * 60 * 60 * 1000;
-                      return (endMs - startMs) / 60000;
-                    })()
-                  : calculateShiftMinutesGross(selectedShift.start_time ?? '', selectedShift.end_time ?? '');
+                // Ore del turno = durata pianificata (start→end), non la timbratura:
+                // da qui si detrae la pausa per ottenere le ore nette.
+                const grossMins = calculateShiftMinutesGross(selectedShift.start_time ?? '', selectedShift.end_time ?? '');
                 const shiftUser = users.find((u) => u.id === selectedShift.user_id);
                 const breakMins = getBreakMinutesForShift({ ...selectedShift, deduct_break: deductBreak }, grossMins, shiftUser ?? null, breakRules,
                   editIn && editOut ? { breakRuleWindow: { start: editIn, end: editOut } } : undefined);
