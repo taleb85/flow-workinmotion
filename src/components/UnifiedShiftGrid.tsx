@@ -2685,7 +2685,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     </div>
                   );
                 })()}
-                {canEdit && (selectedShift.approval_status === 'draft' || selectedShift.approval_status === 'confirmed' || selectedShift.approval_status === 'approved') && (
+                {/* Orario del turno: sempre presente (tranne "non ha lavorato") così il drawer
+                    non cambia dimensione; per confirmed/approved/frozen i campi sono disabilitati. */}
+                {canEdit && selectedShift.approval_status !== 'absent' && (
                   <div className="rounded-xl bg-gradient-to-br from-sky-500/10 to-blue-600/10 p-3 space-y-3">
                     <div>
                       <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.start_time ?? 'Inizio'}</label>
@@ -2722,47 +2724,27 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                         )}
                       </div>
                       <div className="rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-600/10 p-3 space-y-3">
-                        {showEditFields ? (
-                          <>
-                            <div>
-                              <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">
-                                {t.punch_in ?? 'Entrata'}
-                              </label>
-                              <TimeInputField value={editIn} onChange={setEditIn} size="md" onMinutesEnter={() => { editOutHourRef.current?.focus(); editOutHourRef.current?.select(); }} className={`w-full ${editIn ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
-                            </div>
-                            <div>
-                              <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">
-                                {t.punch_out ?? 'Uscita'}
-                              </label>
-                              <TimeInputField value={editOut} onChange={setEditOut} size="md" hourInputRef={editOutHourRef} className={`w-full ${editOut ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
-                            </div>
-                            <button type="button" onClick={() => void handleConfirmPunches()} disabled={saving || (!editIn && !editOut)}
-                              className={`${punchActionRequired ? 'glow-pulse ' : ''}w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider`}>
-                              <Check className="h-3.5 w-3.5 inline-block mr-1.5" />{t.confirm_punches ?? 'Conferma timbrature'}
-                            </button>
-                          </>
-                        ) : (
-                          <div className="space-y-3">
-                            <div>
-                              <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">
-                                {t.punch_in ?? 'Entrata'}
-                              </label>
-                              <TimeInputField value={editIn} onChange={setEditIn} size="md" className="w-full" disabled />
-                            </div>
-                            <div>
-                              <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">
-                                {t.punch_out ?? 'Uscita'}
-                              </label>
-                              <TimeInputField value={editOut} onChange={setEditOut} size="md" className="w-full" disabled />
-                            </div>
-                            <button type="button" disabled
-                              className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[0.6875rem] font-bold text-white transition-colors uppercase tracking-wider disabled:opacity-40">
-                              <Check className="h-3.5 w-3.5 inline-block mr-1.5" />{t.confirm_punches ?? 'Conferma timbrature'}
-                            </button>
-                            {isFrozen(selectedShift) && (
-                              <p className="text-[0.625rem] text-amber-400/70 text-center pt-2">{t.wst_frozen_readonly_hint ?? 'Turno congelato — sola lettura'}</p>
-                            )}
-                          </div>
+                        <div>
+                          <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">
+                            {t.punch_in ?? 'Entrata'}
+                          </label>
+                          <TimeInputField value={editIn} onChange={setEditIn} size="md" disabled={!showEditFields}
+                            onMinutesEnter={() => { editOutHourRef.current?.focus(); editOutHourRef.current?.select(); }}
+                            className={`w-full ${editIn ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
+                        </div>
+                        <div>
+                          <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">
+                            {t.punch_out ?? 'Uscita'}
+                          </label>
+                          <TimeInputField value={editOut} onChange={setEditOut} size="md" disabled={!showEditFields} hourInputRef={editOutHourRef}
+                            className={`w-full ${editOut ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
+                        </div>
+                        <button type="button" onClick={() => void handleConfirmPunches()} disabled={!showEditFields || saving || (!editIn && !editOut)}
+                          className={`${punchActionRequired ? 'glow-pulse ' : ''}w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider disabled:opacity-40`}>
+                          <Check className="h-3.5 w-3.5 inline-block mr-1.5" />{t.confirm_punches ?? 'Conferma timbrature'}
+                        </button>
+                        {isFrozen(selectedShift) && (
+                          <p className="text-[0.625rem] text-amber-400/70 text-center pt-2">{t.wst_frozen_readonly_hint ?? 'Turno congelato — sola lettura'}</p>
                         )}
                       </div>
                     </div>
