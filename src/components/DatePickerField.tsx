@@ -186,7 +186,7 @@ const DatePickerField = forwardRef<HTMLButtonElement, DatePickerFieldProps>(func
         {allowClear ? (
           <button
             type="button"
-            className="rounded-2xl px-2.5 py-1.5 text-sm font-semibold text-white/60 transition-colors hover:bg-slate-50 hover:text-white/90 active:text-white/90 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+            className="rounded-2xl px-2.5 py-1.5 text-sm font-semibold text-white/60 transition-colors hover:bg-white/10 hover:text-white active:text-white hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             onClick={() => {
               onChange('');
               setOpen(false);
@@ -197,7 +197,7 @@ const DatePickerField = forwardRef<HTMLButtonElement, DatePickerFieldProps>(func
         ) : null}
         <button
           type="button"
-          className="rounded-2xl bg-accent px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-hover active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
+          className="rounded-2xl bg-white/20 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-white/30 active:bg-white/80 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
           onClick={() => {
             onChange(format(new Date(), 'yyyy-MM-dd'));
             setOpen(false);

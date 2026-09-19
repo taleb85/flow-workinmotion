@@ -1050,25 +1050,25 @@ button[role="switch"][class~="bg-accent"] {
   color: rgba(255, 255, 255, 0.25);
 }
 
-/* Giorno selezionato: riempimento brand + testo bianco (il tema RDP di default usa quasi solo il bordo). */
+/* Giorno selezionato: riempimento neutro + testo bianco (niente tinta brand). */
 .rdp-modern.rdp-root td.rdp-day.rdp-selected {
   font-size: inherit;
   font-weight: normal;
 }
 
 .rdp-modern.rdp-root .rdp-selected .rdp-day_button {
-  background-color: var(--brand);
+  background-color: rgba(255, 255, 255, 0.25);
   color: #ffffff;
   font-weight: 700;
   font-size: 0.8125rem;
-  border: 2px solid var(--brand-dark);
+  border: 2px solid rgba(255, 255, 255, 0.60);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .rdp-modern.rdp-root .rdp-selected .rdp-day_button:hover {
-  background-color: var(--brand-hover);
+  background-color: rgba(255, 255, 255, 0.35);
   color: #ffffff;
-  border-color: var(--brand-dark);
+  border-color: rgba(255, 255, 255, 0.70);
 }
 
 .rdp-modern.rdp-root .rdp-today:not(.rdp-selected) .rdp-day_button {
