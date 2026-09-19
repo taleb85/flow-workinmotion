@@ -2616,7 +2616,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => handleUnfreezeShift(selectedShift)}
                       gradientFrom="#94a3b8"
                       gradientTo="#475569"
-                      className="h-8 w-8 rounded-full bg-white/20 text-accent hover:bg-white/30">
+                      className="h-8 w-8 rounded-full bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
                       <Lock className="h-4 w-4 shrink-0" />
                     </GradientIconButton>
                   )}
