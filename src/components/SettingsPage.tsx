@@ -32,7 +32,7 @@ import DatePickerField from './DatePickerField';
 import { useAppUser, useAppData, useAppConfig, useAppOverlay } from '../context/AppContext';
 import { useT } from '../hooks/useT';
 import { useTenant } from '../context/TenantContext';
-import type { User, UserRole } from '../types';
+import type { User, UserRole, Language } from '../types';
 import { translateRole } from '../utils/roles';
 import { formatTrans, getFeatureStrings, getTranslations } from '../utils/translations';
 import {
@@ -275,7 +275,7 @@ type SettingsUserRowProps = {
   isVisibilityOpen: boolean;
   isDeleteConfirm: boolean;
   shareMenuOpen: boolean;
-  currentUser: User;
+  effectiveLanguage: Language;
   t: ReturnType<typeof getTranslations>;
   users: User[];
   showSuccess?: (message: string) => void;
@@ -290,7 +290,7 @@ type SettingsUserRowProps = {
 
 const SettingsUserRow = memo(function SettingsUserRow({
   user, canEdit, isVisibilityOpen, isDeleteConfirm, shareMenuOpen,
-  currentUser, t, users, showSuccess, showError,
+  effectiveLanguage, t, users, showSuccess, showError,
   onEdit, onToggleStatus, onSetDeleteConfirm, onDeleteUser, onSetVisibility, onSetShareMenu,
 }: SettingsUserRowProps) {
   return (
@@ -305,7 +305,7 @@ const SettingsUserRow = memo(function SettingsUserRow({
           <span className="block truncate text-sm font-semibold uppercase text-white" title={user.first_name ?? ''}>{user.first_name ?? ''} {user.last_name ?? ''}
           </span>
           <span className="text-white/55 text-[0.6875rem] uppercase tracking-wider">
-            {translateRole(user.role, currentUser.language)}
+            {translateRole(user.role, effectiveLanguage)}
             {!isPurelyManagementRole(user.role) && user.status === 'active' && !isUserVisibleOnTeamSchedule(user) && (
               <span className="ml-1.5 text-amber-600 font-semibold normal-case">
                 · {t.settings_off_schedule_badge}
@@ -520,14 +520,14 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
   }, [currentUser]);
 
   const handleDeleteShiftTemplate = useCallback(async (name: string) => {
-    if (!window.confirm(`Eliminare il template "${name}"? Questa azione non è reversibile.`)) return;
+    if (!window.confirm(formatTrans(t.settings_delete_template_confirm, { name }))) return;
     setShiftTemplateDeleting(name);
     try {
       await database.shiftTemplates.delete(name);
       setShiftTemplates(prev => prev.filter(t => t.name !== name));
-      showSuccess?.(`Template "${name}" eliminato`);
+      showSuccess?.(formatTrans(t.settings_delete_template_success, { name }));
     } catch {
-      showError?.('Errore durante l\'eliminazione del template');
+      showError?.(t.settings_delete_template_error);
     } finally {
       setShiftTemplateDeleting(null);
     }
@@ -940,7 +940,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         <p className="truncate text-sm font-semibold uppercase text-white" title={user.first_name}>{user.first_name} {user.last_name ?? ''}
                         </p>
                         <p className="text-[0.6875rem] uppercase tracking-wider text-white/55">
-                          {translateRole(user.role, currentUser.language)}
+                          {translateRole(user.role, effectiveLanguage)}
                           {!isActiveRow && (
                             <span className="ml-1.5 font-semibold text-amber-400">
                               ·{' '}
@@ -1137,7 +1137,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   isVisibilityOpen={expandedVisibilityUserId === user.id}
                   isDeleteConfirm={deleteConfirmUserId === user.id}
                   shareMenuOpen={shareMenuUserId === user.id}
-                  currentUser={currentUser as User}
+                  effectiveLanguage={effectiveLanguage}
                   t={t}
                   users={users}
                   showSuccess={showSuccess}
@@ -1844,7 +1844,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   {/* `text-slate-400` (→ 0.50 bianco): il namespace `text-white/*` è forzato a ≥0.85, quindi non può rendere l'icona subordinata al testo. */}
                   <CalendarDays className="h-8 w-8 text-slate-400" />
                   <p className="text-[0.8125rem] text-white/40">{t.settings_no_templates_saved ?? 'Nessun template salvato.'}</p>
-                  <p className="text-[0.6875rem] text-white/60">Salva una settimana dal tabellone turni usando il menu Template.</p>
+                  <p className="text-[0.6875rem] text-white/60">{t.settings_template_save_hint}</p>
                 </div>
               )}
 
@@ -2022,8 +2022,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                           <button
                             type="button"
                             onClick={() => setDeletingPeriodRule(rule)}
-                            title="Elimina regola"
-                            aria-label={`Elimina regola ${rule.name}`}
+                            title={t.settings_delete_rule}
+                            aria-label={formatTrans(t.settings_delete_rule_aria, { name: rule.name })}
                             className="flex w-8 shrink-0 items-center justify-center rounded-r-xl text-white/40 transition-colors hover:bg-white/10 hover:text-white active:brightness-95"
                           >
                             <Trash2 className="h-3.5 w-3.5" aria-hidden />
@@ -2038,15 +2038,15 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                 {showPeriodRuleForm && (
                   <div className="mt-2 space-y-2 rounded-xl border-2 border-dashed border-white/20 bg-white/5 p-3">
                     <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
-                      Nuova regola
+                      {t.settings_new_rule}
                     </p>
                     <input
                       type="text"
                       value={newRuleName}
                       onChange={(e) => setNewRuleName(e.target.value)}
                       maxLength={40}
-                      placeholder="Nome regola (es. Periodo estivo)"
-                      aria-label="Nome della nuova regola"
+                      placeholder={t.settings_rule_name_placeholder}
+                      aria-label={t.settings_rule_name_aria}
                       className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/35 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
                     />
                     <div className="grid grid-cols-2 gap-2">
@@ -2292,9 +2292,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   style={{ background: '#0a0a0c' }}
                 >
                   {holidayEmailSaved ? (
-                    <><Check className="h-3.5 w-3.5" />Salvata</>
+                    <><Check className="h-3.5 w-3.5" />{t.settings_saved_f}</>
                   ) : (
-                    'Salva'
+                    t.save
                   )}
                 </button>
               </div>
@@ -2507,8 +2507,8 @@ className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-m
             {/* PIN pad per sblocco */}
             {showDataToolsPinPad && (
               <PinPadModal
-                title="Sblocca strumenti dati"
-                subtitle="Inserisci il tuo PIN amministratore"
+                title={t.settings_unlock_data_tools}
+                subtitle={t.settings_unlock_data_tools_sub}
                 pinLabel="PIN"
                 pin={dataToolsPin}
                 onPinChange={(p) => { setDataToolsPin(p); setDataToolsPinError(''); }}
@@ -2526,8 +2526,7 @@ className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-m
                 onCancel={() => { setShowDataToolsPinPad(false); setDataToolsPin(''); }}
                 error={dataToolsPinError}
                 isLoading={false}
-                confirmLabel="Sblocca"
-                cancelLabel="Annulla"
+                cancelLabel={t.cancel}
               />
             )}
           </SettingsAccordionSection>
@@ -2537,8 +2536,8 @@ className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-m
         {adminOnly && (
           <SettingsAccordionSection
             storageKey="osteria_settings_acc_elevated_access"
-            title="Accesso scheda Admin"
-            subtitle="Abilita il tab Admin nella navigazione del profilo"
+            title={t.settings_admin_tab_access}
+            subtitle={t.settings_admin_tab_access_sub}
             defaultOpen={false}
             attached
           >
@@ -2645,9 +2644,9 @@ className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-m
                 <Trash2 className="h-4 w-4 text-white" />
               </div>
               <div className="min-w-0">
-                <h3 className="text-sm font-bold text-white">Elimina regola</h3>
+                <h3 className="text-sm font-bold text-white">{t.settings_delete_rule}</h3>
                 <p className="mt-0.5 text-xs text-white/55">
-                  La regola «{deletingPeriodRule.name}» verrà rimossa. Il periodo attivo non cambia.
+                  {formatTrans(t.settings_delete_rule_body, { name: deletingPeriodRule.name })}
                 </p>
               </div>
             </div>

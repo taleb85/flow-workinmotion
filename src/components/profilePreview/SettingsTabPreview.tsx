@@ -61,18 +61,21 @@ export default function SettingsTabPreview({
 
 export function GlobalPopupsPreview({
   previewUser,
+  language,
   isSelectedAdmin,
   onUiToggle,
   hiddenBadge,
 }: {
   previewUser: User;
+  language: Language;
   isSelectedAdmin: boolean;
   onUiToggle: (key: string, visible: boolean) => void;
   hiddenBadge: string;
 }) {
+  const t = getTranslations(language);
   return (
     <div className="space-y-2 mt-4 pt-4 border-t border-white/10">
-      <p className="px-1 text-[0.5625rem] font-bold uppercase tracking-wider text-white/60">Menu e Popup Globali</p>
+      <p className="px-1 text-[0.5625rem] font-bold uppercase tracking-wider text-white/60">{t.pv_global_menu_popups}</p>
       
       <WidgetChrome
         widgetKey="global.quick_switch"
@@ -86,8 +89,8 @@ export function GlobalPopupsPreview({
             <Users className="h-5 w-5 text-white/60" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white/90">Cambio rapido utente</p>
-            <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">Pressione lunga sull'avatar</p>
+            <p className="text-sm font-semibold text-white/90">{t.pv_quick_switch_user}</p>
+            <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">{t.pv_quick_switch_hint}</p>
           </div>
         </div>
       </WidgetChrome>
@@ -104,8 +107,8 @@ export function GlobalPopupsPreview({
             <Bell className="h-5 w-5 text-white/60" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white/90">Centro notifiche</p>
-            <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">Icona campanella nell'header</p>
+            <p className="text-sm font-semibold text-white/90">{t.pv_notification_center}</p>
+            <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">{t.pv_notification_center_hint}</p>
           </div>
         </div>
       </WidgetChrome>

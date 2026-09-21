@@ -6,10 +6,12 @@
 import { useState, useMemo } from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
+import { useT } from '../hooks/useT';
 import { translateRole } from '../utils/roles';
 import ToggleSwitch from './ui/toggle-switch-glass';
 export default function ElevatedAccessPanel() {
   const { users, updateUser, effectiveLanguage } = useAppUser();
+  const t = useT();
 
   const eligibleUsers = useMemo(
     () => users.filter((u) => u.status === 'active' && u.role !== 'admin'),
@@ -33,7 +35,7 @@ export default function ElevatedAccessPanel() {
   if (eligibleUsers.length === 0) {
     return (
       <p className="text-xs text-white/55 px-1">
-        Nessun dipendente non-admin attivo da configurare.
+        {t.elevated_none_configurable}
       </p>
     );
   }
@@ -41,7 +43,7 @@ export default function ElevatedAccessPanel() {
   return (
     <div className="space-y-2">
       <p className="text-[0.6875rem] text-white/55 leading-relaxed mb-3">
-        Quando attivato, il dipendente vede la scheda <strong className="text-white/80">Admin</strong> nella navigazione e può accedere all'area gestionale senza PIN aggiuntivo.
+        {t.elevated_desc}
       </p>
 
       {eligibleUsers.map((u) => {

@@ -737,7 +737,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       {/* ── Header fisso unificato: topbar + tabbar ── */}
       <header
         ref={appStickyHeaderRef}
-        aria-label="Navigazione principale"
+        aria-label={t.nav_main}
         /* Header: stesso effetto della bottom nav (trasparente + blur 16px,
            regola .app-header in index.css). I figli non hanno effetti. */
         className={`app-header sticky md:fixed top-0 left-0 right-0 z-[10050] shrink-0 transition-[visibility,opacity] duration-150 ${
@@ -764,8 +764,8 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
           rightExtra={
             <div className="hidden md:flex items-center gap-2.5">
               <GradientIconButton
-                label={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso…' : 'Sincronizza dati'}
-                ariaLabel={isRefreshing || dataSyncInProgress ? 'Sincronizzazione in corso' : 'Sincronizza dati'}
+                label={isRefreshing || dataSyncInProgress ? t.sync_total_in_progress : t.sync_data_label}
+                ariaLabel={isRefreshing || dataSyncInProgress ? t.sync_total_in_progress : t.sync_data_label}
                 onClick={handleHardRefresh}
                 disabled={isRefreshing || dataSyncInProgress}
                 gradientFrom={isRefreshing || dataSyncInProgress ? '#fbbf24' : isSynced ? '#34d399' : '#94a3b8'}
@@ -791,8 +791,8 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
               </GradientIconButton>
               {featureFlags['unlock_with_pin'] !== false && currentUser && isManagement && (
                 <GradientIconButton
-                  label={globalPinSessionId ? 'Sessione PIN attiva' : 'Sblocca sessione PIN'}
-                  ariaLabel={globalPinSessionId ? 'Gestisci sessione PIN' : 'Sblocca sessione PIN'}
+                  label={globalPinSessionId ? t.pin_session_active : t.pin_session_unlock}
+                  ariaLabel={globalPinSessionId ? t.pin_session_manage : t.pin_session_unlock}
                   onClick={() => setShowPinMenu(true)}
                   gradientFrom={globalPinSessionId ? '#34d399' : '#f87171'}
                   gradientTo={globalPinSessionId ? '#059669' : '#dc2626'}
@@ -815,7 +815,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       <main
         id="main-content"
         role="main"
-        aria-label="Contenuto principale"
+        aria-label={t.main_content}
         className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending || appLockVisible ? 'blur-md pointer-events-none' : ''}`}>
         {/* Larghezza massima contenuto unificata (max-w-7xl): tutte le schede
             condividono lo stesso blocco centrato, come già facevano
@@ -836,7 +836,6 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                   error={globalPinError}
                   onConfirm={() => handleGlobalPinSubmit(globalPinValue)}
                   onCancel={closePinMenu}
-                  confirmLabel={t.ts_drawer_unlock_btn}
                 />
               )}
             </AnimatePresence>,
@@ -859,14 +858,14 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/20 border-2 border-white/40 mb-5">
                         <ShieldCheck className="w-9 h-9 text-accent" strokeWidth={2} />
                       </div>
-                      <h2 className="text-white font-bold uppercase tracking-widest text-base mb-2">Sessione sbloccata</h2>
-                      <p className="text-white/60 text-sm font-medium leading-tight px-4">Tutte le operazioni protette da PIN sono accessibili in questa sessione.</p>
+                      <h2 className="text-white font-bold uppercase tracking-widest text-base mb-2">{t.pin_session_unlocked_title}</h2>
+                      <p className="text-white/60 text-sm font-medium leading-tight px-4">{t.pin_session_unlocked_desc}</p>
                     </div>
                     <button type="button" onClick={() => { setGlobalPinSessionId(null); closePinMenu(); }} className="w-full h-14 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold flex items-center justify-center gap-2.5 transition-colors mb-3">
                       <ShieldOff className="w-5 h-5" strokeWidth={2} />
-                      Blocca sessione
+                      {t.pin_session_lock}
                     </button>
-                    <button type="button" onClick={closePinMenu} className="w-full h-14 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white/70 font-bold transition-colors">Annulla</button>
+                    <button type="button" onClick={closePinMenu} className="w-full h-14 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white/70 font-bold transition-colors">{t.cancel}</button>
                   </motion.div>
                 </motion.div>
               )}
@@ -1032,7 +1031,7 @@ function ProtectedApp() {
   // che la sessione salvata venga ripristinata.
   if (appIsLoading) {
     return (
-      <main role="main" aria-label="Caricamento in corso">
+      <main role="main" aria-label={t.app_aria_loading}>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { getTranslations } from '../utils/translations';
+import { getDeviceUiLanguage, readStoredUiLanguage } from '../utils/uiLanguagePreference';
 interface ToastProps {
   message: string;
   type?: 'error' | 'success' | 'info';
@@ -14,6 +16,7 @@ interface ToastProps {
  * Scompare automaticamente dopo 3 secondi.
  */
 export default function Toast({ message, type = 'error', onClose }: ToastProps) {
+  const tr = getTranslations(readStoredUiLanguage() ?? getDeviceUiLanguage());
   useEffect(() => {
     const t = setTimeout(onClose, 3000);
     return () => clearTimeout(t);
@@ -52,7 +55,7 @@ export default function Toast({ message, type = 'error', onClose }: ToastProps) 
           type="button"
           onClick={onClose}
           className="shrink-0 rounded p-0.5 text-white/40 hover:bg-white/10 hover:text-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-          aria-label="Chiudi notifica"
+          aria-label={tr.close_notification}
         >
           <X className="h-3 w-3" />
         </button>

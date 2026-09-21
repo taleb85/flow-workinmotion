@@ -125,8 +125,8 @@ export default function ManagementHomePreview({
                 <Users className="h-4 w-4 text-white/60" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white/90">Profilo Gestionale</p>
-                <p className="text-xs text-white/60">Nessun turno assegnato — accesso solo alla gestione</p>
+                <p className="text-sm font-semibold text-white/90">{t.management_profile_title}</p>
+                <p className="text-xs text-white/60">{t.management_profile_no_shifts}</p>
               </div>
             </div>
           </WidgetChrome>

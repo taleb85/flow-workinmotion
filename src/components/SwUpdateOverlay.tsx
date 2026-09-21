@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Loader2 } from 'lucide-react';
 import FlowLogoSvg from './FlowLogoSvg';
+import { getTranslations } from '../utils/translations';
+import { getDeviceUiLanguage, readStoredUiLanguage } from '../utils/uiLanguagePreference';
 
 const STEPS = [
   { label: 'Nuova versione rilevata',   doneAt: 0    },
@@ -27,6 +29,7 @@ function redirectToApp() {
 }
 
 export default function SwUpdateOverlay() {
+  const t = getTranslations(readStoredUiLanguage() ?? getDeviceUiLanguage());
   const scheduled = useRef(false);
   const [visibleCount, setVisibleCount] = useState(1);
   const [doneCount, setDoneCount]       = useState(1);
@@ -62,7 +65,7 @@ export default function SwUpdateOverlay() {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label="Aggiornamento app"
+      aria-label={t.sw_update_aria}
     >
       {/* Icona */}
       <motion.div
@@ -82,7 +85,7 @@ export default function SwUpdateOverlay() {
       {/* Stato */}
       <div className="flex flex-col items-center gap-1.5 min-h-[2.75rem]">
         <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">
-          Aggiornamento in corso
+          {t.sw_update_in_progress}
         </p>
         <AnimatePresence mode="wait">
           <motion.p

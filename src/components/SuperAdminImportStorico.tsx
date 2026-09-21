@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, ChevronRight, Check, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { getStaticTranslations } from '../hooks/useT';
+import { formatTrans } from '../utils/translations';
 import type { Tenant } from '../types';
+
+type Tr = ReturnType<typeof getStaticTranslations>;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -60,10 +64,11 @@ function parseWeekGridSemicolon(
   text: string,
   fileName: string,
   matchUser: (name: string) => { id: string; first_name: string; last_name?: string } | null,
-  parseTimeFn: (raw: string) => string | null
+  parseTimeFn: (raw: string) => string | null,
+  tr: Tr
 ): { rows: ParsedRow[]; error: string | null } {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0);
-  if (lines.length < 2) return { rows: [], error: 'File vuoto o non valido.' };
+  if (lines.length < 2) return { rows: [], error: tr.sa_file_empty_invalid };
 
   const headerLine = lines[0];
   const headerCells = headerLine.split(';').map((c) => c.trim());
@@ -78,14 +83,14 @@ function parseWeekGridSemicolon(
     if (cell && !/^(ORE|BREAK|N\.B\.|TOT\.?)$/i.test(cell)) dayLabels.push(cell);
   }
   if (dayLabels.length < 7) {
-    return { rows: [], error: 'Intestazione settimanale incompleta: servono 7 giorni (Lun–Dom) nella prima riga.' };
+    return { rows: [], error: tr.sa_week_grid_incomplete };
   }
 
   const fnDate = parseSundayDateFromFileName(fileName);
   let monday: Date;
   if (fnDate) {
     const anyDay = new Date(fnDate.y, fnDate.m - 1, fnDate.d);
-    if (Number.isNaN(anyDay.getTime())) return { rows: [], error: 'Data nel nome file non valida (usa DD-MM-YY o DD-MM-YYYY, es. 04-01-26 o 16-02-2026).' };
+    if (Number.isNaN(anyDay.getTime())) return { rows: [], error: tr.sa_invalid_file_date };
     // Calcola il lunedì della settimana (dow 0=Dom → -6, 1=Lun → 0, …)
     const dow = anyDay.getDay();
     const daysFromMon = dow === 0 ? 6 : dow - 1;
@@ -100,7 +105,7 @@ function parseWeekGridSemicolon(
     const dm0 = monCell.match(/(\d{1,2})\s*$/);
     const dNum0 = dm0 ? parseInt(dm0[1], 10) : NaN;
     if (!Number.isFinite(dNum) && !Number.isFinite(dNum0)) {
-      return { rows: [], error: 'Aggiungi la data nel nome file (es. 16-02-2026.csv) oppure una cella MONDAY/SUNDAY GG.' };
+      return { rows: [], error: tr.sa_add_file_date };
     }
     const y = new Date().getFullYear();
     if (Number.isFinite(dNum0)) {
@@ -111,7 +116,7 @@ function parseWeekGridSemicolon(
       monday = new Date(sun);
       monday.setDate(sun.getDate() - daysFromMon);
     }
-    if (Number.isNaN(monday.getTime())) return { rows: [], error: 'Impossibile ricavare la settimana.' };
+    if (Number.isNaN(monday.getTime())) return { rows: [], error: tr.sa_week_not_found };
   }
   const dates: string[] = [];
   for (let d = 0; d < 7; d++) {
@@ -158,7 +163,7 @@ function parseWeekGridSemicolon(
   }
 
   if (parsed.length === 0) {
-    return { rows: [], error: 'Nessun turno letto: controlla orari HH:MM e nomi dipendenti.' };
+    return { rows: [], error: tr.sa_no_shifts_read };
   }
   return { rows: parsed, error: null };
 }
@@ -168,6 +173,7 @@ function parseWeekGridSemicolon(
 // ---------------------------------------------------------------------------
 
 export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[]; onClose: () => void }) {
+  const tr = getStaticTranslations();
   const [selectedTenantId, setSelectedTenantId] = useState(tenants[0]?.id ?? '');
   const [tenantUsers, setTenantUsers] = useState<{ id: string; first_name: string; last_name?: string }[]>([]);
   const [rows, setRows] = useState<ParsedRow[]>([]);
@@ -241,7 +247,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
       setImportHistory((prev) => prev.filter((b) => b.adminNote !== adminNote));
       setConfirmDelete(null);
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Errore eliminazione');
+      alert(e instanceof Error ? e.message : tr.sa_delete_error);
     } finally {
       setDeletingBatch(null);
     }
@@ -299,7 +305,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
     reader.onload = (e) => {
       const text = (e.target?.result as string) ?? '';
       const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-      if (lines.length < 2) { setParseError('File vuoto o non valido.'); return; }
+      if (lines.length < 2) { setParseError(tr.sa_file_empty_invalid); return; }
 
       const firstLine = lines[0] ?? '';
       const isWeekGrid =
@@ -307,7 +313,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
         (firstLine.includes(';') && firstLine.split(';').length >= 12);
 
       if (isWeekGrid) {
-        const grid = parseWeekGridSemicolon(text, file.name, matchUser, parseTime);
+        const grid = parseWeekGridSemicolon(text, file.name, matchUser, parseTime, tr);
         if (grid.error) {
           setParseError(grid.error);
           setRows([]);
@@ -328,8 +334,8 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
         const date = parseDate(rawDate);
         const startTime = parseTime(rawStart);
         const endTime = parseTime(rawEnd);
-        if (!date) { errors.push(`Riga ${i + 2}: data non valida "${rawDate}"`); return; }
-        if (!startTime || !endTime) { errors.push(`Riga ${i + 2}: ora non valida`); return; }
+        if (!date) { errors.push(formatTrans(tr.sa_row_invalid_date, { n: i + 2, date: rawDate })); return; }
+        if (!startTime || !endTime) { errors.push(formatTrans(tr.sa_row_invalid_time, { n: i + 2 })); return; }
         const matched = matchUser(rawName);
         parsed.push({ rawName, userId: matched?.id ?? null, userName: matched ? `${matched.first_name} ${matched.last_name ?? ''}`.trim() : null, date, startTime, endTime, type: startTime < '15:00' ? 'lunch' : 'dinner' });
       });
@@ -349,7 +355,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
     const duplicateInFile = valid.length - uniqueParsed.length;
 
     if (uniqueParsed.length === 0) {
-      setParseError('Nessun turno con dipendente riconosciuto.');
+      setParseError(tr.sa_no_recognized_shifts);
       return;
     }
 
@@ -428,7 +434,7 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
       setFileName('');
       void loadHistory(selectedTenantId);
     } catch (e) {
-      setParseError(e instanceof Error ? e.message : 'Errore import');
+      setParseError(e instanceof Error ? e.message : tr.sa_import_error);
     } finally {
       setImporting(false);
     }
@@ -441,18 +447,18 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
     <div className="rounded-2xl border border-amber-400/30 bg-amber-50 p-4 md:p-5 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-bold text-amber-700">Importa turni storici</h2>
+          <h2 className="text-sm font-bold text-amber-700">{tr.sa_import_title}</h2>
           <p className="text-[0.6875rem] text-amber-600/70 mt-0.5">
-            CSV con turni passati. I nomi non riconosciuti vengono ignorati. Stesso slot (sede, data, orari, tipo) non viene duplicato se è già in tabella.
+            {tr.sa_import_hint}
           </p>
         </div>
-<button type="button" onClick={onClose} className="text-white/40 hover:text-white/80 transition p-1 active:text-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" aria-label="Chiudi">
+<button type="button" onClick={onClose} className="text-white/40 hover:text-white/80 transition p-1 active:text-white/80 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" aria-label={tr.close}>
           <X className="w-4 h-4" aria-hidden />
         </button>
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="sa-import-tenant" className="text-[0.6875rem] font-semibold text-white/55 uppercase tracking-wider">Sede di destinazione</label>
+        <label htmlFor="sa-import-tenant" className="text-[0.6875rem] font-semibold text-white/55 uppercase tracking-wider">{tr.sa_tenant_destination}</label>
         <select id="sa-import-tenant" value={selectedTenantId} onChange={(e) => { setSelectedTenantId(e.target.value); setRows([]); setImportResult(null); }}
           className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-amber-400/40">
           {tenants.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -463,26 +469,25 @@ export default function ImportStorico({ tenants, onClose }: { tenants: Tenant[];
         <button onClick={downloadTemplate}
 className="flex items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/10 py-2.5 text-xs font-semibold text-white/55 hover:bg-white/10 hover:text-white/90 transition active:text-white/90 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
           <ChevronRight className="w-3.5 h-3.5 -rotate-90" />
-          Scarica template CSV
+          {tr.sa_download_csv_template}
         </button>
         <button onClick={() => fileRef.current?.click()}
           className="flex items-center justify-center gap-1.5 rounded-xl border border-amber-400/40 bg-amber-100 py-2.5 text-xs font-bold text-amber-700 hover:bg-amber-200 transition active:bg-amber-200/80">
           <ChevronRight className="w-3.5 h-3.5 rotate-90" />
-          {fileName ? fileName.slice(0, 22) + (fileName.length > 22 ? '…' : '') : 'Carica CSV'}
+          {fileName ? fileName.slice(0, 22) + (fileName.length > 22 ? '…' : '') : tr.sa_upload_csv}
         </button>
         <input ref={fileRef} type="file" accept=".csv,.txt" className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }} />
       </div>
 
       <div className="rounded-xl bg-white/5 border border-white/[0.14] p-3 space-y-2">
-        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">Formato A — griglia settimanale (Ore dipendenti)</p>
+        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">{tr.sa_format_a_title}</p>
         <p className="text-[0.6875rem] text-white/55 leading-snug">
-          Separatore <strong>;</strong>, prima riga con <code className="text-[0.6875rem]">DATA:</code> e giorni <code className="text-[0.6875rem]">MONDAY 29;;TUESDAY 30;;</code> … Poi una riga per dipendente (nome in maiuscolo) e righe successive senza nome per altri turni nella stessa settimana.
-          Includi nel <strong>nome file</strong> qualsiasi data della settimana in <strong>DD-MM-YY</strong> o <strong>DD-MM-YYYY</strong> (es. <code className="text-[0.6875rem]">04-01-26</code> o <code className="text-[0.6875rem]">16-02-2026</code>).
+          {tr.sa_format_a_hint}
         </p>
-        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 pt-1">Formato B — una riga per turno</p>
+        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 pt-1">{tr.sa_format_b_title}</p>
         <code className="text-[0.6875rem] text-white/55 leading-relaxed whitespace-pre block">{`Nome,Data,Inizio,Fine\nGUSTAVO,29/01/2026,10:00,16:00`}</code>
-        <p className="text-[0.6875rem] text-white/40">Virgola &nbsp;·&nbsp; Data GG/MM/AAAA &nbsp;·&nbsp; Ora HH:MM</p>
+        <p className="text-[0.6875rem] text-white/40">{tr.sa_format_b_hint}</p>
       </div>
 
       {parseError && <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-600">{parseError}</div>}
@@ -490,41 +495,41 @@ className="flex items-center justify-center gap-1.5 rounded-xl border border-whi
       {importResult && (
         <div className={`rounded-xl border px-3 py-3 space-y-1 ${importResult.ok > 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'}`}>
           {importResult.ok > 0 ? (
-            <p className="text-sm font-bold text-emerald-700">✓ {importResult.ok} turni importati con successo!</p>
+            <p className="text-sm font-bold text-emerald-700">{formatTrans(tr.sa_import_success, { n: importResult.ok })}</p>
           ) : (
-            <p className="text-sm font-bold text-amber-800">Nessun turno nuovo: erano già tutti presenti nel database.</p>
+            <p className="text-sm font-bold text-amber-800">{tr.sa_no_new_shifts}</p>
           )}
           {(importResult.duplicateInFile ?? 0) > 0 && (
-            <p className="text-[0.6875rem] text-white/70">Righe duplicate nel file (stesso slot): {importResult.duplicateInFile}</p>
+            <p className="text-[0.6875rem] text-white/70">{formatTrans(tr.sa_dup_in_file, { n: importResult.duplicateInFile ?? 0 })}</p>
           )}
           {(importResult.alreadyInDb ?? 0) > 0 && (
-            <p className="text-[0.6875rem] text-white/70">Già in tabella (stessa settimana / stesso slot): {importResult.alreadyInDb}</p>
+            <p className="text-[0.6875rem] text-white/70">{formatTrans(tr.sa_already_in_db, { n: importResult.alreadyInDb ?? 0 })}</p>
           )}
-          {importResult.skipped.length > 0 && <p className="text-[0.6875rem] text-amber-600">Ignorati (non trovati): {importResult.skipped.join(', ')}</p>}
+          {importResult.skipped.length > 0 && <p className="text-[0.6875rem] text-amber-600">{formatTrans(tr.sa_skipped, { list: importResult.skipped.join(', ') })}</p>}
         </div>
       )}
 
       {rows.length > 0 && (
         <div className="space-y-3">
           <div className="flex gap-2 flex-wrap">
-            <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[0.6875rem] font-bold text-emerald-700">✓ {matched.length} turni pronti</span>
-            {unmatched.length > 0 && <span className="px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-[0.6875rem] font-bold text-red-600">✗ Non riconosciuti: {unmatched.join(', ')}</span>}
+            <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[0.6875rem] font-bold text-emerald-700">{formatTrans(tr.sa_shifts_ready, { n: matched.length })}</span>
+            {unmatched.length > 0 && <span className="px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-[0.6875rem] font-bold text-red-600">{formatTrans(tr.sa_unmatched, { list: unmatched.join(', ') })}</span>}
           </div>
           <div className="rounded-xl border border-white/[0.14] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-[0.6875rem]">
                 <thead><tr className="bg-white/5 text-white/55">
-                  <th className="px-3 py-2 text-left">Nome CSV</th>
-                  <th className="px-3 py-2 text-left">Trovato</th>
-                  <th className="px-3 py-2 text-left">Data</th>
-                  <th className="px-3 py-2 text-left">Inizio</th>
-                  <th className="px-3 py-2 text-left">Fine</th>
+                  <th className="px-3 py-2 text-left">{tr.sa_col_csv_name}</th>
+                  <th className="px-3 py-2 text-left">{tr.sa_col_found}</th>
+                  <th className="px-3 py-2 text-left">{tr.sa_col_date}</th>
+                  <th className="px-3 py-2 text-left">{tr.sa_col_start}</th>
+                  <th className="px-3 py-2 text-left">{tr.sa_col_end}</th>
                 </tr></thead>
                 <tbody className="divide-y divide-slate-100">
                   {rows.slice(0, 15).map((r, i) => (
                     <tr key={i} className={r.userId ? 'text-white/80' : 'text-red-500'}>
                       <td className="px-3 py-1.5 font-mono">{r.rawName}</td>
-                      <td className="px-3 py-1.5">{r.userName ?? <span className="text-red-500">non trovato</span>}</td>
+                      <td className="px-3 py-1.5">{r.userName ?? <span className="text-red-500">{tr.sa_not_found}</span>}</td>
                       <td className="px-3 py-1.5 font-mono">{r.date}</td>
                       <td className="px-3 py-1.5 font-mono">{r.startTime}</td>
                       <td className="px-3 py-1.5 font-mono">{r.endTime}</td>
@@ -533,29 +538,30 @@ className="flex items-center justify-center gap-1.5 rounded-xl border border-whi
                 </tbody>
               </table>
             </div>
-            {rows.length > 15 && <p className="text-center text-[0.6875rem] text-white/40 py-2 border-t border-white/10">… e altri {rows.length - 15} turni</p>}
+            {rows.length > 15 && <p className="text-center text-[0.6875rem] text-white/40 py-2 border-t border-white/10">{formatTrans(tr.sa_more_shifts, { n: rows.length - 15 })}</p>}
           </div>
         </div>
       )}
 
       {/* Pulsante importazione sempre visibile in fondo */}
       <div className="rounded-xl border border-amber-400/40 bg-white/10 p-4 space-y-3 shadow-sm">
-        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-amber-800/80">Importazione nel database</p>
+        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-amber-800/80">{tr.sa_import_db_section}</p>
         {rows.length === 0 && (
           <p className="text-xs text-white/70">
-            Carica un CSV con il pulsante sopra: comparirà l’anteprima e potrai confermare l’import.
+            {tr.sa_csv_upload_hint}
           </p>
         )}
         {rows.length > 0 && matched.length === 0 && (
           <p className="text-xs text-red-700">
-            Nessun dipendente riconosciuto: la colonna <strong>Nome</strong> deve coincidere con il <strong>nome</strong> o <strong>nome e cognome</strong> (come in app) di un utente <strong>attivo</strong> della sede selezionata. Correggi il CSV e ricarica.
+            {tr.sa_no_employee_recognized}
           </p>
         )}
         {rows.length > 0 && matched.length > 0 && (
           <p className="text-xs text-emerald-800">
-            Pronti <strong>{matched.length}</strong> turni da scrivere in tabella <code className="text-[0.6875rem] bg-white/10 px-1 rounded">shifts</code>
+            {formatTrans(tr.sa_ready_to_write, { n: matched.length })}{' '}
+            <code className="text-[0.6875rem] bg-white/10 px-1 rounded">shifts</code>
             {unmatched.length > 0 && (
-              <span className="text-amber-700"> · {rows.length - matched.length} righe saltate (nome non trovato)</span>
+              <span className="text-amber-700"> {formatTrans(tr.sa_rows_skipped, { n: rows.length - matched.length })}</span>
             )}
           </p>
         )}
@@ -567,31 +573,31 @@ className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500
         >
           <Check className="w-4 h-4 shrink-0" />
           {importing
-            ? 'Importazione in corso…'
+            ? tr.sa_importing
             : matched.length > 0
-              ? `Importa ${matched.length} turni nel database`
-              : 'Importa nel database'}
+              ? formatTrans(tr.sa_import_n_shifts, { n: matched.length })
+              : tr.sa_import_into_db}
         </button>
       </div>
 
       {/* ── Storico importazioni ── */}
       <div className="rounded-xl border border-white/[0.14] bg-white/10 overflow-hidden">
         <div className="flex items-center justify-between px-4 py-2.5 bg-white/5 border-b border-white/10">
-          <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/55">Storico importazioni</p>
+          <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/55">{tr.sa_import_history_section}</p>
           <button
             onClick={() => void loadHistory(selectedTenantId)}
             disabled={historyLoading}
             className="text-[0.6875rem] text-white/40 hover:text-white/80 transition font-semibold active:text-white/80"
           >
-            {historyLoading ? 'Caricamento…' : '↺ Aggiorna'}
+            {historyLoading ? tr.loading : tr.sa_refresh}
           </button>
         </div>
 
         {!historyLoading && importHistory.length === 0 && (
-          <p className="text-[0.6875rem] text-white/40 px-4 py-3">Nessun file importato con tracciamento.</p>
+          <p className="text-[0.6875rem] text-white/40 px-4 py-3">{tr.sa_no_file_tracked}</p>
         )}
         {historyLoading && (
-          <p className="text-[0.6875rem] text-white/40 px-4 py-3">Caricamento…</p>
+          <p className="text-[0.6875rem] text-white/40 px-4 py-3">{tr.loading}</p>
         )}
 
         {importHistory.length > 0 && (
@@ -607,25 +613,25 @@ className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500
                       ? batch.minDate
                       : `${batch.minDate} → ${batch.maxDate}`}
                     {' · '}
-                    <span className="font-semibold text-white/55">{batch.count} turni</span>
+                    <span className="font-semibold text-white/55">{formatTrans(tr.sa_n_shifts, { n: batch.count })}</span>
                   </p>
                 </div>
 
                 {confirmDelete === batch.adminNote ? (
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[0.6875rem] text-red-600 font-semibold">Eliminare {batch.count} turni?</span>
+                    <span className="text-[0.6875rem] text-red-600 font-semibold">{formatTrans(tr.sa_confirm_delete_n, { n: batch.count })}</span>
                     <button
                       onClick={() => void deleteImportBatch(batch.adminNote)}
                       disabled={deletingBatch === batch.adminNote}
                       className="rounded-lg bg-red-500 hover:bg-red-600 px-2 py-1 text-[0.6875rem] font-bold text-white transition disabled:opacity-50 active:bg-red-600/80"
                     >
-                      {deletingBatch === batch.adminNote ? '…' : 'Sì, elimina'}
+                      {deletingBatch === batch.adminNote ? '…' : tr.sa_yes_delete}
                     </button>
                     <button
                       onClick={() => setConfirmDelete(null)}
                       className="rounded-lg border border-white/20 px-2 py-1 text-[0.6875rem] font-semibold text-white/70 hover:bg-white/5 transition active:bg-white/10"
                     >
-                      Annulla
+                      {tr.cancel}
                     </button>
                   </div>
                 ) : (
@@ -634,7 +640,7 @@ className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500
                     className="shrink-0 flex items-center gap-1 rounded-lg border border-red-200 px-2 py-1 text-[0.6875rem] font-semibold text-red-500 hover:bg-red-50 hover:border-red-300 transition active:bg-red-50/80"
                   >
                     <Trash2 className="w-3 h-3" />
-                    Elimina
+                    {tr.delete}
                   </button>
                 )}
               </div>

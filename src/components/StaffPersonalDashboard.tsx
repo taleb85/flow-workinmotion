@@ -683,9 +683,9 @@ export default function StaffPersonalDashboard({
       <div className="min-h-screen text-white/90 font-sans antialiased flex flex-col items-center justify-center px-6 safe-area-pad" style={{ background: 'transparent' }}>
         <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] max-w-sm p-8 text-center">
           <Shield className="w-14 h-14 text-white/60 mx-auto mb-4" strokeWidth={1.5} />
-          <h2 className="text-lg font-bold text-white/90 mb-2">Profilo Gestionale</h2>
-          <p className="text-white/60 text-sm">Nessun turno assegnato</p>
-          <p className="text-white/60 text-xs mt-3">Questo profilo è riservato alla gestione. Accedi al pannello di controllo per amministrare turni e personale.</p>
+          <h2 className="text-lg font-bold text-white/90 mb-2">{t.management_profile_title}</h2>
+          <p className="text-white/60 text-sm">{t.no_shifts_assigned}</p>
+          <p className="text-white/60 text-xs mt-3">{t.management_profile_hint}</p>
           <button
             type="button"
             onClick={onLogout}

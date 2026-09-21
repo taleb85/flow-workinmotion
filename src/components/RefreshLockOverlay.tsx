@@ -212,7 +212,6 @@ export default function RefreshLockOverlay({ mode = 'refresh', onUnlocked }: Ref
         onCancel={handleCancel}
         error={error}
         isLoading={loading}
-        confirmLabel={t.confirm}
         cancelLabel={appOpen ? t.logout : t.sync_lock_cancel}
       />
     </AnimatePresence>

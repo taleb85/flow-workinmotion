@@ -6,6 +6,8 @@ import { setDatabaseTenant } from '../lib/database';
 import type { Tenant, TenantSettings } from '../types';
 import { APP_SESSION_STORAGE_KEY } from '../constants/appSession';
 import { withTimeout, TimeoutError } from '../utils/promiseTimeout';
+import { formatTrans, getTranslations } from '../utils/translations';
+import { getDeviceUiLanguage, readStoredUiLanguage } from '../utils/uiLanguagePreference';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -488,6 +490,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    const tr = getTranslations(readStoredUiLanguage() ?? getDeviceUiLanguage());
 
     async function load() {
       // Nessuno slug configurato — modalità single-URL in attesa di loadTenantBySlug().
@@ -534,7 +537,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
         if (err) throw err;
 
         if (!data) {
-          setError(`Sede "${slug}" non trovata o non attiva.`);
+          setError(formatTrans(tr.tenant_not_found_slug, { slug }));
           setIsLoading(false);
           return;
         }
@@ -543,9 +546,9 @@ export function TenantProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         if (!cancelled) {
           if (e instanceof TimeoutError) {
-            setError('Connessione lenta o assente: impossibile caricare la sede. Ricarica o controlla la rete.');
+            setError(tr.tenant_load_connection_error);
           } else {
-            setError(e instanceof Error ? e.message : 'Errore caricamento sede.');
+            setError(e instanceof Error ? e.message : tr.tenant_load_error);
           }
         }
       } finally {

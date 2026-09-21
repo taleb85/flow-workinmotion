@@ -4,6 +4,7 @@ import {
   Pencil, X, Eye, EyeOff, Trash2, Users, ToggleRight, ToggleLeft, UserPlus, Check,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { getStaticTranslations } from '../hooks/useT';
 import type { UserRole, UserStatus } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -55,6 +56,7 @@ const EMPTY_USER: Omit<TenantUser, 'id' | 'sort_order'> = {
 // ---------------------------------------------------------------------------
 
 export default function DipendentiTab({ tenantId }: { tenantId: string }) {
+  const tr = getStaticTranslations();
   const [users, setUsers] = useState<TenantUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | 'new' | null>(null);
@@ -139,7 +141,8 @@ export default function DipendentiTab({ tenantId }: { tenantId: string }) {
           pin: form.pin,
           sort_order: maxOrder,
           tenant_id: tenantId,
-          language: 'it',
+          // AUTO: nessuna preferenza → segue la lingua del dispositivo
+          language: null,
           theme: 'light',
           can_create_shifts: false,
           can_approve_shifts: false,
@@ -169,14 +172,14 @@ export default function DipendentiTab({ tenantId }: { tenantId: string }) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!supabase || !window.confirm('Eliminare questo dipendente? L\'azione è irreversibile.')) return;
+    if (!supabase || !window.confirm(tr.sa_dip_delete_confirm)) return;
     setDeleting(id);
     try {
       const { error: err } = await supabase.from('users').delete().eq('id', id);
       if (err) throw err;
       await loadUsers();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Errore eliminazione');
+      setError(e instanceof Error ? e.message : tr.error_generic);
     } finally {
       setDeleting(null);
     }
@@ -202,7 +205,7 @@ export default function DipendentiTab({ tenantId }: { tenantId: string }) {
         <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 flex gap-2 items-center">
           <X className="w-3.5 h-3.5 shrink-0" />
           <span className="flex-1">{error}</span>
-<button type="button" onClick={() => setError(null)} aria-label="Chiudi messaggio" className="shrink-0 p-0 border-0 bg-transparent text-red-800 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
+<button type="button" onClick={() => setError(null)} aria-label={tr.sa_close_message} className="shrink-0 p-0 border-0 bg-transparent text-red-800 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
             <X className="w-3 h-3" aria-hidden />
           </button>
         </div>
@@ -219,13 +222,13 @@ export default function DipendentiTab({ tenantId }: { tenantId: string }) {
           >
             <div className="rounded-xl border border-white/30 bg-white/10 p-4 space-y-3 shadow-sm">
               <p className="text-xs font-bold uppercase tracking-wider text-accent">
-                {editingId === 'new' ? 'Nuovo dipendente' : 'Modifica dipendente'}
+                {editingId === 'new' ? tr.sa_new_employee : tr.sa_edit_employee}
               </p>
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <label htmlFor="sa-dip-first" className="text-[0.6875rem] font-semibold text-white/55">Nome *</label>
-                  <input id="sa-dip-first" value={form.first_name} onChange={(e) => setF('first_name', e.target.value)} placeholder="Mario"
+                  <label htmlFor="sa-dip-first" className="text-[0.6875rem] font-semibold text-white/55">{tr.sa_label_name}</label>
+                  <input id="sa-dip-first" value={form.first_name} onChange={(e) => setF('first_name', e.target.value)} placeholder={tr.sa_placeholder_name}
                     className="w-full rounded-lg border border-white/20 bg-white/10 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40" />
                 </div>
                 <div className="space-y-1">
@@ -236,28 +239,28 @@ export default function DipendentiTab({ tenantId }: { tenantId: string }) {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="sa-dip-email" className="text-[0.6875rem] font-semibold text-white/55">Email</label>
+                <label htmlFor="sa-dip-email" className="text-[0.6875rem] font-semibold text-white/55">{tr.sa_label_email}</label>
                 <input id="sa-dip-email" type="email" value={form.email} onChange={(e) => setF('email', e.target.value)} placeholder="mario@email.com"
                   className="w-full rounded-lg border border-white/20 bg-white/10 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40" />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <label htmlFor="sa-dip-role" className="text-[0.6875rem] font-semibold text-white/55">Ruolo *</label>
+                  <label htmlFor="sa-dip-role" className="text-[0.6875rem] font-semibold text-white/55">{tr.sa_label_role}</label>
                   <select id="sa-dip-role" value={form.role} onChange={(e) => setF('role', e.target.value as UserRole)}
                     className="w-full rounded-lg border border-white/20 bg-white/10 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40">
                     {ROLE_OPTIONS.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label htmlFor="sa-dip-dept" className="text-[0.6875rem] font-semibold text-white/55">Reparto</label>
-                  <input id="sa-dip-dept" value={form.department ?? ''} onChange={(e) => setF('department', e.target.value)} placeholder="sala, bar, cucina…"
+                  <label htmlFor="sa-dip-dept" className="text-[0.6875rem] font-semibold text-white/55">{tr.sa_label_department}</label>
+                  <input id="sa-dip-dept" value={form.department ?? ''} onChange={(e) => setF('department', e.target.value)} placeholder={tr.sa_placeholder_dept}
                     className="w-full rounded-lg border border-white/20 bg-white/10 px-2.5 py-2 text-base text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40" />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="sa-dip-pin" className="text-[0.6875rem] font-semibold text-white/55">PIN (4 cifre) *</label>
+                <label htmlFor="sa-dip-pin" className="text-[0.6875rem] font-semibold text-white/55">{tr.sa_label_pin}</label>
                 <div className="relative">
                   <input
                     id="sa-dip-pin"
@@ -330,15 +333,15 @@ className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-accent 
               </div>
               {/* Azioni */}
               <div className="flex items-center gap-1 shrink-0">
-                <button onClick={() => toggleStatus(u)} title={u.status === 'active' ? 'Sospendi' : 'Riattiva'}
+                <button onClick={() => toggleStatus(u)} title={u.status === 'active' ? tr.sa_suspend : tr.sa_reactivate}
                   className={`p-1.5 rounded-lg transition ${u.status === 'active' ? 'text-brand-500 hover:bg-brand-50' : 'text-white/40 hover:bg-white/10'} active:bg-brand-50`}>
                   {u.status === 'active' ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                 </button>
-                <button onClick={() => openEdit(u)} title="Modifica"
+                <button onClick={() => openEdit(u)} title={tr.edit}
                   className="p-1.5 rounded-lg text-white/40 hover:text-accent hover:bg-white/10 transition active:text-accent">
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
-                <button onClick={() => handleDelete(u.id)} title="Elimina" disabled={deleting === u.id}
+                <button onClick={() => handleDelete(u.id)} title={tr.delete} disabled={deleting === u.id}
                   className="p-1.5 rounded-lg text-white/40 hover:text-red-500 hover:bg-red-50 transition disabled:opacity-40 active:text-red-500">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>

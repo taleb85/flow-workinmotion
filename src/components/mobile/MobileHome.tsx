@@ -3,7 +3,7 @@ import { Play, LogOut, RotateCcw } from 'lucide-react';
 import { useT } from '../../hooks/useT';
 import { groupShiftsByDay } from '../../utils/timeCalculations';
 import { useAppUser } from '../../context/AppContext';
-import { getDateLocale } from '../../utils/translations';
+import { getDateLocale, formatTrans } from '../../utils/translations';
 import HeaderTodayCoworkersCard from '../HeaderTodayCoworkersCard';
 import { usePullToRefresh } from '../../hooks/usePullToRefresh';
 import { format, parseISO, type Locale } from 'date-fns';
@@ -109,12 +109,12 @@ export default function MobileHome({
     : null;
 
   const punchStatus = inProgress
-    ? `${inProgressLabel}${inProgress.shift.type === 'lunch' ? ' · Pranzo' : ' · Cena'}`
+    ? `${inProgressLabel}${inProgress.shift.type === 'lunch' ? ` · ${t.lunch}` : ` · ${t.dinner}`}`
     : canStart
-      ? 'In attesa'
+      ? t.pending
       : todayWorkShiftsCount > 0
-        ? 'Nessun turno in corso'
-        : 'Nessun turno oggi';
+        ? t.mobile_status_no_shift_in_progress
+        : t.mobile_status_no_shift_today;
 
   const dayLabel = (dateStr: string) => {
     const d = parseISO(dateStr);
@@ -138,7 +138,7 @@ export default function MobileHome({
               className={`h-3.5 w-3.5 shrink-0 ${isRefreshing ? 'animate-spin' : ''}`}
               style={{ transform: isRefreshing ? undefined : `rotate(${indicatorRotation}deg)` }}
             />
-            {isTriggered ? 'Rilascia per aggiornare' : 'Trascina per aggiornare'}
+            {isTriggered ? t.mobile_pull_release_refresh : t.mobile_pull_drag_refresh}
           </div>
         </div>
       )}
@@ -159,7 +159,7 @@ export default function MobileHome({
       {/* ── Card timbratura dominante ───────────────────────────────── */}
       <section className="flow-card" data-tour="punch">
         <div className="flex items-center justify-between gap-2">
-          <span className="flow-section-label">Timbratura</span>
+          <span className="flow-section-label">{t.mobile_punch_section}</span>
           <span className="text-sm font-medium text-white/70">{punchStatus}</span>
         </div>
 
@@ -169,7 +169,7 @@ export default function MobileHome({
 
         {inProgress && entryTime && (
           <div className="mt-2">
-            <span className="flow-badge flow-badge-success">Entrata {entryTime}</span>
+            <span className="flow-badge flow-badge-success">{t.entry} {entryTime}</span>
           </div>
         )}
 
@@ -209,8 +209,8 @@ export default function MobileHome({
       </section>
 
       {/* ── Turno di oggi: tutti i turni, evidenziato quello in corso ── */}
-      <section className="flow-card" aria-label="Turno di oggi">
-        <span className="flow-section-label">Turno di oggi</span>
+      <section className="flow-card" aria-label={t.mobile_today_shift}>
+        <span className="flow-section-label">{t.mobile_today_shift}</span>
         {todayWorkShifts.length > 0 ? (
           <div className="flex gap-2 mt-3">
             {todayWorkShifts.map((s) => {
@@ -241,8 +241,8 @@ export default function MobileHome({
       </section>
 
       {/* ── Prossimi turni: un blocco per giorno ────────────────────── */}
-      <section className="flow-card" aria-label="Prossimi turni">
-        <span className="flow-section-label">Prossimi turni</span>
+      <section className="flow-card" aria-label={t.upcoming_shifts}>
+        <span className="flow-section-label">{t.upcoming_shifts}</span>
         {nextShifts.length === 0 ? (
           <p className="text-sm text-white/40 py-2">—</p>
         ) : (
@@ -259,7 +259,7 @@ export default function MobileHome({
                   </span>
                   {group.shifts.length > 1 && (
                     <span className="flow-section-label tabular-nums shrink-0">
-                      {group.shifts.length} turni
+                      {formatTrans(t.mobile_shifts_count, { n: group.shifts.length })}
                     </span>
                   )}
                 </div>

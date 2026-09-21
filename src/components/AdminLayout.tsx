@@ -100,7 +100,7 @@ export default function AdminLayout() {
               <span className="hidden md:inline">{t.admin_back_to_app}</span>
             </button>
 
-            <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar" aria-label="Sezioni pannello admin">
+            <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar" aria-label={t.admin_panel_sections_aria}>
               {tabs.map(({ key, icon: Icon, label }) => {
                 const isActive = activeTab === key;
                 return (

@@ -2315,7 +2315,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                           </div>
                         ))}
                       {users.filter((u) => isUserVisibleOnTeamSchedule(u, allShifts)).length === 0 && (
-                        <p className="text-center text-[0.6875rem] text-white/40 py-3">Nessun dipendente attivo</p>
+                        <p className="text-center text-[0.6875rem] text-white/40 py-3">{t.no_active_employees}</p>
                       )}
                     </div>
                   )}
@@ -3045,7 +3045,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-white/80 disabled:opacity-60 uppercase tracking-wider flex items-center justify-center gap-1.5"
               >
                 {saving ? (
-                  <><span className="inline-block w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />Salvando…</>
+                  <><span className="inline-block w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />{t.saving}</>
                 ) : (
                   <><Plus className="h-3.5 w-3.5" />{t.create ?? 'Crea'}</>
                 )}
@@ -3312,7 +3312,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           onCancel={() => { setPanelPinModalOpen(false); setPanelPinTargetShiftId(null); setPendingBulkDeleteIds(null); setPanelPin(''); setPanelPinError(''); }}
           error={panelPinError}
           isLoading={saving}
-          confirmLabel={t.confirm ?? 'Conferma'}
           cancelLabel={t.cancel ?? 'Annulla'}
         />
       )}

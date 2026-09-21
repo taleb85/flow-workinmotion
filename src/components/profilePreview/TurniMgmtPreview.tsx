@@ -125,7 +125,7 @@ export default function TurniMgmtPreview({
             <Layout className="h-5 w-5 text-white/60" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white/90">Popup dettaglio turno</p>
+            <p className="text-sm font-semibold text-white/90">{t.pv_shift_detail_popup}</p>
             <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">
               {tv.profile_visibility_generic_widget_demo ?? 'Contenuto dimostrativo: in app qui compariranno i dati reali.'}
             </p>

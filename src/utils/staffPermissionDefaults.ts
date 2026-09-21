@@ -87,7 +87,8 @@ export function userRowToSessionUser(row: User): User {
     role: normalizeUserRoleFromRow(row.role),
     status: row.status ?? 'active',
     sort_order: row.sort_order ?? 0,
-    language: row.language ?? 'it',
+    // `null` = AUTO: nessuna preferenza salvata → l'app segue la lingua del dispositivo.
+    language: (row.language ?? null) as User['language'],
     theme: row.theme ?? 'light',
     can_create_shifts: row.can_create_shifts ?? false,
     can_approve_shifts: row.can_approve_shifts ?? false,

@@ -1,5 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { captureException } from '../utils/monitoring';
+import { getTranslations } from '../utils/translations';
+import { getDeviceUiLanguage, readStoredUiLanguage } from '../utils/uiLanguagePreference';
 
 /** Evita pagina bianca se un componente lancia in render: messaggio + log console. */
 export class RootErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -16,12 +18,13 @@ export class RootErrorBoundary extends Component<{ children: ReactNode }, { erro
 
   render() {
     if (this.state.error) {
+      const t = getTranslations(readStoredUiLanguage() ?? getDeviceUiLanguage());
       return (
         <div className="min-h-screen bg-app-bg p-6 text-white/90 font-sans">
-          <h1 className="text-lg font-semibold mb-2">Errore di avvio</h1>
+          <h1 className="text-lg font-semibold mb-2">{t.root_error_title}</h1>
           <p className="text-sm text-white/70 mb-4">
-            Ricarica la pagina. Se l’app era installata come PWA, apri una volta con{' '}
-            <code className="rounded bg-slate-200 px-1">?nocache=1</code> per svuotare cache e service worker.
+            {t.root_error_reload_hint}{' '}
+            <code className="rounded bg-slate-200 px-1">?nocache=1</code> {t.root_error_cache_hint}
           </p>
           <pre className="rounded-xl border border-white/[0.14] max-w-2xl overflow-auto p-3 text-xs">
             {this.state.error.message}

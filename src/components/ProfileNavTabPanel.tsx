@@ -122,7 +122,7 @@ export default function ProfileNavTabPanel({
       email: currentUser.email ?? '',
       phone_prefix: ph.prefix,
       phone_national: ph.national,
-      language: (currentUser.language ?? 'it') as Language,
+      language: (currentUser.language ?? effectiveLanguage) as Language,
       department: currentUser.department,
       role: currentUser.role,
       pin: currentUser.pin ?? '',
@@ -297,7 +297,9 @@ export default function ProfileNavTabPanel({
       const ok = await updateUser(currentUser.id, {
         email: formData.email,
         phone: joinPhone(formData.phone_prefix, formData.phone_national),
-        language: formData.language,
+        /* La lingua si salva solo se è una scelta esplicita: con AUTO (null)
+           l'app deve continuare a seguire la lingua del dispositivo. */
+        ...(currentUser.language ? { language: formData.language } : {}),
         ...(pinDigits.length === 4 ? { pin: pinDigits } : {}),
       });
       if (!ok) throw new Error('save failed');
@@ -799,15 +801,14 @@ export default function ProfileNavTabPanel({
       <AnimatePresence>
         {showMgmtPinPad && currentUser && (
           <PinPadModal
-            title="Area Gestionale"
-            subtitle="Inserisci il tuo PIN per accedere"
+            title={t.management_area_title}
+            subtitle={t.management_area_pin_subtitle}
             pinLabel="PIN"
             pin={mgmtPin}
             onPinChange={(v) => { setMgmtPinError(''); setMgmtPin(v); }}
             error={mgmtPinError}
             onConfirm={handleMgmtPinConfirm}
             onCancel={() => { setShowMgmtPinPad(false); setMgmtPin(''); setMgmtPinError(''); }}
-            confirmLabel="Accedi"
           />
         )}
       </AnimatePresence>

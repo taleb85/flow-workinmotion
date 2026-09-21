@@ -152,7 +152,7 @@ export default function TimesheetTabPreview({
       >
         <div className="rounded-xl border border-white/[0.14] overflow-hidden shadow-sm border border-white/[0.14]" >
           <div className="grid grid-cols-[minmax(4rem,1fr)_repeat(4,minmax(0,1fr))] gap-px bg-slate-100 text-[0.5625rem]">
-            <div className="bg-white px-1 py-2 font-bold text-white/50">Staff</div>
+            <div className="bg-white px-1 py-2 font-bold text-white/50">{t.profile_visibility_filter_staff}</div>
             {['Lun', 'Mar', 'Mer', 'Gio'].map((d) => (
               <div key={d} className="bg-white py-2 text-center font-bold text-white/50">
                 {d}
@@ -184,7 +184,7 @@ export default function TimesheetTabPreview({
             <Layout className="h-5 w-5 text-white/60" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white/90">Popup revisione timbratura</p>
+            <p className="text-sm font-semibold text-white/90">{t.pv_timesheet_review_popup}</p>
             <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">
               {tv.profile_visibility_generic_widget_demo ?? 'Contenuto dimostrativo: in app qui compariranno i dati reali.'}
             </p>

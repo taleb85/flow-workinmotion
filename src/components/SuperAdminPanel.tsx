@@ -20,6 +20,7 @@ import { seedTenantFromTemplate } from '../utils/seedTenantFromTemplate';
 import { PUBLIC_APP_ORIGIN } from '../config/publicAppUrl';
 import SettingsConfigPanel, { Toggle } from './SuperAdminSettingsPanel';
 import ImportStorico from './SuperAdminImportStorico';
+import { getStaticTranslations } from '../hooks/useT';
 
 // ---------------------------------------------------------------------------
 // Costanti PIN
@@ -33,6 +34,7 @@ const SESSION_KEY = 'sa_unlocked';
 // ---------------------------------------------------------------------------
 
 function SuperAdminPinGate({ onUnlocked }: { onUnlocked: () => void }) {
+  const tr = getStaticTranslations();
   const [digits, setDigits] = useState('');
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
@@ -93,7 +95,7 @@ function SuperAdminPinGate({ onUnlocked }: { onUnlocked: () => void }) {
         />
         <div className="text-center">
           <h1 className="text-lg font-bold text-white tracking-tight">Super Admin</h1>
-          <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.65)' }}>Inserisci il PIN per accedere</p>
+          <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.65)' }}>{tr.sa_pin_prompt}</p>
         </div>
       </div>
 
@@ -142,7 +144,7 @@ function SuperAdminPinGate({ onUnlocked }: { onUnlocked: () => void }) {
       </div>
 
       {error && (
-        <p className="mt-6 text-sm text-red-400 font-medium">PIN non corretto</p>
+        <p className="mt-6 text-sm text-red-400 font-medium">{tr.sa_pin_wrong}</p>
       )}
     </div>
   );
@@ -212,6 +214,7 @@ interface TenantFormProps {
 }
 
 function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeedDemoChange }: TenantFormProps) {
+  const tr = getStaticTranslations();
   const [name, setName] = useState(initial?.name ?? '');
   const [slug, setSlug] = useState(initial?.slug ?? '');
   const [slugManual, setSlugManual] = useState(!!initial?.slug);
@@ -246,7 +249,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
 
       {/* Nome */}
       <div className="space-y-1">
-        <label htmlFor="sa-tenant-name" className="text-xs font-semibold text-white/70">Nome sede *</label>
+        <label htmlFor="sa-tenant-name" className="text-xs font-semibold text-white/70">{tr.sa_venue_name_label}</label>
         <input
           id="sa-tenant-name"
           required
@@ -259,7 +262,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
 
       {/* Slug */}
       <div className="space-y-1">
-        <label htmlFor="sa-tenant-slug" className="text-xs font-semibold text-white/70">Slug (sottodominio) *</label>
+        <label htmlFor="sa-tenant-slug" className="text-xs font-semibold text-white/70">{tr.sa_slug_label}</label>
         <div className="flex gap-2 items-center">
           <input
             id="sa-tenant-slug"
@@ -270,9 +273,9 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
             pattern="[a-z0-9\-]+"
             className="flex-1 rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-base font-mono text-white/90 focus:outline-none focus:ring-2 focus:ring-white/40 transition"
           />
-<button type="button" onClick={() => { setSlugManual(false); setSlug(slugify(name)); }} className="text-xs text-accent hover:underline shrink-0 active:brightness-95 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">Auto</button>
+<button type="button" onClick={() => { setSlugManual(false); setSlug(slugify(name)); }} className="text-xs text-accent hover:underline shrink-0 active:brightness-95 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">{tr.sa_auto}</button>
         </div>
-        <p className="text-[0.6875rem] text-white/40">Sarà il sottodominio: <span className="font-mono">{slug || '…'}.tuodominio.com</span></p>
+        <p className="text-[0.6875rem] text-white/40">{tr.sa_subdomain_hint} <span className="font-mono">{slug || '…'}.tuodominio.com</span></p>
       </div>
 
       {/* Nota branding — colore e logo fissi FLOW */}
@@ -281,7 +284,7 @@ function TenantForm({ initial, onSave, onCancel, saving, seedDemo = true, onSeed
           <span className="text-white text-[0.6875rem] font-bold">F</span>
         </div>
         <p className="text-[0.6875rem] text-white/55">
-          Colore, font e logo sono fissi — brand FLOW per tutte le sedi.
+          {tr.sa_branding_fixed}
         </p>
       </div>
 
@@ -359,8 +362,9 @@ interface NewAdminCredentials {
 }
 
 function NewAdminCredentialsModal({ creds, onClose }: { creds: NewAdminCredentials; onClose: () => void }) {
+  const tr = getStaticTranslations();
   const [copied, setCopied] = useState(false);
-  const text = `Sede: ${creds.tenantName}\nNome: ${creds.firstName}\nPIN: ${creds.pin}\nRuolo: Admin`;
+  const text = `${tr.sa_venue}: ${creds.tenantName}\n${tr.sa_login_name}: ${creds.firstName}\nPIN: ${creds.pin}\n${tr.role}: ${tr.role_admin}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text).then(() => {
@@ -380,18 +384,18 @@ function NewAdminCredentialsModal({ creds, onClose }: { creds: NewAdminCredentia
             <ShieldCheck className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <p className="font-bold text-white text-sm">Admin creato automaticamente</p>
-            <p className="text-xs text-white/55">Salva queste credenziali in un posto sicuro</p>
+            <p className="font-bold text-white text-sm">{tr.sa_admin_created}</p>
+            <p className="text-xs text-white/55">{tr.sa_save_credentials}</p>
           </div>
         </div>
 
         <div className="bg-white/5 rounded-xl p-4 space-y-2 font-mono text-sm">
           <div className="flex justify-between">
-            <span className="text-white/55 text-xs font-sans">Sede</span>
+            <span className="text-white/55 text-xs font-sans">{tr.sa_venue}</span>
             <span className="font-semibold text-white/90">{creds.tenantName}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-white/55 text-xs font-sans">Nome login</span>
+            <span className="text-white/55 text-xs font-sans">{tr.sa_login_name}</span>
             <span className="font-semibold text-white/90">{creds.firstName}</span>
           </div>
           <div className="flex justify-between items-center">
@@ -399,13 +403,13 @@ function NewAdminCredentialsModal({ creds, onClose }: { creds: NewAdminCredentia
             <span className="text-2xl font-bold tracking-widest text-accent">{creds.pin}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-white/55 text-xs font-sans">Ruolo</span>
-            <span className="font-semibold text-emerald-600">Admin</span>
+            <span className="text-white/55 text-xs font-sans">{tr.role}</span>
+            <span className="font-semibold text-emerald-600">{tr.role_admin}</span>
           </div>
         </div>
 
         <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
-          ⚠ Cambia il PIN subito dopo il primo accesso tramite il profilo utente nell'app.
+          {tr.sa_change_pin_hint}
         </p>
 
         <div className="flex gap-2">
@@ -429,6 +433,7 @@ className="flex-1 rounded-xl bg-accent py-2.5 text-sm font-bold text-white hover
 }
 
 function SuperAdminPanelInner() {
+  const tr = getStaticTranslations();
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -622,7 +627,7 @@ function SuperAdminPanelInner() {
             />
             <div className="min-w-0">
               <h1 className="text-base font-bold text-white leading-tight truncate">Super Admin</h1>
-              <p className="text-[0.6875rem] text-[#2255BB] leading-tight hidden md:block">Gestione sedi</p>
+              <p className="text-[0.6875rem] text-[#2255BB] leading-tight hidden md:block">{tr.sa_manage_venues}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -631,8 +636,8 @@ function SuperAdminPanelInner() {
               className={`flex items-center gap-1.5 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-sm font-bold transition ${showImport ? 'bg-amber-100 text-amber-700' : 'bg-white/10 text-white/55 hover:bg-white/[0.14] hover:text-white/90'}`}
             >
               <ChevronRight className="w-4 h-4 rotate-90" />
-              <span className="hidden md:inline">Importa storico</span>
-              <span className="md:hidden">Import</span>
+              <span className="hidden md:inline">{tr.sa_import_history}</span>
+              <span className="md:hidden">{tr.sa_import_short}</span>
             </button>
             <button
               onClick={() => { setShowForm(true); setEditingTenant(null); setShowImport(false); }}
@@ -640,13 +645,13 @@ function SuperAdminPanelInner() {
               style={{ background: '#0a0a0c' }}
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden md:inline">Nuova sede</span>
-              <span className="md:hidden">Nuova</span>
+              <span className="hidden md:inline">{tr.sa_new_venue}</span>
+              <span className="md:hidden">{tr.sa_new_short}</span>
             </button>
             <button
               onClick={handleLogout}
-              title="Esci da Super Admin"
-              aria-label="Esci da Super Admin"
+              title={tr.sa_logout}
+              aria-label={tr.sa_logout}
 className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-red-50 hover:text-red-500 text-white/40 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.25)]"
             >
               <LogOut className="w-4 h-4" aria-hidden />
@@ -668,7 +673,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
               type="button"
               onClick={() => setError(null)}
               className="text-red-400 hover:text-red-600 shrink-0 p-1 active:text-red-600"
-              aria-label="Chiudi messaggio"
+              aria-label={tr.sa_close_message}
             >
               <X className="w-3.5 h-3.5" aria-hidden />
             </button>
@@ -742,14 +747,14 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-bold text-white text-sm">{t.name}</span>
-                              {!t.is_active && <span className="text-[0.6875rem] font-bold uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-200">Inattiva</span>}
+                              {!t.is_active && <span className="text-[0.6875rem] font-bold uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-200">{tr.sa_inactive}</span>}
                             </div>
 
                             {/* Slug */}
                             <div className="flex items-center gap-1 mt-1">
                               <Globe className="w-3 h-3 text-white/40 shrink-0" />
                               <span className="text-xs font-mono text-white/40 truncate" title={t.slug}>{t.slug}</span>
-<button onClick={() => copySlug(t.slug)} className="text-slate-300 hover:text-[#2255BB] transition p-0.5 shrink-0 active:text-[#2255BB] transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" title="Copia slug">
+<button onClick={() => copySlug(t.slug)} className="text-slate-300 hover:text-[#2255BB] transition p-0.5 shrink-0 active:text-[#2255BB] transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]" title={tr.sa_copy_slug}>
                                 <Copy className="w-3 h-3" />
                               </button>
                             </div>
@@ -766,9 +771,9 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                                 <span className="truncate">{new URL(PUBLIC_APP_ORIGIN).host}</span>
                               </a>
                               <button
-                                onClick={() => navigator.clipboard.writeText(PUBLIC_APP_ORIGIN).then(() => showToast('URL copiato!'))}
+                                onClick={() => navigator.clipboard.writeText(PUBLIC_APP_ORIGIN).then(() => showToast(tr.sa_toast_url_copied))}
                                 className="text-slate-300 hover:text-[#2255BB] transition p-0.5 shrink-0 active:text-[#2255BB]"
-                                title="Copia URL"
+                                title={tr.sa_copy_url}
                               >
                                 <Copy className="w-3 h-3" />
                               </button>
@@ -810,7 +815,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                           <button
                             onClick={() => setConfirmDeleteId(confirmDeleteId === t.id ? null : t.id)}
                             className="flex items-center justify-center rounded-xl py-2 px-2.5 bg-white/10 text-white/40 hover:bg-red-50 hover:text-red-500 transition"
-                            title="Elimina sede"
+                            title={tr.sa_delete_venue}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -864,7 +869,7 @@ className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover
                           >
                             <div className="px-4 pt-3 pb-1 flex items-center gap-1.5">
                               <ChevronDown className="w-3.5 h-3.5 text-[#2255BB]/50" />
-                              <span className="text-xs font-bold text-[#2255BB]/70 uppercase tracking-wider">Impostazioni sede</span>
+                              <span className="text-xs font-bold text-[#2255BB]/70 uppercase tracking-wider">{tr.sa_venue_settings}</span>
                             </div>
                             <div className="px-4 pb-4">
                               <SettingsConfigPanel

@@ -6,6 +6,8 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 import { AppProvider } from './context/AppContext';
 import { LayoutPresetProvider } from './context/LayoutPresetContext';
 import { AppContent } from './components/AppShell';
+import { getTranslations } from './utils/translations';
+import { getDeviceUiLanguage, readStoredUiLanguage } from './utils/uiLanguagePreference';
 
 /**
  * SuperAdminPanel — accessibile solo sul dominio super-admin, protetto da PIN.
@@ -13,6 +15,7 @@ import { AppContent } from './components/AppShell';
 const SuperAdminPanel = lazy(() => import('./components/SuperAdminPanel'));
 
 function App() {
+  const t = getTranslations(readStoredUiLanguage() ?? getDeviceUiLanguage());
   // Se il dominio è il progetto super-admin dedicato, reindirizza / → /super-admin
   const isSuperAdminDomain =
     typeof window !== 'undefined' &&
@@ -53,13 +56,13 @@ function App() {
       {/* SuperAdminPanel — attivo solo sul dominio super-admin, protetto da PIN */}
       <Route path="/super-admin" element={
         isSuperAdminDomain
-          ? <Suspense fallback={<main role="main" aria-label="Caricamento Super Admin" className="min-h-screen flex items-center justify-center text-white/50 text-sm">Caricamento…</main>}>
+          ? <Suspense fallback={<main role="main" aria-label={t.sa_loading_aria} className="min-h-screen flex items-center justify-center text-white/50 text-sm">{t.loading}</main>}>
               <SuperAdminPanel />
             </Suspense>
-          : <main role="main" aria-label="Super Admin non disponibile" className="min-h-screen flex items-center justify-center text-white p-6 text-center" style={{ background: 'transparent' }}>
+          : <main role="main" aria-label={t.sa_unavailable_aria} className="min-h-screen flex items-center justify-center text-white p-6 text-center" style={{ background: 'transparent' }}>
               <div className="rounded-2xl border border-neutral-500 p-8 max-w-sm" style={{ background: 'rgba(255, 255, 255, 0.16)' }}>
                 <h1 className="text-2xl font-bold mb-2">SuperAdmin</h1>
-                <p className="text-white/50 text-sm">Se il Super Admin è su un host dedicato, apri l’indirizzo configurato in produzione (stesso build)</p>
+                <p className="text-white/50 text-sm">{t.sa_dedicated_host_hint}</p>
               </div>
             </main>
       } />

@@ -104,7 +104,7 @@ export default function PostUnlockRestartOverlay({ language }: { language: Langu
       </motion.div>
 
       <div className="flex flex-col items-center gap-1 mb-5 min-h-[2.5rem]">
-        <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">Riavvio in corso</p>
+        <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">{t.post_unlock_restarting}</p>
         <h2 className="text-sm font-bold tracking-tight text-white/90">
           {tv.post_unlock_restart_title ?? 'Aggiornamento completato'}
         </h2>

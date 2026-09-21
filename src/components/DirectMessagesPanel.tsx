@@ -53,7 +53,7 @@ function BroadcastList({
   users,
   onClose: _onClose,
   intlLocale,
-  t: _t = {},
+  t = {},
 }: {
   messages: ReturnType<typeof useMessages>['broadcastMessages'];
   currentUserId: string;
@@ -82,8 +82,8 @@ function BroadcastList({
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'rgba(255, 255, 255, 0.10)' }}>
               <MessageCircle className="w-8 h-8 text-white/70" />
             </div>
-            <p className="text-sm font-semibold text-white">Nessuna comunicazione</p>
-            <p className="text-xs text-white/50">I messaggi del management appariranno qui</p>
+            <p className="text-sm font-semibold text-white">{t.dm_empty}</p>
+            <p className="text-xs text-white/50">{t.dm_empty_hint}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">

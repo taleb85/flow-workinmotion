@@ -2,6 +2,7 @@ import { useState } from 'react';
 import FlowLogoSvg from './FlowLogoSvg';
 import FlowWaveIcon from './ui/FlowWaveIcon';
 import { FlowNeonIcon } from './ui/FlowNeonIcon';
+import { useT } from '../hooks/useT';
 
 const BG_OVERLAYS = [
   { id: 'splash', label: 'Splash boot / Update / Restart', gradient: 'radial-gradient(ellipse at 50% 30%, rgba(107,107,107,0.15) 0%, transparent 55%), #0a0a0c' },
@@ -30,6 +31,7 @@ const LOGOS = [
 ];
 
 export default function DesignAuditPreview() {
+  const t = useT();
   const [selectedLogos, setSelectedLogos] = useState<Set<string>>(new Set(LOGOS.map(l => l.id)));
   const [selectedBgs, setSelectedBgs] = useState<Set<string>>(new Set(BG_OVERLAYS.map(b => b.id)));
 
@@ -53,11 +55,11 @@ export default function DesignAuditPreview() {
 
   return (
     <main className="min-h-screen bg-app-bg text-white p-6 font-sans">
-      <h1 className="text-xl font-black mb-2">Audit Design — Loghi & Sfondi</h1>
-      <p className="text-sm text-white/50 mb-6">Seleziona gli elementi da mantenere. Quelli non selezionati verranno rimossi.</p>
+      <h1 className="text-xl font-black mb-2">{t.design_audit_title}</h1>
+      <p className="text-sm text-white/50 mb-6">{t.design_audit_intro}</p>
 
       {/* Loghi */}
-      <h2 className="text-base font-bold text-white/80 mb-3 uppercase tracking-wider">Loghi / Icone</h2>
+      <h2 className="text-base font-bold text-white/80 mb-3 uppercase tracking-wider">{t.design_audit_logos}</h2>
       <div className="fluid-grid fluid-grid-3 gap-4 mb-8">
         {LOGOS.map(logo => {
           const kept = selectedLogos.has(logo.id);
@@ -84,7 +86,7 @@ export default function DesignAuditPreview() {
       </div>
 
       {/* Sfondi */}
-      <h2 className="text-base font-bold text-white/80 mb-3 uppercase tracking-wider">Sfondi / Gradient</h2>
+      <h2 className="text-base font-bold text-white/80 mb-3 uppercase tracking-wider">{t.design_audit_backgrounds}</h2>
       <div className="fluid-grid fluid-grid-3 gap-4 mb-8">
         {BG_OVERLAYS.map(bg => {
           const kept = selectedBgs.has(bg.id);
@@ -110,18 +112,18 @@ export default function DesignAuditPreview() {
 
       {/* Summary */}
       <div className="rounded-2xl border border-white/[0.14] bg-white/5 p-4 space-y-2">
-        <h3 className="text-sm font-bold text-white/80">Riepilogo</h3>
+        <h3 className="text-sm font-bold text-white/80">{t.design_audit_summary}</h3>
         <p className="text-xs text-white/50">
-          <span className="text-emerald-400 font-bold">{selectedLogos.size}</span> loghi mantenuti / <span className="text-rose-400 font-bold">{removedLogos.length}</span> da rimuovere
+          <span className="text-emerald-400 font-bold">{selectedLogos.size}</span> {t.design_audit_logos_kept} <span className="text-rose-400 font-bold">{removedLogos.length}</span> {t.design_audit_to_remove}
         </p>
         {removedLogos.length > 0 && (
-          <p className="text-xs text-rose-300">Loghi da rimuovere: {removedLogos.map(l => l.label).join(', ')}</p>
+          <p className="text-xs text-rose-300">{t.design_audit_remove_logos} {removedLogos.map(l => l.label).join(', ')}</p>
         )}
         <p className="text-xs text-white/50">
-          <span className="text-emerald-400 font-bold">{selectedBgs.size}</span> sfondi mantenuti / <span className="text-rose-400 font-bold">{removedBgs.length}</span> da rimuovere
+          <span className="text-emerald-400 font-bold">{selectedBgs.size}</span> {t.design_audit_backgrounds_kept} <span className="text-rose-400 font-bold">{removedBgs.length}</span> {t.design_audit_to_remove}
         </p>
         {removedBgs.length > 0 && (
-          <p className="text-xs text-rose-300">Sfondi da rimuovere: {removedBgs.map(b => b.label).join(', ')}</p>
+          <p className="text-xs text-rose-300">{t.design_audit_remove_backgrounds} {removedBgs.map(b => b.label).join(', ')}</p>
         )}
       </div>
     </main>

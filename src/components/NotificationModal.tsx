@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { useMultisensorialFeedback } from '../hooks/useMultisensorialFeedback';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { useT } from '../hooks/useT';
 import { DirectMessagesPanel } from './DirectMessagesPanel';
 import type { Message } from '../hooks/useMessages';
 import type { User } from '../types';
@@ -25,6 +26,7 @@ interface NotificationModalProps {
  * Modal messaggi — apre il pannello DM direttamente dalla campanella.
  */
 export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
+  const t = useT();
   const { triggerHapticFeedback, playNotificationSound } = useMultisensorialFeedback();
 
   useBodyScrollLock(isOpen);
@@ -59,7 +61,7 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
         <button
           type="button"
 className="absolute inset-0 bg-black/40 w-screen h-screen transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-          aria-label="Chiudi"
+          aria-label={t.close}
           onClick={onClose}
         />
 

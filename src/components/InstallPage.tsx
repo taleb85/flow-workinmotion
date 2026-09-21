@@ -229,16 +229,16 @@ export default function InstallPage() {
         }}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Installa con 1 tocco (consigliato)
+        {t.install_one_tap}
       </a>
 
       <p className="text-[11px] text-white/40 text-center leading-relaxed mb-3">
-        Scarica il profilo e vai su <strong>Impostazioni → Generali → Gestione dispositivo → FLOW → Installa</strong>
+        {t.install_download_hint} <strong>{t.install_ios_hint}</strong>
       </p>
 
       <div className="flex items-center gap-3 mb-5">
         <div className="flex-1 h-px bg-white/10" />
-        <span className="text-[10px] text-white/30 uppercase tracking-wider">oppure manualmente</span>
+        <span className="text-[10px] text-white/30 uppercase tracking-wider">{t.install_or_manually}</span>
         <div className="flex-1 h-px bg-white/10" />
       </div>
 

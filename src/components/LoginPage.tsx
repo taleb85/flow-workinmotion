@@ -28,7 +28,7 @@ interface LoginPageProps {
 }
 
 export default memo(function LoginPage({ onLogin }: LoginPageProps) {
-  const { users, setCurrentUser, setLanguage, setIsSessionElevated } = useAppUser();
+  const { users, setCurrentUser, setLanguage, clearLanguage, setIsSessionElevated } = useAppUser();
   const { tenant, loadTenantBySlug, error: tenantBootstrapError } = useTenant();
   const [searchParams] = useSearchParams();
 
@@ -223,8 +223,13 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
 
   const finalizeSession = useCallback(
     (user: UserType, clearLoading: () => void) => {
-      const userLang = (user.language || loginLang) as LangType;
-      setLanguage(userLang);
+      /* Lingua esplicita del profilo se presente; altrimenti AUTO (segue il dispositivo)
+         senza riscriverla sul DB, così la preferenza resta "segui il dispositivo". */
+      const profileLang = user.language && ['it', 'en', 'es', 'fr'].includes(user.language)
+        ? (user.language as LangType)
+        : null;
+      if (profileLang) setLanguage(profileLang);
+      else clearLanguage();
       try {
         localStorage.setItem(
           APP_SESSION_STORAGE_KEY,
@@ -239,7 +244,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       }
       const safeUser = userRowToSessionUser({
         ...user,
-        language: userLang,
         theme: (user.theme ?? 'light') as Theme,
       } as UserType);
       setCurrentUser(safeUser);
@@ -250,7 +254,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
         onLogin();
       }, 300);
     },
-    [loginLang, setLanguage, setCurrentUser, onLogin, tenant?.slug]
+    [setLanguage, clearLanguage, setCurrentUser, onLogin, tenant?.slug]
   );
 
   // Retry automatico dopo caricamento tenant (fallback Option B)
@@ -463,7 +467,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
         >
           <button
             type="button"
-            aria-label="Apri form di accesso"
+            aria-label={t.login_open_form_aria}
             onClick={() => setShowForm(true)}
             onPointerDown={() => { if (!showForm) setShowForm(true); }}
             className="focus:outline-none cursor-pointer touch-manipulation [-webkit-tap-highlight-color:transparent]"

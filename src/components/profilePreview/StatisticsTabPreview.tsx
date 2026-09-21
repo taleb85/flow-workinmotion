@@ -83,7 +83,7 @@ export default function StatisticsTabPreview({
         <div className="rounded-xl border border-white/[0.14] overflow-hidden text-xs">
           <div className="grid grid-cols-3 gap-px bg-slate-200 font-bold text-white/70">
             <div className="bg-slate-50 px-2 py-2">{t.stats_preset_period}</div>
-            <div className="bg-slate-50 px-2 py-2 text-center">Ore</div>
+            <div className="bg-slate-50 px-2 py-2 text-center">{t.stats_title}</div>
             <div className="bg-slate-50 px-2 py-2 text-center">Δ</div>
             <div className="bg-slate-50 px-2 py-2 text-white/90">W10</div>
             <div className="bg-slate-50 px-2 py-2 text-center text-white/90">40:00</div>

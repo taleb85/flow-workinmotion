@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Lock, ShieldCheck, Delete, Loader2 } from 'lucide-react';
+import { Lock, ShieldCheck, Delete } from 'lucide-react';
 import React, { ReactNode, useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
@@ -15,7 +15,6 @@ interface PinPadModalProps {
   onCancel: () => void;
   error?: string;
   isLoading?: boolean;
-  confirmLabel?: string;
   cancelLabel?: string;
   leftActionButton?: ReactNode;
   /** Non più usato: lo sfondo scuro è `bg-black/40`, uniforme a tutte le modali. */
@@ -30,13 +29,11 @@ export function PinPadModal({
   onCancel,
   error,
   isLoading = false,
-  confirmLabel,
   cancelLabel,
   leftActionButton,
   backdropClass: _backdropClass,
 }: PinPadModalProps) {
   const t = useT();
-  const confirmText = confirmLabel ?? t.confirm;
   const cancelText = cancelLabel ?? t.cancel;
   useBodyScrollLock(true);
 
@@ -162,16 +159,11 @@ export function PinPadModal({
         </div>
       </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-3 px-5 sm:px-8 pb-6 md:pb-4 mt-2">
+      {/* Action button */}
+      <div className="flex px-5 sm:px-8 pb-6 md:pb-4 mt-2">
         <button type="button" onClick={onCancel}
           className="flex-1 h-12 rounded-2xl font-bold text-sm text-white/80 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           style={btnBase}>{cancelText}</button>
-        <button type="button" disabled={pin.length !== 4 || isLoading} onClick={onConfirm}
-          className="flex-1 h-12 rounded-2xl text-white font-bold text-sm disabled:opacity-35 transition-colors flex items-center justify-center gap-2 hover:bg-white/[0.12] hover:border-white/20 disabled:hover:bg-transparent disabled:hover:border-inherit hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-          style={btnBase}>
-          {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : confirmText}
-        </button>
       </div>
     </>
   );
@@ -194,7 +186,7 @@ export function PinPadModal({
         transition={{ type: 'spring', stiffness: 360, damping: 30, mass: 0.9 }}
         ref={pinAreaRef}
         tabIndex={-1}
-        className="pinpad-card flex flex-col w-full max-w-[23rem] md:max-w-[21.25rem] mx-4 rounded-2xl overflow-hidden outline-none"
+        className="pinpad-card flex flex-col w-full max-w-[23rem] md:max-w-[21.25rem] mx-4 mt-40 md:mt-0 rounded-2xl overflow-hidden outline-none"
         style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.40)', boxShadow: '0 32px 80px rgba(0,0,0,0.75)' }}
         onClick={e => e.stopPropagation()}
       >

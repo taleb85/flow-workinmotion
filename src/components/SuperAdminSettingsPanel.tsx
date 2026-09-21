@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Users, Layers, Clock, MapPin, Languages, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { getStaticTranslations } from '../hooks/useT';
 import type { Tenant, TenantSettings } from '../types';
 import DipendentiTab from './SuperAdminDipendentiTab';
 import ToggleSwitch from './ui/toggle-switch-glass';
@@ -143,6 +144,7 @@ interface SettingsConfigPanelProps {
 }
 
 export default function SettingsConfigPanel({ tenantId, initial, onSaved }: SettingsConfigPanelProps) {
+  const tr = getStaticTranslations();
   const [tab, setTab] = useState<SettingsTab>('features');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -245,15 +247,15 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
         {/* TAB: Funzionalità */}
         {tab === 'features' && (
           <>
-            <p className="text-[0.6875rem] text-white/40 mb-3">Abilita o disabilita i moduli per questa sede.</p>
+            <p className="text-[0.6875rem] text-white/40 mb-3">{tr.sa_modules_hint}</p>
 
             <div className="space-y-1 mb-4">
-              <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-2">Moduli principali</p>
+              <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-2">{tr.sa_main_modules}</p>
               {([
-                { key: 'timesheets', label: 'Presenze (timbrature)' },
-                { key: 'shifts',     label: 'Turni (tabellone)' },
-                { key: 'holidays',   label: 'Ferie e richieste' },
-                { key: 'statistics', label: 'Statistiche ore' },
+                { key: 'timesheets', label: tr.sa_module_timesheets },
+                { key: 'shifts',     label: tr.sa_module_shifts },
+                { key: 'holidays',   label: tr.sa_module_holidays },
+                { key: 'statistics', label: tr.sa_module_statistics },
               ] as { key: keyof NonNullable<TenantSettings['modules']>; label: string }[]).map(({ key, label }) => (
                 <div key={key} className="flex items-center justify-between py-1.5">
                   <span className="text-sm text-white/80">{label}</span>
@@ -263,7 +265,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             </div>
 
             <div className="border-t border-white/10 pt-3 space-y-1">
-              <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-2">Funzionalità avanzate</p>
+              <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40 mb-2">{tr.sa_advanced_features}</p>
               {FEATURE_DEFS.map((f) => (
                 <div key={f.slug} className="flex items-center justify-between py-1.5">
                   <span className={`text-sm ${f.dangerous ? 'text-red-600' : 'text-white/80'}`}>
@@ -279,10 +281,10 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
         {/* TAB: Regole turni */}
         {tab === 'workrules' && (
           <div className="space-y-4">
-            <p className="text-[0.6875rem] text-white/40">Valori predefiniti per le regole di lavoro. L'admin della sede può modificarli.</p>
+            <p className="text-[0.6875rem] text-white/40">{tr.sa_workrules_hint}</p>
 
             <RuleRow
-              label="Ore max giornaliere"
+              label={tr.sa_max_daily_hours}
               enabled={wr.maxDailyHoursEnabled !== false}
               onToggle={(v) => setWorkRule('maxDailyHoursEnabled', v)}
             >
@@ -290,7 +292,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             </RuleRow>
 
             <RuleRow
-              label="Ore max settimanali"
+              label={tr.sa_max_weekly_hours}
               enabled={wr.maxWeeklyHoursEnabled !== false}
               onToggle={(v) => setWorkRule('maxWeeklyHoursEnabled', v)}
             >
@@ -298,7 +300,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             </RuleRow>
 
             <RuleRow
-              label="Riposo minimo tra turni"
+              label={tr.sa_min_rest_hours}
               enabled={wr.minRestHoursEnabled !== false}
               onToggle={(v) => setWorkRule('minRestHoursEnabled', v)}
             >
@@ -306,7 +308,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             </RuleRow>
 
             <RuleRow
-              label="Soglia ritardo tollerato"
+              label={tr.sa_late_threshold}
               enabled={wr.lateThresholdEnabled !== false}
               onToggle={(v) => setWorkRule('lateThresholdEnabled', v)}
             >
@@ -391,10 +393,10 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
         {/* TAB: Locale */}
         {tab === 'locale' && (
           <div className="space-y-4">
-            <p className="text-[0.6875rem] text-white/40">Lingua predefinita e fuso orario della sede.</p>
+            <p className="text-[0.6875rem] text-white/40">{tr.sa_locale_hint}</p>
 
             <div className="space-y-1">
-              <label htmlFor="sa-locale-lang" className="text-xs font-semibold text-white/70">Lingua predefinita</label>
+              <label htmlFor="sa-locale-lang" className="text-xs font-semibold text-white/70">{tr.sa_default_language}</label>
               <select
                 id="sa-locale-lang"
                 value={settings.defaultLanguage ?? 'it'}
@@ -406,7 +408,7 @@ export default function SettingsConfigPanel({ tenantId, initial, onSaved }: Sett
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="sa-locale-tz" className="text-xs font-semibold text-white/70">Fuso orario</label>
+              <label htmlFor="sa-locale-tz" className="text-xs font-semibold text-white/70">{tr.sa_timezone}</label>
               <select
                 id="sa-locale-tz"
                 value={settings.timezone ?? 'Europe/Rome'}

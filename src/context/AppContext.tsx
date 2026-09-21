@@ -975,11 +975,11 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     }
     const existingOnDate = shifts.filter((s) => s.user_id === shift.user_id && s.date === shift.date);
     if (existingOnDate.length >= MAX_SHIFTS_PER_DAY) {
-      showError('Un dipendente non può avere più di 2 turni nello stesso giorno.');
+      showError(getTranslations(effectiveLanguage).max_two_shifts_same_day);
       return null;
     }
     if (hasShiftConflictSameDay(existingOnDate, { start_time: shift.start_time, end_time: shift.end_time ?? '' })) {
-      showError('Conflitto orario: il turno si sovrappone a uno esistente.');
+      showError(getTranslations(effectiveLanguage).shift_overlap_same_day);
       return null;
     }
     let endTime = shift.end_time ?? '';
@@ -1942,7 +1942,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         pin: payload.pin,
         status: payload.status,
         sort_order: maxOrder + 1,
-        language: 'it',
+        /* AUTO: nessuna preferenza salvata → il nuovo profilo segue la lingua del dispositivo. */
+        language: null as unknown as Language,
         theme: 'light',
         ...perms,
         ...(payload.department ? { department: payload.department } : {}),
@@ -2947,7 +2948,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0, transition: { duration: 0.55, ease: 'easeInOut' } }}
                     aria-busy
-                    aria-label="Caricamento"
+                    aria-label={getTranslations(effectiveLanguage).loading_aria}
                   >
                     {/* Solo sfondo: il logo compare con la schermata "Tap to start", così
                         non viene mostrato due volte né si sposta quando la splash svanisce. */}

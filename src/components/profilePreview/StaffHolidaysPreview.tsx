@@ -57,7 +57,7 @@ className="inline-flex items-center gap-1.5 rounded-xl border border-white/40 bg
           <div className="flex items-center gap-3 px-3 py-4">
             <Palmtree className="h-8 w-8 shrink-0 text-white/50" />
             <div>
-              <p className="text-sm font-semibold text-white/90">Ferie estive</p>
+              <p className="text-sm font-semibold text-white/90">{t.pv_holiday_demo_label}</p>
               <p className="text-xs text-white/60">1–7 ago · {t.approved ?? 'Approvata'}</p>
             </div>
           </div>

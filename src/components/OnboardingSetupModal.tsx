@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { Mail, Phone, Lock, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useAppUser } from '../context/appSliceContexts';
 import { useMultisensorialFeedback } from '../hooks/useMultisensorialFeedback';
+import { getTranslations } from '../utils/translations';
 import FlowLogo from './FlowLogo';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -29,6 +30,7 @@ interface OnboardingSetupModalProps {
 export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModalProps) {
   const { currentUser, updateUser, effectiveLanguage } = useAppUser();
   const { triggerHapticFeedback, playNotificationSound } = useMultisensorialFeedback();
+  const tr = getTranslations(effectiveLanguage);
 
   const [email, setEmail] = useState(currentUser?.email ?? '');
   const [phone, setPhone] = useState(currentUser?.phone ?? '');
@@ -279,7 +281,7 @@ export default function OnboardingSetupModal({ onComplete }: OnboardingSetupModa
                   onChange={(e) => { handlePinInput(e.target.value, setNewPin); setTouched((p) => ({ ...p, pin: true })); }}
                   onKeyDown={handleKeyDown}
                   className="sr-only"
-                  aria-label="Nuovo PIN"
+                  aria-label={tr.onboarding_new_pin}
                 />
                 {/* Tastiera numerica visuale */}
                 <div className="mt-3 grid grid-cols-3 gap-2">

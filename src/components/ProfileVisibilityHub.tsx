@@ -470,9 +470,9 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
                       </p>
                       <p
                         className="text-[0.6875rem] text-white/60 truncate"
-                        title={translateRole(u.role, currentUser.language)}
+                        title={translateRole(u.role, effectiveLanguage)}
                       >
-                        {translateRole(u.role, currentUser.language)}
+                        {translateRole(u.role, effectiveLanguage)}
                       </p>
                       {u.status !== 'active' && (
                         <span className="mt-1 inline-block rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[0.6875rem] font-bold text-amber-700 uppercase">
@@ -532,9 +532,9 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
               </p>
               <p
                 className="text-[0.6875rem] text-white/60 truncate"
-                title={translateRole(previewUser.role, currentUser.language)}
+                title={translateRole(previewUser.role, effectiveLanguage)}
               >
-                {translateRole(previewUser.role, currentUser.language)}
+                {translateRole(previewUser.role, effectiveLanguage)}
               </p>
             </div>
             {hasUnsavedChanges ? (

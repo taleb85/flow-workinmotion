@@ -198,6 +198,7 @@ export default function ProfileTabRichPreview({
             {blocks}
             <GlobalPopupsPreview 
               previewUser={previewUser}
+              language={language}
               isSelectedAdmin={isSelectedAdmin}
               onUiToggle={onUiToggle}
               hiddenBadge={tv.profile_visibility_ui_hidden_badge ?? 'Nascosto'}

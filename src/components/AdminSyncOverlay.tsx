@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ShieldCheck } from 'lucide-react';
+import { useT } from '../hooks/useT';
 
 const STEPS = [
   { label: 'Aggiornamento impostazioni rilevato', doneAt: 0 },
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export default function AdminSyncOverlay({ onDone, onReload }: Props) {
+  const t = useT();
   const scheduled = useRef(false);
   const [visibleCount, setVisibleCount] = useState(1);
   const [doneCount, setDoneCount] = useState(1);
@@ -61,7 +63,7 @@ export default function AdminSyncOverlay({ onDone, onReload }: Props) {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label="Aggiornamento dati in corso"
+      aria-label={t.admin_sync_aria}
     >
       {/* Icona animata */}
       <div className="relative mb-8">
@@ -94,10 +96,10 @@ export default function AdminSyncOverlay({ onDone, onReload }: Props) {
       </div>
 
       <h1 className="text-xl font-bold text-white/90 mb-1 tracking-tight">
-        Dati aggiornati dall'admin
+        {t.admin_sync_title}
       </h1>
       <p className="text-sm text-white/60 mb-8 max-w-xs leading-relaxed">
-        L'amministratore ha modificato le impostazioni. Aggiornamento automatico in corso…
+        {t.admin_sync_body}
       </p>
 
       <ul className="w-full max-w-xs space-y-2.5 text-left">
