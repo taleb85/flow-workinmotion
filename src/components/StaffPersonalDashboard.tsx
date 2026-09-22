@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, LogOut, Shield, Calendar } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ChevronDown, LogOut, Shield, Calendar } from 'lucide-react';
 import { database } from '../lib/database';
 import { useAppUser, useAppData, useAppConfig, useAppOverlay } from '../context/AppContext';
 import { useT } from '../hooks/useT';
 import { User as UserType, Shift, HolidayRequest, PunchRecord, type Language } from '../types';
-import { format, isToday, isFuture, startOfWeek, endOfWeek, addWeeks, addDays, startOfMonth, endOfMonth, parseISO, isWithinInterval, startOfDay, endOfDay, getISOWeek } from 'date-fns';
+import { format, isToday, isFuture, startOfWeek, endOfWeek, addDays, parseISO, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { it as itLocale } from 'date-fns/locale';
-import { loadPeriodConfig, getPeriodDateRange, prevPeriodConfig, nextPeriodConfig, type PeriodConfig } from '../utils/periodConfig';
+import { loadPeriodConfig, getPeriodDateRange, getPeriodStartDate, weekIndexForDateInPeriod, prevPeriodConfig, nextPeriodConfig, type PeriodConfig } from '../utils/periodConfig';
 import { getTimesheetGridPrivacyMode } from '../utils/timesheetGridPrivacy';
 import { getNetShiftMinutes } from '../utils/breakRules';
 import { getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
@@ -37,6 +37,7 @@ import { userRowToSessionUser } from '../utils/staffPermissionDefaults';
 import { APP_SESSION_STORAGE_KEY } from '../constants/appSession';
 import { translateDepartmentValue } from '../utils/departmentLabels';
 import AdminRow from './ui/AdminRow';
+import PeriodPickerPopover from './ui/PeriodPickerPopover';
 import RequestHolidayModal from './RequestHolidayModal';
 import LanguageToggleGrid from './LanguageToggleGrid';
 import NotificationCenter from './NotificationCenter';
@@ -375,11 +376,25 @@ export default function StaffPersonalDashboard({
 
   // ── Navigazione periodo mobile (turni + presenze) ──────────────
   type MobileNavTab = 'week' | 'period';
-  const [mobileNavTab, _setMobileNavTab] = useState<MobileNavTab>('period');
+  // Modalità di visualizzazione: selezionabile dalle card del riepilogo (settimana / periodo)
+  const [mobileNavTab, setMobileNavTab] = useState<MobileNavTab>(() => {
+    const saved = sessionStorage.getItem('osteria_staff_nav_mode');
+    return saved === 'week' || saved === 'period' ? saved : 'period';
+  });
+  /** Offset del periodo selezionato rispetto al preset (0 = periodo preimpostato). */
   const [mobileNavOffset, setMobileNavOffset] = useState(() => {
     const saved = sessionStorage.getItem('osteria_staff_nav_offset');
     return saved ? Number(saved) : 0;
   });
+  /** Settimana selezionata dentro il periodo (0 = prima settimana del periodo). */
+  const [weekIndex, setWeekIndex] = useState(() => weekIndexForDateInPeriod(loadPeriodConfig()));
+  const [showPeriodPopover, setShowPeriodPopover] = useState(false);
+  const periodTriggerRef = useRef<HTMLButtonElement>(null);
+
+  // Persiste la modalità di visualizzazione (permane al cambio tab principale)
+  useEffect(() => {
+    sessionStorage.setItem('osteria_staff_nav_mode', mobileNavTab);
+  }, [mobileNavTab]);
 
   // Persiste l'offset in sessionStorage per condividerlo con Statistics
   useEffect(() => {
@@ -404,23 +419,80 @@ export default function StaffPersonalDashboard({
     return () => window.removeEventListener('osteria-staff-nav-offset', handler);
   }, []);
 
-  const getMobileRange = useCallback((tab: MobileNavTab, offset: number): { start: Date; end: Date } => {
-    const today = new Date();
-    if (tab === 'week') {
-      const base = addWeeks(startOfWeek(today, { weekStartsOn: 1 }), offset);
-      return { start: startOfDay(base), end: endOfDay(endOfWeek(base, { weekStartsOn: 1 })) };
-    }
+  /** Configurazione del periodo a un dato offset (0 = periodo preimpostato in "Periodi Presenze"). */
+  const periodConfigAtOffset = useCallback((offset: number): PeriodConfig => {
     let cfg: PeriodConfig = loadPeriodConfig();
     if (offset > 0) for (let i = 0; i < offset; i++) cfg = nextPeriodConfig(cfg);
     else if (offset < 0) for (let i = 0; i > offset; i--) cfg = prevPeriodConfig(cfg);
-    const r = getPeriodDateRange(cfg);
-    return { start: startOfDay(new Date(r.startDate)), end: endOfDay(new Date(r.endDate)) };
+    return cfg;
   }, []);
 
-  const mobileRange = useMemo(
-    () => getMobileRange(mobileNavTab, mobileNavOffset),
-    [getMobileRange, mobileNavTab, mobileNavOffset]
+  /** Periodo selezionato (dropdown o preset). */
+  const selectedPeriodConfig = useMemo(
+    () => periodConfigAtOffset(mobileNavOffset),
+    [periodConfigAtOffset, mobileNavOffset]
   );
+
+  /** Indice settimana valido nel periodo selezionato (0 … numWeeks-1). */
+  const clampedWeekIndex = useMemo(
+    () => Math.max(0, Math.min(selectedPeriodConfig.numWeeks - 1, weekIndex)),
+    [selectedPeriodConfig, weekIndex]
+  );
+
+  /** Periodo selezionato: intervallo completo. */
+  const periodRange = useMemo(() => {
+    const r = getPeriodDateRange(selectedPeriodConfig);
+    return { start: startOfDay(new Date(r.startDate)), end: endOfDay(new Date(r.endDate)) };
+  }, [selectedPeriodConfig]);
+
+  /** Settimana navigata: 0 = prima settimana del periodo selezionato. */
+  const weekRange = useMemo(() => {
+    const wStart = addDays(getPeriodStartDate(selectedPeriodConfig), clampedWeekIndex * 7);
+    return { start: startOfDay(wStart), end: endOfDay(addDays(wStart, 6)) };
+  }, [selectedPeriodConfig, clampedWeekIndex]);
+
+  const mobileRange = useMemo(
+    () => (mobileNavTab === 'week' ? weekRange : periodRange),
+    [mobileNavTab, weekRange, periodRange]
+  );
+
+  /** Seleziona un periodo e riposiziona la settimana su quella che contiene oggi (se dentro il periodo). */
+  const selectPeriod = useCallback((offset: number) => {
+    setMobileNavOffset(offset);
+    setWeekIndex(weekIndexForDateInPeriod(periodConfigAtOffset(offset)));
+  }, [periodConfigAtOffset]);
+
+  /** Frecce in modalità periodo: periodo precedente/successivo. */
+  const stepPeriod = useCallback((delta: number) => {
+    selectPeriod(mobileNavOffset + delta);
+  }, [selectPeriod, mobileNavOffset]);
+
+  /** Frecce in modalità settimana: scorre le settimane del periodo selezionato. */
+  const stepWeek = useCallback((delta: number) => {
+    const max = selectedPeriodConfig.numWeeks - 1;
+    setWeekIndex(Math.max(0, Math.min(max, clampedWeekIndex + delta)));
+  }, [selectedPeriodConfig, clampedWeekIndex]);
+
+  /** Torna a oggi: periodo preimpostato e settimana corrente. */
+  const goToday = useCallback(() => {
+    selectPeriod(0);
+    setShowPeriodPopover(false);
+  }, [selectPeriod]);
+
+  /** Offset (in periodi dal preset) corrispondente a una configurazione: ricerca fino a ±5 anni. */
+  const offsetForConfig = useCallback((cfg: PeriodConfig): number => {
+    for (let o = -60; o <= 60; o++) {
+      const c = periodConfigAtOffset(o);
+      if (c.startDate === cfg.startDate && c.numWeeks === cfg.numWeeks) return o;
+    }
+    return 0;
+  }, [periodConfigAtOffset]);
+
+  /** Selezione dal popover periodi: sposta periodo e settimana (senza modificare il preset). */
+  const selectPeriodConfig = useCallback((cfg: PeriodConfig) => {
+    setMobileNavOffset(offsetForConfig(cfg));
+    setWeekIndex(weekIndexForDateInPeriod(cfg));
+  }, [offsetForConfig]);
 
   const mobileShiftsFiltered = useMemo(
     () => shiftsSortedMobile.filter(s => {
@@ -430,143 +502,162 @@ export default function StaffPersonalDashboard({
     [shiftsSortedMobile, mobileRange]
   );
 
-  // ── Scheda Presenze: una settimana alla volta (navigazione dedicata) ────────
-  const [presenceWeekOffset, setPresenceWeekOffset] = useState(() => {
-    const saved = sessionStorage.getItem('osteria_staff_presence_week_offset');
-    return saved ? Number(saved) : 0;
-  });
-
-  // Persiste l'offset settimana (chiave separata dal bus periodo condiviso)
-  useEffect(() => {
-    sessionStorage.setItem('osteria_staff_presence_week_offset', String(presenceWeekOffset));
-  }, [presenceWeekOffset]);
-
-  const presenceWeekRange = useMemo(
-    () => getMobileRange('week', presenceWeekOffset),
-    [getMobileRange, presenceWeekOffset]
-  );
-
-  /** Limita la navigazione al mese corrente: le frecce si disabilitano quando
-      la settimana target non si sovrappone più al mese attuale. */
-  const presenceNavLimits = useMemo(() => {
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
-    const prev = { start: addDays(presenceWeekRange.start, -7), end: addDays(presenceWeekRange.end, -7) };
-    const next = { start: addDays(presenceWeekRange.start, 7), end: addDays(presenceWeekRange.end, 7) };
-    return {
-      disablePrev: prev.end < monthStart,
-      disableNext: next.start > monthEnd,
-    };
-  }, [presenceWeekRange, now]);
-
-  // Turni della settimana — lo staff NON vede le bozze, ma vede i turni
+  // ── Scheda Presenze: segue lo stesso periodo preimpostato (Periodi Presenze) ──
+  // Turni del periodo — lo staff NON vede le bozze, ma vede i turni
   // pubblicati/approvati/assenti E quelli dove non ha ancora effettuato la timbratura
   const presenceShiftsFiltered = useMemo(
     () => shifts.filter(s => {
       const d = parseISO(s.date);
-      if (!isWithinInterval(d, { start: presenceWeekRange.start, end: presenceWeekRange.end })) return false;
+      if (!isWithinInterval(d, { start: mobileRange.start, end: mobileRange.end })) return false;
       // Regola esistente: lo staff non vede le bozze
       if (s.approval_status === 'draft') return false;
       if (['confirmed', 'absent', 'approved'].includes(s.approval_status ?? '')) return true;
       // Turno senza timbratura effettuata → visibile (lo staff deve sapere che deve timbrare)
       return !punchRecords.some(pr => pr.shift_id === s.id);
     }),
-    [shifts, presenceWeekRange, punchRecords]
+    [shifts, mobileRange, punchRecords]
   );
 
   const mobileLocale = dateLocale ?? itLocale;
 
-  // ── Statistiche per MobileStatsCards (seguono la settimana selezionata) ────
-  const mobileStatsData = useMemo(() => {
-    const weekStart = presenceWeekRange.start;
-    const weekEnd   = presenceWeekRange.end;
-    const monthRef = presenceWeekRange.start;
-    const monthStart = startOfMonth(monthRef);
-    const monthEnd   = endOfMonth(monthRef);
+  /** Etichetta del periodo selezionato (es. "31 ago – 27 set 26"). */
+  const periodLabel =
+    `${format(periodRange.start, 'd MMM', { locale: mobileLocale })} – ${format(periodRange.end, 'd MMM yy', { locale: mobileLocale })}`;
 
-    // Solo turni APPROVATI contano per le ore (settimana e mese)
-    const workedStatuses = new Set(['approved']);
+  /** Le card del riepilogo selezionano la modalità: la settimana resta dentro il periodo scelto. */
+  const handleNavModeChange = useCallback((mode: MobileNavTab) => {
+    setMobileNavTab(mode);
+    setShowPeriodPopover(false);
+  }, []);
+
+  // ── Statistiche per MobileStatsCards ─────────────────────────────────────
+  // Card 1 "Settimana": ore pianificate e ore approvate della settimana navigata.
+  // Card 2: ore del periodo navigato (Periodi Presenze).
+  const mobileStatsData = useMemo(() => {
+    const weekStart = weekRange.start;
+    const weekEnd   = weekRange.end;
+    const periodStart = periodRange.start;
+    const periodEnd   = periodRange.end;
+
+    // Contano i turni pubblicati/approvati (bozze e assenze escluse) — stessa logica di Statistics
+    const workedStatuses = new Set(['confirmed', 'approved']);
+    /** Ore approvate: solo turni con timbrature complete (in/out), netto pause. */
     const calcMins = (s: Shift) => {
-      const { start, end } = getResolvedStartEndForHours(s, punchRecords);
+      const { start, end, source } = getResolvedStartEndForHours(s, punchRecords);
+      if (source !== 'punch') return 0;
       return getNetShiftMinutes(s, start, end, displayUser, breakRules, breakComputeOpts);
     };
+    /** Ore pianificate: orari del turno, netto pause. */
+    const calcPlannedMins = (s: Shift) => getNetShiftMinutes(
+      s,
+      (s.start_time ?? '').slice(0, 5),
+      (s.end_time ?? '').slice(0, 5),
+      displayUser,
+      breakRules,
+      breakComputeOpts,
+    );
 
     let weekWorkedMins = 0;
-    let monthWorkedMins = 0;
-    const monthWorkedDays = new Set<string>();
+    let weekPlannedMins = 0;
+    let periodWorkedMins = 0;
+    let periodPlannedMins = 0;
 
     for (const s of shifts) {
       if (!workedStatuses.has(s.approval_status ?? '')) continue;
       const d = parseISO(s.date);
       const mins = calcMins(s);
-      if (isWithinInterval(d, { start: weekStart,  end: weekEnd  })) weekWorkedMins  += mins;
-      if (isWithinInterval(d, { start: monthStart, end: monthEnd })) {
-        monthWorkedMins += mins;
-        monthWorkedDays.add(s.date);
+      if (isWithinInterval(d, { start: weekStart,  end: weekEnd  })) {
+        weekWorkedMins += mins;
+        weekPlannedMins += calcPlannedMins(s);
+      }
+      if (isWithinInterval(d, { start: periodStart, end: periodEnd })) {
+        periodWorkedMins += mins;
+        periodPlannedMins += calcPlannedMins(s);
       }
     }
 
     const weekCapMins =
       ((displayUser as UserType & { hours_per_week?: number }).hours_per_week ?? 40) * 60;
 
-    return { weekWorkedMins, weekCapMins, monthWorkedMins, monthDaysWorked: monthWorkedDays.size };
-  }, [shifts, punchRecords, displayUser, breakRules, breakComputeOpts, presenceWeekRange]);
+    return { weekWorkedMins, weekPlannedMins, weekCapMins, periodWorkedMins, periodPlannedMins };
+  }, [shifts, punchRecords, displayUser, breakRules, breakComputeOpts, weekRange, periodRange]);
 
-  const MobileNavBar = ({
-    mode = mobileNavTab,
-    onOffsetChange = setMobileNavOffset,
-    range = mobileRange,
-    disablePrev = false,
-    disableNext = false,
-  }: {
-    mode?: MobileNavTab;
-    onOffsetChange?: (updater: (o: number) => number) => void;
-    range?: { start: Date; end: Date };
-    /** Frecce disabilitate quando il periodo target esce dal mese corrente. */
-    disablePrev?: boolean;
-    disableNext?: boolean;
-  }) => (
-    <div className="flex items-center gap-2 mb-4 px-4">
-      {/* Etichetta "Oggi" a sinistra — cliccabile per tornare al periodo corrente */}
-      <button type="button" onClick={() => onOffsetChange(() => 0)}
-        className="h-9 inline-flex items-center px-3 rounded-2xl bg-accent text-white text-[0.6875rem] font-extrabold uppercase tracking-wider shrink-0 shadow-sm active:bg-white/80 transition-colors">
-        {t.today}
-      </button>
+  /** Barra di navigazione periodo/settimana. Funzione (non componente) per non rimontare
+   *  il popover a ogni render del parent: un componente inline cambia identità a ogni render
+   *  e React smonta/rimonta il sottoalbero, perdendo lo stato del popover. */
+  const renderMobileNavBar = () => {
+    const isWeekMode = mobileNavTab === 'week';
+    const maxWeekIdx = selectedPeriodConfig.numWeeks - 1;
+    const disablePrev = isWeekMode && clampedWeekIndex <= 0;
+    const disableNext = isWeekMode && clampedWeekIndex >= maxWeekIdx;
+    const weekLabel = `${format(weekRange.start, 'd MMM', { locale: mobileLocale })} – ${format(weekRange.end, 'd MMM', { locale: mobileLocale })}`;
 
-      {/* Frecce + chip data a destra */}
-      <div className="flex items-center border border-white/20 rounded-2xl overflow-hidden flex-1" style={{ background: 'transparent', boxShadow: 'none' }}>
-        <button
-          type="button"
-          onClick={() => onOffsetChange(o => o - 1)}
-          disabled={disablePrev}
-          aria-label={(t as Record<string, string>).nav_prev_period ?? 'Periodo precedente'}
-          className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-r border-white/10 active:bg-slate-50/80 disabled:opacity-30 disabled:pointer-events-none"
-        >
-          <ChevronLeft className="h-4 w-4" />
+    return (
+      <>
+        <div className="flex items-center gap-2 mb-4 px-4">
+          {/* Etichetta "Oggi" a sinistra — torna al periodo preimpostato e alla settimana corrente */}
+          <button type="button" onClick={goToday}
+          className="h-9 inline-flex items-center px-3 rounded-2xl bg-accent text-white text-[0.6875rem] font-extrabold uppercase tracking-wider shrink-0 shadow-sm active:bg-white/80 transition-colors">
+          {t.today}
         </button>
 
-        <div className="flex-1 flex items-center justify-center gap-1.5 px-2 min-w-0">
-          <Calendar className="h-3 w-3 text-white/50 shrink-0" />
-          <span className="text-[0.6875rem] font-bold text-white/80 tabular-nums truncate">
-            {mode === 'week'
-              ? `S.${getISOWeek(range.start)} · ${format(range.start, 'd MMM', { locale: mobileLocale })} – ${format(range.end, 'd MMM', { locale: mobileLocale })}`
-              : `${format(range.start, 'd MMM', { locale: mobileLocale })} – ${format(range.end, 'd MMM yy', { locale: mobileLocale })}`
-            }
-          </span>
+        {/* Barra unica: frecce ed etichetta sono segmenti dello stesso contenitore. */}
+        <div className="flex items-center h-9 flex-1 min-w-0 rounded-full border border-white/20 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => (isWeekMode ? stepWeek(-1) : stepPeriod(-1))}
+            disabled={disablePrev}
+            aria-label={(t as Record<string, string>).nav_prev_period ?? 'Periodo precedente'}
+            className="flex items-center justify-center w-8 h-8 m-0.5 rounded-full bg-white/10 shrink-0 text-white/60 transition-colors active:bg-white/20 disabled:opacity-30 disabled:pointer-events-none"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          {/* Modalità periodo: apre il popover periodi. Modalità settimana: etichetta sola lettura. */}
+          {isWeekMode ? (
+            <div className="flex-1 min-w-0 flex items-center justify-center gap-1 px-3 text-white text-sm tabular-nums truncate">
+              {weekLabel}
+            </div>
+          ) : (
+            <button
+              ref={periodTriggerRef}
+              type="button"
+              onClick={() => setShowPeriodPopover(v => !v)}
+              aria-label={t.tab_period ?? 'Periodo'}
+              aria-expanded={showPeriodPopover}
+              className="flex-1 min-w-0 flex items-center justify-between gap-1 px-3 text-white text-sm tabular-nums transition-colors active:bg-white/10"
+            >
+              <Calendar className="h-3.5 w-3.5 text-white/50 shrink-0" />
+              <span className="truncate">{periodLabel}</span>
+              <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-white/50 transition-transform ${showPeriodPopover ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => (isWeekMode ? stepWeek(1) : stepPeriod(1))}
+            disabled={disableNext}
+            aria-label={(t as Record<string, string>).nav_next_period ?? 'Periodo successivo'}
+            className="flex items-center justify-center w-8 h-8 m-0.5 rounded-full bg-white/10 shrink-0 text-white/60 transition-colors active:bg-white/20 disabled:opacity-30 disabled:pointer-events-none"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => onOffsetChange(o => o + 1)}
-          disabled={disableNext}
-          aria-label={(t as Record<string, string>).nav_next_period ?? 'Periodo successivo'}
-          className="flex items-center justify-center h-9 w-9 text-white/60 hover:bg-slate-50 transition-colors shrink-0 border-l border-white/10 active:bg-slate-50/80 disabled:opacity-30 disabled:pointer-events-none"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
-    </div>
-  );
+        {/* Popover periodi — stesso componente di Gestione turni (anno + griglia mesi) */}
+        {showPeriodPopover && !isWeekMode && (
+          <PeriodPickerPopover
+            anchorRef={periodTriggerRef}
+            selected={selectedPeriodConfig}
+            onSelect={(cfg) => { selectPeriodConfig(cfg); setShowPeriodPopover(false); }}
+            onClose={() => setShowPeriodPopover(false)}
+            language={effectiveLanguage}
+          />
+        )}
+      </>
+    );
+  };
 
   const renderShifts = () => (
     <div className="space-y-4">
@@ -579,7 +670,7 @@ export default function StaffPersonalDashboard({
         />
       ) : (
         <>
-          <MobileNavBar />
+          {renderMobileNavBar()}
           <StaffDesktopShifts shifts={mobileShiftsFiltered} language={effectiveLanguage} />
         </>
       )}
@@ -743,27 +834,39 @@ export default function StaffPersonalDashboard({
                 {activeTab === 'timesheet' && (
                   <>
                     {/* ── Presenze — layout unico (stesso di mobile) ── */}
-                    <div className="mt-8">
-                      <div className="px-4 mb-4">
-                        <MobileStatsCards
-                          weekWorkedMins={mobileStatsData.weekWorkedMins}
-                          weekCapMins={mobileStatsData.weekCapMins}
-                          monthWorkedMins={mobileStatsData.monthWorkedMins}
-                          monthDaysWorked={mobileStatsData.monthDaysWorked}
-                          hoursFormat="hhmm"
-                          labels={{
-                            title: t.mobile_dash_numbers ?? 'I miei numeri',
-                            week: t.ts_period_week ?? 'Settimana',
-                            month: t.ts_period_month ?? 'Mese',
-                            daysWorked:
-                              (t as Record<string, string>).mobile_dash_days_worked ?? 'Giorni lavorati',
-                          }}
-                        />
+                    <div>
+                      {/* Blocco fisso: etichetta, card e navigazione periodo restano in alto;
+                          scorre solo la griglia delle presenze. Nessun margine sopra il blocco:
+                          così è già "agganciato" al primo scroll e non scivola. */}
+                      <div className="app-sticky-band sticky top-[var(--app-sticky-header-offset,5rem)] z-30 pb-1">
+                        {/* Etichetta di sezione resa dal parent (il figlio la nasconde): sta sopra le card */}
+                        <div className="px-4 pt-4 pb-3">
+                          <span className="text-[0.6875rem] font-black uppercase tracking-widest text-white/55">{t.my_attendance_label ?? 'Le mie presenze'}</span>
+                        </div>
+                        <div className="px-4 pb-4">
+                          <MobileStatsCards
+                            weekWorkedMins={mobileStatsData.weekWorkedMins}
+                            weekPlannedMins={mobileStatsData.weekPlannedMins}
+                            weekCapMins={mobileStatsData.weekCapMins}
+                            monthWorkedMins={mobileStatsData.periodWorkedMins}
+                            monthPlannedMins={mobileStatsData.periodPlannedMins}
+                            monthCapMins={mobileStatsData.weekCapMins * selectedPeriodConfig.numWeeks}
+                            compact
+                            activeMode={mobileNavTab}
+                            onModeChange={handleNavModeChange}
+                            labels={{
+                              title: t.mobile_dash_numbers ?? 'I miei numeri',
+                              week: t.ts_period_week ?? 'Settimana',
+                              month: t.ts_period_month ?? 'Mese',
+                            }}
+                          />
+                        </div>
+                        {renderMobileNavBar()}
                       </div>
-                      <MobileNavBar mode="week" onOffsetChange={setPresenceWeekOffset} range={presenceWeekRange} disablePrev={presenceNavLimits.disablePrev} disableNext={presenceNavLimits.disableNext} />
                       <ManagementMobileTimesheet
                         variant="embedded"
                         hideNavBar
+                        hideSectionLabel
                         forceExpanded
                         shifts={presenceShiftsFiltered}
                         punchRecords={punchRecords}

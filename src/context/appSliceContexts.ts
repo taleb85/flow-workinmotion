@@ -66,6 +66,8 @@ export interface DataSlice {
   copyShift: (shift: Shift, newDate: string) => void;
   publishWeekShifts: (weekStart: Date) => void;
   publishDayShifts: (dateStr: string) => Promise<void>;
+  /** Pubblica un singolo turno in bozza (bozza → pubblicato). */
+  publishShift: (shiftId: string) => Promise<void>;
   approveShift: (shiftId: string, opts?: any) => Promise<void>;
   addHolidayRequest: (request: Omit<HolidayRequest, 'id' | 'created_at' | 'status'>) => Promise<{ ok: boolean; emailSent?: boolean; error?: string }>;
   updateHolidayStatus: (id: string, status: import('../types').HolidayStatus) => Promise<{ ok: boolean; emailSent?: boolean; error?: string }>;

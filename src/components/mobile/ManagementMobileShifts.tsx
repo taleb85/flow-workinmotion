@@ -37,9 +37,10 @@ function shiftMins(s: Shift): number {
   return eh * 60 + em - (sh * 60 + sm);
 }
 
+/** Ore in formato `HH:mm` — unico formato ore dell'app (stesso della card riepilogo). */
 function minsLabel(m: number): string {
-  if (m <= 0) return '—';
-  return m % 60 > 0 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${Math.floor(m / 60)}h`;
+  if (m <= 0) return '00:00';
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 }
 
 function StatusBadge({ shift, t: _t }: { shift: Shift; t: Record<string, string> }) {
@@ -211,10 +212,10 @@ function MyShiftsSection({
                       <span className={`text-[0.6875rem] font-bold ${isToday_ ? 'text-white' : 'text-white/55'}`}>
                         {dayLetters[i]}
                       </span>
-                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[0.6875rem] font-bold ${
+                      <div className={`h-7 min-w-[1.75rem] px-1 rounded-lg flex items-center justify-center text-[0.6875rem] font-bold tabular-nums ${
  isToday_ ? 'bg-white/20 text-white' : 'text-white/55'
  }`}>
-                        {format(day, 'd')}
+                        {format(day, 'd/M')}
                       </div>
                       <div className={`w-full rounded-lg flex flex-col items-center justify-center py-1.5 px-0.5 min-h-[2.375rem] transition-colors ${blockCls} ${
  isSelected ? 'ring-2 ring-white/40 ring-offset-1' : ''

@@ -1440,6 +1440,37 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     }
   }, [shifts, showError, effectiveLanguage, markManagementDataTouched]);
 
+  /** Pubblica un singolo turno in bozza (bozza → pubblicato). */
+  const publishShift = useCallback(async (shiftId: string) => {
+    const op = currentUserRef.current;
+    if (!op || !canPublishScheduleDrafts(op)) {
+      showError(getTranslations(effectiveLanguage).app_access_denied);
+      return;
+    }
+    const shift = shifts.find((s) => s.id === shiftId);
+    if (!shift || shift.approval_status !== 'draft') return;
+    try {
+      const res = await database.shifts.update(shiftId, { approval_status: 'confirmed' });
+      if (res) setShifts((prev) => prev.map((s) => (s.id === shiftId ? res : s)));
+      const actorFull = currentUserRef.current;
+      void logShiftAudit({
+        shiftId,
+        action: 'publish',
+        actorUserId: actorFull?.id ?? null,
+        actorName: actorFull ? `${actorFull.first_name} ${actorFull.last_name ?? ''}`.trim() : 'Sistema',
+        field: 'approval_status',
+        oldValue: 'Bozza',
+        newValue: 'Pubblicato',
+        description: `Turno confermato: ${formatAuditDate(shift.date)} ${shift.start_time}–${shift.end_time ?? ''}`,
+      });
+      const actor = actorFull?.first_name ?? 'Sistema';
+      logHistory('publish', actor, `Turno ${formatAuditDate(shift.date)} ${shift.start_time}–${shift.end_time ?? ''} pubblicato`);
+      markManagementDataTouched();
+    } catch (error) {
+      console.error('Errore durante la pubblicazione del turno:', error);
+    }
+  }, [shifts, showError, effectiveLanguage, markManagementDataTouched]);
+
   const addHolidayRequest = useCallback(async (req: Omit<HolidayRequest, 'id' | 'created_at' | 'status'>): Promise<{ ok: boolean; emailSent?: boolean; error?: string }> => {
     const payload = { ...req, status: 'pending' as const };
     const res = await database.holidays.insert(payload);
@@ -2834,14 +2865,14 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   const dataSlice = useMemo<DataSlice>(() => ({
     shifts, punchRecords, holidays, availability,
     addShift, updateShift, deleteShift, deleteShifts, copyShift,
-    publishWeekShifts, publishDayShifts, approveShift,
+    publishWeekShifts, publishDayShifts, publishShift, approveShift,
     addHolidayRequest, updateHolidayStatus, deleteHolidayRequest,
     addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
     seedDemoProfileForUser,
   }), [
     shifts, punchRecords, holidays, availability,
     addShift, updateShift, deleteShift, deleteShifts, copyShift,
-    publishWeekShifts, publishDayShifts, approveShift,
+    publishWeekShifts, publishDayShifts, publishShift, approveShift,
     addHolidayRequest, updateHolidayStatus, deleteHolidayRequest,
     addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
     seedDemoProfileForUser,
@@ -2899,7 +2930,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     isLoading,
     currentUser, setCurrentUser, users, shifts, holidays, punchRecords, availability, toggleAvailability,
     addShift, updateShift, approveShift, deleteShift, deleteShifts, copyShift,
-    publishWeekShifts, publishDayShifts, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
+    publishWeekShifts, publishDayShifts, publishShift, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
     updateUser, createUser, deleteUser, reorderUsers, setUsersSortOrder, updateUserPreferences, effectiveLanguage, setLanguage, clearLanguage, showError, showSuccess, forceGlobalRefresh, hardResetTestData, seedDemoProfileForUser, silentRefreshData, hardReloadFromDatabase, isGlobalRefreshing, syncStage, dataSyncInProgress,
     postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
     featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,
@@ -2915,7 +2946,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   } satisfies AppContextType), [
     isLoading, currentUser, setCurrentUser, users, shifts, holidays, punchRecords, availability, toggleAvailability,
     addShift, updateShift, approveShift, deleteShift, deleteShifts, copyShift,
-    publishWeekShifts, publishDayShifts, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
+    publishWeekShifts, publishDayShifts, publishShift, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest, addPunchRecord, updatePunchRecord, deletePunchRecordsForShift,
     updateUser, createUser, deleteUser, reorderUsers, setUsersSortOrder, updateUserPreferences, effectiveLanguage, setLanguage, clearLanguage, showError, showSuccess, forceGlobalRefresh, hardResetTestData, seedDemoProfileForUser, silentRefreshData, hardReloadFromDatabase, isGlobalRefreshing, syncStage, dataSyncInProgress,
     postRefreshLocked, postUnlockReloadPending, unlockAfterRefresh, cancelRefreshLock, pendingOrderIds, requestConfirmAndSaveOrder, pendingPublishWeekStart, requestConfirmAndPublishWeek, forceLogoutRequested, clearForceLogoutRequest, logout, globalPinSessionId, setGlobalPinSessionId,
     featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,

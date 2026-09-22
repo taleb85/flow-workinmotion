@@ -2485,6 +2485,20 @@ td, th {
   opacity: 1 !important;
 }
 
+/* ── Blocco sticky della tab Presenze (staff) ──────────────────────────
+   Vetro applicato SOLO al contenitore, nessun effetto sui figli: stesso
+   accorgimento di `.app-header`, che su iOS evita il glitch di compositing
+   (elementi sticky che sembrano muoversi/ritardare durante lo scroll). */
+.app-sticky-band {
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+.app-sticky-band * {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+}
+
 /* ── Bottom nav: vetro trasparente fino al bordo (safe-area incluso) ───
    Il wrapper fixed contiene il padding del safe-area iOS: applicando il
    blur al wrapper (la tabbar interna resta trasparente), su iPhone la barra

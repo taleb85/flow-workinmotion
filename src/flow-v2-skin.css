@@ -254,6 +254,11 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
+/* Card riepilogo (Settimana/Mese): leggermente più basse delle card standard. */
+.stats-cards .flow-card {
+  padding: 12px;
+}
+
 /* ═══════════════ CARD (vetro Apple) ═══════════════ */
 /* `:not([class*="rounded-full"])`: gli elementi con `bg-white` + `rounded-full`
    sono riempimenti/pallini/knob (barre di avanzamento, indicatori di selezione,

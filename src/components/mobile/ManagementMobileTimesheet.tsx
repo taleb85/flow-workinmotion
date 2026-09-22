@@ -13,8 +13,11 @@ import { translateDepartmentValue, formatDepartmentDisplayForProfile } from '../
 import { getTranslations } from '../../utils/translations';
 import {
   loadPeriodConfig, getPeriodDateRange,
-  prevPeriodConfig, nextPeriodConfig, type PeriodConfig,
+  prevPeriodConfig, nextPeriodConfig, periodConfigForMonth, type PeriodConfig,
 } from '../../utils/periodConfig';
+import { getNetShiftMinutes } from '../../utils/breakRules';
+import { getResolvedStartEndForHours } from '../../utils/shiftResolvedClockTimes';
+import { useAppConfig } from '../../context/AppContext';
 import MobileStatsCards from './MobileStatsCards';
 
 const Statistics = lazy(() => import('../Statistics'));
@@ -33,6 +36,8 @@ interface Props {
   variant?: 'standalone' | 'embedded';
   /** `embedded` sotto StaffPersonalDashboard: nasconde la navbar interna (la navigazione è nel parent). */
   hideNavBar?: boolean;
+  /** `embedded` sotto StaffPersonalDashboard: l'etichetta "Le mie presenze" è resa dal parent (sopra le card). */
+  hideSectionLabel?: boolean;
   /** `embedded`: espande sempre la settimana (niente accordion collassato). */
   forceExpanded?: boolean;
 }
@@ -68,24 +73,15 @@ function groupByWeeks(list: Shift[]) {
   return map;
 }
 
-function shiftMins(s: Shift): number {
-  if (!s.start_time || !s.end_time || s.approval_status === 'absent') return 0;
-  const [sh, sm] = s.start_time.split(':').map(Number);
-  const [eh, em] = s.end_time.split(':').map(Number);
-  return eh * 60 + em - (sh * 60 + sm);
-}
-
-function minsLabel(m: number): string {
-  if (m <= 0) return '—';
-  return m % 60 > 0 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${Math.floor(m / 60)}h`;
-}
+/** Turni conteggiati nelle ore: pubblicati o approvati (bozze e assenze escluse). */
+const PUBLISHED_STATUSES = new Set(['confirmed', 'approved']);
 
 function punchLabel(pr: PunchRecord): string {
   const t = pr.calculated_time ?? pr.timestamp;
   try { return format(parseISO(t), 'HH:mm'); } catch { return '–'; }
 }
 
-/** Durata in formato `HH:mm` (senza suffissi h/m). */
+/** Ore in formato `HH:mm` — unico formato ore dell'app (stesso della card riepilogo). */
 function minsHhMm(m: number): string {
   if (m <= 0) return '00:00';
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
@@ -130,6 +126,7 @@ function statusDotColor(status: string | undefined): string {
 /* ── Sezione personale ─────────────────────────────────────────────────── */
 function MyTimesheetSection({
   myShifts, myPunches, locale, dayLetters, language, t, plannedOnly, forceExpanded = false, embedded = false,
+  currentUser,
 }: {
   myShifts: Shift[];
   myPunches: PunchRecord[];
@@ -141,7 +138,14 @@ function MyTimesheetSection({
   forceExpanded?: boolean;
   /** true (staff embedded): celle senza conteggio e senza legenda; false (gestione standalone): conteggio turni + legenda con Ore tot. */
   embedded?: boolean;
+  /** Utente a cui appartengono i turni: serve per le regole pausa nel conteggio ore. */
+  currentUser?: User;
 }) {
+  const { breakRules, featureFlags } = useAppConfig();
+  const breakComputeOpts = useMemo(
+    () => ({ autoBreaksFeatureEnabled: featureFlags['auto_breaks'] !== false }),
+    [featureFlags],
+  );
   const cardBg = { background: 'transparent' };
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
   // Track which non-current weeks the user manually expanded
@@ -185,6 +189,14 @@ function MyTimesheetSection({
     return m;
   }, [myPunches]);
 
+  /** Minuti del turno timbrato (timbrature complete), netto pause — stesso conteggio del totale settimana. */
+  const workedMinsForShift = useCallback((shift: Shift): number => {
+    if (shift.approval_status === 'absent') return 0;
+    const { start, end, source } = getResolvedStartEndForHours(shift, myPunches);
+    if (source !== 'punch') return 0;
+    return getNetShiftMinutes(shift, start, end, currentUser, breakRules, breakComputeOpts);
+  }, [myPunches, currentUser, breakRules, breakComputeOpts]);
+
   if (myShifts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center">
@@ -209,7 +221,24 @@ function MyTimesheetSection({
         });
 
         const confirmed = week.shifts.filter(s => s.approval_status !== 'absent');
-        const totalMins = confirmed.reduce((acc, s) => acc + shiftMins(s), 0);
+        /** Turni pubblicati/approvati della settimana: base di calcolo delle ore. */
+        const published = confirmed.filter(s => PUBLISHED_STATUSES.has(s.approval_status ?? ''));
+        /** Ore pianificate: orari del turno, netto pause. */
+        const totalMins = published.reduce(
+          (acc, s) => acc + getNetShiftMinutes(
+            s,
+            (s.start_time ?? '').slice(0, 5),
+            (s.end_time ?? '').slice(0, 5),
+            currentUser,
+            breakRules,
+            breakComputeOpts,
+          ),
+          0
+        );
+        /** Ore approvate: solo turni timbrati (in/out completi), netto pause. */
+        const workedTotalMins = published.reduce((acc, s) => acc + workedMinsForShift(s), 0);
+        /** Nella scheda Presenze dello staff il totale mostrato è quello effettivo, non pianificato. */
+        const weekTotalMins = embedded ? workedTotalMins : totalMins;
         const restDays = weekDays.filter(d =>
           !(byDay[format(d, 'yyyy-MM-dd')] ?? []).some(s => s.approval_status !== 'absent')
         ).length;
@@ -239,7 +268,7 @@ function MyTimesheetSection({
                   </span>
                   <span className="text-[0.6875rem] text-white/40">·</span>
                   <span className="text-xs font-semibold text-white/70 tabular-nums">
-                    {minsLabel(totalMins)}
+                    {minsHhMm(weekTotalMins)}
                   </span>
                 </div>
               </div>
@@ -290,10 +319,10 @@ function MyTimesheetSection({
                       <span className={`text-[0.6875rem] font-bold ${isToday_ ? 'text-white' : 'text-white/55'}`}>
                         {dayLetters[i]}
                       </span>
-                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[0.6875rem] font-bold ${
+                      <div className={`h-7 min-w-[1.75rem] px-1 rounded-lg flex items-center justify-center text-[0.6875rem] font-bold tabular-nums ${
  isToday_ ? 'bg-white/20 text-white' : 'text-white/55'
  }`}>
-                        {format(day, 'd')}
+                        {format(day, 'd/M')}
                       </div>
                       <div className={`w-full rounded-lg flex flex-col items-center justify-center py-1.5 px-0.5 min-h-[2.375rem] transition-colors ${blockCls} ${
  isSelected && !plannedOnly ? 'ring-2 ring-white/40 ring-offset-1' : ''
@@ -326,7 +355,7 @@ function MyTimesheetSection({
               <div className="border-t border-white/10 mx-3 pt-2.5 pb-3 flex items-center justify-around">
                 {[
                   { label: t.shift_plural ?? 'Turni', value: confirmed.length.toString() },
-                  { label: t.stat_hours_total_abbr ?? 'Ore tot', value: minsLabel(totalMins) },
+                  { label: t.stat_hours_total_abbr ?? 'Ore tot', value: minsHhMm(weekTotalMins) },
                   { label: t.rest_days_label ?? 'Riposi', value: restDays.toString() },
                 ].map(({ label, value }, i) => (
                   <div key={i} className="flex flex-col items-center gap-0.5">
@@ -378,12 +407,8 @@ function MyTimesheetSection({
                           : (punchByDay[key] ?? []);
                         const pIn  = (plannedOnly && !embedded) ? null : shiftPunches.find(p => p.type === 'in');
                         const pOut = (plannedOnly && !embedded) ? null : shiftPunches.find(p => p.type === 'out');
-                        // Totale ore lavorate (differenza tra le timbrature, se complete)
-                        const workedMins = pIn && pOut
-                          ? Math.max(0, Math.round(
-                              (new Date(pOut.calculated_time ?? pOut.timestamp).getTime()
-                               - new Date(pIn.calculated_time ?? pIn.timestamp).getTime()) / 60000))
-                          : 0;
+                        // Totale ore del turno: timbrature netto pause (stesso conteggio del totale settimana)
+                        const workedMins = workedMinsForShift(shift);
                         return (
                           <div key={shift.id}
                             className={`flex items-center justify-between rounded-xl px-3 py-2.5 mb-1 border shadow-sm ${
@@ -407,7 +432,6 @@ function MyTimesheetSection({
                               <p className={`font-bold tabular-nums text-base leading-none flex items-center gap-1.5 ${isAbsent ? 'text-white/40 line-through' : 'text-white'}`}>
                                 {embedded && !isAbsent && pIn ? (
                                   <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-black text-emerald-300 border-emerald-500/30 bg-emerald-500/15">
-                                    <Clock className="w-3.5 h-3.5 shrink-0" />
                                     {punchLabel(pIn)} → {pOut ? punchLabel(pOut) : '…'}
                                     {workedMins > 0 && (
                                       <>
@@ -544,7 +568,7 @@ function TeamTimesheetSectionDesign({
                 <div className="truncate text-sm font-semibold text-white">{fullName}</div>
                 <div className="flow-label">{dept}</div>
               </div>
-              <div className="flow-kpi text-white" style={{ fontSize: 20 }}>{minsLabel(minutes)}</div>
+              <div className="flow-kpi text-white" style={{ fontSize: 20 }}>{minsHhMm(minutes)}</div>
             </div>
 
             <div className="mt-3 grid grid-cols-7 gap-1">
@@ -596,11 +620,22 @@ export default function ManagementMobileTimesheet({
   plannedOnly,
   variant = 'standalone',
   hideNavBar = false,
+  hideSectionLabel = false,
   forceExpanded = false,
 }: Props) {
   const locale = getLocale(language);
   const t = getTranslations(language as 'it' | 'en' | 'es') as Record<string, string>;
   const dayLetters = getDayLetters(locale);
+  /** Utente corrente: serve alle regole pausa nel conteggio ore. */
+  const currentUser = useMemo(
+    () => users.find(u => u.id === currentUserId),
+    [users, currentUserId],
+  );
+  const { breakRules, featureFlags } = useAppConfig();
+  const breakComputeOpts = useMemo(
+    () => ({ autoBreaksFeatureEnabled: featureFlags['auto_breaks'] !== false }),
+    [featureFlags],
+  );
 
   const [navMode, _setNavMode] = useState<NavMode>('period');
   const [navOffset, setNavOffset] = useState(() => {
@@ -634,6 +669,8 @@ export default function ManagementMobileTimesheet({
     return () => window.removeEventListener('osteria-staff-nav-offset', handler);
   }, [hideNavBar]);
   const embedded = variant === 'embedded';
+  /** Navigazione delegata al parent (es. scheda Presenze staff): i turni arrivano già filtrati sul periodo. */
+  const parentControlled = embedded && hideNavBar;
   /** Sub-tab interno (solo modalità standalone): presenze oppure statistiche. */
   const [tsView, setTsView] = useState<'presence' | 'stats'>('presence');
   const showPresenceBody = embedded || tsView === 'presence';
@@ -671,16 +708,20 @@ export default function ManagementMobileTimesheet({
     : `${format(range.start, 'd MMM', { locale })} – ${format(range.end, 'd MMM yy', { locale })}`;
 
   const filteredShifts = useMemo(
-    () => shifts.filter(s => isWithinInterval(parseISO(s.date), { start: range.start, end: range.end })),
-    [shifts, range]
+    () => (parentControlled
+      ? shifts
+      : shifts.filter(s => isWithinInterval(parseISO(s.date), { start: range.start, end: range.end }))),
+    [shifts, range, parentControlled]
   );
   const filteredPunches = useMemo(
-    () => punchRecords.filter(p => {
-      try {
-        return isWithinInterval(parseISO(p.calculated_time ?? p.timestamp), { start: range.start, end: range.end });
-      } catch { return false; }
-    }),
-    [punchRecords, range]
+    () => (parentControlled
+      ? punchRecords
+      : punchRecords.filter(p => {
+          try {
+            return isWithinInterval(parseISO(p.calculated_time ?? p.timestamp), { start: range.start, end: range.end });
+          } catch { return false; }
+        })),
+    [punchRecords, range, parentControlled]
   );
 
   const myShifts   = useMemo(() => filteredShifts.filter(s => s.user_id === currentUserId), [filteredShifts, currentUserId]);
@@ -694,20 +735,41 @@ export default function ManagementMobileTimesheet({
     const weekEnd   = endOfWeek(now,   { weekStartsOn: 1 });
     const monthStart = startOfMonth(now);
     const monthEnd   = endOfMonth(now);
-    const worked = new Set(['approved', 'confirmed']);
-    let weekMins = 0, monthMins = 0;
-    const monthDays = new Set<string>();
+    let weekPlannedMins = 0, weekWorkedMins = 0, monthPlannedMins = 0, monthMins = 0;
     for (const s of shifts.filter(s => s.user_id === currentUserId)) {
-      if (!worked.has(s.approval_status ?? '')) continue;
+      if (!PUBLISHED_STATUSES.has(s.approval_status ?? '')) continue;
       const d = parseISO(s.date);
-      const sm = s.start_time ? parseInt(s.start_time.split(':')[0]) * 60 + parseInt(s.start_time.split(':')[1]) : 0;
-      const em = s.end_time   ? parseInt(s.end_time.split(':')[0])   * 60 + parseInt(s.end_time.split(':')[1])   : 0;
-      const mins = Math.max(0, em - sm);
-      if (isWithinInterval(d, { start: weekStart,  end: weekEnd  })) weekMins  += mins;
-      if (isWithinInterval(d, { start: monthStart, end: monthEnd })) { monthMins += mins; monthDays.add(s.date); }
+      /** Ore pianificate: orari del turno. Ore approvate: solo turni timbrati (in/out completi). Entrambe netto pause. */
+      const planned = getNetShiftMinutes(
+        s,
+        (s.start_time ?? '').slice(0, 5),
+        (s.end_time ?? '').slice(0, 5),
+        currentUser,
+        breakRules,
+        breakComputeOpts,
+      );
+      const resolved = getResolvedStartEndForHours(s, punchRecords);
+      const worked = resolved.source === 'punch'
+        ? getNetShiftMinutes(s, resolved.start, resolved.end, currentUser, breakRules, breakComputeOpts)
+        : 0;
+      if (isWithinInterval(d, { start: weekStart,  end: weekEnd  })) {
+        weekPlannedMins += planned;
+        weekWorkedMins += worked;
+      }
+      if (isWithinInterval(d, { start: monthStart, end: monthEnd })) {
+        monthPlannedMins += planned;
+        monthMins += worked;
+      }
     }
-    return { weekMins, monthMins, monthDaysWorked: monthDays.size };
-  }, [shifts, currentUserId]);
+    return {
+      weekPlannedMins,
+      weekWorkedMins,
+      monthPlannedMins,
+      monthMins,
+      /** Tetto del periodo = ore settimanali × settimane del periodo corrente. */
+      monthCapMins: 40 * 60 * periodConfigForMonth(now).numWeeks,
+    };
+  }, [shifts, currentUserId, punchRecords, currentUser, breakRules, breakComputeOpts]);
 
   return (
     <div className={`flex flex-col pt-1 ${embedded ? '' : 'pb-content'}`}>
@@ -749,15 +811,16 @@ export default function ManagementMobileTimesheet({
       {!embedded && (
         <div className="px-4 mb-4">
           <MobileStatsCards
-            weekWorkedMins={statsData.weekMins}
+            weekWorkedMins={statsData.weekWorkedMins}
+            weekPlannedMins={statsData.weekPlannedMins}
             weekCapMins={40 * 60}
             monthWorkedMins={statsData.monthMins}
-            monthDaysWorked={statsData.monthDaysWorked}
+            monthPlannedMins={statsData.monthPlannedMins}
+            monthCapMins={statsData.monthCapMins}
             labels={{
               title: t.tab_statistics ?? 'Statistiche',
               week: t.ts_period_week ?? 'Settimana',
               month: t.ts_period_month ?? 'Mese',
-              daysWorked: (t as Record<string, string>).mobile_dash_days_worked ?? 'Giorni lavorati',
             }}
           />
         </div>
@@ -791,11 +854,12 @@ export default function ManagementMobileTimesheet({
 
         {/* I miei turni */}
         <section>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[0.6875rem] font-black uppercase tracking-widest text-white/55">{t.my_attendance_label ?? 'Le mie presenze'}</span>
-            {myShifts.length > 0 && <span className="text-[0.6875rem] font-black tabular-nums text-white/70">({myShifts.length})</span>}
-          </div>
-          <MyTimesheetSection myShifts={myShifts} myPunches={myPunches} locale={locale} dayLetters={dayLetters} language={language} t={t} plannedOnly={plannedOnly} forceExpanded={forceExpanded} embedded={embedded} />
+          {!hideSectionLabel && (
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[0.6875rem] font-black uppercase tracking-widest text-white/55">{t.my_attendance_label ?? 'Le mie presenze'}</span>
+            </div>
+          )}
+          <MyTimesheetSection myShifts={myShifts} myPunches={myPunches} locale={locale} dayLetters={dayLetters} language={language} t={t} plannedOnly={plannedOnly} forceExpanded={forceExpanded} embedded={embedded} currentUser={currentUser} />
         </section>
 
         {/* Team — solo in vista gestione standalone, non nella Presenze personale */}

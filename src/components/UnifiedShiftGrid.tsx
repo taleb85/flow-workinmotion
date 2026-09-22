@@ -30,9 +30,10 @@ import { getShiftViolations, DEFAULT_WORK_RULES } from '../utils/workRules';
 import { isShiftPayrollFrozen } from '../utils/timesheetFreezeCriteria';
 import { logShiftAudit, formatAuditDate } from '../utils/shiftAuditLog';
 import { PinPadModal } from './ui/PinPadModal';
+import PeriodPickerPopover from './ui/PeriodPickerPopover';
 import {
   loadPeriodConfig, savePeriodConfig, getPeriodStartDate, getPeriodEndDate,
-  nextPeriodConfig, prevPeriodConfig, periodConfigForMonth, periodConfigContainingDate,
+  nextPeriodConfig, prevPeriodConfig, periodConfigContainingDate,
   type PeriodConfig,
 } from '../utils/periodConfig';
 import {
@@ -462,7 +463,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const sessionActive = isSessionElevated || !!globalPinSessionId;
   const {
     shifts: allShifts, punchRecords: allPunchRecords,
-    deleteShift, deleteShifts, publishWeekShifts,
+    deleteShift, deleteShifts, publishWeekShifts, publishShift,
     addPunchRecord, updatePunchRecord, addShift, updateShift,
   } = useAppData();
   const { breakRules, featureFlags } = useAppConfig();
@@ -476,7 +477,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     () => currentUser ? canEditTeamShifts(currentUser) : false,
     [currentUser]
   );
-  const _canPublish = currentUser ? canPublishScheduleDrafts(currentUser) : false;
+  const canPublish = currentUser ? canPublishScheduleDrafts(currentUser) : false;
   const _canApprove = useMemo(
     () => currentUser ? canApproveShiftActions(currentUser) : false,
     [currentUser]
@@ -651,10 +652,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   }, [weekDays.length, viewMode, tableMaxHeight]);
 
   const [showPeriodPopover, setShowPeriodPopover] = useState(false);
-  const [periodPopoverYear, setPeriodPopoverYear] = useState(today.getFullYear());
-  const [periodPopoverStyle, setPeriodPopoverStyle] = useState<React.CSSProperties>({});
   const periodTriggerRef = useRef<HTMLButtonElement>(null);
-  const periodPopoverRef = useRef<HTMLDivElement>(null);
 
   // ── Department filter ──
   const [deptFilter, setDeptFilter] = useState<string | null>(null);
@@ -662,18 +660,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const [deptDropdownStyle, setDeptDropdownStyle] = useState<React.CSSProperties>({});
   const deptTriggerRef = useRef<HTMLButtonElement>(null);
   const deptPopoverRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!showPeriodPopover) return;
-    const handler = (e: MouseEvent) => {
-      const t = e.target as Node;
-      if (!periodPopoverRef.current?.contains(t) && !periodTriggerRef.current?.contains(t)) {
-        setShowPeriodPopover(false);
-      }
-    };
-    const id = setTimeout(() => document.addEventListener('click', handler), 0);
-    return () => { clearTimeout(id); document.removeEventListener('click', handler); };
-  }, [showPeriodPopover]);
 
   useEffect(() => {
     if (!deptDropdownOpen) return;
@@ -687,29 +673,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   }, [deptDropdownOpen]);
 
   const togglePeriodPopover = useCallback(() => {
-    setShowPeriodPopover(prev => {
-      if (!prev && periodTriggerRef.current) {
-        const rect = periodTriggerRef.current.getBoundingClientRect();
-        const popoverWidth = Math.min(340, window.innerWidth - 32);
-        const popoverHeight = 300;
-        const gap = 6;
-
-        let top: number;
-        if (rect.bottom + gap + popoverHeight > window.innerHeight) {
-          top = Math.max(8, rect.top - gap - popoverHeight);
-        } else {
-          top = rect.bottom + gap;
-        }
-
-        const centerX = rect.left + rect.width / 2;
-        const minLeft = popoverWidth / 2 + 16;
-        const maxLeft = window.innerWidth - popoverWidth / 2 - 16;
-        const left = Math.min(maxLeft, Math.max(minLeft, centerX));
-
-        setPeriodPopoverStyle({ top, left });
-      }
-      return !prev;
-    });
+    setShowPeriodPopover(prev => !prev);
   }, []);
 
   const toggleDeptDropdown = useCallback(() => {
@@ -1171,6 +1135,16 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     try { await publishWeekShifts(weekStart); showSuccess(t.week_published ?? 'Settimana pubblicata.'); }
     catch { showError(t.error_generic ?? 'Errore.'); }
   }, [publishWeekShifts, weekStart, showSuccess, showError, t]);
+
+  /** Pubblica un singolo turno in bozza (bozza → pubblicato), senza toccare il resto della settimana. */
+  const handlePublishShift = useCallback(async (shift: Shift) => {
+    if (shift.approval_status !== 'draft') return;
+    try {
+      await publishShift(shift.id);
+      setSelectedShift(prev => prev && prev.id === shift.id ? { ...prev, approval_status: 'confirmed' as const } : prev);
+      showSuccess(t.shift_published ?? 'Turno pubblicato.');
+    } catch { showError(t.error_generic ?? 'Errore.'); }
+  }, [publishShift, setSelectedShift, showSuccess, showError, t]);
 
   const handleFreezeWeek = useCallback(async () => {
     if (!confirm(t.confirm_freeze_week ?? 'Congelare tutti i turni della settimana?')) return;
@@ -1655,6 +1629,24 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     showSuccess((t.shifts_deleted ?? '{n} turni eliminati.').replace('{n}', String(ids.length)));
     exitSelectionMode();
   }, [allShifts, deleteShifts, showSuccess, t, exitSelectionMode]);
+
+  /** Turni in bozza tra quelli selezionati: abilitano il pulsante "Pubblica" nella barra di selezione. */
+  const selectedDraftCount = useMemo(
+    () => weekShifts.filter(s => selectedShiftIds.has(s.id) && s.approval_status === 'draft').length,
+    [weekShifts, selectedShiftIds]
+  );
+
+  /** Pubblica solo i turni in bozza selezionati (selezione multipla). */
+  const handlePublishSelected = useCallback(async () => {
+    const ids = weekShifts
+      .filter(s => selectedShiftIds.has(s.id) && s.approval_status === 'draft')
+      .map(s => s.id);
+    if (ids.length === 0) return;
+    if (!confirm((t.confirm_publish_shifts ?? 'Pubblicare i {n} turni selezionati?').replace('{n}', String(ids.length)))) return;
+    for (const id of ids) await publishShift(id);
+    showSuccess((t.shifts_published_count ?? '{n} turni pubblicati.').replace('{n}', String(ids.length)));
+    exitSelectionMode();
+  }, [weekShifts, selectedShiftIds, publishShift, showSuccess, t, exitSelectionMode]);
 
   /** Cambio di settimana/periodo: i turni selezionati non sono più visibili → esci. */
   const selectionScopeRef = useRef(weekDateStrings);
@@ -2331,38 +2323,14 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       </div>
 
       {/* ── Period Popover ── */}
-      {showPeriodPopover && createPortal(
-          <div ref={periodPopoverRef}
-            className="fixed z-[10050] mt-1 rounded-2xl border border-white/[0.14] p-3 md:p-4 w-[calc(100vw-32px)] max-w-[21.25rem] max-h-[85vh] overflow-y-auto"
-            style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', top: periodPopoverStyle.top, left: periodPopoverStyle.left, transform: 'translateX(-50%)' }}>
-          <div className="flex items-center justify-between mb-3">
-            <button type="button" onClick={() => setPeriodPopoverYear(y => y - 1)}
-              className="rounded-lg bg-white/10 px-2 py-1 text-white/60 hover:text-white transition-colors"><ChevronLeft className="h-3.5 w-3.5" /></button>
-            <span className="text-sm font-bold text-white">{periodPopoverYear}</span>
-            <button type="button" onClick={() => setPeriodPopoverYear(y => y + 1)}
-              className="rounded-lg bg-white/10 px-2 py-1 text-white/60 hover:text-white transition-colors"><ChevronRight className="h-3.5 w-3.5" /></button>
-          </div>
-          <div className="grid grid-cols-3 gap-1 md:gap-2">
-            {Array.from({ length: 12 }, (_, i) => {
-              const refDate = new Date(periodPopoverYear, i, 15);
-              const cfg = periodConfigForMonth(refDate);
-              const start = getPeriodStartDate(cfg);
-              const end = getPeriodEndDate(cfg);
-              const isActive = cfg.startDate === effectivePeriod.startDate && cfg.numWeeks === effectivePeriod.numWeeks;
-              return (
-                <button key={i} type="button" onClick={() => applyPeriod(cfg)}
-                  className={`rounded-xl border px-2.5 py-2 text-center transition-colors ${isActive ? 'border-white/40 bg-white/20' : 'border-white/20 hover:border-white/40'}`}>
-                  <div className="text-[0.6875rem] font-bold text-white">{format(new Date(periodPopoverYear, i, 15), 'MMM', { locale }).toUpperCase()}</div>
-                  <div className="text-[0.5625rem] text-white/40 mt-0.5 leading-tight tabular-nums whitespace-nowrap">
-                    {format(start, 'd MMM', { locale }).toUpperCase()} — {format(end, 'd MMM', { locale }).toUpperCase()}
-                  </div>
-                  <div className="text-[0.5rem] text-white/30 mt-0.5 font-bold uppercase">{(t.ts_period_weeks_abbr ?? '{n} sett.').replace('{n}', String(cfg.numWeeks))}</div>
-                </button>
-              );
-            })}
-          </div>
-        </div>,
-        document.body
+      {showPeriodPopover && (
+        <PeriodPickerPopover
+          anchorRef={periodTriggerRef}
+          selected={effectivePeriod}
+          onSelect={applyPeriod}
+          onClose={() => setShowPeriodPopover(false)}
+          language={effectiveLanguage}
+        />
       )}
 
       {/* ── Mobile Card View (card memoizzate: si ri-renderizzano solo se le loro props cambiano) ── */}
@@ -2539,6 +2507,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   </button>
                 </div>
               )}
+              {canPublish && selectedShift.approval_status === 'draft' && (
+                <button type="button" onClick={() => void handlePublishShift(selectedShift)}
+                  className="flex-1 flex items-center justify-center rounded-lg bg-cyan-500/20 px-2 py-2 text-cyan-300 hover:bg-cyan-500/30 transition-colors" title={t.publish_shift ?? 'Pubblica turno'}>
+                  <Send className="h-4 w-4" />
+                </button>
+              )}
               {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
                 <button type="button" onClick={() => handleFreezeShift(selectedShift)}
                   className="flex-1 flex items-center justify-center rounded-lg bg-emerald-600/20 px-2 py-2 text-emerald-300 hover:bg-emerald-600/30 transition-colors" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
@@ -2599,6 +2573,16 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                         {t.wst_confirm_delete_btn ?? 'Conferma elimina'}
                       </button>
                     </div>
+                  )}
+                  {canPublish && selectedShift.approval_status === 'draft' && (
+                    <GradientIconButton
+                      label={t.publish_shift ?? 'Pubblica turno'}
+                      onClick={() => void handlePublishShift(selectedShift)}
+                      gradientFrom="#67e8f9"
+                      gradientTo="#0891b2"
+                      className="h-8 w-8 rounded-full bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30">
+                      <Send className="h-4 w-4 shrink-0" />
+                    </GradientIconButton>
                   )}
                   {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
                     <GradientIconButton
@@ -3205,7 +3189,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               className="flex w-full h-full items-center justify-center gap-2.5 text-white font-bold hover:bg-white/10 transition-colors active:bg-white/20"
             >
               <Trash2 className="h-3.5 w-3.5 shrink-0" style={{ color: '#ef4444' }} />
-              Elimina turno
+              {t.delete_shift ?? 'Elimina turno'}
             </button>
           </div>
         </>,
@@ -3230,6 +3214,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             {selectedShiftIds.size > 0 && selectedShiftIds.size === selectableShiftIds.size
               ? (t.deselect_all ?? 'Deseleziona tutti')
               : (t.select_all ?? 'Seleziona tutti')}
+          </button>
+          <button
+            type="button"
+            onClick={() => void handlePublishSelected()}
+            disabled={!canPublish || selectedDraftCount === 0}
+            className="flex items-center gap-1 rounded-lg bg-cyan-500/20 px-2.5 py-1.5 text-[0.625rem] font-bold uppercase tracking-wider text-cyan-300 transition-colors hover:bg-cyan-500/30 disabled:opacity-40"
+          >
+            <Send className="h-3 w-3 shrink-0" />
+            {t.publish_selected ?? 'Pubblica selezionati'}
           </button>
           <button
             type="button"
