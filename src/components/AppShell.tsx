@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, lazy, Suspense, useMemo, useCallback, useRe
 import AdminSyncOverlay from '../components/AdminSyncOverlay';
 import { RouteErrorBoundary } from '../components/RouteErrorBoundary';
 import DeepAuroraShell from '../components/DeepAuroraShell';
-import { getStoredTheme, getThemeById } from '../utils/backgroundThemes';
+import { getStoredTheme, getThemeById, applyThemeToDocument } from '../utils/backgroundThemes';
 import type { BackgroundTheme } from '../utils/backgroundThemes';
 import DesignAuditPreview from '../components/DesignAuditPreview';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
@@ -89,6 +89,8 @@ function LoginRoute() {
     return () => window.removeEventListener('flow-bg-change', handler);
   }, []);
 
+  useEffect(() => { applyThemeToDocument(bgTheme); }, [bgTheme]);
+
   const handleLogin = () => navigate(postAuthPath, { replace: true });
   const handleBack = () => navigate(PATH_PROFILO, { replace: true });
 
@@ -113,6 +115,8 @@ function InstallRoute() {
     window.addEventListener('flow-bg-change', handler);
     return () => window.removeEventListener('flow-bg-change', handler);
   }, []);
+
+  useEffect(() => { applyThemeToDocument(bgTheme); }, [bgTheme]);
 
   return (
     <RouteErrorBoundary sectionName="Install">
@@ -156,19 +160,8 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
   } = useAppOverlay();
   const [bgTheme, setBgTheme] = useState<BackgroundTheme>(() => getStoredTheme(currentUser?.id));
 
-  // Applica appBg a html e body così il colore del tema copre tutto lo schermo anche sotto il gradiente trasparente
-  useEffect(() => {
-    const bg = bgTheme.appBg;
-    document.documentElement.style.background = bg;
-    document.body.style.background = bg;
-    // CSS custom property per header sticky opaco (vetro satinato) — RGB components
-    const r = parseInt(bg.slice(1, 3), 16);
-    const g = parseInt(bg.slice(3, 5), 16);
-    const b = parseInt(bg.slice(5, 7), 16);
-    document.documentElement.style.setProperty('--app-bg-r', String(r));
-    document.documentElement.style.setProperty('--app-bg-g', String(g));
-    document.documentElement.style.setProperty('--app-bg-b', String(b));
-  }, [bgTheme]);
+  // Applica il tema allo sfondo globale (skin v2: `--flow-background` / `--flow-mesh`)
+  useEffect(() => { applyThemeToDocument(bgTheme); }, [bgTheme]);
 
   useEffect(() => {
     const handler = (e: Event) => setBgTheme(getThemeById((e as CustomEvent<string>).detail));
@@ -737,7 +730,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       {/* ── Header fisso unificato: topbar + tabbar ── */}
       <header
         ref={appStickyHeaderRef}
-        aria-label={t.nav_main}
+        aria-label={t.nav_main_aria}
         /* Header: stesso effetto della bottom nav (trasparente + blur 16px,
            regola .app-header in index.css). I figli non hanno effetti. */
         className={`app-header sticky md:fixed top-0 left-0 right-0 z-[10050] shrink-0 transition-[visibility,opacity] duration-150 ${
@@ -791,8 +784,8 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
               </GradientIconButton>
               {featureFlags['unlock_with_pin'] !== false && currentUser && isManagement && (
                 <GradientIconButton
-                  label={globalPinSessionId ? t.pin_session_active : t.pin_session_unlock}
-                  ariaLabel={globalPinSessionId ? t.pin_session_manage : t.pin_session_unlock}
+                  label={globalPinSessionId ? t.app_pin_session_active_title : t.app_pin_session_unlock_btn}
+                  ariaLabel={globalPinSessionId ? t.app_pin_session_active_title : t.app_pin_session_unlock_btn}
                   onClick={() => setShowPinMenu(true)}
                   gradientFrom={globalPinSessionId ? '#34d399' : '#f87171'}
                   gradientTo={globalPinSessionId ? '#059669' : '#dc2626'}
@@ -815,7 +808,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       <main
         id="main-content"
         role="main"
-        aria-label={t.main_content}
+        aria-label={t.main_content_aria}
         className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending || appLockVisible ? 'blur-md pointer-events-none' : ''}`}>
         {/* Larghezza massima contenuto unificata (max-w-7xl): tutte le schede
             condividono lo stesso blocco centrato, come già facevano
@@ -858,12 +851,12 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
                       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/20 border-2 border-white/40 mb-5">
                         <ShieldCheck className="w-9 h-9 text-accent" strokeWidth={2} />
                       </div>
-                      <h2 className="text-white font-bold uppercase tracking-widest text-base mb-2">{t.pin_session_unlocked_title}</h2>
-                      <p className="text-white/60 text-sm font-medium leading-tight px-4">{t.pin_session_unlocked_desc}</p>
+                      <h2 className="text-white font-bold uppercase tracking-widest text-base mb-2">{t.app_pin_session_unlocked_title}</h2>
+                      <p className="text-white/60 text-sm font-medium leading-tight px-4">{t.app_pin_session_unlocked_desc}</p>
                     </div>
                     <button type="button" onClick={() => { setGlobalPinSessionId(null); closePinMenu(); }} className="w-full h-14 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold flex items-center justify-center gap-2.5 transition-colors mb-3">
                       <ShieldOff className="w-5 h-5" strokeWidth={2} />
-                      {t.pin_session_lock}
+                      {t.app_pin_session_lock_btn}
                     </button>
                     <button type="button" onClick={closePinMenu} className="w-full h-14 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white/70 font-bold transition-colors">{t.cancel}</button>
                   </motion.div>
@@ -1031,7 +1024,7 @@ function ProtectedApp() {
   // che la sessione salvata venga ripristinata.
   if (appIsLoading) {
     return (
-      <main role="main" aria-label={t.app_aria_loading}>
+      <main role="main" aria-label={t.loading_aria}>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

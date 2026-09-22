@@ -4,7 +4,7 @@ import { useMultisensorialFeedback } from '../hooks/useMultisensorialFeedback';
 import { useAppUser, useAppData } from '../context/AppContext';
 import { NotificationModal } from './NotificationModal';
 import { countUnreadNotifications } from '../utils/notifications';
-import { getTranslations } from '../utils/translations';
+import { getTranslations, formatTrans } from '../utils/translations';
 import { GradientIconButton } from './ui/GradientIconButton';
 
 interface UnifiedBellButtonProps {
@@ -28,6 +28,7 @@ export function UnifiedBellButton({
   const { messages, unreadCount: msgUnread, markAsRead, markAllAsRead, loadMessages, error, sendMessage, deleteMessage } = useMessages(userId, isAdmin);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const t = getTranslations(effectiveLanguage);
 
   // Conteggio unificato: messaggi non letti + notifiche turni/ferie non lette
   const shiftNotifUnread = useMemo(() => {
@@ -83,11 +84,13 @@ export function UnifiedBellButton({
     <div className="relative shrink-0">
       {/* Pulsante Campanella */}
       <GradientIconButton
-        label={totalUnread > 0 ? `Notifiche (${totalUnread})` : 'Notifiche'}
+        label={totalUnread > 0 ? formatTrans(t.notifications_pill_count, { n: totalUnread }) : t.notifications_pill}
         ariaLabel={
           error
-            ? `Errore caricamento notifiche`
-            : `Campanella notifiche${totalUnread > 0 ? ` con ${totalUnread} nuovi messaggi` : ''}`
+            ? t.notifications_load_error
+            : totalUnread > 0
+              ? formatTrans(t.notifications_aria_count, { n: totalUnread })
+              : t.notifications_aria
         }
         onClick={() => {
           if (!isDisabled) {

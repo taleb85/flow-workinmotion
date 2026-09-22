@@ -120,7 +120,7 @@ export default function MobileProfileHeader({
           <span
             style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.625rem', fontWeight: 500, letterSpacing: '0.20em', textTransform: 'uppercase', marginTop: '0.1875rem', lineHeight: 'normal' }}
           >
-            Work in Motion <span style={{ color: 'rgba(255,255,255,0.25)', marginLeft: '0.125rem' }}>v{__APP_VERSION__}</span>
+            Work in Motion
           </span>
         </div>
         {isSessionElevated && (
@@ -134,6 +134,9 @@ export default function MobileProfileHeader({
       {/* Destra: data | separatore | azioni (extra + campanella + logout) —
           visibile anche su mobile (campanella e logout in alto a destra) */}
       <div className="flex shrink-0 items-center gap-2.5">
+        {/* Versione app — a sinistra delle azioni */}
+        <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.625rem', fontWeight: 500 }}>v{__APP_VERSION__}</span>
+
         {/* Slot azioni (sync + PIN dall'esterno) */}
         {rightExtra}
 

@@ -5,7 +5,7 @@ import { useAppUser } from '../context/appSliceContexts';
 import { useAppOverlay } from '../context/appSliceContexts';
 import { useT } from '../hooks/useT';
 import { isAdminOnly } from '../utils/permissions';
-import { getStoredTheme, getThemeById } from '../utils/backgroundThemes';
+import { getStoredTheme, getThemeById, applyThemeToDocument } from '../utils/backgroundThemes';
 import type { BackgroundTheme } from '../utils/backgroundThemes';
 import DeepAuroraShell from './DeepAuroraShell';
 import SettingsPage from './SettingsPage';
@@ -30,18 +30,8 @@ export default function AdminLayout() {
   const [activeTab, setActiveTab] = useState<AdminTab>('profili');
   const [bgTheme, setBgTheme] = useState<BackgroundTheme>(() => getStoredTheme(currentUser?.id));
 
-  // Applica appBg a html e body così il colore del tema copre tutto lo schermo
-  useEffect(() => {
-    const bg = bgTheme.appBg;
-    document.documentElement.style.background = bg;
-    document.body.style.background = bg;
-    const r = parseInt(bg.slice(1, 3), 16);
-    const g = parseInt(bg.slice(3, 5), 16);
-    const b = parseInt(bg.slice(5, 7), 16);
-    document.documentElement.style.setProperty('--app-bg-r', String(r));
-    document.documentElement.style.setProperty('--app-bg-g', String(g));
-    document.documentElement.style.setProperty('--app-bg-b', String(b));
-  }, [bgTheme]);
+  // Applica il tema allo sfondo globale (skin v2: `--flow-background` / `--flow-mesh`)
+  useEffect(() => { applyThemeToDocument(bgTheme); }, [bgTheme]);
 
   useEffect(() => {
     const handler = (e: Event) => setBgTheme(getThemeById((e as CustomEvent<string>).detail));

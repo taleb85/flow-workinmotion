@@ -768,11 +768,9 @@ export function ProfileFormAdmin({
         {variant === 'edit' && (!readOnly || isManagementRole(currentUser.role)) && (
           <div className="rounded-xl border border-white/[0.14] bg-white/10 p-4 space-y-3">
             <p className="text-[0.75rem] leading-relaxed text-white/70 font-sans text-center">
-              {formatTrans(
-                tv.admin_employee_access_link_hint_simple ??
-                  'Invia il link a {name}. Aprendolo compilerà i dati mancanti e attiverà le notifiche.',
-                { name: formData.first_name || 'il dipendente' }
-              )}
+              {formatTrans(t.admin_employee_access_link_hint_simple, {
+                name: formData.first_name || t.generic_employee,
+              })}
             </p>
 
             {/* Pulsante principale: invia via WhatsApp/SMS/Telegram */}
@@ -783,7 +781,7 @@ export function ProfileFormAdmin({
               style={{ background: '#22c55e' }}
             >
               <Share2 className="w-5 h-5" aria-hidden />
-              <span>Invia accesso</span>
+              <span>{t.send_access}</span>
             </button>
 
             {/* Stato link + revoca/riattivazione */}
@@ -817,8 +815,7 @@ export function ProfileFormAdmin({
 
         {!readOnly && (
           <p className="text-[0.6875rem] text-white/55 mt-2">
-            {(t as { permissions_in_settings?: string }).permissions_in_settings ??
-              'Funzionalità, moduli e visibilità schede: Impostazioni → Team → Permessi sul dipendente (template ruoli + anteprima).'}
+            {t.permissions_in_settings}
           </p>
         )}
 

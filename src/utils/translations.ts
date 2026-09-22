@@ -142,6 +142,14 @@ const baseIt = {
 
   // App
   sync_total_in_progress: 'Sincronizzazione in corso…',
+  sync_data_label: 'Sincronizza dati',
+
+  // Header — pill dei pulsanti a icona
+  notifications_pill: 'Notifiche',
+  notifications_pill_count: 'Notifiche ({n})',
+  notifications_aria: 'Campanella notifiche',
+  notifications_aria_count: 'Campanella notifiche con {n} nuovi messaggi',
+  notifications_load_error: 'Errore caricamento notifiche',
 
   // HolidayRequests
   email_sent: 'Email inviata.',
@@ -194,6 +202,8 @@ const baseIt = {
   department_filter_label: 'Reparto',
   department_filter_all: 'Tutti',
   publish_week: 'Pubblica settimana',
+  publish_shift: 'Pubblica turno',
+  shift_published: 'Turno pubblicato.',
   edit_view: 'Modifica vista',
   select: 'Seleziona',
   actions: 'Azioni',
@@ -294,6 +304,11 @@ const baseIt = {
   profile_employment_end_hint: 'Obbligatoria se utile: data in cui il rapporto è sospeso, inattivo o terminato.',
   admin_employee_access_link_hint:
     'Il link include nome e PIN così come nei campi qui sotto (anche prima di salvare). Contiene il PIN nell’URL: invialo solo in modo privato (mai in gruppi pubblici). Salva in anagrafica per allineare il server.',
+  admin_employee_access_link_hint_simple:
+    'Invia il link a {name}. Aprendolo compilerà i dati mancanti e attiverà le notifiche.',
+  generic_employee: 'il dipendente',
+  permissions_in_settings:
+    'Funzionalità, moduli e visibilità schede: Impostazioni → Team → Permessi sul dipendente (template ruoli + anteprima).',
   admin_employee_access_link_copied: 'Link copiato negli appunti.',
   share_access_message: 'Ciao {name}! 👋\n\nApri questo link, installa l\'app FLOW e accedi per attivare il tuo account.',
   invite_revoke_btn: 'Revoca link',
@@ -633,6 +648,8 @@ const baseIt = {
   shift_list: 'Elenco turni',
   shifts_plural: 'Turni',
   stat_hours_total_abbr: 'Ore tot',
+  stat_hours_planned: 'Ore pianificate',
+  stat_hours_approved: 'Ore approvate',
   week_selector: 'Selettore settimana',
   week_summary: 'Riepilogo della settimana',
   all: 'Tutti',
@@ -741,6 +758,9 @@ const baseIt = {
   delete_shifts_title: 'Eliminare {n} turni?',
   delete_shifts_irreversible: 'L\'operazione non può essere annullata.',
   shifts_deleted: '{n} turni eliminati.',
+  publish_selected: 'Pubblica selezionati',
+  confirm_publish_shifts: 'Pubblicare i {n} turni selezionati?',
+  shifts_published_count: '{n} turni pubblicati.',
   shift_delete_blocked_frozen:
     'Questo turno è congelato (validato): non può essere eliminato. Usa «Non ha lavorato» se il dipendente non si è presentato.',
   shift_delete_blocked_published:
@@ -1348,6 +1368,8 @@ const baseIt = {
   sa_confirm_delete_n: 'Eliminare {n} turni?',
   sa_yes_delete: 'Sì, elimina',
   sa_change_pin_hint: '⚠ Cambia il PIN subito dopo il primo accesso tramite il profilo utente nell\'app.',
+  bg_picker_row: 'Sfondo',
+  bg_picker_hint: 'Tocca un tema: lo vedi applicato subito e resta salvato.',
 
   // ── SettingsPage ──
   settings_share_access: 'Condividi accesso',
@@ -1524,6 +1546,12 @@ const baseEn: Record<string, string> = {
   login_account_not_active:
     'This account is suspended or inactive: you cannot sign in. Contact a manager.',
   sync_total_in_progress: 'Syncing…',
+  sync_data_label: 'Sync data',
+  notifications_pill: 'Notifications',
+  notifications_pill_count: 'Notifications ({n})',
+  notifications_aria: 'Notifications bell',
+  notifications_aria_count: 'Notifications bell with {n} new messages',
+  notifications_load_error: 'Failed to load notifications',
   email_sent: 'Email sent.',
   holiday_saved_email_sent: 'Request saved and email sent.',
   request_holiday: 'Request Holiday',
@@ -1559,6 +1587,8 @@ const baseEn: Record<string, string> = {
   department_filter_label: 'Department',
   department_filter_all: 'All',
   publish_week: 'Publish week',
+  publish_shift: 'Publish shift',
+  shift_published: 'Shift published.',
   edit_view: 'Edit view',
   select: 'Select',
   actions: 'Actions',
@@ -1659,6 +1689,11 @@ const baseEn: Record<string, string> = {
   profile_employment_end_hint: 'Use when the account is suspended or inactive: last relevant date.',
   admin_employee_access_link_hint:
     'The link carries the name and PIN as shown in the fields below (even before you save). The PIN is in the URL—share only privately (never in public chats). Save the profile to sync the server.',
+  admin_employee_access_link_hint_simple:
+    'Send the link to {name}. Opening it will fill in the missing details and turn on notifications.',
+  generic_employee: 'the employee',
+  permissions_in_settings:
+    'Features, modules and tab visibility: Settings → Team → Employee permissions (role templates + preview).',
   admin_employee_access_link_copied: 'Link copied to clipboard.',
   share_access_message: 'Hi {name}! 👋\n\nOpen this link, install the FLOW app and sign in to activate your account.',
   invite_revoke_btn: 'Revoke link',
@@ -1975,6 +2010,8 @@ const baseEn: Record<string, string> = {
   shift_list: 'Shift list',
   shifts_plural: 'Shifts',
   stat_hours_total_abbr: 'Tot hrs',
+  stat_hours_planned: 'Planned hours',
+  stat_hours_approved: 'Approved hours',
   week_selector: 'Week selector',
   week_summary: 'Week summary',
   all: 'All',
@@ -2077,6 +2114,9 @@ const baseEn: Record<string, string> = {
   delete_shifts_title: 'Delete {n} shifts?',
   delete_shifts_irreversible: 'This action cannot be undone.',
   shifts_deleted: '{n} shifts deleted.',
+  publish_selected: 'Publish selected',
+  confirm_publish_shifts: 'Publish the {n} selected shifts?',
+  shifts_published_count: '{n} shifts published.',
   shift_delete_blocked_frozen:
     'This shift is frozen (validated): it cannot be deleted. Use “Did not work” if the employee was absent.',
   shift_delete_blocked_published:
@@ -2680,6 +2720,8 @@ const baseEn: Record<string, string> = {
   sa_confirm_delete_n: 'Delete {n} shifts?',
   sa_yes_delete: 'Yes, delete',
   sa_change_pin_hint: '⚠ Change the PIN right after the first login via the user profile in the app.',
+  bg_picker_row: 'Background',
+  bg_picker_hint: 'Tap a theme: it applies right away and stays saved.',
   settings_share_access: 'Share access',
   settings_access_link: 'Access link',
   settings_delete_template_error: 'Error while deleting the template',
@@ -2855,6 +2897,12 @@ const baseEs: Record<string, string> = {
   login_account_not_active:
     'Cuenta suspendida o inactiva: no puedes entrar. Contacta con un responsable.',
   sync_total_in_progress: 'Sincronizando…',
+  sync_data_label: 'Sincronizar datos',
+  notifications_pill: 'Notificaciones',
+  notifications_pill_count: 'Notificaciones ({n})',
+  notifications_aria: 'Campana de notificaciones',
+  notifications_aria_count: 'Campana de notificaciones con {n} mensajes nuevos',
+  notifications_load_error: 'Error al cargar las notificaciones',
   email_sent: 'Email enviado.',
   holiday_saved_email_sent: 'Solicitud guardada y email enviado.',
   request_holiday: 'Solicitar vacaciones',
@@ -2890,6 +2938,8 @@ const baseEs: Record<string, string> = {
   department_filter_label: 'Departamento',
   department_filter_all: 'Todos',
   publish_week: 'Publicar semana',
+  publish_shift: 'Publicar turno',
+  shift_published: 'Turno publicado.',
   edit_view: 'Editar vista',
   select: 'Seleccionar',
   actions: 'Acciones',
@@ -2990,6 +3040,11 @@ const baseEs: Record<string, string> = {
   profile_employment_end_hint: 'Si aplica: fecha de suspensión, inactividad o fin.',
   admin_employee_access_link_hint:
     'El enlace lleva nombre y PIN como en los campos (incluso antes de guardar). El PIN va en la URL: compártelo solo en privado. Guarda el perfil para sincronizar el servidor.',
+  admin_employee_access_link_hint_simple:
+    'Envía el enlace a {name}. Al abrirlo completará los datos que faltan y activará las notificaciones.',
+  generic_employee: 'el empleado',
+  permissions_in_settings:
+    'Funciones, módulos y visibilidad de pestañas: Ajustes → Equipo → Permisos del empleado (plantillas de rol + vista previa).',
   admin_employee_access_link_copied: 'Enlace copiado al portapapeles.',
   share_access_message: '¡Hola {name}! 👋\n\nAbre este enlace, instala la app FLOW e inicia sesión para activar tu cuenta.',
   invite_revoke_btn: 'Revocar enlace',
@@ -3302,6 +3357,8 @@ const baseEs: Record<string, string> = {
   shift_list: 'Lista de turnos',
   shifts_plural: 'Turnos',
   stat_hours_total_abbr: 'Horas tot',
+  stat_hours_planned: 'Horas planificadas',
+  stat_hours_approved: 'Horas aprobadas',
   week_selector: 'Selector de semana',
   week_summary: 'Resumen de la semana',
   all: 'Todos',
@@ -3404,6 +3461,9 @@ const baseEs: Record<string, string> = {
   delete_shifts_title: '¿Eliminar {n} turnos?',
   delete_shifts_irreversible: 'Esta acción no se puede deshacer.',
   shifts_deleted: '{n} turnos eliminados.',
+  publish_selected: 'Publicar seleccionados',
+  confirm_publish_shifts: '¿Publicar los {n} turnos seleccionados?',
+  shifts_published_count: '{n} turnos publicados.',
   shift_delete_blocked_frozen:
     'Este turno está congelado (validado): no se puede eliminar. Usa «No trabajó» si el empleado no se presentó.',
   shift_delete_blocked_published:
@@ -4007,6 +4067,8 @@ const baseEs: Record<string, string> = {
   sa_confirm_delete_n: '¿Eliminar {n} turnos?',
   sa_yes_delete: 'Sí, eliminar',
   sa_change_pin_hint: '⚠ Cambia el PIN justo después del primer acceso desde el perfil de usuario en la app.',
+  bg_picker_row: 'Fondo',
+  bg_picker_hint: 'Toca un tema: se aplica al momento y queda guardado.',
   settings_share_access: 'Compartir acceso',
   settings_access_link: 'Enlace de acceso',
   settings_delete_template_error: 'Error al eliminar la plantilla',
@@ -4129,6 +4191,12 @@ const baseFr: Record<string, string> = {
   status_inactive: 'Inactif',
   status_suspended: 'Suspendu',
   sync_total_in_progress: 'Synchronisation en cours…',
+  sync_data_label: 'Synchroniser les données',
+  notifications_pill: 'Notifications',
+  notifications_pill_count: 'Notifications ({n})',
+  notifications_aria: 'Cloche de notifications',
+  notifications_aria_count: 'Cloche de notifications avec {n} nouveaux messages',
+  notifications_load_error: 'Erreur de chargement des notifications',
   department_sala: 'Salle',
   department_bar: 'Bar',
   department_sala_bar: 'Salle et Bar',
@@ -4425,6 +4493,9 @@ const baseFr: Record<string, string> = {
   delete_shifts_title: 'Supprimer {n} shifts ?',
   delete_shifts_irreversible: 'Cette action est irréversible.',
   shifts_deleted: '{n} shifts supprimés.',
+  publish_selected: 'Publier la sélection',
+  confirm_publish_shifts: 'Publier les {n} services sélectionnés ?',
+  shifts_published_count: '{n} services publiés.',
   shift_delete_blocked_frozen:
     'Ce shift est gelé (validé) : il ne peut pas être supprimé. Utilisez « N’a pas travaillé » si l’employé était absent.',
   shift_delete_blocked_published:
@@ -4731,6 +4802,11 @@ const baseFr: Record<string, string> = {
 
   admin_employee_access_link_hint:
     'Le lien contient le nom et le PIN tels que dans les champs (même avant enregistrement). Le PIN figure dans l’URL : partagez-le uniquement en privé. Enregistrez le profil pour synchroniser le serveur.',
+  admin_employee_access_link_hint_simple:
+    'Envoie le lien à {name}. En l\'ouvrant, il complétera les données manquantes et activera les notifications.',
+  generic_employee: 'l\'employé',
+  permissions_in_settings:
+    'Fonctionnalités, modules et visibilité des onglets : Réglages → Équipe → Permissions de l\'employé (modèles de rôle + aperçu).',
   admin_employee_access_link_copied: 'Lien copié dans le presse-papiers.',
   share_access_message: 'Bonjour {name} ! 👋\n\nOuvre ce lien, installe l\'app FLOW et connecte-toi pour activer ton compte.',
   invite_revoke_btn: 'Révoquer le lien',
@@ -4871,6 +4947,8 @@ const baseFr: Record<string, string> = {
   shift_list: 'Liste des services',
   shifts_plural: 'Services',
   stat_hours_total_abbr: 'Hres tot',
+  stat_hours_planned: 'Heures planifiées',
+  stat_hours_approved: 'Heures approuvées',
   week_selector: 'Sélecteur de semaine',
   week_summary: 'Résumé de la semaine',
   all: 'Tous',
@@ -4910,6 +4988,8 @@ const baseFr: Record<string, string> = {
   profile_visibility_save_apply: 'Enregistrer et appliquer',
   publish_pin_prompt: 'Saisissez votre PIN pour publier la semaine.',
   publish_week: 'Publier la semaine',
+  publish_shift: 'Publier le service',
+  shift_published: 'Service publié.',
   request_holiday: 'Demander un congé',
   restore: 'Restaurer',
   role: 'Rôle',
@@ -5333,6 +5413,8 @@ const baseFr: Record<string, string> = {
   sa_confirm_delete_n: 'Supprimer {n} services ?',
   sa_yes_delete: 'Oui, supprimer',
   sa_change_pin_hint: '⚠ Changez le PIN juste après la première connexion via le profil utilisateur dans l\'app.',
+  bg_picker_row: 'Fond',
+  bg_picker_hint: 'Touchez un thème : il s\'applique aussitôt et reste enregistré.',
   settings_share_access: 'Partager l\'accès',
   settings_access_link: 'Lien d\'accès',
   settings_delete_template_error: 'Erreur lors de la suppression du modèle',

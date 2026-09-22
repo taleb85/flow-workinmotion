@@ -1,12 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Camera, ChevronRight, KeyRound, Languages, Settings2, ShieldCheck, Smartphone, Trash2 } from 'lucide-react';
+import { Bell, Camera, ChevronRight, KeyRound, Languages, Palette, Settings2, ShieldCheck, Smartphone, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppUser, useAppOverlay } from '../context/AppContext';
 import { useProfileLeaveGuardRef } from '../context/ProfileLeaveGuardContext';
 import { useT } from '../hooks/useT';
 import { getDeviceUiLanguage, persistStoredUiLanguage, readStoredUiLanguage, clearStoredUiLanguage } from '../utils/uiLanguagePreference';
 import { NotificationPermissionButton } from './NotificationPermissionButton';
+import BackgroundPicker from './BackgroundPicker';
 import SavedToast from './ui/SavedToast';
 
 import { isManagementRole, isAdminOnly } from '../utils/permissions';
@@ -336,7 +337,7 @@ export default function ProfileNavTabPanel({
     };
   }, [profileLeaveGuardRef, isDirty, performProfileSave]);
 
-  const [expanded, setExpanded] = useState<'settings' | 'notif' | 'lang' | 'security' | null>(null);
+  const [expanded, setExpanded] = useState<'settings' | 'notif' | 'lang' | 'bg' | 'security' | null>(null);
   const toggleSection = (s: typeof expanded) => setExpanded(prev => prev === s ? null : s);
 
   // ── Sicurezza: PIN del profilo + riconoscimento dispositivo ────────────────
@@ -697,6 +698,32 @@ export default function ProfileNavTabPanel({
                       </button>
                     ))}
                   </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Sfondo — anteprima e scelta del tema */}
+          <button
+            type="button"
+            onClick={() => toggleSection('bg')}
+            className="w-full flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-colors hover:bg-white/5"
+            style={{
+              background: 'rgba(99, 102, 241, 0.15)',
+              border: '1px solid rgba(99, 102, 241, 0.35)',
+            }}
+          >
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(99, 102, 241, 0.30)' }}>
+              <Palette className="w-4 h-4" style={{ color: '#a5b4fc' }} />
+            </div>
+            <span className="flex-1 text-left text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>{t.bg_picker_row}</span>
+            <ChevronRight className={`w-4 h-4 transition-transform duration-200 flex-shrink-0 ${expanded === 'bg' ? 'rotate-90' : ''}`} style={{ color: 'rgba(165, 180, 252, 0.60)' }} />
+          </button>
+          <AnimatePresence initial={false}>
+            {expanded === 'bg' && (
+              <motion.div key="bg-body" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
+                <div className="rounded-2xl px-4 py-4 text-white" style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
+                  <BackgroundPicker userId={currentUser?.id} language={effectiveLanguage} />
                 </div>
               </motion.div>
             )}
