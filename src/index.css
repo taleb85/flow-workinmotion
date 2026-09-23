@@ -934,6 +934,15 @@ button[role="switch"][class~="bg-accent"] {
     padding-right: env(safe-area-inset-right, 0);
   }
 
+  /* Schermata di accesso: iOS ingrandisce da solo la pagina quando si tocca un campo
+     con font-size sotto i 16px (e lo zoom lascia scroll orizzontale). La skin v2 fissa i
+     campi a 14px: qui la soglia viene rialzata solo nella schermata di accesso. */
+  .app-auth-region input,
+  .app-auth-region textarea,
+  .app-auth-region select {
+    font-size: max(16px, var(--font-base)) !important;
+  }
+
   /* Barra in alto: sotto la status bar (PWA). Spazio garantito anche se env() è 0. */
   .safe-area-top {
     padding-top: max(48px, env(safe-area-inset-top, 0px));
