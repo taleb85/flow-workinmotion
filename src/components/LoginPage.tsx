@@ -179,6 +179,31 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
     applyThemeToDocument(getLastUsedTheme());
   }, []);
 
+  /**
+   * Tastiera virtuale (iOS): `innerHeight` non cambia, quindi l'altezza coperta si ricava
+   * dal `visualViewport`. Serve a spostare il form sopra la tastiera: altrimenti il campo
+   * del PIN finisce sotto di essa e la pagina scorre da sola.
+   */
+  const [keyboardInset, setKeyboardInset] = useState(0);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    // Solo su dispositivi touch: su desktop lo zoom del browser ridurrebbe il visual viewport
+    // facendo sembrare aperta una tastiera che non c'è.
+    if (!vv || !window.matchMedia?.('(pointer: coarse)').matches) return;
+    const update = () => {
+      const covered = window.innerHeight - vv.height - vv.offsetTop;
+      setKeyboardInset(covered > 120 ? Math.round(covered) : 0);
+    };
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+    };
+  }, []);
+  const keyboardOpen = keyboardInset > 0;
+
   useEffect(() => {
     if (!inviteUserId && !inviteNameFromUrl && !invitePinFromUrl) {
       return;
@@ -474,6 +499,18 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   );
 
   /**
+   * Apre il tastierino del PIN. Su iOS il focus da codice (a pagina caricata) non apre la
+   * tastiera: dentro un gesto dell'utente serve un vero cambio di focus. `preventScroll`
+   * evita che iOS scorra la pagina da solo.
+   */
+  const openPinKeypad = useCallback(() => {
+    const el = pinInputRef.current;
+    if (!el) return;
+    if (document.activeElement === el) el.blur();
+    el.focus({ preventScroll: true });
+  }, []);
+
+  /**
    * Su iOS il focus da codice non apre la tastiera: al primo tocco sulla superficie
    * (fuori da un altro campo) il tastierino numerico del PIN si apre subito.
    */
@@ -485,10 +522,10 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       }
       if (!deviceNamePrefilledRef.current) return;
       const target = e.target as HTMLElement | null;
-      if (target?.closest('input, button, a, [role="button"]')) return;
-      if (document.activeElement !== pinInputRef.current) pinInputRef.current?.focus();
+      if (target?.closest('input, button, a, [role="button"], [data-pin-surface]')) return;
+      openPinKeypad();
     },
-    [showForm]
+    [showForm, openPinKeypad]
   );
 
   return (
@@ -499,10 +536,12 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       onPointerDown={handleSurfacePointerDown}
       role="main"
       aria-label="Login"
-      className="fixed inset-0 z-20 w-full flex flex-col items-center justify-center p-6 safe-area-pad font-sans antialiased text-neutral-100 overflow-y-auto"
+      className={`fixed inset-0 z-20 w-full flex flex-col items-center p-6 safe-area-pad font-sans antialiased text-neutral-100 overflow-y-auto ${keyboardOpen ? 'justify-start pt-[max(1rem,env(safe-area-inset-top,0px))]' : 'justify-center'}`}
       style={{
         background: 'transparent',
-        bottom: '-60px',
+        // Tastiera aperta: il contenitore resta dentro lo schermo e il form va in alto,
+        // così il campo del PIN non finisce sotto la tastiera e la pagina non scorre.
+        bottom: keyboardOpen ? 0 : '-60px',
       }}
     >
       {tenantBootstrapError ? (
@@ -566,8 +605,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
           transition={{ duration: 0.32, ease: [0.25, 0.1, 0.25, 1] }}
           className="w-full flex flex-col items-center"
         >
-          {/* Logo + brand */}
-          <div className="flex flex-col items-center mb-8">
+          {/* Logo + brand — nascosto con la tastiera aperta, per lasciare spazio ai campi */}
+          <div className={`flex flex-col items-center mb-8 ${keyboardOpen ? 'hidden' : ''}`}>
             <div className="animate-pulse-glow-sm" style={{ borderRadius: 26 }}>
               <FlowWaveIcon size={96} radius={26} />
             </div>
@@ -713,9 +752,10 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               />
               {/* Contenitore visivo */}
               <div
+                data-pin-surface="true"
                 className={`w-full pl-10 pr-10 py-3.5 rounded-2xl flex items-center justify-center gap-5 transition-all cursor-text ${pinFocused ? 'ring-2 ring-white/50' : ''}`}
                 style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.14)' }}
-                onClick={() => pinInputRef.current?.focus()}
+                onClick={openPinKeypad}
               >
                 {showPassword ? (
                   <span className="text-white text-base font-bold tracking-[0.3em]">{password || '\u00A0'}</span>
