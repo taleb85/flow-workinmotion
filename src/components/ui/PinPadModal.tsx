@@ -107,7 +107,7 @@ export function PinPadModal({
     <>
       {/* Blocco 1 — icona + pallini. Su telefono sta in alto, staccato dal
           tastierino. */}
-      <div className="pinpad-block pinpad-block-info flex flex-col items-center text-center gap-3 px-5 py-6">
+      <div className="pinpad-block pinpad-block-info my-auto flex flex-col items-center text-center gap-3 px-5 py-6">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'rgba(255,255,255,0.06)', border, boxShadow: '0 0 20px rgba(255,255,255,0.06)' }}>
           <div className={successAnim ? 'pin-lock-success' : ''} style={{ color: successAnim ? undefined : '#ffffff' }}>
             <Lock className="w-8 h-8" strokeWidth={2.5} />
