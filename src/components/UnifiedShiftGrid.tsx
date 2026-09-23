@@ -772,6 +772,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       && isValidHHMM(editStartTime) && isValidHHMM(editEndTime) && editStartTime !== editEndTime;
     const punchesSavable = (iv.editIn !== editIn || iv.editOut !== editOut)
       && canEdit && !isFrozen(shift) && shift.approval_status !== 'approved'
+      && shift.date <= today.toISOString().slice(0, 10)
       && isValidHHMM(editIn) && isValidHHMM(editOut);
     // Niente da scrivere (valori incompleti o campi non modificabili): nessuna chiamata.
     if (!timesSavable && !punchesSavable) return;
@@ -787,8 +788,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         setInitialValues(prev => ({ ...prev, editStartTime, editEndTime, deductBreak, isAutoBreak }));
       }
       if (punchesSavable) {
-        const todayStr = today.toISOString().slice(0, 10);
-        const punchDate = shift.date <= todayStr ? shift.date : todayStr;
+        // Solo turni di oggi o passati: per i turni futuri le timbrature non si salvano.
+        const punchDate = shift.date;
         const existingIn = allPunchRecords.find(pr => pr.shift_id === shift.id && pr.type === 'in');
         const existingOut = allPunchRecords.find(pr => pr.shift_id === shift.id && pr.type === 'out');
         if (existingIn) await updatePunchRecord(existingIn.id, { timestamp: new Date(`${punchDate}T${editIn}:00`).toISOString() });
@@ -2747,13 +2748,16 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   const outEffectiveT = punchOut ? punchTimeHHMM(punchOut.calculated_time || punchOut.timestamp) : null;
                   const inClickAdjusted = !!inRawT && inRawT !== inEffectiveT;
                   const outClickAdjusted = !!outRawT && outRawT !== outEffectiveT;
-                  // Turno approvato: timbrature in sola lettura (nessuna modifica dal drawer).
-                  const showEditFields = canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'approved';
+                  // Turno approvato o futuro: timbrature in sola lettura (nessuna modifica dal drawer).
+                  const isFutureShift = selectedShift.date > today.toISOString().slice(0, 10);
+                  const showEditFields = canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'approved' && !isFutureShift;
                   return (
                     <div className="space-y-3">
-                      <div className={`flex items-center justify-between gap-2 rounded-xl border p-3 bg-gradient-to-br from-amber-500/10 to-orange-600/10 ${(!hasIn && !hasOut) ? 'border-amber-500/60 animate-pulse' : 'border-transparent'}`}>
+                      <div className={`flex items-center justify-between gap-2 rounded-xl border p-3 bg-gradient-to-br from-amber-500/10 to-orange-600/10 ${(!hasIn && !hasOut && !isFutureShift) ? 'border-amber-500/60 animate-pulse' : 'border-transparent'}`}>
                         <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/50">{t.status ?? 'Stato'}</span>
-                        {!hasIn && !hasOut ? (
+                        {isFutureShift ? (
+                          <span className="text-[0.6875rem] font-bold text-white/50">{t.future_shift_punch_disabled ?? 'Turno futuro: timbrature non attive'}</span>
+                        ) : !hasIn && !hasOut ? (
                           <span className="flex items-center gap-1 text-[0.6875rem] font-bold text-amber-400"><AlertTriangle className="h-3 w-3" />{t.not_clocked ?? 'Non timbrato'}</span>
                         ) : hasIn && !hasOut ? (
                           <span className="flex items-center gap-1 text-[0.6875rem] font-bold text-white"><Clock className="h-3 w-3" />{t.clocked_in_only ?? 'Solo entrata'}</span>
