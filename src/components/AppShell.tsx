@@ -96,9 +96,10 @@ function LoginRoute() {
 
   return (
     <RouteErrorBoundary sectionName="Login">
-      {/* Altezza = `--app-vh` (visualViewport): con la tastiera aperta #root si accorcia e
-          un `min-h-screen` (100vh) renderebbe la pagina scorrevole. */}
-      <div className="app-auth-region relative min-h-[var(--app-vh,100dvh)] w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
+      {/* Altezza = `--app-vh` (visualViewport): con la tastiera aperta la pagina si accorcia
+          su tutta l'area visibile (niente scroll, form mai sotto la tastiera). Un
+          `min-h-screen` (100vh) la renderebbe scorrevole. */}
+      <div className="app-auth-region relative min-h-[var(--app-vh,100dvh)] w-full overflow-y-auto transition-[min-height] duration-200 ease-out" style={{ background: bgTheme.appBg }}>
         <DeepAuroraShell theme={bgTheme} />
         <AnimatePresence mode="wait">
           <LoginPage key="login" onLogin={handleLogin} onBack={handleBack} />

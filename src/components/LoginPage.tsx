@@ -179,31 +179,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
     applyThemeToDocument(getLastUsedTheme());
   }, []);
 
-  /**
-   * Tastiera virtuale (iOS): `innerHeight` non cambia, quindi l'altezza coperta si ricava
-   * dal `visualViewport`. Serve a spostare il form sopra la tastiera: altrimenti il campo
-   * del PIN finisce sotto di essa e la pagina scorre da sola.
-   */
-  const [keyboardInset, setKeyboardInset] = useState(0);
-  useEffect(() => {
-    const vv = window.visualViewport;
-    // Solo su dispositivi touch: su desktop lo zoom del browser ridurrebbe il visual viewport
-    // facendo sembrare aperta una tastiera che non c'è.
-    if (!vv || !window.matchMedia?.('(pointer: coarse)').matches) return;
-    const update = () => {
-      const covered = window.innerHeight - vv.height - vv.offsetTop;
-      setKeyboardInset(covered > 120 ? Math.round(covered) : 0);
-    };
-    update();
-    vv.addEventListener('resize', update);
-    vv.addEventListener('scroll', update);
-    return () => {
-      vv.removeEventListener('resize', update);
-      vv.removeEventListener('scroll', update);
-    };
-  }, []);
-  const keyboardOpen = keyboardInset > 0;
-
   useEffect(() => {
     if (!inviteUserId && !inviteNameFromUrl && !invitePinFromUrl) {
       return;
@@ -536,15 +511,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       onPointerDown={handleSurfacePointerDown}
       role="main"
       aria-label="Login"
-      className="fixed inset-0 z-20 w-full flex flex-col items-center justify-center p-6 safe-area-pad font-sans antialiased text-neutral-100 overflow-y-auto transition-[padding-bottom] duration-200 ease-out"
-      style={{
-        background: 'transparent',
-        // Tastiera aperta: si lascia libero lo spazio che occupa, così il form sale
-        // quanto basta senza cambiare composizione (logo e campi restano al loro posto).
-        // Il contenitore non si estende più sotto lo schermo, per non creare scroll.
-        bottom: keyboardOpen ? 0 : '-60px',
-        paddingBottom: keyboardOpen ? keyboardInset + 24 : undefined,
-      }}
+      className="absolute inset-0 z-20 w-full flex flex-col items-center p-6 safe-area-pad font-sans antialiased text-neutral-100 overflow-y-auto"
+      style={{ background: 'transparent' }}
     >
       {tenantBootstrapError ? (
         <div
@@ -555,7 +523,9 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
         </div>
       ) : null}
 
-      <div className="w-full max-w-lg flex flex-col items-center">
+      {/* `my-auto`: centra il contenuto quando c'è spazio e resta scorrevole dall'alto
+          se lo spazio non basta (tastiera aperta), senza tagliare il logo. */}
+      <div className="w-full max-w-lg flex flex-col items-center my-auto">
         <>
         {/* Schermata iniziale — identica al boot screen AppProvider */}
         <AnimatePresence>
