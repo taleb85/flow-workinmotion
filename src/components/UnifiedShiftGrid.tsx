@@ -273,9 +273,8 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
                 onDragLeave={onDragLeave}
                 onDrop={(e) => { const firstDay = weekDateStrings[0]; if (firstDay) onDrop(e, user.id, firstDay); }}
               >
-                <p className="text-xs text-white/50 italic">{t.no_shifts_this_week ?? 'Nessun turno'}</p>
                 {create && (
-                  <p className="mt-1.5 inline-flex items-center gap-1 text-[0.6875rem] font-bold text-white/45">
+                  <p className="inline-flex items-center gap-1 text-[0.6875rem] font-bold text-white/45">
                     <Plus className="h-3 w-3" /> {t.add_shift ?? 'Aggiungi'}
                   </p>
                 )}
