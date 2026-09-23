@@ -486,24 +486,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   }, []);
 
   /**
-   * Su iOS il focus da codice non apre la tastiera: al primo tocco sulla superficie
-   * (fuori da un altro campo) il tastierino numerico del PIN si apre subito.
-   */
-  const handleSurfacePointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      if (!showForm) {
-        setShowForm(true);
-        return;
-      }
-      if (!deviceNamePrefilledRef.current) return;
-      const target = e.target as HTMLElement | null;
-      if (target?.closest('input, button, a, [role="button"], [data-pin-surface]')) return;
-      openPinKeypad();
-    },
-    [showForm, openPinKeypad]
-  );
-
-  /**
    * Con la tastiera aperta iOS può trascinare la pagina (pan/bounce) anche quando non
    * c'è nulla da scorrere. Se il contenuto ci sta, il trascinamento viene annullato:
    * si scorre solo quando serve davvero (contenuto più alto dell'area visibile).
@@ -526,8 +508,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       ref={loginRootRef}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      onClick={() => { if (!showForm) setShowForm(true); }}
-      onPointerDown={handleSurfacePointerDown}
       role="main"
       aria-label="Login"
       className="absolute inset-0 z-20 w-full flex flex-col items-center pt-20 pb-6 safe-area-pad font-sans antialiased text-neutral-100 overflow-y-auto"
@@ -697,7 +677,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
 
             {/* Nome utente */}
             <div className="relative">
-              <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" aria-hidden />
+              <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 pointer-events-none" aria-hidden />
               <input
                 ref={staffNameInputRef}
                 type="text"
@@ -716,8 +696,9 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
 
             {/* Password / PIN */}
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 z-10" aria-hidden />
-              {/* Input nascosto per tastiera + PIN visivo a pallini */}
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 z-10 pointer-events-none" aria-hidden />
+              {/* Input PIN trasparente: il tocco sul campo è raccolto dal riquadro sotto,
+                  che apre il tastierino numerico di sistema. */}
               <input
                 type="text"
                 inputMode="numeric"
@@ -738,7 +719,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
                 onBlur={() => setPinFocused(false)}
                 ref={pinInputRef}
                 aria-label={t.login_password_label}
-                className="absolute inset-0 opacity-0 z-20 cursor-default pointer-events-none"
+                className="absolute inset-0 opacity-0 z-20 cursor-text pointer-events-none"
                 style={{ caretColor: 'transparent' }}
               />
               {/* Contenitore visivo */}
@@ -764,7 +745,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               </div>
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={(e) => { e.stopPropagation(); setShowPassword(!showPassword); }}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/35 hover:text-white/70 transition-colors active:text-white/70 z-10"
                 tabIndex={-1}
                 aria-label={showPassword ? t.pin_toggle_hide : t.pin_toggle_show}
