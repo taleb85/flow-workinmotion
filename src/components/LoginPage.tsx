@@ -77,26 +77,6 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const [loginLang, setLoginLang] = useState<LangType>(() => getDeviceUiLanguage());
   const t = getTranslations(loginLang);
 
-  const [staffName, setStaffName] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPinHelp, setShowPinHelp] = useState(false);
-  const [pinFocused, setPinFocused] = useState(false);
-  const [error, setError] = useState('');
-  const shakeControls = useAnimation();
-  useEffect(() => {
-    if (!error) return;
-    void shakeControls.start({
-      x: [0, -11, 11, -8, 8, -5, 5, -2, 2, 0],
-      transition: { duration: 0.45, ease: 'easeInOut' },
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  // Credenziali in attesa che il tenant carichi (fallback Option B)
-  const [pendingCreds, setPendingCreds] = useState<{ name: string; pin: string } | null>(null);
-
   /**
    * Profilo già associato a questo dispositivo (ultimo accesso): il nome viene
    * precompilato e all'utente resta da digitare solo il PIN.
@@ -116,6 +96,29 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   }, []);
   /** True quando il nome è stato precompilato dal dispositivo (una sola volta). */
   const deviceNamePrefilledRef = useRef(false);
+  /** Dispositivo associato: si entra subito nel form, senza schermata "Tap to start". */
+  const deviceProfileKnown = Boolean(lastProfile) && !isInviteLink && !hadStoredInviteName;
+
+  const [staffName, setStaffName] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPinHelp, setShowPinHelp] = useState(false);
+  const [pinFocused, setPinFocused] = useState(false);
+  const [error, setError] = useState('');
+  const shakeControls = useAnimation();
+  useEffect(() => {
+    if (!error) return;
+    void shakeControls.start({
+      x: [0, -11, 11, -8, 8, -5, 5, -2, 2, 0],
+      transition: { duration: 0.45, ease: 'easeInOut' },
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
+  const [isLoading, setIsLoading] = useState(false);
+  // Dispositivo associato a un profilo: il form si apre subito, col tastierino PIN pronto.
+  const [showForm, setShowForm] = useState(() => deviceProfileKnown);
+  // Credenziali in attesa che il tenant carichi (fallback Option B)
+  const [pendingCreds, setPendingCreds] = useState<{ name: string; pin: string } | null>(null);
 
   // Invite onboarding — il nuovo dipendente compila i campi mancanti
   const [inviteEmail, setInviteEmail] = useState('');
@@ -470,11 +473,30 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
     [handleLogin]
   );
 
+  /**
+   * Su iOS il focus da codice non apre la tastiera: al primo tocco sulla superficie
+   * (fuori da un altro campo) il tastierino numerico del PIN si apre subito.
+   */
+  const handleSurfacePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (!showForm) {
+        setShowForm(true);
+        return;
+      }
+      if (!deviceNamePrefilledRef.current) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('input, button, a, [role="button"]')) return;
+      if (document.activeElement !== pinInputRef.current) pinInputRef.current?.focus();
+    },
+    [showForm]
+  );
+
   return (
     <motion.div
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
       onClick={() => { if (!showForm) setShowForm(true); }}
+      onPointerDown={handleSurfacePointerDown}
       role="main"
       aria-label="Login"
       className="fixed inset-0 z-20 w-full flex flex-col items-center justify-center p-6 safe-area-pad font-sans antialiased text-neutral-100 overflow-y-auto"
