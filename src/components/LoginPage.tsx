@@ -519,6 +519,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
     return () => el.removeEventListener('touchmove', onTouchMove);
   }, []);
 
+  // Padding superiore più ampio di quello inferiore: il form sta leggermente sotto il
+  // centro, come nel design originale, e resta comunque sopra la tastiera aperta.
   return (
     <motion.div
       ref={loginRootRef}
@@ -528,7 +530,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       onPointerDown={handleSurfacePointerDown}
       role="main"
       aria-label="Login"
-      className="absolute inset-0 z-20 w-full flex flex-col items-center p-6 safe-area-pad font-sans antialiased text-neutral-100 overflow-y-auto"
+      className="absolute inset-0 z-20 w-full flex flex-col items-center pt-20 pb-6 safe-area-pad font-sans antialiased text-neutral-100 overflow-y-auto"
       style={{ background: 'transparent' }}
     >
       {tenantBootstrapError ? (
