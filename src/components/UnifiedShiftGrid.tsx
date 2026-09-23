@@ -3211,7 +3211,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               className="flex w-full h-full items-center justify-center gap-2.5 text-white font-bold hover:bg-white/10 transition-colors active:bg-white/20"
             >
               <Trash2 className="h-3.5 w-3.5 shrink-0" style={{ color: '#ef4444' }} />
-              {t.delete_shift ?? 'Elimina turno'}
+              {t.delete_shift ?? 'Elimina'}
             </button>
           </div>
         </>,
