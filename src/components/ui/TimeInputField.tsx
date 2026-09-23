@@ -181,7 +181,7 @@ export function TimeInputField({
 
   return (
     <div
-      className={`flex max-w-full min-w-0 touch-manipulation items-center justify-center bg-white/15 transition-colors ${boxSize} ${borderTone} ${disabled ? 'opacity-60' : 'cursor-text'} ${className}`.trim()}
+      className={`time-field flex max-w-full min-w-0 touch-manipulation items-center justify-center bg-white/15 transition-colors ${boxSize} ${borderTone} ${disabled ? 'opacity-60' : 'cursor-text'} ${className}`.trim()}
       style={style}
       onBlur={(e) => {
         // Fires only when focus leaves the entire component (not moving between hour/minute)

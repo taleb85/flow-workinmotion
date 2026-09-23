@@ -84,6 +84,11 @@ button,
   --font-small: calc(13px * var(--scale-factor));
   --font-large: calc(20px * var(--scale-factor));
 
+  /* Dimensione del testo nei campi (input/select/textarea), usata dalla skin v2.
+     Sui dispositivi touch viene rialzata a 16px: sotto quella soglia iOS ingrandisce
+     la pagina quando si tocca un campo (zoom con scroll orizzontale). */
+  --field-font-size: 14px;
+
   --spacing-xs: calc(4px * var(--scale-factor));
   --spacing-sm: calc(8px * var(--scale-factor));
   --spacing-md: calc(16px * var(--scale-factor));
@@ -934,13 +939,19 @@ button[role="switch"][class~="bg-accent"] {
     padding-right: env(safe-area-inset-right, 0);
   }
 
-  /* Schermata di accesso: iOS ingrandisce da solo la pagina quando si tocca un campo
-     con font-size sotto i 16px (e lo zoom lascia scroll orizzontale). La skin v2 fissa i
-     campi a 14px: qui la soglia viene rialzata solo nella schermata di accesso. */
-  .app-auth-region input,
-  .app-auth-region textarea,
-  .app-auth-region select {
-    font-size: max(16px, var(--font-base)) !important;
+  /* Sui dispositivi touch i campi (e i riquadri orari del tabellone) stanno almeno a
+     16px: sotto quella soglia iOS ingrandisce la pagina al focus. Su desktop la scala
+     proporzionale dell'app resta invariata. */
+  @media (pointer: coarse) {
+    :root {
+      --field-font-size: max(16px, var(--font-base));
+    }
+
+    /* `1em` = dimensione del riquadro orario: alza solo i campi sotto la soglia,
+       senza ridurre le varianti grandi (drawer/modali). */
+    .time-field input {
+      font-size: max(16px, 1em);
+    }
   }
 
   /* Barra in alto: sotto la status bar (PWA). Spazio garantito anche se env() è 0. */
