@@ -107,7 +107,12 @@ export function PinPadModal({
     <>
       {/* Blocco 1 — icona + pallini. Su telefono sta in alto, staccato dal
           tastierino. */}
-      <div className="pinpad-block pinpad-block-info my-auto flex flex-col items-center text-center gap-3 px-5 py-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.28, ease: 'easeOut' }}
+        className="pinpad-block pinpad-block-info my-auto flex flex-col items-center text-center gap-3 px-5 py-6"
+      >
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'rgba(255,255,255,0.06)', border, boxShadow: '0 0 20px rgba(255,255,255,0.06)' }}>
           <div className={successAnim ? 'pin-lock-success' : ''} style={{ color: successAnim ? undefined : '#ffffff' }}>
             <Lock className="w-8 h-8" strokeWidth={2.5} />
@@ -136,12 +141,17 @@ export function PinPadModal({
           </div>
           {error && <p className="text-red-400 text-xs font-bold text-center animate-shake">{error}</p>}
         </div>
-      </div>
+      </motion.div>
 
       {/* Blocco 2 — tastierino: su telefono occupa tutta la larghezza ed è
           appoggiato al fondo schermo. Nessun "Conferma": il PIN si invia da solo
           raggiunte le 4 cifre (vedi l'effetto `successAnim` sopra). */}
-      <div className="pinpad-block pinpad-block-keys flex flex-col gap-2 px-2 pt-4 md:px-5 md:pt-0 md:pb-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+      <motion.div
+        initial={{ y: '100%', opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 32, mass: 0.9, delay: 0.04 }}
+        className="pinpad-block pinpad-block-keys flex flex-col gap-2 px-2 pt-4 md:px-5 md:pt-0 md:pb-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]"
+      >
         <div className="grid grid-cols-3 gap-2">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
             <button key={n} type="button" onClick={() => handleKey(n)}
@@ -166,7 +176,7 @@ export function PinPadModal({
         <button type="button" onClick={onCancel}
           className="w-full h-14 md:h-12 rounded-2xl font-bold text-sm text-white/80 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           style={btnBase}>{cancelText}</button>
-      </div>
+      </motion.div>
     </>
   );
 
