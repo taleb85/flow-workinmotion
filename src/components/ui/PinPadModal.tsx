@@ -110,7 +110,7 @@ export function PinPadModal({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.28, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: 'easeOut', delay: 0.12 }}
         className="pinpad-block pinpad-block-info my-auto flex flex-col items-center text-center gap-3 px-5 py-6"
       >
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'rgba(255,255,255,0.06)', border, boxShadow: '0 0 20px rgba(255,255,255,0.06)' }}>
