@@ -503,8 +503,25 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
     [showForm, openPinKeypad]
   );
 
+  /**
+   * Con la tastiera aperta iOS può trascinare la pagina (pan/bounce) anche quando non
+   * c'è nulla da scorrere. Se il contenuto ci sta, il trascinamento viene annullato:
+   * si scorre solo quando serve davvero (contenuto più alto dell'area visibile).
+   */
+  const loginRootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = loginRootRef.current;
+    if (!el) return;
+    const onTouchMove = (e: TouchEvent) => {
+      if (el.scrollHeight <= el.clientHeight + 1) e.preventDefault();
+    };
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => el.removeEventListener('touchmove', onTouchMove);
+  }, []);
+
   return (
     <motion.div
+      ref={loginRootRef}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
       onClick={() => { if (!showForm) setShowForm(true); }}
