@@ -752,13 +752,6 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         || iv.deductBreak !== deductBreak || iv.isAutoBreak !== isAutoBreak;
   }, [drawerOpen, editStartTime, editEndTime, editIn, editOut, deductBreak, isAutoBreak, initialValues]);
 
-  const handleCloseDrawer = useCallback(() => {
-    // Con modifiche non salvate la chiusura non va mai bloccata in silenzio:
-    // chiediamo conferma e, se accettata, scartiamo le modifiche locali.
-    if (hasUnsavedChanges && !window.confirm(t.shift_close_unsaved ?? 'Hai modifiche non salvate su questo turno. Chiudere senza salvare?')) return;
-    setDrawerOpen(false);
-  }, [hasUnsavedChanges, t]);
-
   /**
    * Scrive le timbrature indicate sul turno.
    * - Aggiorna un record esistente SOLO se il valore mostrato è cambiato, e scrive
@@ -820,29 +813,55 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         // Solo i campi modificati; i turni futuri non salvano timbrature.
         // createMissing: completa la coppia entrata/uscita, altrimenti le ore del turno
         // non risultano timbrate e i totali restano quelli pianificati.
+        // L'approvazione NON avviene qui: approvare in background disabiliterebbe i campi
+        // mentre l'operatore sta ancora compilando la seconda timbratura. Avviene alla
+        // chiusura del drawer o con il pulsante "Conferma timbrature".
         await persistPunchTimes(shift, editIn, editOut, iv, true);
         setInitialValues(prev => ({ ...prev, editIn, editOut }));
-        // Timbrature salvate su un turno pubblicato ⇒ il turno passa ad "Approvato"
-        // (stessa funzione del pulsante "Conferma timbrature", senza doverlo premere).
-        if (shift.approval_status === 'confirmed') {
-          await updateShift(shift.id, { approval_status: 'approved' } as any);
-          setSelectedShift(prev => prev && prev.id === shift.id ? { ...prev, approval_status: 'approved' as const } : prev);
-          const actor = currentUser;
-          void logShiftAudit({
-            shiftId: shift.id,
-            action: 'update',
-            field: 'punch_confirm',
-            oldValue: 'Pubblicato',
-            newValue: 'Approvato',
-            description: `${formatAuditDate(shift.date)} — timbrature salvate (in ${editIn}, out ${editOut}); turno approvato`,
-            actorUserId: actor?.id ?? null,
-            actorName: actor ? `${actor.first_name} ${actor.last_name ?? ''}`.trim() : 'Sistema',
-          });
-        }
       }
     } catch { showError(t.punch_save_error ?? 'Errore nel salvataggio della timbratura.'); }
     finally { setSaving(false); }
   }, [selectedShift, initialValues, editStartTime, editEndTime, deductBreak, isAutoBreak, editIn, editOut, updateShift, persistPunchTimes, setSelectedShift, currentUser, canEdit, today, showError, t]);
+
+  /**
+   * Un turno "Pubblicato" (confirmed) con la coppia di timbrature completa passa ad
+   * "Approvato" quando l'operatore ha finito: alla chiusura del drawer o con il
+   * pulsante "Conferma timbrature".
+   */
+  const approveShiftIfPunchesComplete = useCallback(async (shift: Shift, inHHMM: string, outHHMM: string) => {
+    if (shift.approval_status !== 'confirmed') return;
+    const hasIn = allPunchRecords.some(pr => pr.shift_id === shift.id && pr.type === 'in');
+    const hasOut = allPunchRecords.some(pr => pr.shift_id === shift.id && pr.type === 'out');
+    // In alternativa alle timbrature già in archivio valgono i valori appena compilati.
+    if ((!hasIn && !inHHMM) || (!hasOut && !outHHMM)) return;
+    await updateShift(shift.id, { approval_status: 'approved' } as any);
+    void logShiftAudit({
+      shiftId: shift.id,
+      action: 'update',
+      field: 'punch_confirm',
+      oldValue: 'Pubblicato',
+      newValue: 'Approvato',
+      description: `${formatAuditDate(shift.date)} — timbrature salvate (in ${inHHMM}, out ${outHHMM}); turno approvato`,
+      actorUserId: currentUser?.id ?? null,
+      actorName: currentUser ? `${currentUser.first_name} ${currentUser.last_name ?? ''}`.trim() : 'Sistema',
+    });
+  }, [allPunchRecords, updateShift, currentUser]);
+
+  /**
+   * La X chiude il drawer (non annulla): prima di chiudere salviamo quanto è salvabile
+   * — il debounce dell'auto-salvataggio può non essere ancora scattato — e, se la coppia
+   * di timbrature è completa, il turno pubblicato passa ad Approvato.
+   */
+  const handleCloseDrawer = useCallback(() => {
+    const shift = selectedShift;
+    if (shift && hasUnsavedChanges) {
+      void autoSaveDrawerChanges();
+      if (isValidHHMM(editIn) && isValidHHMM(editOut)) {
+        void approveShiftIfPunchesComplete(shift, editIn, editOut);
+      }
+    }
+    setDrawerOpen(false);
+  }, [selectedShift, hasUnsavedChanges, autoSaveDrawerChanges, approveShiftIfPunchesComplete, editIn, editOut]);
 
   // Auto-salvataggio: salva le modifiche del drawer poco dopo l'ultima digitazione,
   // così il pulsante X resta solo un pulsante di chiusura.
