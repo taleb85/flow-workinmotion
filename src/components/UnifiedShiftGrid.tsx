@@ -286,7 +286,7 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
             const todayDate = isToday(day);
             return (
               <div key={dateStr}
-                className={`flex items-start gap-3 p-2.5 rounded-xl ring-1 ${todayDate ? 'ring-white/25' : 'ring-white/10'} ${dropTargetKey ===`${user.id}_${dateStr}` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+                className={`flex items-start gap-3 p-2.5 rounded-xl ${todayDate ? 'ring-1 ring-white/20' : ''} ${dropTargetKey ===`${user.id}_${dateStr}` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
                 onDragOver={(e) => onDragOver(e, `${user.id}_${dateStr}`)}
                 onDragLeave={onDragLeave}
                 onDrop={(e) => onDrop(e, user.id, dateStr)}
