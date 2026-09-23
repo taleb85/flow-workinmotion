@@ -758,7 +758,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const [editEndTime, setEditEndTime] = useState('');
 
   // ── Create shift modal state ──
-  const [createModal, setCreateModal] = useState<{ userId: string; date: string; hasExisting: boolean } | null>(null);
+  const [createModal, setCreateModal] = useState<{ userId: string; date: string } | null>(null);
   const [createStart, setCreateStart] = useState('10:00');
   const [createEnd, setCreateEnd] = useState('16:00');
 
@@ -1067,6 +1067,19 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     () => allShifts.filter(s => weekDateSet.has(s.date) && (!filterUserId || s.user_id === filterUserId)),
     [allShifts, weekDateSet, filterUserId]
   );
+  /**
+   * Turni già presenti per giorno dell'utente nel modale "Crea turno": serve sia
+   * per abilitare le tessere dei giorni (max 2 turni/giorno) sia per mostrare il
+   * solo preset dello slot libero. Si ricalcola quando l'utente cambia giorno.
+   */
+  const createModalDayCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    if (!createModal) return counts;
+    for (const s of weekShifts) {
+      if (s.user_id === createModal.userId) counts.set(s.date, (counts.get(s.date) ?? 0) + 1);
+    }
+    return counts;
+  }, [createModal, weekShifts]);
   // Memoizzato con Set: prima era un filter O(P×D) a ogni render.
   const weekPunchRecords = useMemo(
     () => allPunchRecords.filter(pr => pr.timestamp && weekDateSet.has(pr.timestamp.slice(0, 10))),
@@ -1645,7 +1658,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       setCreateStart(pick.start);
       setCreateEnd(pick.end);
     }
-    setCreateModal({ userId, date, hasExisting: existing.length === 1 });
+    setCreateModal({ userId, date });
   }, [weekShifts, showError, t]);
 
   // Toggle pausa: aggiornano solo lo stato locale; il salvataggio avviene con "Salva modifiche"
@@ -3196,6 +3209,34 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           >
             <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">{t.create_shift ?? 'Nuovo turno'}</h3>
             <div className="space-y-3 mb-4">
+              {/* Mobile: il giorno si sceglie qui (su desktop è già la cella toccata).
+                  Un giorno con 2 turni è disabilitato (massimo 2 al giorno). */}
+              <div className="md:hidden">
+                <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.field_date ?? 'Data'}</label>
+                <div className="flex gap-1.5 overflow-x-auto pb-1">
+                  {weekDays.map((day, i) => {
+                    const ds = weekDateStrings[i];
+                    if (!ds) return null;
+                    const isSelected = ds === createModal.date;
+                    const isFull = (createModalDayCounts.get(ds) ?? 0) >= 2;
+                    return (
+                      <button key={ds} type="button" disabled={isFull}
+                        onClick={() => setCreateModal(prev => (prev ? { ...prev, date: ds } : prev))}
+                        className={`flex shrink-0 flex-col items-center rounded-lg border px-3 py-1.5 transition-colors ${
+                          isSelected
+                            ? 'border-white/60 bg-white/25 text-white'
+                            : isFull
+                              ? 'border-white/10 text-white/20 cursor-not-allowed'
+                              : 'border-white/20 text-white/60 hover:border-white/40 hover:text-white'
+                        }`}
+                      >
+                        <span className="text-[0.5625rem] font-bold uppercase tracking-wider">{format(day, 'EEE', { locale })}</span>
+                        <span className="text-[0.8125rem] font-bold tabular-nums">{format(day, 'd')}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               <div>
                 <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.start_time ?? 'Inizio'}</label>
                 <TimeInputField value={createStart} onChange={setCreateStart} size="md" className="w-full border-white/20 bg-white/10" />
@@ -3205,7 +3246,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 <TimeInputField value={createEnd} onChange={setCreateEnd} size="md" className="w-full border-white/20 bg-white/10" />
               </div>
               <div className="space-y-4">
-                {createModal.hasExisting ? (
+                {createModalDayCounts.get(createModal.date) === 1 ? (
                   <ShiftSlotPresetsSection
                     startTime={createStart}
                     endTime={createEnd}
