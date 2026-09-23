@@ -208,6 +208,10 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
 }: ShiftGridMobileCardProps) {
   const { effectiveLanguage } = useAppUser();
   const totalActual = totals.actual;
+  /** Giorno proposto per la creazione: oggi se è nel periodo mostrato, altrimenti il primo giorno. */
+  const todayIdx = weekDays.findIndex((d) => isToday(d));
+  const defaultCreateDate = weekDateStrings[todayIdx >= 0 ? todayIdx : 0];
+  const canCreate = canEdit && !isSelectionMode && !!defaultCreateDate;
   return (
     <div className="rounded-xl border border-white/[0.14] overflow-hidden p-4 shadow-sm">
       <div
@@ -250,45 +254,34 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
       {isExpanded && (
       <div className="space-y-2 divide-y divide-white/10">
         {!hasShifts ? (
-          (() => {
-            const canCreate = canEdit && !isSelectionMode;
-            // Crea il turno oggi se è nel periodo mostrato, altrimenti il primo giorno.
-            const todayIdx = weekDays.findIndex((d) => isToday(d));
-            const targetDate = weekDateStrings[todayIdx >= 0 ? todayIdx : 0];
-            const create = canCreate && targetDate ? () => onCreateShift(user.id, targetDate) : undefined;
-            return (
-              <div
-                role={create ? 'button' : undefined}
-                tabIndex={create ? 0 : undefined}
-                aria-label={create ? `${t.add_shift ?? 'Aggiungi'} — ${user.first_name ?? ''}` : undefined}
-                onClick={create}
-                onKeyDown={create ? (e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    create();
-                  }
-                } : undefined}
-                className={`py-4 text-center border-2 border-dashed border-white/20 rounded-xl ${create ? 'cursor-pointer transition-colors hover:border-white/45 hover:bg-white/[0.05]' : ''} ${dropTargetKey ===`${user.id}_empty` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
-                onDragOver={(e) => onDragOver(e, `${user.id}_empty`)}
-                onDragLeave={onDragLeave}
-                onDrop={(e) => { const firstDay = weekDateStrings[0]; if (firstDay) onDrop(e, user.id, firstDay); }}
-              >
-                {create && (
-                  <p className="inline-flex items-center gap-1 text-[0.6875rem] font-bold text-white/45">
-                    <Plus className="h-3 w-3" /> {t.add_shift ?? 'Aggiungi'}
-                  </p>
-                )}
-              </div>
-            );
-          })()
+          <div
+            role={canCreate ? 'button' : undefined}
+            tabIndex={canCreate ? 0 : undefined}
+            aria-label={canCreate ? `${t.add_shift ?? 'Aggiungi'} — ${user.first_name ?? ''}` : undefined}
+            onClick={canCreate ? () => onCreateShift(user.id, defaultCreateDate) : undefined}
+            onKeyDown={canCreate ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onCreateShift(user.id, defaultCreateDate);
+              }
+            } : undefined}
+            className={`py-4 text-center border-2 border-dashed border-white/20 rounded-xl ${canCreate ? 'cursor-pointer transition-colors hover:border-white/45 hover:bg-white/[0.05]' : ''} ${dropTargetKey ===`${user.id}_empty` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+            onDragOver={(e) => onDragOver(e, `${user.id}_empty`)}
+            onDragLeave={onDragLeave}
+            onDrop={(e) => { const firstDay = weekDateStrings[0]; if (firstDay) onDrop(e, user.id, firstDay); }}
+          >
+            {canCreate && (
+              <p className="inline-flex items-center gap-1 text-[0.6875rem] font-bold text-white/45">
+                <Plus className="h-3 w-3" /> {t.add_shift ?? 'Aggiungi'}
+              </p>
+            )}
+          </div>
         ) : (
-          weekDays.map(day => {
+          <>
+          {weekDays.map(day => {
             const dateStr = format(day, 'yyyy-MM-dd');
             const groups = dayGroupsByUserDate.get(`${user.id}|${dateStr}`) ?? EMPTY_GROUPS;
-            // Giorno senza turni: si mostra solo a chi può aggiungerne uno (altrimenti
-            // sarebbe una riga vuota). Così ogni giorno della settimana è raggiungibile
-            // anche quando in altri giorni ci sono già turni.
-            if (groups.length === 0 && !(canEdit && !isSelectionMode)) return null;
+            if (groups.length === 0) return null;
 
             const todayDate = isToday(day);
             return (
@@ -323,7 +316,7 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
                     else if (canAddSecond) slots.push(
                       <button key="add-evening" type="button" onClick={() => onCreateShift(user.id, dateStr, 'evening')}
                         className="w-full rounded-lg border border-dashed border-white/20 py-1.5 text-[0.625rem] font-bold text-white/40 transition-colors hover:border-white/20 hover:text-white/70">
-                        <Plus className="mb-0.5 inline-block h-3 w-3" /> {groups.length === 0 ? (t.add_shift ?? 'Aggiungi') : (t.add_second_shift ?? '2° turno')}
+                        <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_second_shift ?? '2° turno'}
                       </button>
                     );
                     // Slot affiancati: ognuno larghezza pari merito, a piena larghezza se è l'unico.
@@ -336,7 +329,18 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
                 </div>
               </div>
             );
-          })
+          })}
+          {/* Un solo pulsante per aggiungere un turno in un altro giorno: la data si
+              sceglie nel modale (su mobile), così l'elenco resta solo i giorni con turni. */}
+          {canCreate && (
+            <div className="pt-2">
+              <button type="button" onClick={() => onCreateShift(user.id, defaultCreateDate)}
+                className="w-full rounded-lg border border-dashed border-white/20 py-1.5 text-[0.625rem] font-bold text-white/40 transition-colors hover:border-white/20 hover:text-white/70">
+                <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_shift ?? 'Aggiungi'}
+              </button>
+            </div>
+          )}
+          </>
         )}
       </div>
       )}
