@@ -105,68 +105,66 @@ export function PinPadModal({
   /* ── Contenuto condiviso mobile/desktop ─────────────────────────── */
   const content = (
     <>
-      {/* Header */}
-      <div className="flex flex-col items-center text-center pt-8 md:pt-6 pb-3">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl mb-3" style={{ background: 'rgba(255,255,255,0.06)', border, boxShadow: '0 0 20px rgba(255,255,255,0.06)' }}>
+      {/* Blocco 1 — icona + pallini. Su telefono sta in alto, staccato dal
+          tastierino. */}
+      <div className="pinpad-block pinpad-block-info flex flex-col items-center text-center gap-3 px-5 py-6">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'rgba(255,255,255,0.06)', border, boxShadow: '0 0 20px rgba(255,255,255,0.06)' }}>
           <div className={successAnim ? 'pin-lock-success' : ''} style={{ color: successAnim ? undefined : '#ffffff' }}>
             <Lock className="w-8 h-8" strokeWidth={2.5} />
           </div>
         </div>
-      </div>
 
-      {/* PIN display — pallini di avanzamento */}
-      <div className="flex flex-col items-center gap-2 px-5 sm:px-8 mt-2">
-        <div className="flex items-center gap-1.5 text-white/75 mb-1">
-          <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
-          <span className="text-sm font-bold uppercase tracking-widest">{pinLabel}</span>
-        </div>
-        <div className="w-full h-12 rounded-2xl flex items-center justify-center relative"
-          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.40)' }}>
-          <div className="flex items-center gap-6">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="relative flex items-center justify-center">
-                <div
-                  className={`w-4 h-4 rounded-full transition-colors duration-200 ${filledCount === i ? 'animate-pulse' : ''}`}
-                  style={filledCount > i
-                    ? { background: '#ffffff', boxShadow: '0 0 10px 3px rgba(255,255,255,0.60)' }
-                    : { background: 'transparent', border: '1.5px solid rgba(255,255,255,0.9)' }}
-                />
-              </div>
-            ))}
+        <div className="flex w-full flex-col items-center gap-2">
+          <div className="flex items-center gap-1.5 text-white/75">
+            <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
+            <span className="text-sm font-bold uppercase tracking-widest">{pinLabel}</span>
           </div>
+          <div className="w-full h-12 rounded-2xl flex items-center justify-center relative"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.40)' }}>
+            <div className="flex items-center gap-6">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="relative flex items-center justify-center">
+                  <div
+                    className={`w-4 h-4 rounded-full transition-colors duration-200 ${filledCount === i ? 'animate-pulse' : ''}`}
+                    style={filledCount > i
+                      ? { background: '#ffffff', boxShadow: '0 0 10px 3px rgba(255,255,255,0.60)' }
+                      : { background: 'transparent', border: '1.5px solid rgba(255,255,255,0.9)' }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          {error && <p className="text-red-400 text-xs font-bold text-center animate-shake">{error}</p>}
         </div>
-        {error && <p className="text-red-400 text-xs font-bold text-center animate-shake">{error}</p>}
       </div>
 
-      {/* Numpad — sempre visibile, anche da telefono */}
-      <div className="flex flex-col justify-center px-5 sm:px-8 mt-2">
-        <div className="grid grid-cols-3 gap-2.5 sm:gap-2">
+      {/* Blocco 2 — tastierino: su telefono occupa tutta la larghezza ed è
+          appoggiato al fondo schermo. Nessun "Conferma": il PIN si invia da solo
+          raggiunte le 4 cifre (vedi l'effetto `successAnim` sopra). */}
+      <div className="pinpad-block pinpad-block-keys flex flex-col gap-2 px-2 pt-4 md:px-5 md:pt-0 md:pb-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+        <div className="grid grid-cols-3 gap-2">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
             <button key={n} type="button" onClick={() => handleKey(n)}
-              className="h-16 sm:h-14 md:h-12 rounded-2xl font-bold text-3xl sm:text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"
+              className="h-14 md:h-12 rounded-2xl font-bold text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"
               style={btnBase}>{n}</button>
           ))}
           {leftActionButton ? (
-            <div className="h-16 sm:h-14 md:h-12 rounded-2xl flex items-center justify-center" style={btnBase}>{leftActionButton}</div>
+            <div className="h-14 md:h-12 rounded-2xl flex items-center justify-center" style={btnBase}>{leftActionButton}</div>
           ) : (
-            <div className="h-16 sm:h-14 md:h-12 rounded-2xl" style={btnBase} aria-hidden />
+            <div className="h-14 md:h-12 rounded-2xl" style={btnBase} aria-hidden />
           )}
           <button type="button" onClick={() => handleKey(0)}
-            className="h-16 sm:h-14 md:h-12 rounded-2xl font-bold text-3xl sm:text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"
+            className="h-14 md:h-12 rounded-2xl font-bold text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"
             style={btnBase}>0</button>
           <button type="button" onClick={() => handleKey('del')}
-            className="h-16 sm:h-14 md:h-12 rounded-2xl flex items-center justify-center text-white/70 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20"
+            className="h-14 md:h-12 rounded-2xl flex items-center justify-center text-white/70 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20"
             style={btnBase}>
-            <Delete className="w-7 h-7 sm:w-6 sm:h-6" />
+            <Delete className="w-6 h-6" />
           </button>
         </div>
-      </div>
 
-      {/* Azione. Nessun pulsante "Conferma": il PIN si invia da solo
-          raggiunte le 4 cifre (vedi l'effetto `successAnim` sopra). */}
-      <div className="flex gap-2 px-5 sm:px-8 pb-6 md:pb-4 mt-2">
         <button type="button" onClick={onCancel}
-          className="flex-1 h-12 rounded-2xl font-bold text-sm text-white/80 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+          className="w-full h-12 rounded-2xl font-bold text-sm text-white/80 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           style={btnBase}>{cancelText}</button>
       </div>
     </>
@@ -178,16 +176,13 @@ export function PinPadModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.22 }}
-      /* Mobile: la card è una bottom sheet (`mt-auto` la spinge in fondo) — il
-         tastierino finisce nel terzo basso dello schermo, raggiungibile con una
-         mano. Desktop (md): card centrata come prima.
-         `overflow-y-auto` + `mt-auto` invece di `justify-end`: se il contenuto
-         non ci sta, resta scorribile dall'alto senza tagliare la testa. */
-      className="fixed inset-0 z-[10060] flex flex-col items-center overflow-y-auto bg-black/30 pb-[max(1rem,env(safe-area-inset-bottom,0px))] md:justify-center md:pb-0"
-      style={{ }}
+      /* Mobile: due blocchi separati — la sheet riempie lo schermo e
+         `justify-between` spinge l'info in alto e il tastierino in fondo.
+         Desktop (md): torna la card unica centrata. */
+      className="fixed inset-0 z-[10060] flex flex-col overflow-y-auto bg-black/30 pt-[max(2.5rem,env(safe-area-inset-top,0px))] md:justify-center md:pt-4"
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
     >
-      {/* Card centrata — mobile e desktop */}
+      {/* Sheet mobile / card desktop */}
       <motion.div
         initial={{ opacity: 0, y: 28 }}
         animate={{ opacity: 1, y: 0 }}
@@ -195,9 +190,8 @@ export function PinPadModal({
         transition={{ type: 'spring', stiffness: 360, damping: 30, mass: 0.9 }}
         ref={pinAreaRef}
         tabIndex={-1}
-        className="pinpad-card mt-auto md:mt-0 flex flex-col w-full max-w-[23rem] md:max-w-[21.25rem] mx-4 rounded-2xl overflow-hidden outline-none"
-        style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.40)', boxShadow: '0 32px 80px rgba(0,0,0,0.75)' }}
-        onClick={e => e.stopPropagation()}
+        className="pinpad-card pinpad-sheet flex w-full flex-1 flex-col justify-between outline-none md:mx-auto md:max-w-[21.25rem] md:flex-none md:justify-start"
+        onClick={(e) => { e.stopPropagation(); if (e.target === e.currentTarget) onCancel(); }}
       >
         {content}
       </motion.div>

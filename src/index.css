@@ -2752,3 +2752,48 @@ input:-webkit-autofill:active {
   outline: none !important;
   outline-offset: 0 !important;
 }
+
+/* ── PIN pad: due blocchi su telefono, card unica da 768px in su ─────────────
+   Sotto md: la sheet riempie l'overlay e `justify-between` spinge in alto il
+   blocco info (icona + pallini) e in basso il tastierino, che occupa tutta la
+   larghezza ed è raggiungibile con il pollice. Da md: la superficie torna sul
+   contenitore, che ridiventa la card centrata di prima. */
+.pinpad-block {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.pinpad-block-info {
+  border-radius: 1.25rem;
+  margin-inline: 1rem;
+}
+
+.pinpad-block-keys {
+  border-radius: 1.5rem 1.5rem 0 0;
+  border-bottom: none;
+}
+
+@media (min-width: 768px) {
+  .pinpad-sheet {
+    border: 1px solid rgba(255, 255, 255, 0.40);
+    border-radius: 1rem;
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.75);
+  }
+
+  /* La superficie passa al contenitore: i blocchi tornano trasparenti */
+  .pinpad-block,
+  .pinpad-block-info,
+  .pinpad-block-keys {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    margin-inline: 0;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
