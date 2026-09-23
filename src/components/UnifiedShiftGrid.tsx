@@ -759,6 +759,34 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   }, [hasUnsavedChanges, t]);
 
   /**
+   * Scrive le timbrature indicate sul turno.
+   * - Aggiorna un record esistente SOLO se il valore mostrato è cambiato, e scrive
+   *   `calculated_time` (orario efficace) senza toccare `timestamp`: l'ora reale del
+   *   click resta registrata e continua a essere visibile come "Click reale".
+   * - Crea il record mancante quando `createMissing` è true (conferma esplicita) o
+   *   quando è proprio quel campo a essere stato modificato.
+   */
+  const persistPunchTimes = useCallback(async (
+    shift: Shift,
+    nextIn: string,
+    nextOut: string,
+    baseline: { editIn: string; editOut: string },
+    createMissing: boolean,
+  ) => {
+    const existingIn = allPunchRecords.find(pr => pr.shift_id === shift.id && pr.type === 'in');
+    const existingOut = allPunchRecords.find(pr => pr.shift_id === shift.id && pr.type === 'out');
+    const iso = (t: string) => new Date(`${shift.date}T${t}:00`).toISOString();
+    if (nextIn !== baseline.editIn || (createMissing && !existingIn)) {
+      if (existingIn) await updatePunchRecord(existingIn.id, { calculated_time: iso(nextIn) });
+      else await addPunchRecord(shift.user_id, 'in', { shift_id: shift.id, timestamp: `${shift.date}T${nextIn}:00`, source: 'manual' });
+    }
+    if (nextOut !== baseline.editOut || (createMissing && !existingOut)) {
+      if (existingOut) await updatePunchRecord(existingOut.id, { calculated_time: iso(nextOut) });
+      else await addPunchRecord(shift.user_id, 'out', { shift_id: shift.id, timestamp: `${shift.date}T${nextOut}:00`, source: 'manual' });
+    }
+  }, [allPunchRecords, updatePunchRecord, addPunchRecord]);
+
+  /**
    * Auto-salvataggio del drawer: orari turno + pausa (solo turni in bozza, dove i campi
    * sono attivi) e timbrature Entrata/Uscita. Il ritardo è gestito dall'effetto sotto.
    */
@@ -788,19 +816,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         setInitialValues(prev => ({ ...prev, editStartTime, editEndTime, deductBreak, isAutoBreak }));
       }
       if (punchesSavable) {
-        // Solo turni di oggi o passati: per i turni futuri le timbrature non si salvano.
-        const punchDate = shift.date;
-        const existingIn = allPunchRecords.find(pr => pr.shift_id === shift.id && pr.type === 'in');
-        const existingOut = allPunchRecords.find(pr => pr.shift_id === shift.id && pr.type === 'out');
-        if (existingIn) await updatePunchRecord(existingIn.id, { timestamp: new Date(`${punchDate}T${editIn}:00`).toISOString() });
-        else await addPunchRecord(shift.user_id, 'in', { shift_id: shift.id, timestamp: `${punchDate}T${editIn}:00`, source: 'manual' });
-        if (existingOut) await updatePunchRecord(existingOut.id, { timestamp: new Date(`${punchDate}T${editOut}:00`).toISOString() });
-        else await addPunchRecord(shift.user_id, 'out', { shift_id: shift.id, timestamp: `${punchDate}T${editOut}:00`, source: 'manual' });
+        // Solo i campi modificati; i turni futuri non salvano timbrature.
+        await persistPunchTimes(shift, editIn, editOut, iv, false);
         setInitialValues(prev => ({ ...prev, editIn, editOut }));
       }
     } catch { showError(t.punch_save_error ?? 'Errore nel salvataggio della timbratura.'); }
     finally { setSaving(false); }
-  }, [selectedShift, initialValues, editStartTime, editEndTime, deductBreak, isAutoBreak, editIn, editOut, updateShift, updatePunchRecord, addPunchRecord, allPunchRecords, canEdit, today, showError, t]);
+  }, [selectedShift, initialValues, editStartTime, editEndTime, deductBreak, isAutoBreak, editIn, editOut, updateShift, persistPunchTimes, canEdit, today, showError, t]);
 
   // Auto-salvataggio: salva le modifiche del drawer poco dopo l'ultima digitazione,
   // così il pulsante X resta solo un pulsante di chiusura.
@@ -1303,24 +1325,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setSaving(true);
     try {
       const shift = selectedShift;
-      const todayStr = today.toISOString().slice(0, 10);
-      const punchDate = shift.date <= todayStr ? shift.date : todayStr;
       const existingIn = allPunchRecords.find(pr => pr.shift_id === shift.id && pr.type === 'in');
       const existingOut = allPunchRecords.find(pr => pr.shift_id === shift.id && pr.type === 'out');
-      if (editIn) {
-        if (existingIn) {
-          await updatePunchRecord(existingIn.id, { timestamp: new Date(`${punchDate}T${editIn}:00`).toISOString() });
-        } else {
-          await addPunchRecord(shift.user_id, 'in', { shift_id: shift.id, timestamp: `${punchDate}T${editIn}:00`, source: 'manual' });
-        }
-      }
-      if (editOut) {
-        if (existingOut) {
-          await updatePunchRecord(existingOut.id, { timestamp: new Date(`${punchDate}T${editOut}:00`).toISOString() });
-        } else {
-          await addPunchRecord(shift.user_id, 'out', { shift_id: shift.id, timestamp: `${punchDate}T${editOut}:00`, source: 'manual' });
-        }
-      }
+      // Scrive le timbrature mancanti e aggiorna solo quelle modificate, senza
+      // sovrascrivere l'ora reale del click (timestamp) sui record esistenti.
+      await persistPunchTimes(shift, editIn, editOut, initialValues, true);
       await updateShift(shift.id, { approval_status: 'approved' } as any);
       const actorFull = currentUser;
       await logShiftAudit({
@@ -1349,7 +1358,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       }
     } catch { showError(t.error_generic ?? 'Errore.'); }
     finally { setSaving(false); }
-  }, [selectedShift, editIn, editOut, allPunchRecords, addPunchRecord, updatePunchRecord, updateShift, setSelectedShift, showSuccess, showError, t, reviewQueue, reviewIdx, currentUser, today]);
+  }, [selectedShift, editIn, editOut, initialValues, allPunchRecords, persistPunchTimes, updateShift, setSelectedShift, showSuccess, showError, t, reviewQueue, reviewIdx, currentUser]);
 
   const handleFreezeShift = useCallback(async (shift: Shift) => {
     if (sessionActive) {
