@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Lock, ShieldCheck, Delete } from 'lucide-react';
-import React, { ReactNode, useEffect, useId, useState, useRef } from 'react';
+import React, { ReactNode, useEffect, useId, useLayoutEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 import { useT } from '../../hooks/useT';
@@ -42,15 +42,25 @@ export function PinPadModal({
   const mobilePinInputRef = useRef<HTMLInputElement>(null);
   const mobilePinInputId = useId();
 
-  // Autofocus all'apertura. Su mobile il focus va sull'input PIN (per aprire la tastiera
-  // numerica di sistema), su PC/tablet sulla card (si usa il tastierino della modale).
-  useEffect(() => {
+  // Autofocus all'apertura: su mobile serve a far comparire subito la tastiera
+  // numerica di sistema, su PC/tablet il focus va sulla card (si usa il tastierino
+  // della modale). Deve essere `useLayoutEffect`, non `useEffect`: iOS mostra la
+  // tastiera solo se il focus avviene in modo sincrono dentro il gesto che ha
+  // aperto la modale.
+  useLayoutEffect(() => {
     if (window.innerWidth < 768) {
       mobilePinInputRef.current?.focus();
       return;
     }
     pinAreaRef.current?.focus();
   }, []);
+
+  /** iOS: se l'apertura non deriva da un gesto (es. dopo un controllo asincrono)
+   *  il focus sincrono viene ignorato. Al primo tocco sulla card rimettiamo il
+   *  focus sull'input, così la tastiera compare comunque subito. */
+  const focusMobilePinInput = () => {
+    if (window.innerWidth < 768) mobilePinInputRef.current?.focus();
+  };
 
   // Auto-conferma quando il PIN raggiunge 4 cifre (con animazione lucchetto rosso→verde)
   const [successAnim, setSuccessAnim] = useState(false);
@@ -242,6 +252,7 @@ export function PinPadModal({
         tabIndex={-1}
         className="pinpad-card flex flex-col w-full max-w-[23rem] md:max-w-[21.25rem] mx-4 rounded-2xl overflow-hidden outline-none"
         style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.40)', boxShadow: '0 32px 80px rgba(0,0,0,0.75)' }}
+        onPointerDown={focusMobilePinInput}
         onClick={e => e.stopPropagation()}
       >
         {content}
