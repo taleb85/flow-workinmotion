@@ -821,10 +821,27 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         // non risultano timbrate e i totali restano quelli pianificati.
         await persistPunchTimes(shift, editIn, editOut, iv, true);
         setInitialValues(prev => ({ ...prev, editIn, editOut }));
+        // Timbrature salvate su un turno pubblicato ⇒ il turno passa ad "Approvato"
+        // (stessa funzione del pulsante "Conferma timbrature", senza doverlo premere).
+        if (shift.approval_status === 'confirmed') {
+          await updateShift(shift.id, { approval_status: 'approved' } as any);
+          setSelectedShift(prev => prev && prev.id === shift.id ? { ...prev, approval_status: 'approved' as const } : prev);
+          const actor = currentUser;
+          void logShiftAudit({
+            shiftId: shift.id,
+            action: 'update',
+            field: 'punch_confirm',
+            oldValue: 'Pubblicato',
+            newValue: 'Approvato',
+            description: `${formatAuditDate(shift.date)} — timbrature salvate (in ${editIn}, out ${editOut}); turno approvato`,
+            actorUserId: actor?.id ?? null,
+            actorName: actor ? `${actor.first_name} ${actor.last_name ?? ''}`.trim() : 'Sistema',
+          });
+        }
       }
     } catch { showError(t.punch_save_error ?? 'Errore nel salvataggio della timbratura.'); }
     finally { setSaving(false); }
-  }, [selectedShift, initialValues, editStartTime, editEndTime, deductBreak, isAutoBreak, editIn, editOut, updateShift, persistPunchTimes, canEdit, today, showError, t]);
+  }, [selectedShift, initialValues, editStartTime, editEndTime, deductBreak, isAutoBreak, editIn, editOut, updateShift, persistPunchTimes, setSelectedShift, currentUser, canEdit, today, showError, t]);
 
   // Auto-salvataggio: salva le modifiche del drawer poco dopo l'ultima digitazione,
   // così il pulsante X resta solo un pulsante di chiusura.
