@@ -178,7 +178,12 @@ export function PinPadModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.22 }}
-      className="fixed inset-0 z-[10060] flex flex-col items-center justify-start pt-[max(5.5rem,env(safe-area-inset-top,0px))] md:justify-center md:pt-0 overflow-y-auto bg-black/30"
+      /* Mobile: la card è una bottom sheet (`mt-auto` la spinge in fondo) — il
+         tastierino finisce nel terzo basso dello schermo, raggiungibile con una
+         mano. Desktop (md): card centrata come prima.
+         `overflow-y-auto` + `mt-auto` invece di `justify-end`: se il contenuto
+         non ci sta, resta scorribile dall'alto senza tagliare la testa. */
+      className="fixed inset-0 z-[10060] flex flex-col items-center overflow-y-auto bg-black/30 pb-[max(1rem,env(safe-area-inset-bottom,0px))] md:justify-center md:pb-0"
       style={{ }}
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
     >
@@ -190,7 +195,7 @@ export function PinPadModal({
         transition={{ type: 'spring', stiffness: 360, damping: 30, mass: 0.9 }}
         ref={pinAreaRef}
         tabIndex={-1}
-        className="pinpad-card flex flex-col w-full max-w-[23rem] md:max-w-[21.25rem] mx-4 rounded-2xl overflow-hidden outline-none"
+        className="pinpad-card mt-auto md:mt-0 flex flex-col w-full max-w-[23rem] md:max-w-[21.25rem] mx-4 rounded-2xl overflow-hidden outline-none"
         style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.40)', boxShadow: '0 32px 80px rgba(0,0,0,0.75)' }}
         onClick={e => e.stopPropagation()}
       >

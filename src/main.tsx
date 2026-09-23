@@ -82,7 +82,16 @@ if (!rootEl) {
     </StrictMode>
   );
 
-  if (import.meta.env.DEV) {
+  // axe-core rifà l'audit di TUTTO il DOM ogni secondo: utile su desktop, ma sul
+  // WebContent di Safari su iPhone è un carico continuo che contribuisce al crash
+  // "Abnormally stopped". Sui dispositivi touch resta quindi spento, salvo
+  // richiesta esplicita con `?a11y=1`. In produzione non gira mai.
+  const axeWanted =
+    import.meta.env.DEV &&
+    (!window.matchMedia('(pointer: coarse)').matches ||
+      new URLSearchParams(window.location.search).has('a11y'));
+
+  if (axeWanted) {
     void (async () => {
       const { default: axe } = await import('@axe-core/react');
       const React = (await import('react')).default;
