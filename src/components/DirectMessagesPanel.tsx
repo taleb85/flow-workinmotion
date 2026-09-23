@@ -378,7 +378,7 @@ export function DirectMessagesPanel({ onClose }: { onClose?: () => void } = {}) 
   if (!currentUser) return null;
 
   return (
-    <div className="relative flex h-full min-h-0 w-full max-w-7xl flex-1 flex-col overflow-hidden mx-auto">
+    <div className="relative flex h-full min-h-0 w-full max-w-[96rem] flex-1 flex-col overflow-hidden mx-auto">
       {/* Tab bar — sempre visibile in cima, in tutte le viste.
           Niente banda nera: la larghezza è ripartita tra i due tab e il
           pulsante di chiusura, che sta in linea (non più sovrapposto). */}
