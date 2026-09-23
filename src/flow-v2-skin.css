@@ -217,7 +217,8 @@ body {
        la pillola resta allineata al bordo sinistro/destro delle card. */
     left: var(--layout-app-px) !important;
     right: var(--layout-app-px) !important;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) !important;
+    /* Gutter ridotto: la pillola sta più in basso, appena sopra la home indicator. */
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 4px) !important;
     width: auto !important;
     border-radius: var(--flow-radius-pill) !important;
     overflow: hidden !important;
