@@ -83,7 +83,7 @@ function StaffDesktopShifts({ shifts, language = 'it' }: { shifts: Shift[]; lang
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl flex flex-col gap-11 pb-8">
+    <div className="mx-auto w-full max-w-[96rem] flex flex-col gap-11 pb-8">
       {weeks.map((week, wIdx) => {
         const weekDays = eachDayOfInterval({ start: week.start, end: week.end });
         const byDay = new Map<string, Shift[]>();

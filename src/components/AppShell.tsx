@@ -822,14 +822,14 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         role="main"
         aria-label={t.main_content_aria}
         className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending || appLockVisible ? 'blur-md pointer-events-none' : ''}`}>
-        {/* Larghezza massima contenuto unificata (max-w-7xl): tutte le schede
+        {/* Larghezza massima contenuto unificata (max-w-[96rem]): tutte le schede
             condividono lo stesso blocco centrato, come già facevano
             Statistiche/Ferie/Profilo-visibilità. */}
         {/* Spazio per la bottom nav: lo gestisce `.pb-content` di ogni pagina (calcolato
             su altezza nav + safe area). Qui niente padding, altrimenti le schede con
             contenuto già visibile diventano scorrevoli "a vuoto". */}
         <div className="w-full app-horizontal-pad pt-0 md:pt-[var(--app-sticky-header-offset)] flex-1 min-h-0 flex flex-col">
-          <div className="w-full max-w-7xl mx-auto flex-1 min-h-0 flex flex-col">
+          <div className="w-full max-w-[96rem] mx-auto flex-1 min-h-0 flex flex-col">
           {/* PIN portals */}
           {createPortal(
             <AnimatePresence>

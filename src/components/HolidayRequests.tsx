@@ -64,7 +64,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
 
   if (featureFlags['staff_requests'] === false) {
     return (
-      <div className={`font-sans mx-auto flex min-h-[40vh] w-full max-w-7xl items-center justify-center ${embedded ? '' : 'pb-content'}`}>
+      <div className={`font-sans mx-auto flex min-h-[40vh] w-full max-w-[96rem] items-center justify-center ${embedded ? '' : 'pb-content'}`}>
         <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] max-w-md px-6 py-8 text-center">
           <Palmtree className="w-10 h-10 text-white/60 mx-auto mb-3 opacity-90" />
           <p className="text-white/80 font-semibold text-sm">{t.staff_requests_feature_off}</p>

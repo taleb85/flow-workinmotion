@@ -83,7 +83,7 @@ export default memo(function HomeStaffView({
 
   return (
     <div className="pb-content pt-6 w-full font-sans md:!pb-32">
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="mx-auto w-full max-w-[96rem]">
       <div className="block md:hidden space-y-4">
         <MobileStaffDashboard
           user={currentUser}

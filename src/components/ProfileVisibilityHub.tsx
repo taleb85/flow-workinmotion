@@ -387,7 +387,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
 
   return (
     <>
-    <div className="app-horizontal-pad font-sans mx-auto w-full max-w-7xl pb-content pt-6">
+    <div className="app-horizontal-pad font-sans mx-auto w-full max-w-[96rem] pb-content pt-6">
       <div className="mb-6">
         <h1 className="text-xl font-bold tracking-tight text-white">
           {tv.profile_visibility_title ?? 'Cosa vede chi'}
@@ -553,7 +553,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
           </header>
 
           <div className="flex-1 min-h-0 overflow-y-auto app-horizontal-pad py-4 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))]">
-            <div className="mx-auto w-full max-w-7xl space-y-4">
+            <div className="mx-auto w-full max-w-[96rem] space-y-4">
               <div className="rounded-xl border border-white/[0.14] overflow-hidden">
                 <div className="border-b border-white/10 bg-slate-50 px-3 py-2">
                   <p className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider">
