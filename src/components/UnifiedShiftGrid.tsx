@@ -285,7 +285,10 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
           weekDays.map(day => {
             const dateStr = format(day, 'yyyy-MM-dd');
             const groups = dayGroupsByUserDate.get(`${user.id}|${dateStr}`) ?? EMPTY_GROUPS;
-            if (groups.length === 0) return null;
+            // Giorno senza turni: si mostra solo a chi può aggiungerne uno (altrimenti
+            // sarebbe una riga vuota). Così ogni giorno della settimana è raggiungibile
+            // anche quando in altri giorni ci sono già turni.
+            if (groups.length === 0 && !(canEdit && !isSelectionMode)) return null;
 
             const todayDate = isToday(day);
             return (
@@ -320,7 +323,7 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
                     else if (canAddSecond) slots.push(
                       <button key="add-evening" type="button" onClick={() => onCreateShift(user.id, dateStr, 'evening')}
                         className="w-full rounded-lg border border-dashed border-white/20 py-1.5 text-[0.625rem] font-bold text-white/40 transition-colors hover:border-white/20 hover:text-white/70">
-                        <Plus className="mb-0.5 inline-block h-3 w-3" /> {t.add_second_shift ?? '2° turno'}
+                        <Plus className="mb-0.5 inline-block h-3 w-3" /> {groups.length === 0 ? (t.add_shift ?? 'Aggiungi') : (t.add_second_shift ?? '2° turno')}
                       </button>
                     );
                     // Slot affiancati: ognuno larghezza pari merito, a piena larghezza se è l'unico.
