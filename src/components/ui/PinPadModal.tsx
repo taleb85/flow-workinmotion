@@ -119,32 +119,48 @@ export function PinPadModal({
         </div>
       </div>
 
-      {/* PIN display — mobile: input con tastiera numerica di sistema */}
+      {/* PIN display — mobile: pallini, con input invisibile sopra per la
+          tastiera numerica di sistema. */}
       <div className="px-5 sm:px-8 mt-2 md:hidden">
         <div className="flex items-center justify-center gap-1.5 text-white/75 mb-2">
           <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
           <label htmlFor={mobilePinInputId} className="text-sm font-bold uppercase tracking-widest">{pinLabel}</label>
         </div>
-        <input
-          id={mobilePinInputId}
-          ref={mobilePinInputRef}
-          type="password"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          autoComplete="off"
-          maxLength={4}
-          value={pin}
-          disabled={isLoading}
-          onChange={(e) => onPinChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && pin.length === 4) {
-              e.preventDefault();
-              onConfirm();
-            }
-          }}
-          className="w-full h-14 rounded-2xl text-center text-2xl font-bold tracking-[0.5em] text-white outline-none transition-colors focus:ring-2 focus:ring-white/40"
+        <div
+          className="relative w-full h-14 rounded-2xl flex items-center justify-center"
           style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.40)' }}
-        />
+        >
+          <div className="flex items-center gap-6" aria-hidden>
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={`w-4 h-4 rounded-full transition-colors duration-200 ${filledCount === i ? 'animate-pulse' : ''}`}
+                style={filledCount > i
+                  ? { background: '#ffffff', boxShadow: '0 0 10px 3px rgba(255,255,255,0.60)' }
+                  : { background: 'transparent', border: '1.5px solid rgba(255,255,255,0.9)' }}
+              />
+            ))}
+          </div>
+          <input
+            id={mobilePinInputId}
+            ref={mobilePinInputRef}
+            type="password"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            autoComplete="off"
+            maxLength={4}
+            value={pin}
+            disabled={isLoading}
+            onChange={(e) => onPinChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && pin.length === 4) {
+                e.preventDefault();
+                onConfirm();
+              }
+            }}
+            className="absolute inset-0 h-full w-full rounded-2xl opacity-0 outline-none"
+          />
+        </div>
         {error && <p className="text-red-400 text-xs font-bold text-center animate-shake mt-2">{error}</p>}
       </div>
 
@@ -214,7 +230,7 @@ export function PinPadModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.22 }}
-      className="fixed inset-0 z-[10060] flex flex-col items-center justify-start pt-[max(4rem,env(safe-area-inset-top,0px))] md:justify-center md:pt-0 overflow-hidden bg-black/30"
+      className="fixed inset-0 z-[10060] flex flex-col items-center justify-start pt-[max(5.5rem,env(safe-area-inset-top,0px))] md:justify-center md:pt-0 overflow-hidden bg-black/30"
       style={{ }}
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
     >
