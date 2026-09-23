@@ -337,6 +337,17 @@ body {
   .app-main-top-pad {
     padding-top: var(--layout-main-pt);
   }
+
+  /** Contenuto "occupato" (sync / blocco dati): sfocatura del contenuto sottostante. */
+  .app-content-busy {
+    filter: blur(12px);
+  }
+
+  /** Overlay a schermo intero con vetro: su iOS il blur è ridotto (vedi sotto). */
+  .overlay-fullscreen-blur {
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
+  }
 }
 
 /* Card / Panel — fill solido per moduli densi in pagina; dialog su overlay → `modal-glass-panel` */
@@ -2568,6 +2579,40 @@ html[data-ios="1"] [class*="surface-glass"],
 html[data-ios="1"] .ui-toolbar-page-band-presences .ui-toolbar-group {
   -webkit-backdrop-filter: blur(6px) !important;
   backdrop-filter: blur(6px) !important;
+}
+
+/* ── iOS: altre tre vette di costo GPU (stessa causa) ────────────────────────
+   1. il filtro a schermo intero sul contenuto durante sync/blocco;
+   2. i backdrop-filter delle celle sticky della griglia, che si ricompongono a
+      ogni frame di scroll (header, colonna dipendente, fascia toolbar, tfoot);
+   3. le animazioni infinite di box-shadow, che ridipingono a ogni frame.
+   Su iPhone azzeriamo 1 e 2 (il fondo diventa un fill solido, resta leggibile)
+   e rendiamo statico il bagliore di 3: aspetto praticamente identico. */
+html[data-ios="1"] .app-content-busy {
+  filter: none !important;
+}
+html[data-ios="1"] .overlay-fullscreen-blur {
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+}
+html[data-ios="1"] .wst-header-scrolled th,
+html[data-ios="1"] .wst-col-scrolled.wst-col-scrolled,
+html[data-ios="1"] .toolbar-band-over-content,
+html[data-ios="1"] tfoot th.backdrop-blur-lg,
+html[data-ios="1"] tfoot td.backdrop-blur-lg {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background-color: rgba(10, 10, 12, 0.92) !important;
+}
+html[data-ios="1"] .animate-pulse-glow {
+  animation: none !important;
+  will-change: auto;
+  box-shadow: 0 0 24px rgba(255, 149, 0, 0.75), 0 0 8px rgba(255, 200, 150, 0.45);
+}
+html[data-ios="1"] .animate-pulse-glow-sm {
+  animation: none !important;
+  will-change: auto;
+  box-shadow: 0 0 18px rgba(255, 149, 0, 0.70), 0 0 6px rgba(255, 200, 150, 0.40);
 }
 
 /* ── Testo globale ── */

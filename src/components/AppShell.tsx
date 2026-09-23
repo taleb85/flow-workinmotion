@@ -821,7 +821,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         id="main-content"
         role="main"
         aria-label={t.main_content_aria}
-        className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending || appLockVisible ? 'blur-md pointer-events-none' : ''}`}>
+        className={`w-full flex-1 min-h-0 flex flex-col ${isGlobalRefreshing || postRefreshLocked || postUnlockReloadPending || appLockVisible ? 'app-content-busy pointer-events-none' : ''}`}>
         {/* Larghezza massima contenuto unificata (max-w-[96rem]): tutte le schede
             condividono lo stesso blocco centrato, come già facevano
             Statistiche/Ferie/Profilo-visibilità. */}
@@ -926,19 +926,11 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
         return (
           <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 font-sans text-center px-4 bg-black/40">
             <div className="flex flex-col items-center gap-6">
-              <motion.div
-                animate={{
-                  boxShadow: [
-                    '0 0 32px rgba(255,149,0,0.70), 0 0 12px rgba(255,200,150,0.50)',
-                    '0 0 56px rgba(255,149,0,1.00), 0 0 24px rgba(255,200,150,0.80)',
-                    '0 0 32px rgba(255,149,0,0.70), 0 0 12px rgba(255,200,150,0.50)',
-                  ],
-                }}
-                transition={{ duration: 2.4, ease: 'easeInOut', repeat: Infinity }}
-                style={{ borderRadius: '2rem' }}
-              >
+              {/* Bagliore con keyframes CSS: l'animazione `boxShadow` di Framer
+                  ridipinge a ogni frame (una delle cause del crash iOS). */}
+              <div className="animate-pulse-glow-sm" style={{ borderRadius: '2rem' }}>
                 <FlowWaveIcon size={120} radius={32} />
-              </motion.div>
+              </div>
               <div className="flex flex-col items-center gap-1 min-h-[2.5rem]">
                 <p className="text-white/70 text-xs font-semibold uppercase tracking-widest">
                   {t.sync_total_in_progress}
@@ -1049,20 +1041,12 @@ function ProtectedApp() {
   >
         <motion.div
           initial={{ scale: 0.82, opacity: 0 }}
-          animate={{
-            scale: 1,
-            opacity: 1,
-            boxShadow: [
-              '0 0 32px rgba(255,149,0,0.70), 0 0 12px rgba(255,200,150,0.50)',
-              '0 0 56px rgba(255,149,0,1.00), 0 0 24px rgba(255,200,150,0.80)',
-              '0 0 32px rgba(255,149,0,0.70), 0 0 12px rgba(255,200,150,0.50)',
-            ],
-          }}
+          animate={{ scale: 1, opacity: 1 }}
           transition={{
             scale:     { duration: 0.6, ease: [0.34, 1.2, 0.64, 1] },
             opacity:   { duration: 0.5, ease: 'easeOut' },
-            boxShadow: { duration: 2.4, ease: 'easeInOut', repeat: Infinity, delay: 0.5 },
           }}
+          className="animate-pulse-glow"
           style={{ borderRadius: '2.375rem' }}
         >
           <FlowWaveIcon size={140} radius={38} />

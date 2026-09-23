@@ -81,27 +81,19 @@ export default function PostUnlockRestartOverlay({ language }: { language: Langu
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[110] flex flex-col items-center justify-center px-6 text-center font-sans"
-      style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(107,107,107,0.15) 0%, transparent 55%)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
+      className="overlay-fullscreen-blur fixed inset-0 z-[110] flex flex-col items-center justify-center px-6 text-center font-sans"
+      style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(107,107,107,0.15) 0%, transparent 55%)' }}
       role="status"
       aria-live="polite"
       aria-busy="true"
       aria-label={tv.post_unlock_restart_title ?? 'Aggiornamento'}
     >
       {/* Icona */}
-      <motion.div
-        animate={{
-          boxShadow: [
-            '0 0 32px rgba(255,149,0,0.70), 0 0 12px rgba(255,200,150,0.50)',
-            '0 0 56px rgba(255,149,0,1.00), 0 0 24px rgba(255,200,150,0.80)',
-            '0 0 32px rgba(255,149,0,0.70), 0 0 12px rgba(255,200,150,0.50)',
-          ],
-        }}
-        transition={{ duration: 2.4, ease: 'easeInOut', repeat: Infinity }}
-        style={{ borderRadius: '2rem', marginBottom: '1.5rem' }}
-      >
+      {/* Bagliore con keyframes CSS: l'animazione `boxShadow` di Framer
+          ridipinge a ogni frame (una delle cause del crash iOS). */}
+      <div className="animate-pulse-glow-sm" style={{ borderRadius: '2rem', marginBottom: '1.5rem' }}>
         <FlowWaveIcon size={120} radius={32} />
-      </motion.div>
+      </div>
 
       <div className="flex flex-col items-center gap-1 mb-5 min-h-[2.5rem]">
         <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">{t.post_unlock_restarting}</p>
