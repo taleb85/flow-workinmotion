@@ -107,7 +107,6 @@ function MatrixToggle({ enabled, onToggle }: { enabled: boolean; onToggle: () =>
       isActive={enabled}
       onChange={onToggle}
       size="xs"
-      shape="rect"
       darkMode
       className="inline-flex"
     />
@@ -127,7 +126,6 @@ function MobileRow({ label, enabled, onToggle, sublabel }: {
         isActive={enabled}
         onChange={onToggle}
         size="sm"
-        shape="rect"
         darkMode
         className="shrink-0"
       />
