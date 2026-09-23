@@ -22,6 +22,7 @@ import {
   type PunchRoundingRules,
   type RoundingAnchor,
   type RoundingDirection,
+  type RoundingPreviewResult,
 } from '../../utils/punchRoundingRules';
 import { translateRole } from '../../utils/roles';
 import { getDepartments } from '../../utils/departments';
@@ -120,6 +121,28 @@ function AnchorPicker({ value, onChange }: { value: RoundingAnchor; onChange: (v
   );
 }
 
+function InlinePreview({
+  label,
+  result,
+  message,
+}: {
+  label: string;
+  result: RoundingPreviewResult;
+  message: string;
+}) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/25 px-2.5 py-2">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">{label}</span>
+        <span className="text-sm font-bold text-white/50 line-through">{result.rawHHMM}</span>
+        <span className="text-white/40">→</span>
+        <span className="text-sm font-bold text-white">{result.effectiveHHMM}</span>
+      </div>
+      <p className="mt-0.5 text-[0.6875rem] leading-snug text-white/60">{message}</p>
+    </div>
+  );
+}
+
 export function PunchRoundingSettingsSection() {
   const t = useT();
   const { effectiveLanguage } = useAppUser();
@@ -129,11 +152,15 @@ export function PunchRoundingSettingsSection() {
   const [draft, setDraft] = useState<PunchRoundingRules>(() => sanitizePunchRoundingRules(punchRoundingRules));
   const [activeTab, setActiveTab] = useState<'rules' | 'exceptions' | 'preview'>('rules');
 
-  // Anteprima
+  // Anteprima: un orario di esempio per l'entrata e uno per l'uscita.
   const [previewType, setPreviewType] = useState<'in' | 'out'>('in');
-  const [previewTime, setPreviewTime] = useState('18:03');
+  const [previewInTime, setPreviewInTime] = useState('18:07');
+  const [previewOutTime, setPreviewOutTime] = useState('23:07');
   const [previewShiftStart, setPreviewShiftStart] = useState('18:00');
   const [previewShiftEnd, setPreviewShiftEnd] = useState('23:00');
+
+  const previewTime = previewType === 'in' ? previewInTime : previewOutTime;
+  const setPreviewTime = (value: string) => (previewType === 'in' ? setPreviewInTime(value) : setPreviewOutTime(value));
 
   useEffect(() => {
     setDraft(sanitizePunchRoundingRules(punchRoundingRules));
@@ -211,30 +238,55 @@ export function PunchRoundingSettingsSection() {
     return Array.from(byLabel.values());
   }, [effectiveLanguage]);
 
-  const preview = useMemo(() => {
+  const shiftDate = useMemo(() => {
     const today = new Date();
-    const shiftDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    return previewPunchRounding({
-      rules: draft,
-      type: previewType,
-      timeHHMM: previewTime,
-      shiftDate,
-      shiftStart: previewShiftStart,
-      shiftEnd: previewShiftEnd,
-    });
-  }, [draft, previewType, previewTime, previewShiftStart, previewShiftEnd]);
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  }, []);
 
-  const previewMessage = useMemo(() => {
-    if (preview.skippedReason === 'rules_disabled') return t.settings_rounding_prev_off;
-    if (preview.skippedReason === 'exception') return t.settings_rounding_prev_exception;
-    if (preview.skippedReason === 'rule_disabled') return t.settings_rounding_prev_rule_off;
-    if (!preview.rounded) return formatTrans(t.settings_rounding_prev_aligned, { time: preview.effectiveHHMM });
-    return formatTrans(t.settings_rounding_prev_rounded, {
-      delta: `${preview.deltaMinutes > 0 ? '+' : ''}${preview.deltaMinutes}`,
-      step: preview.appliedRule?.stepMinutes ?? 0,
-      direction: preview.appliedRule ? directionLabel(preview.appliedRule.direction) : '',
-    });
-  }, [preview, t, directionLabel]);
+  const previewIn = useMemo(
+    () =>
+      previewPunchRounding({
+        rules: draft,
+        type: 'in',
+        timeHHMM: previewInTime,
+        shiftDate,
+        shiftStart: previewShiftStart,
+        shiftEnd: previewShiftEnd,
+      }),
+    [draft, previewInTime, shiftDate, previewShiftStart, previewShiftEnd]
+  );
+
+  const previewOut = useMemo(
+    () =>
+      previewPunchRounding({
+        rules: draft,
+        type: 'out',
+        timeHHMM: previewOutTime,
+        shiftDate,
+        shiftStart: previewShiftStart,
+        shiftEnd: previewShiftEnd,
+      }),
+    [draft, previewOutTime, shiftDate, previewShiftStart, previewShiftEnd]
+  );
+
+  const preview = previewType === 'in' ? previewIn : previewOut;
+
+  const explainPreview = useCallback(
+    (p: ReturnType<typeof previewPunchRounding>): string => {
+      if (p.skippedReason === 'rules_disabled') return t.settings_rounding_prev_off;
+      if (p.skippedReason === 'exception') return t.settings_rounding_prev_exception;
+      if (p.skippedReason === 'rule_disabled') return t.settings_rounding_prev_rule_off;
+      if (!p.rounded) return formatTrans(t.settings_rounding_prev_aligned, { time: p.effectiveHHMM });
+      return formatTrans(t.settings_rounding_prev_rounded, {
+        delta: `${p.deltaMinutes > 0 ? '+' : ''}${p.deltaMinutes}`,
+        step: p.appliedRule?.stepMinutes ?? 0,
+        direction: p.appliedRule ? directionLabel(p.appliedRule.direction) : '',
+      });
+    },
+    [t, directionLabel]
+  );
+
+  const previewMessage = explainPreview(preview);
 
   const tabOptions = [
     { id: 'rules' as const, label: t.settings_rounding_tab_rules },
@@ -359,6 +411,11 @@ export function PunchRoundingSettingsSection() {
                       className="flex-shrink-0"
                     />
                   </div>
+                  <InlinePreview
+                    label={t.settings_rounding_preview_result}
+                    result={previewIn}
+                    message={explainPreview(previewIn)}
+                  />
                 </div>
 
                 {/* Uscita */}
@@ -385,6 +442,11 @@ export function PunchRoundingSettingsSection() {
                     <label className={labelClass}>{t.settings_rounding_anchor_label}</label>
                     <AnchorPicker value={draft.clockOut.anchor} onChange={(v) => setClockOut({ anchor: v })} />
                   </div>
+                  <InlinePreview
+                    label={t.settings_rounding_preview_result}
+                    result={previewOut}
+                    message={explainPreview(previewOut)}
+                  />
                 </div>
 
                 {/* Finestra pausa */}
