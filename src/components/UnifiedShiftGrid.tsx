@@ -250,14 +250,38 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
       {isExpanded && (
       <div className="space-y-2 divide-y divide-white/10">
         {!hasShifts ? (
-          <div
-            className={`py-4 text-center border-2 border-dashed border-white/20 rounded-xl ${dropTargetKey ===`${user.id}_empty` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
-            onDragOver={(e) => onDragOver(e, `${user.id}_empty`)}
-            onDragLeave={onDragLeave}
-            onDrop={(e) => { const firstDay = weekDateStrings[0]; if (firstDay) onDrop(e, user.id, firstDay); }}
-          >
-            <p className="text-xs text-white/50 italic">{t.no_shifts_this_week ?? 'Nessun turno'}</p>
-          </div>
+          (() => {
+            const canCreate = canEdit && !isSelectionMode;
+            // Crea il turno oggi se è nel periodo mostrato, altrimenti il primo giorno.
+            const todayIdx = weekDays.findIndex((d) => isToday(d));
+            const targetDate = weekDateStrings[todayIdx >= 0 ? todayIdx : 0];
+            const create = canCreate && targetDate ? () => onCreateShift(user.id, targetDate) : undefined;
+            return (
+              <div
+                role={create ? 'button' : undefined}
+                tabIndex={create ? 0 : undefined}
+                aria-label={create ? `${t.add_shift ?? 'Aggiungi'} — ${user.first_name ?? ''}` : undefined}
+                onClick={create}
+                onKeyDown={create ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    create();
+                  }
+                } : undefined}
+                className={`py-4 text-center border-2 border-dashed border-white/20 rounded-xl ${create ? 'cursor-pointer transition-colors hover:border-white/45 hover:bg-white/[0.05]' : ''} ${dropTargetKey ===`${user.id}_empty` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
+                onDragOver={(e) => onDragOver(e, `${user.id}_empty`)}
+                onDragLeave={onDragLeave}
+                onDrop={(e) => { const firstDay = weekDateStrings[0]; if (firstDay) onDrop(e, user.id, firstDay); }}
+              >
+                <p className="text-xs text-white/50 italic">{t.no_shifts_this_week ?? 'Nessun turno'}</p>
+                {create && (
+                  <p className="mt-1.5 inline-flex items-center gap-1 text-[0.6875rem] font-bold text-white/45">
+                    <Plus className="h-3 w-3" /> {t.add_shift ?? 'Aggiungi'}
+                  </p>
+                )}
+              </div>
+            );
+          })()
         ) : (
           weekDays.map(day => {
             const dateStr = format(day, 'yyyy-MM-dd');
