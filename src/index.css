@@ -2588,9 +2588,8 @@ html[data-ios="1"] .ui-toolbar-page-band-presences .ui-toolbar-group {
    3. le animazioni infinite di box-shadow, che ridipingono a ogni frame.
    Su iPhone azzeriamo 1 e 2 (il fondo diventa un fill solido, resta leggibile)
    e rendiamo statico il bagliore di 3: aspetto praticamente identico.
-   NB: la fascia toolbar resta fuori dal gruppo "fill solido" — è un elemento
-   unico e sempre visibile, togliergli il vetro la trasformerebbe in una banda
-   nera: lì riduciamo soltanto il blur. */
+   NB: la fascia toolbar resta fuori da questo blocco — è un elemento unico e
+   sempre visibile, togliergli il vetro la trasformerebbe in una banda nera. */
 html[data-ios="1"] .app-content-busy {
   filter: none !important;
 }
@@ -2598,10 +2597,8 @@ html[data-ios="1"] .overlay-fullscreen-blur {
   -webkit-backdrop-filter: blur(8px) !important;
   backdrop-filter: blur(8px) !important;
 }
-html[data-ios="1"] .toolbar-band-over-content {
-  -webkit-backdrop-filter: blur(8px) !important;
-  backdrop-filter: blur(8px) !important;
-}
+/* Fascia toolbar: NON toccata. È un elemento unico e sempre visibile, e
+   toglierle il vetro la trasformerebbe in una banda nera. */
 html[data-ios="1"] .wst-header-scrolled th,
 html[data-ios="1"] .wst-col-scrolled.wst-col-scrolled,
 html[data-ios="1"] tfoot th.backdrop-blur-lg,
