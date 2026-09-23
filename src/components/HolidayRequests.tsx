@@ -618,7 +618,7 @@ export default function HolidayRequests({ embedded = false }: { embedded?: boole
             <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] overflow-hidden">
               <div className="px-5 py-4 flex items-center justify-between">
                 <h3 className="text-white font-semibold text-xl">{t.rejected}</h3>
-                <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-bold border border-red-200/80">{rejectedAll.length}</span>
+                <span className="px-2 py-0.5 rounded-[var(--flow-radius-sm)] bg-red-100 text-red-700 text-xs font-bold border border-red-200/80">{rejectedAll.length}</span>
               </div>
               <div>
                 {rejectedAll

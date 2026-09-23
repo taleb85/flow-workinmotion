@@ -2714,7 +2714,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => setDrawerDeleteConfirm(true)}
                       gradientFrom="#fb7185"
                       gradientTo="#e11d48"
-                      className="h-8 w-8 rounded-full bg-rose-600/20 text-rose-300 hover:bg-rose-600/30">
+                      className="h-8 w-8 rounded-lg bg-rose-600/20 text-rose-300 hover:bg-rose-600/30">
                       <Trash2 className="h-4 w-4" />
                     </GradientIconButton>
                   )}
@@ -2736,7 +2736,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => void handlePublishShift(selectedShift)}
                       gradientFrom="#67e8f9"
                       gradientTo="#0891b2"
-                      className="h-8 w-8 rounded-full bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30">
+                      className="h-8 w-8 rounded-lg bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30">
                       <Send className="h-4 w-4 shrink-0" />
                     </GradientIconButton>
                   )}
@@ -2746,7 +2746,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => void handleReopenShift(selectedShift)}
                       gradientFrom="#fbbf24"
                       gradientTo="#d97706"
-                      className="h-8 w-8 rounded-full bg-amber-500/20 text-amber-300 hover:bg-amber-500/30">
+                      className="h-8 w-8 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30">
                       <Unlock className="h-4 w-4 shrink-0" />
                     </GradientIconButton>
                   )}
@@ -2756,7 +2756,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => handleFreezeShift(selectedShift)}
                       gradientFrom="#34d399"
                       gradientTo="#059669"
-                      className="h-8 w-8 rounded-full bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/30">
+                      className="h-8 w-8 rounded-lg bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/30">
                       <Unlock className="h-4 w-4 shrink-0" />
                     </GradientIconButton>
                   )}
@@ -2766,7 +2766,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => handleUnfreezeShift(selectedShift)}
                       gradientFrom="#94a3b8"
                       gradientTo="#475569"
-                      className="h-8 w-8 rounded-full bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
+                      className="h-8 w-8 rounded-lg bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
                       <Lock className="h-4 w-4 shrink-0" />
                     </GradientIconButton>
                   )}
@@ -2776,7 +2776,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       onClick={() => setShowShiftAuditModal(true)}
                       gradientFrom="#94a3b8"
                       gradientTo="#475569"
-                      className="h-8 w-8 rounded-full bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
+                      className="h-8 w-8 rounded-lg bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
                       <History className="h-4 w-4" />
                     </GradientIconButton>
                   )}
@@ -2786,7 +2786,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   onClick={handleCloseDrawer}
                   gradientFrom="#94a3b8"
                   gradientTo="#475569"
-                  className="h-8 w-8 rounded-full bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
+                  className="h-8 w-8 rounded-lg bg-white/10 text-white/50 hover:bg-white/20 hover:text-white">
                   <X className="h-4 w-4" />
                 </GradientIconButton>
               </div>

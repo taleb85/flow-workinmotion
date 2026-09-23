@@ -572,7 +572,7 @@ export default function ProfileNavTabPanel({
             {[roleDisplay, deptLabel !== roleDisplay ? deptLabel : null, t.status_active].filter(Boolean).map((label, i) => (
               <span
                 key={i}
-                className="text-[0.6875rem] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider"
+                className="text-[0.6875rem] font-bold px-2.5 py-0.5 rounded-[var(--flow-radius-sm)] uppercase tracking-wider"
                 style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.20)', color: 'rgba(255,255,255,0.65)' }}
               >
                 {label}
