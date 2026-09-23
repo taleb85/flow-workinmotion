@@ -546,3 +546,78 @@ function directionLabel(direction?: RoundingDirection): string {
   if (direction === 'nearest') return 'matematico';
   return '';
 }
+
+// ── Ricalcolo delle timbrature già registrate ─────────────────────────────────
+
+export interface PunchRoundingShiftRef extends PunchRoundingShiftLike {
+  id: string;
+}
+
+export interface PunchRoundingUserRef extends PunchRoundingUserLike {
+  id: string;
+}
+
+export interface PunchRoundingPunchRef {
+  id: string;
+  user_id: string;
+  type: 'in' | 'out';
+  timestamp: string;
+  calculated_time?: string | null;
+  shift_id?: string | null;
+  source?: string | null;
+}
+
+export interface PunchRoundingRecalculation {
+  id: string;
+  /** Nuovo orario efficace da salvare in `calculated_time`. */
+  iso: string;
+}
+
+/**
+ * Calcola quali timbrature già registrate vanno riscritte quando cambiano le regole.
+ *
+ * Le regole si applicano al momento della timbratura: senza questo passaggio una
+ * configurazione salvata vale solo per le timbrature successive. Vengono toccate
+ * solo le timbrature dell'app/kiosk (non `source === 'manual'`) il cui orario
+ * efficace non è mai stato corretto a mano, cioè è ancora quello reale oppure è
+ * esattamente il risultato delle regole precedenti. Un valore diverso è una
+ * correzione manuale di un responsabile e resta intatta.
+ */
+export function planPunchRoundingRecalculation(params: {
+  previousRules: PunchRoundingRules;
+  nextRules: PunchRoundingRules;
+  punches: PunchRoundingPunchRef[];
+  shifts: PunchRoundingShiftRef[];
+  users: PunchRoundingUserRef[];
+}): PunchRoundingRecalculation[] {
+  const { previousRules, nextRules, punches, shifts, users } = params;
+  const shiftById = new Map(shifts.map((s) => [s.id, s]));
+  const userById = new Map(users.map((u) => [u.id, u]));
+  const plan: PunchRoundingRecalculation[] = [];
+
+  for (const punch of punches) {
+    if (punch.source === 'manual') continue;
+    const shift = punch.shift_id ? shiftById.get(punch.shift_id) : undefined;
+    if (!shift) continue;
+
+    const shared = {
+      type: punch.type,
+      rawIso: punch.timestamp,
+      shift,
+      user: userById.get(punch.user_id) ?? null,
+    };
+    const previous = computeRoundedPunchTime({ rules: previousRules, ...shared });
+
+    const storedMinutes = punchMinutesRelativeToShift(punch.calculated_time || punch.timestamp, shift.date);
+    if (storedMinutes == null) continue;
+    const untouched = storedMinutes === previous.rawMinutes || storedMinutes === previous.effectiveMinutes;
+    if (!untouched) continue;
+
+    const next = computeRoundedPunchTime({ rules: nextRules, ...shared });
+    if (next.effectiveMinutes === storedMinutes) continue;
+
+    plan.push({ id: punch.id, iso: isoFromShiftMinutes(shift.date, next.effectiveMinutes) });
+  }
+
+  return plan;
+}

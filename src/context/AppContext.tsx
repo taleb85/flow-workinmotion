@@ -108,6 +108,7 @@ import {
   loadPunchRoundingRulesFromSupabase,
   sanitizePunchRoundingRules,
   computeRoundedPunchTime,
+  planPunchRoundingRecalculation,
 } from '../utils/punchRoundingRules';
 import {
   mergeShiftsDeductExclusionsFromLocal,
@@ -2544,13 +2545,37 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 
   const setPunchRoundingRules = useCallback(async (rules: PunchRoundingRules) => {
     const sanitized = sanitizePunchRoundingRules(rules);
+    const previous = punchRoundingRules;
     setPunchRoundingRulesState(sanitized);
     savePunchRoundingRules(sanitized);
     markManagementDataTouched();
+
+    // Le regole valgono al momento della timbratura: senza questo passaggio una nuova
+    // configurazione varrebbe solo per le timbrature successive. Riallinea le timbrature
+    // app/kiosk il cui orario efficace deriva dalle regole precedenti; le correzioni
+    // manuali (o le timbrature inserite a mano) restano intatte.
+    const recalculations = planPunchRoundingRecalculation({
+      previousRules: previous,
+      nextRules: sanitized,
+      punches: punchRecordsRef.current,
+      shifts,
+      users,
+    });
+    if (recalculations.length > 0) {
+      const patched = new Map<string, PunchRecord>();
+      for (const item of recalculations) {
+        const upd = await database.punchRecords.update(item.id, { calculated_time: item.iso }).catch(() => null);
+        if (upd) patched.set(item.id, upd as PunchRecord);
+      }
+      if (patched.size > 0) {
+        setPunchRecords((prev) => prev.map((p) => (patched.has(p.id) ? { ...p, ...patched.get(p.id) } : p)));
+      }
+    }
+
     await savePunchRoundingRulesToSupabase(sanitized).catch(() => {});
     const rev = await bumpClientSyncRevisionOnSupabase();
     if (rev != null) writeAckClientSyncRevision(rev);
-  }, [markManagementDataTouched]);
+  }, [markManagementDataTouched, punchRoundingRules, shifts, users]);
 
   const pushSettingsToCloud = useCallback(async () => {
     if (!isAppCloudSyncEnabled()) {

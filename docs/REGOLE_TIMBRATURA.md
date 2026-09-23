@@ -54,11 +54,29 @@ l'interruttore generale o quello della singola regola è spento: in quel caso la
 
 ## Salvataggio e reset
 
-- **Salva regole**: valida la configurazione e la salva su Supabase Storage
-  (`app-config/punch_rounding_rules.json`) + mirror in `localStorage`, poi allinea gli altri
-  dispositivi.
+- **Salva regole**: valida la configurazione, la salva su Supabase Storage
+  (`app-config/punch_rounding_rules.json`) + mirror in `localStorage`, allinea gli altri
+  dispositivi e **riallinea le timbrature già registrate** (vedi sotto).
 - **Ripristina valori predefiniti**: ricarica i valori di default nella scheda, **senza salvare**:
   occorre premere *Salva regole* per applicarli.
+
+### Ricalcolo delle timbrature esistenti
+
+L'arrotondamento viene scritto in `calculated_time` nel momento in cui la timbratura viene
+registrata: senza un passaggio aggiuntivo una regola salvata varrebbe solo per le timbrature
+successive, non per le ore già registrate.
+
+Per questo, al salvataggio l'app riallinea anche le timbrature esistenti. Vengono considerate solo
+le timbrature dell'app/kiosk (non quelle inserite a mano, `source = 'manual'`) il cui orario
+efficace **non è mai stato corretto**: cioè è ancora l'ora reale del click oppure è esattamente il
+risultato delle regole precedenti. Qualsiasi altro valore è una correzione manuale di un
+responsabile e resta intatta.
+
+Di conseguenza:
+
+- salvare le regole aggiorna subito le ore dei turni già timbrati;
+- disattivare l'arrotondamento e salvare riporta le timbrature all'ora reale (il ricalcolo è
+  reversibile), senza toccare le correzioni manuali.
 
 ### Validazioni
 

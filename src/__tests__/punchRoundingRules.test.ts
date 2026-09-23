@@ -3,6 +3,7 @@ import {
   DEFAULT_PUNCH_ROUNDING_RULES,
   computeRoundedPunchTime,
   isRoundingExceptional,
+  planPunchRoundingRecalculation,
   previewPunchRounding,
   punchMinutesRelativeToShift,
   roundBreakWindow,
@@ -272,6 +273,103 @@ describe('validatePunchRoundingRules', () => {
     const rules = enabledRules();
     rules.exceptions.weekdays = [0, 1, 2, 3, 4, 5, 6];
     expect(validatePunchRoundingRules(rules).some((i) => i.code === 'exception_emptied')).toBe(true);
+  });
+});
+
+describe('planPunchRoundingRecalculation', () => {
+  const shift = { id: 's1', date: '2026-09-22', start_time: '18:00', end_time: '23:00' };
+  const punches = [
+    {
+      id: 'p1',
+      user_id: 'u1',
+      type: 'out' as const,
+      timestamp: localIso('2026-09-22', 22, 50),
+      calculated_time: null,
+      shift_id: 's1',
+      source: 'kiosk',
+    },
+  ];
+  const base = {
+    punches,
+    shifts: [shift],
+    users: [{ id: 'u1', role: 'waiter', department: 'sala' }],
+  };
+
+  it('riallinea le timbrature app/kiosk registrate con le regole precedenti', () => {
+    const plan = planPunchRoundingRecalculation({
+      previousRules: { ...DEFAULT_PUNCH_ROUNDING_RULES, enabled: false },
+      nextRules: enabledRules(),
+      ...base,
+    });
+    expect(plan).toEqual([{ id: 'p1', iso: localIso('2026-09-22', 22, 45) }]);
+  });
+
+  it('riallinea le timbrature mai corrette anche risalvando le stesse regole', () => {
+    const plan = planPunchRoundingRecalculation({
+      previousRules: enabledRules(),
+      nextRules: enabledRules(),
+      ...base,
+    });
+    expect(plan).toEqual([{ id: 'p1', iso: localIso('2026-09-22', 22, 45) }]);
+  });
+
+  it('non tocca una correzione manuale sul record', () => {
+    const plan = planPunchRoundingRecalculation({
+      previousRules: { ...DEFAULT_PUNCH_ROUNDING_RULES, enabled: false },
+      nextRules: enabledRules(),
+      ...base,
+      punches: [{ ...punches[0], calculated_time: localIso('2026-09-22', 22, 52) }],
+    });
+    expect(plan).toEqual([]);
+  });
+
+  it('non tocca le timbrature inserite a mano', () => {
+    const plan = planPunchRoundingRecalculation({
+      previousRules: { ...DEFAULT_PUNCH_ROUNDING_RULES, enabled: false },
+      nextRules: enabledRules(),
+      ...base,
+      punches: [{ ...punches[0], source: 'manual' }],
+    });
+    expect(plan).toEqual([]);
+  });
+
+  it('ignora le timbrature senza turno collegato o con turno sconosciuto', () => {
+    expect(
+      planPunchRoundingRecalculation({
+        previousRules: { ...DEFAULT_PUNCH_ROUNDING_RULES, enabled: false },
+        nextRules: enabledRules(),
+        ...base,
+        punches: [{ ...punches[0], shift_id: null }],
+      })
+    ).toEqual([]);
+    expect(
+      planPunchRoundingRecalculation({
+        previousRules: { ...DEFAULT_PUNCH_ROUNDING_RULES, enabled: false },
+        nextRules: enabledRules(),
+        ...base,
+        punches: [{ ...punches[0], shift_id: 'ignoto' }],
+      })
+    ).toEqual([]);
+  });
+
+  it('riporta l’orario reale quando l’arrotondamento viene disattivato', () => {
+    const plan = planPunchRoundingRecalculation({
+      previousRules: enabledRules(),
+      nextRules: { ...DEFAULT_PUNCH_ROUNDING_RULES, enabled: false },
+      ...base,
+      punches: [{ ...punches[0], calculated_time: localIso('2026-09-22', 22, 45) }],
+    });
+    expect(plan).toEqual([{ id: 'p1', iso: localIso('2026-09-22', 22, 50) }]);
+  });
+
+  it('non propone nulla se il risultato non cambia', () => {
+    const plan = planPunchRoundingRecalculation({
+      previousRules: enabledRules(),
+      nextRules: enabledRules(),
+      ...base,
+      punches: [{ ...punches[0], calculated_time: localIso('2026-09-22', 22, 45) }],
+    });
+    expect(plan).toEqual([]);
   });
 });
 
