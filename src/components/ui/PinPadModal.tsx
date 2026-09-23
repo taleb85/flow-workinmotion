@@ -108,8 +108,8 @@ export function PinPadModal({
       {/* Blocco 1 — icona + pallini. Su telefono sta in alto, staccato dal
           tastierino. */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, scale: 0.94 }}
+        animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut', delay: 0.12 }}
         className="pinpad-block pinpad-block-info my-auto flex flex-col items-center text-center gap-3 px-5 py-6"
       >
