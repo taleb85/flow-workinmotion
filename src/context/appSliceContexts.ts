@@ -3,6 +3,7 @@ import type { User, Shift, HolidayRequest, PunchRecord } from '../types';
 import type { FeatureFlags } from '../utils/featureFlags';
 import type { WorkRules } from '../utils/workRules';
 import type { BreakRule } from '../utils/breakRules';
+import type { PunchRoundingRules } from '../utils/punchRoundingRules';
 import type { GeofenceConfig } from '../utils/geofencePunch';
 import type { PresenceVerificationConfig } from '../utils/presenceVerificationConfigStorage';
 
@@ -125,6 +126,8 @@ export interface ConfigSlice {
   setWorkRules: (rules: WorkRules) => Promise<void>;
   breakRules: BreakRule[];
   setBreakRules: (rules: BreakRule[]) => Promise<void>;
+  punchRoundingRules: PunchRoundingRules;
+  setPunchRoundingRules: (rules: PunchRoundingRules) => Promise<void>;
   geofenceEffectiveConfig: GeofenceConfig | null;
   presenceVerificationConfig: PresenceVerificationConfig;
   roleTemplatesRevision: number;

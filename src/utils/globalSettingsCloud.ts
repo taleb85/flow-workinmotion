@@ -16,6 +16,7 @@ import type { FeatureFlags } from './featureFlags';
 import type { RoleFeatureTemplatesOnDisk } from './roleFeatureTemplates';
 import type { AdminModulesGlobalOnDisk } from './adminModulesGlobal';
 import type { PresenceVerificationConfig } from './presenceVerificationConfigStorage';
+import type { PunchRoundingRules } from './punchRoundingRules';
 import { isAppCloudSyncEnabled } from './appCloudSync';
 
 export const GLOBAL_SETTINGS_BUNDLE_PATH = 'config/settings_bundle.json';
@@ -116,6 +117,7 @@ export interface AppGlobalSettingsBundle {
   roleFeatureTemplates?: RoleFeatureTemplatesOnDisk | null;
   adminModulesGlobal?: AdminModulesGlobalOnDisk | null;
   presenceVerification?: PresenceVerificationConfig | null;
+  punchRoundingRules?: PunchRoundingRules | null;
 }
 
 function storageEnabled(): boolean {
@@ -229,6 +231,7 @@ export function buildGlobalSettingsBundleFromParts(parts: {
   roleFeatureTemplates: RoleFeatureTemplatesOnDisk | null;
   adminModulesGlobal: AdminModulesGlobalOnDisk | null;
   presenceVerification: PresenceVerificationConfig;
+  punchRoundingRules: PunchRoundingRules;
 }): AppGlobalSettingsBundle {
   return {
     schemaVersion: GLOBAL_SETTINGS_SCHEMA_VERSION,
@@ -240,5 +243,6 @@ export function buildGlobalSettingsBundleFromParts(parts: {
     roleFeatureTemplates: parts.roleFeatureTemplates ? { ...parts.roleFeatureTemplates } : null,
     adminModulesGlobal: parts.adminModulesGlobal ? { ...parts.adminModulesGlobal } : null,
     presenceVerification: { ...parts.presenceVerification },
+    punchRoundingRules: { ...parts.punchRoundingRules },
   };
 }

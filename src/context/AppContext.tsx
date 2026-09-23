@@ -21,7 +21,7 @@ import {
 import { format, addDays, parseISO, isValid } from 'date-fns';
 import { database, formatSupabaseError } from '../lib/database';
 import { supabase } from '../lib/supabase';
-import { hasShiftConflictSameDay, computeEffectivePunchIn, calculateShiftMinutesGross } from '../utils/timeCalculations';
+import { hasShiftConflictSameDay, calculateShiftMinutesGross } from '../utils/timeCalculations';
 import { isShiftPayrollFrozen } from '../utils/timesheetFreezeCriteria';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -100,6 +100,15 @@ import {
   getActiveBreakRules,
   setAutoBreakTiers,
 } from '../utils/breakRules';
+import {
+  type PunchRoundingRules,
+  getPunchRoundingRules,
+  savePunchRoundingRules,
+  savePunchRoundingRulesToSupabase,
+  loadPunchRoundingRulesFromSupabase,
+  sanitizePunchRoundingRules,
+  computeRoundedPunchTime,
+} from '../utils/punchRoundingRules';
 import {
   mergeShiftsDeductExclusionsFromLocal,
   setLocalDeductExcludedRuleIds,
@@ -362,6 +371,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   const [featureFlags, setFeatureFlagsState] = useState<FeatureFlags>(() => getLocalFeatureFlags());
   const [workRules, setWorkRulesState] = useState<WorkRules>(() => ({ ...DEFAULT_WORK_RULES }));
   const [breakRules, setBreakRulesState] = useState<BreakRule[]>(() => []);
+  const [punchRoundingRules, setPunchRoundingRulesState] = useState<PunchRoundingRules>(() => getPunchRoundingRules());
   const [settingsCloudLastSyncedAt, setSettingsCloudLastSyncedAt] = useState<string | null>(null);
   const [settingsCloudPushBusy, setSettingsCloudPushBusy] = useState(false);
   const [roleTemplatesRevision, setRoleTemplatesRevision] = useState(0);
@@ -385,6 +395,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   const settingsBundleSeedDepsRef = useRef({
     workRules,
     breakRules,
+    punchRoundingRules,
     featureFlags,
     presenceVerificationConfig,
     roleFeatureTemplates: null as RoleFeatureTemplatesOnDisk | null,
@@ -396,12 +407,13 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     settingsBundleSeedDepsRef.current = {
       workRules,
       breakRules,
+      punchRoundingRules,
       featureFlags,
       presenceVerificationConfig,
       roleFeatureTemplates: getRoleFeatureTemplatesCache() ?? getLocalRoleFeatureTemplates(),
       adminModulesGlobal: getAdminModulesGlobalCache() ?? getLocalAdminModulesGlobal(),
     };
-  }, [workRules, breakRules, featureFlags, presenceVerificationConfig, roleTemplatesRevision, adminModulesRevision]);
+  }, [workRules, breakRules, punchRoundingRules, featureFlags, presenceVerificationConfig, roleTemplatesRevision, adminModulesRevision]);
 
   const refreshPresenceVerificationConfig = useCallback(async () => {
     const remote = await loadPresenceVerificationFromSupabase().catch(() => null);
@@ -438,6 +450,11 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     }
     if (bundle.breakRules) {
       setBreakRulesState(bundle.breakRules);
+    }
+    if (bundle.punchRoundingRules) {
+      const mergedRound = sanitizePunchRoundingRules(bundle.punchRoundingRules);
+      setPunchRoundingRulesState(mergedRound);
+      savePunchRoundingRules(mergedRound);
     }
     if (bundle.geofence !== undefined && bundle.geofence !== null) {
       writeLocalGeofenceConfig(bundle.geofence);
@@ -903,9 +920,10 @@ function AppProviderInner({ children }: { children: ReactNode }) {
             setAdminModulesRevision((n) => n + 1);
             await refreshGeofenceEffectiveConfig();
             await refreshPresenceVerificationConfig();
-            const [wrSb, brSb] = await Promise.all([
+            const [wrSb, brSb, prSb] = await Promise.all([
               loadWorkRulesFromSupabase().catch(() => null),
               loadBreakRulesFromSupabase().catch(() => null),
+              loadPunchRoundingRulesFromSupabase().catch(() => null),
             ]);
             if (wrSb) {
               setWorkRulesState(wrSb);
@@ -918,6 +936,12 @@ function AppProviderInner({ children }: { children: ReactNode }) {
             }
             if (brSb) setBreakRulesState(brSb);
             else setBreakRulesState(getBreakRules());
+            if (prSb) {
+              setPunchRoundingRulesState(prSb);
+              savePunchRoundingRules(prSb);
+            } else {
+              setPunchRoundingRulesState(getPunchRoundingRules());
+            }
             const deptRemoteBootElse = await loadDepartmentsFromSupabase().catch(() => null);
             mergeDepartmentsRemoteAfterPull(deptRemoteBootElse);
             setSettingsCloudLastSyncedAt(new Date().toISOString());
@@ -931,6 +955,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           const hasLocalWr = localStorage.getItem('osteria_work_rules') !== null;
           setWorkRulesState(hasLocalWr ? localWr : (ts?.workRules ? { ...DEFAULT_WORK_RULES, ...ts.workRules } : localWr));
           setBreakRulesState(getBreakRules());
+          setPunchRoundingRulesState(getPunchRoundingRules());
           if (ts?.featureFlags && Object.keys(ts.featureFlags).length > 0 && localStorage.getItem('osteria_app_features_v2') === null) {
             setFeatureFlagsState(ts.featureFlags as FeatureFlags);
             writeFeatureFlagsToStorage(ts.featureFlags as FeatureFlags);
@@ -1715,16 +1740,21 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       const res = await database.punchRecords.insert(record as Omit<PunchRecord, 'id'>);
       if (res) {
         let row: PunchRecord = res as PunchRecord;
-        if (
-          effectiveType === 'in' &&
-          shiftId &&
-          resolvedSource !== 'manual' &&
-          typeof row.timestamp === 'string'
-        ) {
+        // Orario efficace delle timbrature fatte dall'app/kiosk: applica le regole di
+        // arrotondamento configurate (e la politica "mai prima del turno" sull'entrata).
+        // L'ora reale resta sempre in `timestamp`; le timbrature manuali non si toccano.
+        if (shiftId && resolvedSource !== 'manual' && typeof row.timestamp === 'string') {
           const relatedShift = shifts.find((s) => s.id === shiftId);
           if (relatedShift) {
-            const ct = computeEffectivePunchIn(relatedShift, row.timestamp);
-            if (ct && ct !== row.calculated_time) {
+            const punchUser = users.find((u) => u.id === userId) ?? null;
+            const ct = computeRoundedPunchTime({
+              rules: punchRoundingRules,
+              type: effectiveType,
+              rawIso: row.timestamp,
+              shift: relatedShift,
+              user: punchUser,
+            }).iso;
+            if (ct && ct !== row.calculated_time && ct !== row.timestamp) {
               const upd = await database.punchRecords.update(row.id, { calculated_time: ct });
               if (upd) row = { ...row, ...upd };
             }
@@ -1741,7 +1771,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       punchInFlightRef.current = false;
       setIsPunching(false);
     }
-  }, [isPunching, shifts, effectiveLanguage, featureFlags, markManagementDataTouched]);
+  }, [isPunching, shifts, users, punchRoundingRules, effectiveLanguage, featureFlags, markManagementDataTouched]);
 
   const updatePunchRecord = useCallback(async (id: string, updates: { timestamp?: string; calculated_time?: string; clock_out_time?: string | null }) => {
     // Legge il record corrente dal ref (senza dipendenza da punchRecords nello state)
@@ -2247,15 +2277,20 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           setAdminModulesGlobalCache(amMerged);
           if (amMerged) writeAdminModulesGlobalLocal(amMerged);
           setAdminModulesRevision((n) => n + 1);
-          const [wrSb, brSb] = await Promise.all([
+          const [wrSb, brSb, prSb] = await Promise.all([
             loadWorkRulesFromSupabase().catch(() => null),
             loadBreakRulesFromSupabase().catch(() => null),
+            loadPunchRoundingRulesFromSupabase().catch(() => null),
           ]);
           if (wrSb) {
             setWorkRulesState(wrSb);
             saveWorkRules(wrSb);
           }
           if (brSb) setBreakRulesState(brSb);
+          if (prSb) {
+            setPunchRoundingRulesState(prSb);
+            savePunchRoundingRules(prSb);
+          }
           setSettingsCloudLastSyncedAt(new Date().toISOString());
         } else {
           const localFlags = getLocalFeatureFlags();
@@ -2277,15 +2312,20 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           setAdminModulesRevision((n) => n + 1);
           await refreshGeofenceEffectiveConfig();
           await refreshPresenceVerificationConfig();
-          const [wrSb, brSb] = await Promise.all([
+          const [wrSb, brSb, prSb] = await Promise.all([
             loadWorkRulesFromSupabase().catch(() => null),
             loadBreakRulesFromSupabase().catch(() => null),
+            loadPunchRoundingRulesFromSupabase().catch(() => null),
           ]);
           if (wrSb) {
             setWorkRulesState(wrSb);
             saveWorkRules(wrSb);
           }
           if (brSb) setBreakRulesState(brSb);
+          if (prSb) {
+            setPunchRoundingRulesState(prSb);
+            savePunchRoundingRules(prSb);
+          }
           const deptRemoteSrElse = await loadDepartmentsFromSupabase().catch(() => null);
           mergeDepartmentsRemoteAfterPull(deptRemoteSrElse);
           setSettingsCloudLastSyncedAt(new Date().toISOString());
@@ -2502,6 +2542,16 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     if (rev != null) writeAckClientSyncRevision(rev);
   }, [markManagementDataTouched]);
 
+  const setPunchRoundingRules = useCallback(async (rules: PunchRoundingRules) => {
+    const sanitized = sanitizePunchRoundingRules(rules);
+    setPunchRoundingRulesState(sanitized);
+    savePunchRoundingRules(sanitized);
+    markManagementDataTouched();
+    await savePunchRoundingRulesToSupabase(sanitized).catch(() => {});
+    const rev = await bumpClientSyncRevisionOnSupabase();
+    if (rev != null) writeAckClientSyncRevision(rev);
+  }, [markManagementDataTouched]);
+
   const pushSettingsToCloud = useCallback(async () => {
     if (!isAppCloudSyncEnabled()) {
       showError(getTranslations(effectiveLanguage).settings_cloud_sync_paused);
@@ -2517,6 +2567,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           const bundle = buildGlobalSettingsBundleFromParts({
             workRules,
             breakRules,
+            punchRoundingRules,
             geofenceDisk: disk,
             featureFlags,
             roleFeatureTemplates: rt,
@@ -2527,6 +2578,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           await Promise.all([
             saveWorkRulesToSupabase(workRules),
             saveBreakRulesToSupabase(breakRules),
+            savePunchRoundingRulesToSupabase(punchRoundingRules).catch(() => {}),
             writeAllFeatureFlagsToSupabase(featureFlags).catch(() => {}),
             savePresenceVerificationToSupabase(presenceVerificationConfig).catch(() => {}),
             disk ? saveGeofenceConfigToSupabase(disk).catch(() => {}) : Promise.resolve(),
@@ -2561,6 +2613,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   }, [
     workRules,
     breakRules,
+    punchRoundingRules,
     featureFlags,
     presenceVerificationConfig,
     effectiveLanguage,
@@ -2695,6 +2748,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         const bundle = buildGlobalSettingsBundleFromParts({
           workRules: d.workRules,
           breakRules: d.breakRules,
+          punchRoundingRules: d.punchRoundingRules,
           geofenceDisk: getLocalGeofenceConfig(),
           featureFlags: d.featureFlags,
           roleFeatureTemplates: d.roleFeatureTemplates,
@@ -2887,6 +2941,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   const configSlice = useMemo<ConfigSlice>(() => ({
     featureFlags, setFeatureFlag, workRules, setWorkRules,
     breakRules: effectiveBreakRules, setBreakRules,
+    punchRoundingRules, setPunchRoundingRules,
     geofenceEffectiveConfig, presenceVerificationConfig,
     roleTemplatesRevision, adminModulesRevision, departmentsRevision,
     toggleAvailability,
@@ -2897,6 +2952,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   }), [
     featureFlags, setFeatureFlag, workRules, setWorkRules,
     effectiveBreakRules, setBreakRules,
+    punchRoundingRules, setPunchRoundingRules,
     geofenceEffectiveConfig, presenceVerificationConfig,
     roleTemplatesRevision, adminModulesRevision, departmentsRevision,
     toggleAvailability,
@@ -2936,6 +2992,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,
     presenceVerificationConfig, savePresenceVerificationConfig,
     workRules, setWorkRules, breakRules, setBreakRules,
+    punchRoundingRules, setPunchRoundingRules,
     roleTemplatesRevision, saveRoleFeatureTemplates,
     adminModulesRevision, saveAdminModulesGlobal,
     departmentsRevision, notifyDepartmentsChanged,
@@ -2952,6 +3009,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     featureFlags, setFeatureFlag, geofenceEffectiveConfig, saveGeofenceConfig,
     presenceVerificationConfig, savePresenceVerificationConfig,
     workRules, setWorkRules, breakRules, setBreakRules,
+    punchRoundingRules, setPunchRoundingRules,
     roleTemplatesRevision, saveRoleFeatureTemplates,
     adminModulesRevision, saveAdminModulesGlobal,
     departmentsRevision, notifyDepartmentsChanged,

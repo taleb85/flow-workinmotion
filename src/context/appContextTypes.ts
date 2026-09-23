@@ -16,6 +16,7 @@ import type { RoleFeatureTemplatesOnDisk } from '../utils/roleFeatureTemplates';
 import type { AdminModulesGlobalOnDisk } from '../utils/adminModulesGlobal';
 import type { WorkRules } from '../utils/workRules';
 import type { BreakRule } from '../utils/breakRules';
+import type { PunchRoundingRules } from '../utils/punchRoundingRules';
 import type { GeofenceConfig } from '../utils/geofencePunch';
 import type { PresenceVerificationConfig } from '../utils/presenceVerificationConfigStorage';
 
@@ -142,6 +143,9 @@ export interface AppContextType {
   setWorkRules: (rules: WorkRules) => Promise<void>;
   breakRules: BreakRule[];
   setBreakRules: (rules: BreakRule[]) => Promise<void>;
+  /** Regole di arrotondamento degli orari di timbratura (configurabili dall'Admin). */
+  punchRoundingRules: PunchRoundingRules;
+  setPunchRoundingRules: (rules: PunchRoundingRules) => Promise<void>;
   /** Revisione incrementata al caricamento/salvataggio template permessi ruolo (solo Admin). */
   roleTemplatesRevision: number;
   /** Salva template permessi (locale + Storage). Solo per pannello Admin. */
