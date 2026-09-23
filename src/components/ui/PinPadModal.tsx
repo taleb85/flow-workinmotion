@@ -149,7 +149,7 @@ export function PinPadModal({
       <motion.div
         initial={{ y: '100%', opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 320, damping: 32, mass: 0.9, delay: 0.04 }}
+        transition={{ type: 'spring', stiffness: 170, damping: 26, mass: 1, delay: 0.04 }}
         className="pinpad-block pinpad-block-keys flex flex-col gap-2 px-2 pt-4 md:px-5 md:pt-0 md:pb-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]"
       >
         <div className="grid grid-cols-3 gap-2">
