@@ -18,7 +18,7 @@ l'arrotondamento si applica alle timbrature registrate da **app e kiosk**.
 
 ## Configurazione
 
-La sezione ha tre tab.
+La sezione ha due tab.
 
 ### Regole
 
@@ -43,9 +43,10 @@ Se il turno ricade in una di queste condizioni **l'arrotondamento non viene appl
 
 ### Anteprima
 
-Mostra il risultato su un orario di esempio: si scelgono tipo di timbratura, ora reale e orari del
-turno, e l'app mostra `ora reale → ora efficace` con la spiegazione della regola applicata (o del
-motivo per cui non è stata applicata).
+Dentro le card **Entrata** e **Uscita** c'è un riquadro *Risultato* che mostra in tempo reale
+l'effetto della regola su un orario di esempio (turno 18:00–23:00, entrata 18:07, uscita 23:07):
+`ora reale → ora efficace` con la spiegazione della regola applicata, o il motivo per cui non è
+stata applicata. Cambiando soglia, direzione o orario di riferimento il riquadro si aggiorna subito.
 
 ## Salvataggio e reset
 

@@ -30,7 +30,6 @@ import { translateDepartmentValue } from '../../utils/departmentLabels';
 import type { UserRole } from '../../types';
 import { SettingsAccordionSection } from './SettingsAccordionSection';
 import ToggleSwitch from './toggle-switch-glass';
-import { TimeInputField } from './TimeInputField';
 import { GradientIconButton } from './GradientIconButton';
 
 const ROUNDING_ROLES: UserRole[] = [
@@ -46,6 +45,12 @@ const ROUNDING_ROLES: UserRole[] = [
 ];
 
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
+
+/** Esempio di turno e di orari reali usato per l'anteprima dentro le card. */
+const PREVIEW_SHIFT_START = '18:00';
+const PREVIEW_SHIFT_END = '23:00';
+const PREVIEW_IN_TIME = '18:07';
+const PREVIEW_OUT_TIME = '23:07';
 
 const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/55';
 const cardClass = 'space-y-3 rounded-xl border border-white/[0.14] bg-white/5 p-3';
@@ -150,17 +155,7 @@ export function PunchRoundingSettingsSection() {
   const { showSuccess, showError } = useAppOverlay();
 
   const [draft, setDraft] = useState<PunchRoundingRules>(() => sanitizePunchRoundingRules(punchRoundingRules));
-  const [activeTab, setActiveTab] = useState<'rules' | 'exceptions' | 'preview'>('rules');
-
-  // Anteprima: un orario di esempio per l'entrata e uno per l'uscita.
-  const [previewType, setPreviewType] = useState<'in' | 'out'>('in');
-  const [previewInTime, setPreviewInTime] = useState('18:07');
-  const [previewOutTime, setPreviewOutTime] = useState('23:07');
-  const [previewShiftStart, setPreviewShiftStart] = useState('18:00');
-  const [previewShiftEnd, setPreviewShiftEnd] = useState('23:00');
-
-  const previewTime = previewType === 'in' ? previewInTime : previewOutTime;
-  const setPreviewTime = (value: string) => (previewType === 'in' ? setPreviewInTime(value) : setPreviewOutTime(value));
+  const [activeTab, setActiveTab] = useState<'rules' | 'exceptions'>('rules');
 
   useEffect(() => {
     setDraft(sanitizePunchRoundingRules(punchRoundingRules));
@@ -248,12 +243,12 @@ export function PunchRoundingSettingsSection() {
       previewPunchRounding({
         rules: draft,
         type: 'in',
-        timeHHMM: previewInTime,
+        timeHHMM: PREVIEW_IN_TIME,
         shiftDate,
-        shiftStart: previewShiftStart,
-        shiftEnd: previewShiftEnd,
+        shiftStart: PREVIEW_SHIFT_START,
+        shiftEnd: PREVIEW_SHIFT_END,
       }),
-    [draft, previewInTime, shiftDate, previewShiftStart, previewShiftEnd]
+    [draft, shiftDate]
   );
 
   const previewOut = useMemo(
@@ -261,18 +256,16 @@ export function PunchRoundingSettingsSection() {
       previewPunchRounding({
         rules: draft,
         type: 'out',
-        timeHHMM: previewOutTime,
+        timeHHMM: PREVIEW_OUT_TIME,
         shiftDate,
-        shiftStart: previewShiftStart,
-        shiftEnd: previewShiftEnd,
+        shiftStart: PREVIEW_SHIFT_START,
+        shiftEnd: PREVIEW_SHIFT_END,
       }),
-    [draft, previewOutTime, shiftDate, previewShiftStart, previewShiftEnd]
+    [draft, shiftDate]
   );
 
-  const preview = previewType === 'in' ? previewIn : previewOut;
-
   const explainPreview = useCallback(
-    (p: ReturnType<typeof previewPunchRounding>): string => {
+    (p: RoundingPreviewResult): string => {
       if (p.skippedReason === 'rules_disabled') return t.settings_rounding_prev_off;
       if (p.skippedReason === 'exception') return t.settings_rounding_prev_exception;
       if (p.skippedReason === 'rule_disabled') return t.settings_rounding_prev_rule_off;
@@ -286,12 +279,9 @@ export function PunchRoundingSettingsSection() {
     [t, directionLabel]
   );
 
-  const previewMessage = explainPreview(preview);
-
   const tabOptions = [
     { id: 'rules' as const, label: t.settings_rounding_tab_rules },
     { id: 'exceptions' as const, label: t.settings_rounding_tab_exceptions },
-    { id: 'preview' as const, label: t.settings_rounding_tab_preview },
   ];
 
   return (
@@ -574,78 +564,6 @@ export function PunchRoundingSettingsSection() {
                       </button>
                     ))}
                   </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'preview' && (
-              <div className="space-y-3">
-                <div className={cardClass}>
-                  <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
-                    {t.settings_rounding_preview_title}
-                  </p>
-                  <div className="grid gap-3 md:grid-cols-3">
-                    <div>
-                      <label className={labelClass}>{t.settings_rounding_preview_type}</label>
-                      <div className="flex gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setPreviewType('in')}
-                          className={chipClass(previewType === 'in')}
-                        >
-                          {t.settings_rounding_clock_in}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setPreviewType('out')}
-                          className={chipClass(previewType === 'out')}
-                        >
-                          {t.settings_rounding_clock_out}
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className={labelClass}>{t.settings_rounding_preview_time}</label>
-                      <TimeInputField
-                        value={previewTime}
-                        onChange={setPreviewTime}
-                        aria-label={t.settings_rounding_preview_time}
-                        className="w-full border-white/20 bg-white/10"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className={labelClass}>{t.settings_rounding_preview_shift_start}</label>
-                        <TimeInputField
-                          value={previewShiftStart}
-                          onChange={setPreviewShiftStart}
-                          aria-label={t.settings_rounding_preview_shift_start}
-                          className="w-full border-white/20 bg-white/10"
-                        />
-                      </div>
-                      <div>
-                        <label className={labelClass}>{t.settings_rounding_preview_shift_end}</label>
-                        <TimeInputField
-                          value={previewShiftEnd}
-                          onChange={setPreviewShiftEnd}
-                          aria-label={t.settings_rounding_preview_shift_end}
-                          className="w-full border-white/20 bg-white/10"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-white/[0.14] bg-white/5 p-3">
-                  <p className="text-center text-[0.6875rem] font-bold uppercase tracking-wider text-white/40">
-                    {t.settings_rounding_preview_result}
-                  </p>
-                  <div className="mt-1 flex items-center justify-center gap-3">
-                    <span className="text-lg font-bold text-white/60 line-through">{preview.rawHHMM}</span>
-                    <span className="text-white/40">→</span>
-                    <span className="text-lg font-bold text-white">{preview.effectiveHHMM}</span>
-                  </div>
-                  <p className="mt-1 text-center text-[0.75rem] leading-snug text-white/70">{previewMessage}</p>
                 </div>
               </div>
             )}
