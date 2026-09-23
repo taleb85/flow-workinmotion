@@ -151,7 +151,7 @@ export function PinPadModal({
           {leftActionButton ? (
             <div className="h-14 md:h-12 rounded-2xl flex items-center justify-center" style={btnBase}>{leftActionButton}</div>
           ) : (
-            <div className="h-14 md:h-12 rounded-2xl" style={btnBase} aria-hidden />
+            <div className="h-14 md:h-12 rounded-[var(--flow-radius-button)]" style={btnBase} aria-hidden />
           )}
           <button type="button" onClick={() => handleKey(0)}
             className="h-14 md:h-12 rounded-2xl font-bold text-2xl text-white transition-colors hover:bg-white/10 hover:border-white/20"

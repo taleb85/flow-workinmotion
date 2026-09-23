@@ -215,17 +215,17 @@ body {
   }
 }
 
-/* ═══════════════ BOTTOM NAV: pillola flottante su mobile (≤768px) ═══════════════ */
+/* ═══════════════ BOTTOM NAV: barra flottante stondata su mobile (≤768px) ═══════════════ */
 @media (max-width: 767.98px) {
   .bottom-nav-glass-edge {
     /* Stesso gutter orizzontale del contenuto/header (--layout-app-px):
-       la pillola resta allineata al bordo sinistro/destro delle card. */
+       la barra resta allineata al bordo sinistro/destro delle card. */
     left: var(--layout-app-px) !important;
     right: var(--layout-app-px) !important;
-    /* Gutter ridotto: la pillola sta più in basso, appena sopra la home indicator. */
+    /* Gutter ridotto: la barra sta più in basso, appena sopra la home indicator. */
     bottom: calc(env(safe-area-inset-bottom, 0px) + 4px) !important;
     width: auto !important;
-    border-radius: var(--flow-radius-pill) !important;
+    border-radius: var(--flow-radius-button) !important;
     overflow: hidden !important;
     padding-bottom: 0 !important;
     border: 1px solid rgba(255, 255, 255, 0.14) !important;
@@ -425,14 +425,16 @@ select option { background: #1c1c1e !important; color: #f5f5f7 !important; }
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
 }
 
-/* ── CHIP / BADGE / STATO TURNO: pill vetro ── */
+/* ── CHIP / BADGE / STATO TURNO: rettangoli stondati ──
+   Raggio "small" (8px): questi elementi sono alti ~22px, quindi 10px sarebbero
+   metà altezza e tornerebbero capsule. */
 .ui-toolbar-chip,
 [class*="badge"],
 .shift-status-off,
 [class*="status-chip"] {
   background: rgba(120, 120, 128, 0.22) !important;
   border: 1px solid rgba(255, 255, 255, 0.20) !important;
-  border-radius: 999px !important;
+  border-radius: var(--flow-radius-sm) !important;
   color: #f5f5f7 !important;
 }
 
@@ -558,7 +560,7 @@ hr { border-color: rgba(255, 255, 255, 0.1) !important; }
   gap: 4px;
   height: 22px;
   padding: 0 9px;
-  border-radius: var(--flow-radius-pill);
+  border-radius: var(--flow-radius-sm);
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
@@ -576,7 +578,7 @@ hr { border-color: rgba(255, 255, 255, 0.1) !important; }
   margin-top: 12px;
   width: 100%;
   padding: 10px 14px;
-  border-radius: var(--flow-radius-pill);
+  border-radius: var(--flow-radius-button);
   font-size: 13.5px;
   font-weight: 600;
   color: var(--flow-primary) !important;

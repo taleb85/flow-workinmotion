@@ -2753,15 +2753,6 @@ input:-webkit-autofill:active {
   outline-offset: 0 !important;
 }
 
-/* ── PIN pad: i tasti restano rettangoli arrotondati ──
- * `flow-v2-skin.css` forzava `button[class*="rounded-"]` a `--flow-radius-pill`
- * con `!important`: i tasti, essendo `<button>`, diventavano a pillola mentre la
- * cella vuota (un `<div>`) restava arrotondata. Specificità maggiore → vince.
- * Stesso token dei pulsanti di tutta l'app, così la forma è una sola. */
-.pinpad-card button[class*="rounded-"] {
-  border-radius: 1rem !important;
-}
-
 /* ── PIN pad: due blocchi su telefono, card unica da 768px in su ─────────────
    Sotto md: la sheet riempie l'overlay e `justify-between` spinge in alto il
    blocco info (icona + pallini) e in basso il tastierino, che occupa tutta la
