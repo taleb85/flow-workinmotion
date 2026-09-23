@@ -51,6 +51,8 @@ export interface ToggleSwitchProps {
   size?: ToggleSize;
   colorTheme?: ToggleColorTheme;
   disabled?: boolean;
+  /** Forma del binario: `pill` (default, a pillola) o `rect` (rettangolo stondato). */
+  shape?: "pill" | "rect";
 }
 
 export default function ToggleSwitch({
@@ -62,6 +64,7 @@ export default function ToggleSwitch({
   size = "md",
   colorTheme = "default",
   disabled = false,
+  shape = "pill",
 }: ToggleSwitchProps) {
   const [isActive, setIsActive] = useState(initialIsActive);
   const [isDragging, setIsDragging] = useState(false);
@@ -74,6 +77,9 @@ export default function ToggleSwitch({
   const shouldReduceMotion = useReducedMotion();
 
   const { trackWidth, trackHeight, knobWidth, knobMargin, indicatorWidth, indicatorHeight, indicatorOffset, circleSize } = sizeConfig[size];
+
+  /** Con `shape="rect"` binario e knob diventano rettangoli stondati (6px). */
+  const shapeClass = shape === "rect" ? "rounded-[6px]" : "rounded-full";
 
   const calculateTravel = () => {
     return trackWidth - knobWidth - knobMargin * 2;
@@ -197,7 +203,7 @@ export default function ToggleSwitch({
       {/* Track */}
       <motion.div
         ref={trackRef}
-        className="relative z-0 h-full w-full rounded-full"
+        className={`relative z-0 h-full w-full ${shapeClass}`}
         style={trackStyle}
         animate={{
           backgroundColor: getBackgroundColor(),
@@ -209,7 +215,7 @@ export default function ToggleSwitch({
         {/* Track inner highlight for glass effect */}
         {glassEffect && (
           <div
-            className="absolute inset-0 rounded-full pointer-events-none"
+            className={`absolute inset-0 ${shapeClass} pointer-events-none`}
             style={{
               boxShadow: "inset 0 1px 2px rgba(255,255,255,0.15)",
             }}
@@ -293,7 +299,7 @@ export default function ToggleSwitch({
 
       {/* Knob */}
       <motion.div
-        className="absolute rounded-full z-[5] cursor-grab active:cursor-grabbing"
+        className={`absolute ${shapeClass} z-[5] cursor-grab active:cursor-grabbing`}
         drag="x"
         dragConstraints={{ left: 0, right: calculateTravel() }}
         dragElastic={0}
@@ -320,7 +326,7 @@ export default function ToggleSwitch({
       >
         {/* Knob base - 3D neumorphic pill shape */}
         <motion.div
-          className="w-full h-full rounded-full relative overflow-hidden"
+          className={`w-full h-full ${shapeClass} relative overflow-hidden`}
           animate={{
             backgroundColor: isDragging ? "rgba(255, 255, 255, 0.08)" : "#FAFAFA",
           }}

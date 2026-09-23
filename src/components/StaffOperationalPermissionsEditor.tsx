@@ -96,6 +96,7 @@ export default function StaffOperationalPermissionsEditor({ user, currentUser }:
                     onChange={() => void handleToggle(perm.key, perm.adminOnly)}
                     disabled={busyKey !== null}
                     size="sm"
+                    shape="rect"
                     darkMode
                     className="flex-shrink-0"
                   />
