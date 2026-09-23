@@ -15,6 +15,7 @@ import {
 import { getDateLocale } from '../utils/translations';
 import { isFeatureEnabled } from '../utils/enabledFeatures';
 import { isUiWidgetVisible } from '../utils/uiScreenWidgets';
+import { isMobileLayout } from '../utils/layoutPreset';
 import type { Shift } from '../types';
 import { getResolvedStartEndForHours, shiftPastPlannedEndWithoutClockIn } from '../utils/shiftResolvedClockTimes';
 import type { AppNavTab } from '../utils/enabledModules';
@@ -136,7 +137,7 @@ export default function HomePage({
   const locale = getDateLocale(effectiveLanguage) ?? it;
 
   const isMgmtUser = isManagementRole(currentUser.role);
-  const isMobile = window.innerWidth < 768;
+  const isMobile = isMobileLayout();
   const uiW = (key: string) => isUiWidgetVisible(currentUser, key);
   const showTeamHome = isMgmtUser && isFeatureEnabled(currentUser, 'team_view');
   const canEditShiftsHome =

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   computeEffectiveLayoutFromWidth,
   computeViewportClass,
+  isDevMobileOverrideActive,
   LAYOUT_BREAKPOINT_PX,
   type LayoutEffective,
   type ViewportClass,
@@ -23,8 +24,17 @@ export function LayoutPresetProvider({ children }: { children: ReactNode }) {
     typeof window !== 'undefined' ? window.innerWidth > window.innerHeight : false,
   );
 
-  const effective = useMemo(() => computeEffectiveLayoutFromWidth(width), [width]);
-  const viewportClass = useMemo(() => computeViewportClass(width), [width]);
+  /** Override di sviluppo (`?view=mobile`): forza il layout telefono anche su viewport larghi. */
+  const devMobileOverride = useMemo(() => isDevMobileOverrideActive(), []);
+
+  const effective = useMemo(
+    () => (devMobileOverride ? 'compact' : computeEffectiveLayoutFromWidth(width)),
+    [width, devMobileOverride],
+  );
+  const viewportClass = useMemo(
+    () => (devMobileOverride ? 'phone' : computeViewportClass(width)),
+    [width, devMobileOverride],
+  );
 
   useEffect(() => {
     const update = () => {
@@ -46,41 +56,61 @@ export function LayoutPresetProvider({ children }: { children: ReactNode }) {
   }, [effective, viewportClass]);
 
   /** Quando il viewport è "phone" in orizzontale, disabilita i media query Tailwind
-   *  che attiverebbero layout da tablet/desktop (md: e md:). In questo modo la
-   *  grafica rimane quella mobile ma si adatta a tutta la larghezza disponibile. */
+   *  che attiverebbero layout da tablet/desktop (sm/md/lg). In questo modo la
+   *  grafica rimane quella mobile ma si adatta a tutta la larghezza disponibile.
+   *  In sviluppo l'override `?view=mobile` attiva lo stesso comportamento su
+   *  qualunque viewport (anteprima mobile nel pannello IDE largo). */
   useEffect(() => {
-    const isLandscapePhone = viewportClass === 'phone' && isLandscape;
+    const suppressDesktopMediaQueries =
+      devMobileOverride || (viewportClass === 'phone' && isLandscape);
 
-    // Trova tutti i CSSMediaRule con min-width: 640/768 (sm/md) e salva l'originale
-    const sheet = document.styleSheets;
-    const targets: { rule: CSSMediaRule; original: string }[] = [];
-    for (let i = 0; i < sheet.length; i++) {
-      try {
-        const rules = sheet[i].cssRules;
-        if (!rules) continue;
-        for (let j = 0; j < rules.length; j++) {
-          const rule = rules[j];
-          if (!(rule instanceof CSSMediaRule)) continue;
-          const mt = rule.media.mediaText;
-          // Scegli i breakpoint rilevanti (640=sm, 768=md, 1024=lg)
-          if (/min-width:\s*(64[04]|768|1024)\s*px/.test(mt)) {
-            targets.push({ rule, original: mt });
+    // Regole neutralizzate, con il testo media originale (chiave = regola CSS).
+    // Il registro non viene azzerato: una regola già riscritta a `99999px` non
+    // corrisponderebbe più al pattern e non potrebbe più essere ripristinata.
+    const originals = new Map<CSSMediaRule, string>();
+
+    const scan = () => {
+      const sheet = document.styleSheets;
+      for (let i = 0; i < sheet.length; i++) {
+        try {
+          const rules = sheet[i].cssRules;
+          if (!rules) continue;
+          for (let j = 0; j < rules.length; j++) {
+            const rule = rules[j];
+            if (!(rule instanceof CSSMediaRule)) continue;
+            const mt = rule.media.mediaText;
+            // Scegli i breakpoint rilevanti (640=sm, 768=md, 1024=lg)
+            if (/min-width:\s*(64[04]|768|1024)\s*px/.test(mt) && !originals.has(rule)) {
+              originals.set(rule, mt);
+            }
           }
-        }
-      } catch { /* cross-origin stylesheet — skip */ }
-    }
+        } catch { /* cross-origin stylesheet — skip */ }
+      }
+    };
 
-    if (isLandscapePhone) {
-      targets.forEach(({ rule }) => { rule.media.mediaText = '(min-width: 99999px)'; });
-    } else {
-      targets.forEach(({ rule, original }) => { rule.media.mediaText = original; });
+    const apply = () => {
+      scan();
+      originals.forEach((original, rule) => {
+        rule.media.mediaText = suppressDesktopMediaQueries ? '(min-width: 99999px)' : original;
+      });
+    };
+
+    apply();
+
+    // Solo con l'override: i componenti lazy iniettano nuovo CSS dopo il mount,
+    // senza un nuovo scan le loro regole `md:` resterebbero attive.
+    let observer: MutationObserver | null = null;
+    if (devMobileOverride) {
+      observer = new MutationObserver(apply);
+      observer.observe(document.head, { childList: true, subtree: true });
     }
 
     return () => {
+      observer?.disconnect();
       // Cleanup: ripristina tutti i media query originali
-      targets.forEach(({ rule, original }) => { rule.media.mediaText = original; });
+      originals.forEach((original, rule) => { rule.media.mediaText = original; });
     };
-  }, [viewportClass, isLandscape]);
+  }, [viewportClass, isLandscape, devMobileOverride]);
 
   return <>{children}</>;
 }

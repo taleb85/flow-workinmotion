@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { isMobileLayout } from '../utils/layoutPreset';
 
 const isMobileCheck = () =>
-  window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+  isMobileLayout() || window.matchMedia('(pointer: coarse)').matches;
 
 export const useIsMobileViewport = () => {
   const [isMobile, setIsMobile] = useState(isMobileCheck);

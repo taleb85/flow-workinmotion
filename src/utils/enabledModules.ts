@@ -1,4 +1,5 @@
 import { getEnabledFeatures } from './enabledFeatures';
+import { isMobileLayout } from './layoutPreset';
 import type { FeatureFlags } from './featureFlags';
 import type { User } from '../types';
 
@@ -72,7 +73,7 @@ export function getBottomNavTabsForMainApp(
 
   // Su mobile, forziamo l'ordine dello staff per tutti (inclusi manager)
   // e rimuoviamo le voci da desktop come "Impostazioni".
-  const isMobileViewport = window.innerWidth < 768;
+  const isMobileViewport = isMobileLayout();
   if (isManagement && !isMobileViewport) return all;
 
   const set = new Set(all);
