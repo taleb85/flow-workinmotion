@@ -3209,8 +3209,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           >
             <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">{t.create_shift ?? 'Nuovo turno'}</h3>
             <div className="space-y-3 mb-4">
-              {/* Mobile: il giorno si sceglie qui (su desktop è già la cella toccata).
-                  Un giorno con 2 turni è disabilitato (massimo 2 al giorno). */}
+              {/* Mobile + vista settimana: il giorno si sceglie qui (su desktop è già
+                  la cella toccata). In vista periodo il giorno resta quello della
+                  cella di partenza. Un giorno con 2 turni è disabilitato. */}
+              {viewMode === 'week' && (
               <div className="md:hidden">
                 <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.field_date ?? 'Data'}</label>
                 <div className="grid grid-cols-7 gap-1">
@@ -3237,6 +3239,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   })}
                 </div>
               </div>
+              )}
               <div>
                 <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.start_time ?? 'Inizio'}</label>
                 <TimeInputField value={createStart} onChange={setCreateStart} size="md" className="w-full border-white/20 bg-white/10" />
