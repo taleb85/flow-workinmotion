@@ -49,6 +49,11 @@
   --flow-radius-sm: 8px;
   --flow-radius-md: 12px;
   --flow-radius-lg: 16px;
+  /* Raggio dei PULSANTI: rettangoli con angoli stondati (prima erano pillole).
+     NON `--flow-radius-lg` (16px): la maggior parte dei pulsanti è alta 27–33px,
+     quindi un raggio ≥16px equivale a metà altezza e l'effetto resta "capsula".
+     10px è il valore in cui l'angolo si legge davvero come rettangolo smussato. */
+  --flow-radius-button: 10px;
   /* 9999px = stesso valore di Tailwind `rounded-full`, così i pill dichiarati
      con la classe e quelli forzati dalla skin hanno lo stesso raggio calcolato. */
   --flow-radius-pill: 9999px;
@@ -289,14 +294,14 @@ body .bg-gray-100:not(input):not(textarea):not(select) { background-color: var(-
 
 /* ═══════════════ PULSANTI ═══════════════ */
 /* CTA accent: target minimo 44px, testo 14px. Esclusi i pulsanti compatti
-   (h-7/h-8/h-9, es. "Oggi" nella nav periodi) e i toggle switch (role="switch"),
-   che mantengono le proprie misure di pillola. */
-.bg-accent:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]):not([role="switch"]),
-.bg-brand:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]):not([role="switch"]),
-.bg-primary:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]):not([role="switch"]) {
+   (h-7/h-8/h-9, es. "Oggi" nella nav periodi), i toggle switch (role="switch")
+   e chi è dichiarato tondo (`rounded-full`: FAB, avatar, manopole). */
+.bg-accent:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]):not([role="switch"]):not([class*="rounded-full"]),
+.bg-brand:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]):not([role="switch"]):not([class*="rounded-full"]),
+.bg-primary:not([class*="h-7"]):not([class*="h-8"]):not([class*="h-9"]):not([role="switch"]):not([class*="rounded-full"]) {
   background-color: var(--flow-primary-fill, var(--brand)) !important;
   color: #ffffff !important;
-  border-radius: var(--flow-radius-pill) !important;
+  border-radius: var(--flow-radius-button) !important;
   min-height: 44px;
   font-size: 14px;
   font-weight: 600;
@@ -304,15 +309,16 @@ body .bg-gray-100:not(input):not(textarea):not(select) { background-color: var(-
 .text-accent, .text-brand { color: var(--brand) !important; }
 .border-accent, .border-brand { border-color: var(--brand) !important; }
 
-/* Bottoni ghost/secondari → pill vetro */
-button.rounded-xl,
-button.rounded-lg,
-button[class*="rounded-"] {
-  border-radius: var(--flow-radius-pill) !important;
+/* Bottoni ghost/secondari → rettangoli con angoli stondati (come le card). */
+button.rounded-xl:not([class*="rounded-full"]),
+button.rounded-lg:not([class*="rounded-full"]),
+button[class*="rounded-"]:not([class*="rounded-full"]) {
+  border-radius: var(--flow-radius-button) !important;
 }
 
-/* Pulsanti-icona e avatar → rotondi (stesso token pill: unica scala raggi) */
-button[class*="h-9"], button[class*="h-10"] { border-radius: var(--flow-radius-pill) !important; }
+/* Pulsanti-icona → stesso rettangolo stondato. Esclusi i tondi dichiarati
+   (`rounded-full`: avatar, pallini, manopole toggle). */
+button[class*="h-9"]:not([class*="rounded-full"]), button[class*="h-10"]:not([class*="rounded-full"]) { border-radius: var(--flow-radius-button) !important; }
 [class*="rounded-full"] { -webkit-tap-highlight-color: transparent; }
 
 /* ═══════════════ TESTI ═══════════════ */

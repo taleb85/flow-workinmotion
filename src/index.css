@@ -2753,10 +2753,11 @@ input:-webkit-autofill:active {
   outline-offset: 0 !important;
 }
 
-/* ── PIN pad: i tasti restano rettangoli arrotondati (`rounded-2xl` = 1rem) ──
- * `flow-v2-skin.css` forza `button[class*="rounded-"]` a `--flow-radius-pill`
+/* ── PIN pad: i tasti restano rettangoli arrotondati ──
+ * `flow-v2-skin.css` forzava `button[class*="rounded-"]` a `--flow-radius-pill`
  * con `!important`: i tasti, essendo `<button>`, diventavano a pillola mentre la
- * cella vuota (un `<div>`) restava arrotondata. Specificità maggiore → vince. */
+ * cella vuota (un `<div>`) restava arrotondata. Specificità maggiore → vince.
+ * Stesso token dei pulsanti di tutta l'app, così la forma è una sola. */
 .pinpad-card button[class*="rounded-"] {
   border-radius: 1rem !important;
 }
