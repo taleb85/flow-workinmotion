@@ -747,9 +747,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   }, [drawerOpen, editStartTime, editEndTime, editIn, editOut, deductBreak, isAutoBreak]);
 
   const handleCloseDrawer = useCallback(() => {
-    if (hasUnsavedChanges) return; // Impedisce la chiusura se ci sono modifiche non salvate
+    // Con modifiche non salvate la chiusura non va mai bloccata in silenzio:
+    // chiediamo conferma e, se accettata, scartiamo le modifiche locali.
+    if (hasUnsavedChanges && !window.confirm(t.shift_close_unsaved ?? 'Hai modifiche non salvate su questo turno. Chiudere senza salvare?')) return;
     setDrawerOpen(false);
-  }, [hasUnsavedChanges]);
+  }, [hasUnsavedChanges, t]);
 
   // ── ESC annulla azione corrente ──
   useEffect(() => {
