@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Lock, ShieldCheck, Delete } from 'lucide-react';
-import React, { ReactNode, useEffect, useId, useLayoutEffect, useState, useRef } from 'react';
+import React, { ReactNode, useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 import { useT } from '../../hooks/useT';
@@ -38,29 +38,14 @@ export function PinPadModal({
   useBodyScrollLock(true);
 
   const pinAreaRef = useRef<HTMLDivElement>(null);
-  /** Input PIN della versione mobile: usa la tastiera numerica di sistema. */
-  const mobilePinInputRef = useRef<HTMLInputElement>(null);
-  const mobilePinInputId = useId();
 
-  // Autofocus all'apertura: su mobile serve a far comparire subito la tastiera
-  // numerica di sistema, su PC/tablet il focus va sulla card (si usa il tastierino
-  // della modale). Deve essere `useLayoutEffect`, non `useEffect`: iOS mostra la
-  // tastiera solo se il focus avviene in modo sincrono dentro il gesto che ha
-  // aperto la modale.
+  // Il PIN si digita sempre con il tastierino della modale, anche da telefono:
+  // iOS non apre la tastiera di sistema senza un tocco su un campo già presente
+  // nel DOM, quindi affidarsi a quella lasciava il tastierino "assente"
+  // all'apertura. Il focus sulla card serve solo alla tastiera fisica.
   useLayoutEffect(() => {
-    if (window.innerWidth < 768) {
-      mobilePinInputRef.current?.focus();
-      return;
-    }
     pinAreaRef.current?.focus();
   }, []);
-
-  /** iOS: se l'apertura non deriva da un gesto (es. dopo un controllo asincrono)
-   *  il focus sincrono viene ignorato. Al primo tocco sulla card rimettiamo il
-   *  focus sull'input, così la tastiera compare comunque subito. */
-  const focusMobilePinInput = () => {
-    if (window.innerWidth < 768) mobilePinInputRef.current?.focus();
-  };
 
   // Auto-conferma quando il PIN raggiunge 4 cifre (con animazione lucchetto rosso→verde)
   const [successAnim, setSuccessAnim] = useState(false);
@@ -129,53 +114,8 @@ export function PinPadModal({
         </div>
       </div>
 
-      {/* PIN display — mobile: pallini, con input invisibile sopra per la
-          tastiera numerica di sistema. */}
-      <div className="px-5 sm:px-8 mt-2 md:hidden">
-        <div className="flex items-center justify-center gap-1.5 text-white/75 mb-2">
-          <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
-          <label htmlFor={mobilePinInputId} className="text-sm font-bold uppercase tracking-widest">{pinLabel}</label>
-        </div>
-        <div
-          className="relative w-full h-14 rounded-2xl flex items-center justify-center"
-          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.40)' }}
-        >
-          <div className="flex items-center gap-6" aria-hidden>
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className={`w-4 h-4 rounded-full transition-colors duration-200 ${filledCount === i ? 'animate-pulse' : ''}`}
-                style={filledCount > i
-                  ? { background: '#ffffff', boxShadow: '0 0 10px 3px rgba(255,255,255,0.60)' }
-                  : { background: 'transparent', border: '1.5px solid rgba(255,255,255,0.9)' }}
-              />
-            ))}
-          </div>
-          <input
-            id={mobilePinInputId}
-            ref={mobilePinInputRef}
-            type="password"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            autoComplete="off"
-            maxLength={4}
-            value={pin}
-            disabled={isLoading}
-            onChange={(e) => onPinChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && pin.length === 4) {
-                e.preventDefault();
-                onConfirm();
-              }
-            }}
-            className="absolute inset-0 h-full w-full rounded-2xl opacity-0 outline-none"
-          />
-        </div>
-        {error && <p className="text-red-400 text-xs font-bold text-center animate-shake mt-2">{error}</p>}
-      </div>
-
-      {/* PIN display — PC/tablet: pallini + tastierino della modale */}
-      <div className="hidden md:flex flex-col items-center gap-2 px-5 sm:px-8 mt-2">
+      {/* PIN display — pallini di avanzamento */}
+      <div className="flex flex-col items-center gap-2 px-5 sm:px-8 mt-2">
         <div className="flex items-center gap-1.5 text-white/75 mb-1">
           <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
           <span className="text-sm font-bold uppercase tracking-widest">{pinLabel}</span>
@@ -198,8 +138,8 @@ export function PinPadModal({
         {error && <p className="text-red-400 text-xs font-bold text-center animate-shake">{error}</p>}
       </div>
 
-      {/* Numpad — solo PC e tablet */}
-      <div className="hidden md:flex flex-col justify-center px-5 sm:px-8 mt-2">
+      {/* Numpad — sempre visibile, anche da telefono */}
+      <div className="flex flex-col justify-center px-5 sm:px-8 mt-2">
         <div className="grid grid-cols-3 gap-2.5 sm:gap-2">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
             <button key={n} type="button" onClick={() => handleKey(n)}
@@ -238,7 +178,7 @@ export function PinPadModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.22 }}
-      className="fixed inset-0 z-[10060] flex flex-col items-center justify-start pt-[max(5.5rem,env(safe-area-inset-top,0px))] md:justify-center md:pt-0 overflow-hidden bg-black/30"
+      className="fixed inset-0 z-[10060] flex flex-col items-center justify-start pt-[max(5.5rem,env(safe-area-inset-top,0px))] md:justify-center md:pt-0 overflow-y-auto bg-black/30"
       style={{ }}
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
     >
@@ -252,7 +192,6 @@ export function PinPadModal({
         tabIndex={-1}
         className="pinpad-card flex flex-col w-full max-w-[23rem] md:max-w-[21.25rem] mx-4 rounded-2xl overflow-hidden outline-none"
         style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.40)', boxShadow: '0 32px 80px rgba(0,0,0,0.75)' }}
-        onPointerDown={focusMobilePinInput}
         onClick={e => e.stopPropagation()}
       >
         {content}
