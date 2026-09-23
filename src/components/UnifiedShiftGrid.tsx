@@ -3213,7 +3213,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   Un giorno con 2 turni è disabilitato (massimo 2 al giorno). */}
               <div className="md:hidden">
                 <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">{t.field_date ?? 'Data'}</label>
-                <div className="flex gap-1.5 overflow-x-auto pb-1">
+                <div className="grid grid-cols-7 gap-1">
                   {weekDays.map((day, i) => {
                     const ds = weekDateStrings[i];
                     if (!ds) return null;
@@ -3222,7 +3222,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                     return (
                       <button key={ds} type="button" disabled={isFull}
                         onClick={() => setCreateModal(prev => (prev ? { ...prev, date: ds } : prev))}
-                        className={`flex shrink-0 flex-col items-center rounded-lg border px-3 py-1.5 transition-colors ${
+                        className={`flex min-w-0 flex-col items-center rounded-lg border px-1 py-1.5 transition-colors ${
                           isSelected
                             ? 'border-white/60 bg-white/25 text-white'
                             : isFull
