@@ -212,14 +212,12 @@ export function PinPadModal({
         </div>
       </div>
 
-      {/* Action button */}
+      {/* Azione. Nessun pulsante "Conferma": il PIN si invia da solo
+          raggiunte le 4 cifre (vedi l'effetto `successAnim` sopra). */}
       <div className="flex gap-2 px-5 sm:px-8 pb-6 md:pb-4 mt-2">
         <button type="button" onClick={onCancel}
           className="flex-1 h-12 rounded-2xl font-bold text-sm text-white/80 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           style={btnBase}>{cancelText}</button>
-        <button type="button" onClick={onConfirm} disabled={isLoading || pin.length !== 4}
-          className="md:hidden flex-1 h-12 rounded-2xl font-bold text-sm text-white transition-colors hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-transparent"
-          style={btnBase}>{t.confirm}</button>
       </div>
     </>
   );
