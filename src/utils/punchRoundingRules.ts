@@ -564,7 +564,6 @@ export interface PunchRoundingPunchRef {
   timestamp: string;
   calculated_time?: string | null;
   shift_id?: string | null;
-  source?: string | null;
 }
 
 export interface PunchRoundingRecalculation {
@@ -577,11 +576,10 @@ export interface PunchRoundingRecalculation {
  * Calcola quali timbrature già registrate vanno riscritte quando cambiano le regole.
  *
  * Le regole si applicano al momento della timbratura: senza questo passaggio una
- * configurazione salvata vale solo per le timbrature successive. Vengono toccate
- * solo le timbrature dell'app/kiosk (non `source === 'manual'`) il cui orario
- * efficace non è mai stato corretto a mano, cioè è ancora quello reale oppure è
- * esattamente il risultato delle regole precedenti. Un valore diverso è una
- * correzione manuale di un responsabile e resta intatta.
+ * configurazione salvata vale solo per le timbrature successive. Vengono riallineate
+ * le timbrature il cui orario efficace non è mai stato corretto a mano, cioè è ancora
+ * quello reale oppure è esattamente il risultato delle regole precedenti. Un valore
+ * diverso è una correzione manuale di un responsabile e resta intatta.
  */
 export function planPunchRoundingRecalculation(params: {
   previousRules: PunchRoundingRules;
@@ -596,7 +594,6 @@ export function planPunchRoundingRecalculation(params: {
   const plan: PunchRoundingRecalculation[] = [];
 
   for (const punch of punches) {
-    if (punch.source === 'manual') continue;
     const shift = punch.shift_id ? shiftById.get(punch.shift_id) : undefined;
     if (!shift) continue;
 

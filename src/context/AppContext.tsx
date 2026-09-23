@@ -2552,8 +2552,8 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 
     // Le regole valgono al momento della timbratura: senza questo passaggio una nuova
     // configurazione varrebbe solo per le timbrature successive. Riallinea le timbrature
-    // app/kiosk il cui orario efficace deriva dalle regole precedenti; le correzioni
-    // manuali (o le timbrature inserite a mano) restano intatte.
+    // il cui orario efficace non è mai stato corretto a mano; le correzioni manuali
+    // restano intatte.
     const recalculations = planPunchRoundingRecalculation({
       previousRules: previous,
       nextRules: sanitized,

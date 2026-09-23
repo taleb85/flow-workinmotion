@@ -286,7 +286,6 @@ describe('planPunchRoundingRecalculation', () => {
       timestamp: localIso('2026-09-22', 22, 50),
       calculated_time: null,
       shift_id: 's1',
-      source: 'kiosk',
     },
   ];
   const base = {
@@ -319,16 +318,6 @@ describe('planPunchRoundingRecalculation', () => {
       nextRules: enabledRules(),
       ...base,
       punches: [{ ...punches[0], calculated_time: localIso('2026-09-22', 22, 52) }],
-    });
-    expect(plan).toEqual([]);
-  });
-
-  it('non tocca le timbrature inserite a mano', () => {
-    const plan = planPunchRoundingRecalculation({
-      previousRules: { ...DEFAULT_PUNCH_ROUNDING_RULES, enabled: false },
-      nextRules: enabledRules(),
-      ...base,
-      punches: [{ ...punches[0], source: 'manual' }],
     });
     expect(plan).toEqual([]);
   });

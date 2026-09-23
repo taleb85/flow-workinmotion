@@ -66,17 +66,20 @@ L'arrotondamento viene scritto in `calculated_time` nel momento in cui la timbra
 registrata: senza un passaggio aggiuntivo una regola salvata varrebbe solo per le timbrature
 successive, non per le ore già registrate.
 
-Per questo, al salvataggio l'app riallinea anche le timbrature esistenti. Vengono considerate solo
-le timbrature dell'app/kiosk (non quelle inserite a mano, `source = 'manual'`) il cui orario
-efficace **non è mai stato corretto**: cioè è ancora l'ora reale del click oppure è esattamente il
-risultato delle regole precedenti. Qualsiasi altro valore è una correzione manuale di un
-responsabile e resta intatta.
+Per questo, al salvataggio l'app riallinea anche le timbrature esistenti. Vengono considerate tutte
+le timbrature il cui orario efficace **non è mai stato corretto**: cioè è ancora l'ora reale del
+click oppure è esattamente il risultato delle regole precedenti. Qualsiasi altro valore è una
+correzione manuale di un responsabile e resta intatta.
 
 Di conseguenza:
 
-- salvare le regole aggiorna subito le ore dei turni già timbrati;
+- salvare le regole aggiorna subito le ore dei turni già timbrati, comprese le timbrature inserite
+  a mano in Presenze (se non sono state corrette);
 - disattivare l'arrotondamento e salvare riporta le timbrature all'ora reale (il ricalcolo è
   reversibile), senza toccare le correzioni manuali.
+
+Nota: l'arrotondamento applicato **al momento** della timbratura resta limitato alle timbrature di
+app e kiosk; il ricalcolo al salvataggio è l'unico punto che tocca anche i record inseriti a mano.
 
 ### Validazioni
 
