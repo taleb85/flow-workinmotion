@@ -2704,29 +2704,33 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       </div>
                       <div className="rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-600/10 p-3 space-y-3">
                         <div>
-                          <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">
-                            {t.punch_in ?? 'Entrata'}
-                          </label>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50">
+                              {t.punch_in ?? 'Entrata'}
+                            </label>
+                            {inClickAdjusted && inRawT && (
+                              <p className="text-[0.625rem] font-semibold text-white/45">
+                                {(t.punch_real_click ?? 'Click reale: {time}').replace('{time}', inRawT)}
+                              </p>
+                            )}
+                          </div>
                           <TimeInputField value={editIn} onChange={setEditIn} size="md" disabled={!showEditFields}
                             onMinutesEnter={() => { editOutHourRef.current?.focus(); editOutHourRef.current?.select(); }}
                             className={`w-full ${editIn ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
-                          {inClickAdjusted && inRawT && (
-                            <p className="mt-1 text-[0.625rem] font-semibold text-white/45">
-                              {(t.punch_real_click ?? 'Click reale: {time}').replace('{time}', inRawT)}
-                            </p>
-                          )}
                         </div>
                         <div>
-                          <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">
-                            {t.punch_out ?? 'Uscita'}
-                          </label>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50">
+                              {t.punch_out ?? 'Uscita'}
+                            </label>
+                            {outClickAdjusted && outRawT && (
+                              <p className="text-[0.625rem] font-semibold text-white/45">
+                                {(t.punch_real_click ?? 'Click reale: {time}').replace('{time}', outRawT)}
+                              </p>
+                            )}
+                          </div>
                           <TimeInputField value={editOut} onChange={setEditOut} size="md" disabled={!showEditFields} hourInputRef={editOutHourRef}
                             className={`w-full ${editOut ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
-                          {outClickAdjusted && outRawT && (
-                            <p className="mt-1 text-[0.625rem] font-semibold text-white/45">
-                              {(t.punch_real_click ?? 'Click reale: {time}').replace('{time}', outRawT)}
-                            </p>
-                          )}
                         </div>
                         <button type="button" onClick={() => void handleConfirmPunches()} disabled={!showEditFields || saving || (!editIn && !editOut)}
                           className="min-h-[2.75rem] w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider disabled:opacity-40">
