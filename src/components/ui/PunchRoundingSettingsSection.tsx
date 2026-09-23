@@ -238,10 +238,18 @@ export function PunchRoundingSettingsSection() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   }, []);
 
+  /**
+   * Anteprima "come se fosse attiva": l'interruttore generale e quello della regola
+   * vengono forzati a ON, così il risultato è visibile anche mentre l'arrotondamento
+   * è disattivato. `isActive` dice se nella configurazione corrente si applicherebbe.
+   */
+  const isActive = (type: 'in' | 'out') =>
+    draft.enabled && (type === 'in' ? draft.clockIn.enabled : draft.clockOut.enabled);
+
   const previewIn = useMemo(
     () =>
       previewPunchRounding({
-        rules: draft,
+        rules: { ...draft, enabled: true, clockIn: { ...draft.clockIn, enabled: true } },
         type: 'in',
         timeHHMM: PREVIEW_IN_TIME,
         shiftDate,
@@ -254,7 +262,7 @@ export function PunchRoundingSettingsSection() {
   const previewOut = useMemo(
     () =>
       previewPunchRounding({
-        rules: draft,
+        rules: { ...draft, enabled: true, clockOut: { ...draft.clockOut, enabled: true } },
         type: 'out',
         timeHHMM: PREVIEW_OUT_TIME,
         shiftDate,
@@ -265,16 +273,17 @@ export function PunchRoundingSettingsSection() {
   );
 
   const explainPreview = useCallback(
-    (p: RoundingPreviewResult): string => {
-      if (p.skippedReason === 'rules_disabled') return t.settings_rounding_prev_off;
-      if (p.skippedReason === 'exception') return t.settings_rounding_prev_exception;
-      if (p.skippedReason === 'rule_disabled') return t.settings_rounding_prev_rule_off;
-      if (!p.rounded) return formatTrans(t.settings_rounding_prev_aligned, { time: p.effectiveHHMM });
-      return formatTrans(t.settings_rounding_prev_rounded, {
-        delta: `${p.deltaMinutes > 0 ? '+' : ''}${p.deltaMinutes}`,
-        step: p.appliedRule?.stepMinutes ?? 0,
-        direction: p.appliedRule ? directionLabel(p.appliedRule.direction) : '',
-      });
+    (p: RoundingPreviewResult, active: boolean): string => {
+      let message: string;
+      if (p.skippedReason === 'exception') message = t.settings_rounding_prev_exception;
+      else if (!p.rounded) message = formatTrans(t.settings_rounding_prev_aligned, { time: p.effectiveHHMM });
+      else
+        message = formatTrans(t.settings_rounding_prev_rounded, {
+          delta: `${p.deltaMinutes > 0 ? '+' : ''}${p.deltaMinutes}`,
+          step: p.appliedRule?.stepMinutes ?? 0,
+          direction: p.appliedRule ? directionLabel(p.appliedRule.direction) : '',
+        });
+      return active ? message : `${message} · ${t.settings_rounding_prev_inactive}`;
     },
     [t, directionLabel]
   );
@@ -404,7 +413,7 @@ export function PunchRoundingSettingsSection() {
                   <InlinePreview
                     label={t.settings_rounding_preview_result}
                     result={previewIn}
-                    message={explainPreview(previewIn)}
+                    message={explainPreview(previewIn, isActive('in'))}
                   />
                 </div>
 
@@ -435,7 +444,7 @@ export function PunchRoundingSettingsSection() {
                   <InlinePreview
                     label={t.settings_rounding_preview_result}
                     result={previewOut}
-                    message={explainPreview(previewOut)}
+                    message={explainPreview(previewOut, isActive('out'))}
                   />
                 </div>
 

@@ -48,6 +48,10 @@ l'effetto della regola su un orario di esempio (turno 18:00–23:00, entrata 18:
 `ora reale → ora efficace` con la spiegazione della regola applicata, o il motivo per cui non è
 stata applicata. Cambiando soglia, direzione o orario di riferimento il riquadro si aggiorna subito.
 
+Il riquadro calcola il risultato **come se la regola fosse attiva**, quindi resta utile anche mentre
+l'interruttore generale o quello della singola regola è spento: in quel caso la nota lo segnala
+(«Arrotondamento disattivato: anteprima di come si applicherebbe») e il valore mostrato è indicativo.
+
 ## Salvataggio e reset
 
 - **Salva regole**: valida la configurazione e la salva su Supabase Storage
