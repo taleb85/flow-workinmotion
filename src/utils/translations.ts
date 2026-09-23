@@ -1232,7 +1232,7 @@ const baseIt = {
   tenant_load_error: 'Errore caricamento sede.',
   loading_aria: 'Caricamento',
   sw_update_aria: 'Aggiornamento app',
-  sw_update_in_progress: 'Aggiornamento in corso',
+  sw_update_ready: 'Nuova versione pronta: si applica alla prossima apertura',
   post_unlock_restarting: 'Riavvio in corso',
   elevated_none_configurable: 'Nessun dipendente non-admin attivo da configurare.',
   elevated_desc:
@@ -2587,7 +2587,7 @@ const baseEn: Record<string, string> = {
   tenant_load_error: 'Error loading venue.',
   loading_aria: 'Loading',
   sw_update_aria: 'App update',
-  sw_update_in_progress: 'Update in progress',
+  sw_update_ready: 'New version ready: it will apply on next launch',
   post_unlock_restarting: 'Restarting',
   elevated_none_configurable: 'No active non-admin employee to configure.',
   elevated_desc:
@@ -3982,7 +3982,7 @@ const baseEs: Record<string, string> = {
   tenant_load_error: 'Error al cargar la sede.',
   loading_aria: 'Cargando',
   sw_update_aria: 'Actualización de la app',
-  sw_update_in_progress: 'Actualización en curso',
+  sw_update_ready: 'Nueva versión lista: se aplicará al volver a abrir la app',
   post_unlock_restarting: 'Reiniciando',
   elevated_none_configurable: 'Ningún empleado no admin activo que configurar.',
   elevated_desc:
@@ -5376,7 +5376,7 @@ const baseFr: Record<string, string> = {
   tenant_load_error: 'Erreur de chargement de l’établissement.',
   loading_aria: 'Chargement',
   sw_update_aria: 'Mise à jour de l’app',
-  sw_update_in_progress: 'Mise à jour en cours',
+  sw_update_ready: 'Nouvelle version prête : elle s’appliquera à la prochaine ouverture',
   post_unlock_restarting: 'Redémarrage en cours',
   elevated_none_configurable: 'Aucun employé non-admin actif à configurer.',
   elevated_desc:

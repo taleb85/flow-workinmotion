@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 
-import SwUpdateOverlay from './components/SwUpdateOverlay';
+import UpdateReadyNotice from './components/UpdateReadyNotice';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { AppProvider } from './context/AppContext';
@@ -24,11 +24,8 @@ function App() {
   // Overlay aggiornamento SW: mostrato quando viene rilevato un nuovo deploy
   const [swUpdating, setSwUpdating] = useState(false);
 
-  const { updateServiceWorker } = useRegisterSW({
+  useRegisterSW({
     immediate: true,
-    onNeedRefresh() {
-      void updateServiceWorker(true);
-    },
     onOfflineReady() {},
     onRegisteredSW(_swUrl, registration) {
       if (!registration) return;
@@ -42,17 +39,21 @@ function App() {
     },
   });
 
+  // `sw-update` = un nuovo deploy ha già preso il controllo sul dispositivo.
+  // Nessun reload forzato: l'avviso è discreto e la nuova versione si applica
+  // alla prossima apertura. Se l'app è in background non si avvisa: non si vedrebbe.
   useEffect(() => {
-    const onSwUpdate = () => setSwUpdating(true);
+    const onSwUpdate = () => {
+      if (document.visibilityState === 'visible') setSwUpdating(true);
+    };
     window.addEventListener('sw-update', onSwUpdate);
     return () => window.removeEventListener('sw-update', onSwUpdate);
   }, []);
 
-  // Priorità massima: se SW update in corso, mostra solo l'overlay
-  if (swUpdating) return <SwUpdateOverlay />;
-
   return (
-    <Routes>
+    <>
+      {swUpdating && <UpdateReadyNotice onClose={() => setSwUpdating(false)} />}
+      <Routes>
       {/* SuperAdminPanel — attivo solo sul dominio super-admin, protetto da PIN */}
       <Route path="/super-admin" element={
         isSuperAdminDomain
@@ -80,7 +81,8 @@ function App() {
           </AppProvider>
         }
       />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

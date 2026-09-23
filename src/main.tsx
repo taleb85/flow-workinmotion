@@ -30,7 +30,8 @@ import './flow-v2-skin.css';
 // Quando un nuovo SW prende il controllo (dopo un deploy):
 //   1. Blocca il reload silenzioso automatico di workbox-window
 //   2. Notifica React tramite evento custom `sw-update`
-//   3. SwUpdateOverlay mostra il progresso e reindirizza a /app
+//   3. UpdateReadyNotice mostra un avviso discreto: nessun reload forzato,
+//      la nuova versione si applica alla prossima apertura dell'app
 if ('serviceWorker' in navigator) {
   let hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
