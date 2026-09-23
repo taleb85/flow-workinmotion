@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Lock, ShieldCheck, Delete } from 'lucide-react';
-import React, { ReactNode, useEffect, useState, useRef } from 'react';
+import React, { ReactNode, useEffect, useId, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 import { useT } from '../../hooks/useT';
@@ -38,9 +38,17 @@ export function PinPadModal({
   useBodyScrollLock(true);
 
   const pinAreaRef = useRef<HTMLDivElement>(null);
+  /** Input PIN della versione mobile: usa la tastiera numerica di sistema. */
+  const mobilePinInputRef = useRef<HTMLInputElement>(null);
+  const mobilePinInputId = useId();
 
-  // Autofocus dell'area PIN all'apertura (senza aprire la tastiera nativa mobile)
+  // Autofocus all'apertura. Su mobile il focus va sull'input PIN (per aprire la tastiera
+  // numerica di sistema), su PC/tablet sulla card (si usa il tastierino della modale).
   useEffect(() => {
+    if (window.innerWidth < 768) {
+      mobilePinInputRef.current?.focus();
+      return;
+    }
     pinAreaRef.current?.focus();
   }, []);
 
@@ -111,8 +119,37 @@ export function PinPadModal({
         </div>
       </div>
 
-      {/* PIN display */}
-      <div className="flex flex-col items-center gap-2 px-5 sm:px-8 mt-2">
+      {/* PIN display — mobile: input con tastiera numerica di sistema */}
+      <div className="px-5 sm:px-8 mt-2 md:hidden">
+        <div className="flex items-center justify-center gap-1.5 text-white/75 mb-2">
+          <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
+          <label htmlFor={mobilePinInputId} className="text-sm font-bold uppercase tracking-widest">{pinLabel}</label>
+        </div>
+        <input
+          id={mobilePinInputId}
+          ref={mobilePinInputRef}
+          type="password"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          autoComplete="off"
+          maxLength={4}
+          value={pin}
+          disabled={isLoading}
+          onChange={(e) => onPinChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && pin.length === 4) {
+              e.preventDefault();
+              onConfirm();
+            }
+          }}
+          className="w-full h-14 rounded-2xl text-center text-2xl font-bold tracking-[0.5em] text-white outline-none transition-colors focus:ring-2 focus:ring-white/40"
+          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.40)' }}
+        />
+        {error && <p className="text-red-400 text-xs font-bold text-center animate-shake mt-2">{error}</p>}
+      </div>
+
+      {/* PIN display — PC/tablet: pallini + tastierino della modale */}
+      <div className="hidden md:flex flex-col items-center gap-2 px-5 sm:px-8 mt-2">
         <div className="flex items-center gap-1.5 text-white/75 mb-1">
           <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
           <span className="text-sm font-bold uppercase tracking-widest">{pinLabel}</span>
@@ -135,8 +172,8 @@ export function PinPadModal({
         {error && <p className="text-red-400 text-xs font-bold text-center animate-shake">{error}</p>}
       </div>
 
-      {/* Numpad */}
-      <div className="flex-1 flex flex-col justify-center px-5 sm:px-8 mt-2 md:flex-none">
+      {/* Numpad — solo PC e tablet */}
+      <div className="hidden md:flex flex-col justify-center px-5 sm:px-8 mt-2">
         <div className="grid grid-cols-3 gap-2.5 sm:gap-2">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
             <button key={n} type="button" onClick={() => handleKey(n)}
@@ -160,10 +197,13 @@ export function PinPadModal({
       </div>
 
       {/* Action button */}
-      <div className="flex px-5 sm:px-8 pb-6 md:pb-4 mt-2">
+      <div className="flex gap-2 px-5 sm:px-8 pb-6 md:pb-4 mt-2">
         <button type="button" onClick={onCancel}
           className="flex-1 h-12 rounded-2xl font-bold text-sm text-white/80 hover:text-white transition-colors hover:bg-white/10 hover:border-white/20 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
           style={btnBase}>{cancelText}</button>
+        <button type="button" onClick={onConfirm} disabled={isLoading || pin.length !== 4}
+          className="md:hidden flex-1 h-12 rounded-2xl font-bold text-sm text-white transition-colors hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-transparent"
+          style={btnBase}>{t.confirm}</button>
       </div>
     </>
   );
@@ -174,7 +214,7 @@ export function PinPadModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.22 }}
-      className="fixed inset-0 z-[10060] flex flex-col items-center justify-center overflow-hidden bg-black/30"
+      className="fixed inset-0 z-[10060] flex flex-col items-center justify-start pt-[max(4rem,env(safe-area-inset-top,0px))] md:justify-center md:pt-0 overflow-hidden bg-black/30"
       style={{ }}
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
     >
@@ -186,7 +226,7 @@ export function PinPadModal({
         transition={{ type: 'spring', stiffness: 360, damping: 30, mass: 0.9 }}
         ref={pinAreaRef}
         tabIndex={-1}
-        className="pinpad-card flex flex-col w-full max-w-[23rem] md:max-w-[21.25rem] mx-4 mt-40 md:mt-0 rounded-2xl overflow-hidden outline-none"
+        className="pinpad-card flex flex-col w-full max-w-[23rem] md:max-w-[21.25rem] mx-4 rounded-2xl overflow-hidden outline-none"
         style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.40)', boxShadow: '0 32px 80px rgba(0,0,0,0.75)' }}
         onClick={e => e.stopPropagation()}
       >
