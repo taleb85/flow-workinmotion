@@ -221,25 +221,29 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
             onToggleExpanded(user.id);
           }
         }}
-        className="flex justify-between items-start mb-4 cursor-pointer select-none"
+        className="flex justify-between items-center gap-3 mb-4 cursor-pointer select-none"
       >
-        <div className="flex items-start gap-2 min-w-0">
+        {/* Nome e reparto sulla stessa riga */}
+        <div className="flex min-w-0 items-center gap-2">
           <ChevronDown
-            className={`mt-1 h-4 w-4 shrink-0 text-white/40 transition-transform ${isExpanded ? '' : '-rotate-90'}`}
+            className={`h-4 w-4 shrink-0 text-white/40 transition-transform ${isExpanded ? '' : '-rotate-90'}`}
             aria-hidden
           />
-          <div className="min-w-0">
-            <p className="font-bold text-lg text-white truncate">{user.first_name} {user.last_name?.[0] ?? ''}</p>
+          <p className="min-w-0 truncate font-bold text-lg text-white">
+            {user.first_name} {user.last_name?.[0] ?? ''}
             {user.department && (
-              <p className="text-[0.6875rem] text-white/50 font-medium uppercase tracking-wider">{translateDepartmentValue(user.department ?? '', effectiveLanguage)}</p>
+              <span className="ml-2 text-[0.6875rem] font-medium uppercase tracking-wider text-white/50">
+                {translateDepartmentValue(user.department ?? '', effectiveLanguage)}
+              </span>
             )}
-          </div>
+          </p>
         </div>
-        <div className="text-right shrink-0">
-          <div className="text-[0.625rem] font-bold text-white/40 uppercase tracking-tight">{t.total_hours ?? 'Ore'}</div>
-          <div className="text-sm font-bold text-white tabular-nums">
+        {/* TOTALE e ore sulla stessa riga */}
+        <div className="flex shrink-0 items-baseline gap-1.5">
+          <span className="text-[0.625rem] font-bold text-white/40 uppercase tracking-tight">{t.total_hours ?? 'Ore'}</span>
+          <span className="text-sm font-bold text-white tabular-nums">
             {formatMinutesToHoursAndMinutes(totalActual)}
-          </div>
+          </span>
         </div>
       </div>
 
