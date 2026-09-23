@@ -2614,11 +2614,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         </table>
       </div>
 
-      {/* ── Detail Drawer ── */}
+      {/* ── Detail Drawer ── (`pt-14` sul contenitore: la scheda sta un po' sotto il centro) */}
       {createPortal(
         <AnimatePresence>
           {drawerOpen && selectedShift && (
-        <div className="fixed inset-0 z-[10050] flex items-center justify-center px-4" onClick={handleCloseDrawer}>
+        <div className="fixed inset-0 z-[10050] flex items-center justify-center px-4 pt-14" onClick={handleCloseDrawer}>
           <motion.div className="absolute inset-0 bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
           <motion.div
             initial={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
