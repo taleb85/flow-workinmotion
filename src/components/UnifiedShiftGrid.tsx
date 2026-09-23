@@ -968,7 +968,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const [panelPinTargetShiftId, setPanelPinTargetShiftId] = useState<string | null>(null);
   const [panelPinError, setPanelPinError] = useState('');
   const [panelPin, setPanelPin] = useState('');
-  const [panelPinMode, setPanelPinMode] = useState<'freeze' | 'unfreeze' | 'delete' | 'bulk-delete'>('unfreeze');
+  const [panelPinMode, setPanelPinMode] = useState<'freeze' | 'unfreeze' | 'reopen' | 'delete' | 'bulk-delete'>('unfreeze');
 
   // ── Selezione multipla turni ──
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -1418,6 +1418,38 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     });
   }, [sessionActive, updateShift, setSelectedShift, showSuccess, t]);
 
+  /** Porta un turno approvato a "Confermato" e traccia la riapertura nello storico. */
+  const applyReopen = useCallback(async (shiftId: string) => {
+    await updateShift(shiftId, { approval_status: 'confirmed' } as any);
+    setSelectedShift(prev => prev && prev.id === shiftId ? { ...prev, approval_status: 'confirmed' as const } : prev);
+    void logShiftAudit({
+      shiftId,
+      action: 'update',
+      field: 'reopen',
+      oldValue: 'approvato',
+      newValue: 'confermato',
+      description: 'Turno approvato riaperto per modificare le timbrature',
+      actorUserId: currentUser?.id ?? null,
+      actorName: currentUser ? `${currentUser.first_name} ${currentUser.last_name ?? ''}`.trim() : 'Sistema',
+    });
+    showSuccess(t.shift_reopen_success ?? 'Turno riaperto: ora è modificabile.');
+  }, [updateShift, setSelectedShift, showSuccess, t, currentUser]);
+
+  /** Riapre un turno approvato riportandolo a "Confermato" (quindi modificabile).
+   *  Richiede il PIN di un responsabile, salvo sessione PIN già attiva. */
+  const handleReopenShift = useCallback(async (shift: Shift) => {
+    if (sessionActive) {
+      await applyReopen(shift.id);
+      return;
+    }
+    requestAnimationFrame(() => {
+      setPanelPinTargetShiftId(shift.id);
+      setPanelPinMode('reopen');
+      setPanelPinError('');
+      setPanelPinModalOpen(true);
+    });
+  }, [sessionActive, applyReopen]);
+
   const handlePinConfirm = useCallback(async () => {
     if (!panelPinTargetShiftId && panelPinMode !== 'bulk-delete') return;
     setSaving(true);
@@ -1457,6 +1489,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         await updateShift(panelPinTargetShiftId, { approval_status: 'frozen' } as any);
         setSelectedShift(prev => prev && prev.id === panelPinTargetShiftId ? { ...prev, approval_status: 'frozen' as const } : prev);
         showSuccess(t.wst_freeze_success ?? 'Turno congelato.');
+      } else if (panelPinMode === 'reopen') {
+        await applyReopen(panelPinTargetShiftId);
       } else {
         await updateShift(panelPinTargetShiftId, { approval_status: 'confirmed' } as any);
         setSelectedShift(prev => prev && prev.id === panelPinTargetShiftId ? { ...prev, approval_status: 'confirmed' as const } : prev);
@@ -1468,7 +1502,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       setPanelPinError('');
     } catch { showError(t.error_generic ?? 'Errore.'); }
     finally { setSaving(false); }
-  }, [panelPinTargetShiftId, panelPin, panelPinMode, pendingBulkDeleteIds, allShifts, users, updateShift, deleteShift, deleteShifts, setSelectedShift, showSuccess, showError, t]);
+  }, [panelPinTargetShiftId, panelPin, panelPinMode, pendingBulkDeleteIds, allShifts, users, updateShift, deleteShift, deleteShifts, setSelectedShift, showSuccess, showError, t, applyReopen]);
 
   const _handleSaveManualPunch = useCallback(async () => {
     if (!selectedShift) return;
@@ -2610,6 +2644,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   <Send className="h-4 w-4" />
                 </button>
               )}
+              {canEdit && selectedShift.approval_status === 'approved' && (
+                <button type="button" onClick={() => void handleReopenShift(selectedShift)}
+                  className="flex-1 flex items-center justify-center rounded-lg bg-amber-500/20 px-2 py-2 text-amber-300 hover:bg-amber-500/30 transition-colors" title={t.shift_reopen_btn ?? 'Riapri turno'} aria-label={t.shift_reopen_btn ?? 'Riapri turno'}>
+                  <Unlock className="h-4 w-4" />
+                </button>
+              )}
               {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
                 <button type="button" onClick={() => handleFreezeShift(selectedShift)}
                   className="flex-1 flex items-center justify-center rounded-lg bg-emerald-600/20 px-2 py-2 text-emerald-300 hover:bg-emerald-600/30 transition-colors" title={t.ts_drawer_freeze_btn ?? 'Congela'}>
@@ -2679,6 +2719,16 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                       gradientTo="#0891b2"
                       className="h-8 w-8 rounded-full bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30">
                       <Send className="h-4 w-4 shrink-0" />
+                    </GradientIconButton>
+                  )}
+                  {canEdit && selectedShift.approval_status === 'approved' && (
+                    <GradientIconButton
+                      label={t.shift_reopen_btn ?? 'Riapri turno'}
+                      onClick={() => void handleReopenShift(selectedShift)}
+                      gradientFrom="#fbbf24"
+                      gradientTo="#d97706"
+                      className="h-8 w-8 rounded-full bg-amber-500/20 text-amber-300 hover:bg-amber-500/30">
+                      <Unlock className="h-4 w-4 shrink-0" />
                     </GradientIconButton>
                   )}
                   {canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'draft' && (
@@ -3420,9 +3470,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 : '';
               return statusLabel ? `Elimina turno ${statusLabel}` : 'Elimina turno';
             }
-            return panelPinMode === 'freeze' ? (t.ts_drawer_freeze_title ?? 'Congela questo turno') : (t.wst_freeze_pin_title ?? 'Sblocca turno');
+            if (panelPinMode === 'freeze') return (t.ts_drawer_freeze_title ?? 'Congela questo turno');
+            if (panelPinMode === 'reopen') return (t.shift_reopen_pin_title ?? 'Riapri questo turno');
+            return (t.wst_freeze_pin_title ?? 'Sblocca turno');
           })()}
-          subtitle={panelPinMode === 'bulk-delete' ? 'Inserisci il PIN per confermare l\'eliminazione' : panelPinMode === 'delete' ? 'Inserisci il PIN per confermare l\'eliminazione' : panelPinMode === 'freeze' ? (t.ts_drawer_freeze_subtitle ?? 'Inserisci il PIN del manager/assistant per congelare il turno') : (t.wst_freeze_pin_subtitle ?? 'Inserisci il PIN del manager/assistant per sbloccare il turno')}
+          subtitle={panelPinMode === 'bulk-delete' ? 'Inserisci il PIN per confermare l\'eliminazione' : panelPinMode === 'delete' ? 'Inserisci il PIN per confermare l\'eliminazione' : panelPinMode === 'freeze' ? (t.ts_drawer_freeze_subtitle ?? 'Inserisci il PIN del manager/assistant per congelare il turno') : panelPinMode === 'reopen' ? (t.shift_reopen_pin_subtitle ?? 'Inserisci il PIN del manager/assistant per riaprire il turno approvato') : (t.wst_freeze_pin_subtitle ?? 'Inserisci il PIN del manager/assistant per sbloccare il turno')}
           pinLabel={t.wst_pin_label ?? 'PIN'}
           pin={panelPin}
           onPinChange={setPanelPin}
