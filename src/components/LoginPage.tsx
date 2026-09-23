@@ -536,12 +536,14 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
       onPointerDown={handleSurfacePointerDown}
       role="main"
       aria-label="Login"
-      className={`fixed inset-0 z-20 w-full flex flex-col items-center p-6 safe-area-pad font-sans antialiased text-neutral-100 overflow-y-auto ${keyboardOpen ? 'justify-start pt-[max(1rem,env(safe-area-inset-top,0px))]' : 'justify-center'}`}
+      className="fixed inset-0 z-20 w-full flex flex-col items-center justify-center p-6 safe-area-pad font-sans antialiased text-neutral-100 overflow-y-auto transition-[padding-bottom] duration-200 ease-out"
       style={{
         background: 'transparent',
-        // Tastiera aperta: il contenitore resta dentro lo schermo e il form va in alto,
-        // così il campo del PIN non finisce sotto la tastiera e la pagina non scorre.
+        // Tastiera aperta: si lascia libero lo spazio che occupa, così il form sale
+        // quanto basta senza cambiare composizione (logo e campi restano al loro posto).
+        // Il contenitore non si estende più sotto lo schermo, per non creare scroll.
         bottom: keyboardOpen ? 0 : '-60px',
+        paddingBottom: keyboardOpen ? keyboardInset + 24 : undefined,
       }}
     >
       {tenantBootstrapError ? (
@@ -605,8 +607,8 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
           transition={{ duration: 0.32, ease: [0.25, 0.1, 0.25, 1] }}
           className="w-full flex flex-col items-center"
         >
-          {/* Logo + brand — nascosto con la tastiera aperta, per lasciare spazio ai campi */}
-          <div className={`flex flex-col items-center mb-8 ${keyboardOpen ? 'hidden' : ''}`}>
+          {/* Logo + brand */}
+          <div className="flex flex-col items-center mb-8">
             <div className="animate-pulse-glow-sm" style={{ borderRadius: 26 }}>
               <FlowWaveIcon size={96} radius={26} />
             </div>

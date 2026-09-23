@@ -96,7 +96,9 @@ function LoginRoute() {
 
   return (
     <RouteErrorBoundary sectionName="Login">
-      <div className="app-auth-region relative min-h-screen min-h-[100dvh] w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
+      {/* Altezza = `--app-vh` (visualViewport): con la tastiera aperta #root si accorcia e
+          un `min-h-screen` (100vh) renderebbe la pagina scorrevole. */}
+      <div className="app-auth-region relative min-h-[var(--app-vh,100dvh)] w-full overflow-y-auto" style={{ background: bgTheme.appBg }}>
         <DeepAuroraShell theme={bgTheme} />
         <AnimatePresence mode="wait">
           <LoginPage key="login" onLogin={handleLogin} onBack={handleBack} />
