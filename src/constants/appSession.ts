@@ -29,6 +29,30 @@ export const HAD_SAVED_SESSION_AT_BOOT = (() => {
 export const APP_LAST_ACTIVITY_STORAGE_KEY = 'app_last_activity_at';
 
 /**
+ * Ultimo profilo che ha usato l'app su questo dispositivo.
+ * A differenza di `APP_SESSION_STORAGE_KEY` **non** viene cancellato al logout:
+ * serve a riproporre sulla schermata di accesso gli stessi colori/sfondo del profilo.
+ */
+export const LAST_PROFILE_STORAGE_KEY = 'flow_last_profile_id';
+
+export function markLastProfile(userId?: string | null): void {
+  if (!userId) return;
+  try {
+    localStorage.setItem(LAST_PROFILE_STORAGE_KEY, userId);
+  } catch {
+    /* storage non disponibile */
+  }
+}
+
+export function readLastProfileId(): string | null {
+  try {
+    return localStorage.getItem(LAST_PROFILE_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Finestra di grazia dello sblocco alla riapertura: entro questo intervallo l'app non
  * richiede Face ID/PIN. Da tarare qui se serve una soglia diversa.
  */

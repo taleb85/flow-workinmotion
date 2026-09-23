@@ -1,3 +1,5 @@
+import { readLastProfileId } from '../constants/appSession';
+
 export interface BackgroundTheme {
   id: string;
   label: Record<string, string>;
@@ -152,10 +154,32 @@ export function getStoredTheme(userId?: string): BackgroundTheme {
   return DEFAULT_THEME;
 }
 
+/** Tema scelto esplicitamente da un profilo; `null` se non ha mai scelto. */
+export function getProfileTheme(userId?: string): BackgroundTheme | null {
+  try {
+    const stored = localStorage.getItem(storageKey(userId));
+    if (stored) return getThemeById(stored);
+  } catch { /* ignore */ }
+  return null;
+}
+
 export function storeTheme(id: string, userId?: string): void {
   try {
     localStorage.setItem(storageKey(userId), id);
+    // Il tema attivo resta valido anche senza sessione (schermata di accesso): la chiave
+    // senza userId memorizza l'ultimo sfondo usato da un profilo.
+    if (userId) localStorage.setItem(storageKey(), id);
   } catch { /* ignore */ }
+}
+
+/**
+ * Tema da mostrare quando non c'è sessione (schermate di accesso/installazione):
+ * quello scelto dall'ultimo profilo che ha usato l'app su questo dispositivo, altrimenti
+ * l'ultimo sfondo memorizzato o il tema di default.
+ */
+export function getLastUsedTheme(): BackgroundTheme {
+  const lastUserId = readLastProfileId();
+  return (lastUserId ? getProfileTheme(lastUserId) : null) ?? getStoredTheme();
 }
 
 /** `#rrggbb` + alpha → `rgba(r,g,b,a)` (i colori dei temi sono sempre hex). */

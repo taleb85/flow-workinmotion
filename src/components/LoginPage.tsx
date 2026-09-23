@@ -9,6 +9,7 @@ import { database } from '../lib/database';
 import { userRowToSessionUser } from '../utils/staffPermissionDefaults';
 import { getTranslations } from '../utils/translations';
 import { applyUnauthenticatedDocumentTheme } from '../utils/theme';
+import { applyThemeToDocument, getLastUsedTheme } from '../utils/backgroundThemes';
 import { decodeProfiloAccessToken } from '../config/appPaths';
 import { APP_SESSION_STORAGE_KEY, FLOW_INVITE_NAME_STORAGE_KEY, FLOW_INVITE_PIN_STORAGE_KEY } from '../constants/appSession';
 import { getDeviceUiLanguage } from '../utils/uiLanguagePreference';
@@ -150,6 +151,9 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
     applyUnauthenticatedDocumentTheme();
     // La pagina di login usa sempre il design dark (come da preview).
     document.documentElement.classList.add('dark');
+    // Sfondo: quello scelto dal profilo che ha usato l'app su questo dispositivo
+    // (anche dopo il logout). Se nessun profilo ha scelto, resta l'ultimo sfondo usato.
+    applyThemeToDocument(getLastUsedTheme());
   }, []);
 
   useEffect(() => {

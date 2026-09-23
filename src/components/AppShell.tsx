@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, lazy, Suspense, useMemo, useCallback, useRe
 import AdminSyncOverlay from '../components/AdminSyncOverlay';
 import { RouteErrorBoundary } from '../components/RouteErrorBoundary';
 import DeepAuroraShell from '../components/DeepAuroraShell';
-import { getStoredTheme, getThemeById, applyThemeToDocument } from '../utils/backgroundThemes';
+import { getStoredTheme, getThemeById, applyThemeToDocument, storeTheme, getProfileTheme, getLastUsedTheme } from '../utils/backgroundThemes';
 import type { BackgroundTheme } from '../utils/backgroundThemes';
 import DesignAuditPreview from '../components/DesignAuditPreview';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
@@ -31,7 +31,7 @@ import { GradientIconButton } from '../components/ui/GradientIconButton';
 import { lockBodyScroll, unlockBodyScroll } from '../utils/bodyScrollLock';
 import { persistStoredUiLanguage } from '../utils/uiLanguagePreference';
 import { PATH_PROFILO } from '../config/appPaths';
-import { APP_SESSION_STORAGE_KEY, HAD_SAVED_SESSION_AT_BOOT, isAppSessionWithinGrace, markAppSessionActive } from '../constants/appSession';
+import { APP_SESSION_STORAGE_KEY, HAD_SAVED_SESSION_AT_BOOT, isAppSessionWithinGrace, markAppSessionActive, markLastProfile } from '../constants/appSession';
 import { getUnifiedNavTabs, getBottomNavTabsForMainApp, type AppNavTab } from '../utils/enabledModules';
 import {
   readMainViewState,
@@ -77,7 +77,7 @@ function LoginRoute() {
   const location = useLocation();
   const { currentUser } = useAppUser();
   const postAuthPath = useMemo(() => safeInternalRedirectPath(location.state), [location.state]);
-  const [bgTheme, setBgTheme] = useState<BackgroundTheme>(getStoredTheme);
+  const [bgTheme, setBgTheme] = useState<BackgroundTheme>(getLastUsedTheme);
 
   useEffect(() => {
     if (currentUser) navigate(postAuthPath, { replace: true });
@@ -108,7 +108,7 @@ function LoginRoute() {
 
 // ─── Install Route ─────────────────────────────────────────────────────────────
 function InstallRoute() {
-  const [bgTheme, setBgTheme] = useState<BackgroundTheme>(getStoredTheme);
+  const [bgTheme, setBgTheme] = useState<BackgroundTheme>(getLastUsedTheme);
 
   useEffect(() => {
     const handler = (e: Event) => setBgTheme(getThemeById((e as CustomEvent<string>).detail));
@@ -160,8 +160,17 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
   } = useAppOverlay();
   const [bgTheme, setBgTheme] = useState<BackgroundTheme>(() => getStoredTheme(currentUser?.id));
 
-  // Applica il tema allo sfondo globale (skin v2: `--flow-background` / `--flow-mesh`)
-  useEffect(() => { applyThemeToDocument(bgTheme); }, [bgTheme]);
+  // Applica il tema allo sfondo globale (skin v2: `--flow-background` / `--flow-mesh`).
+  // Ricorda inoltre il profilo attivo (anche dopo il logout) e, se ha scelto uno sfondo,
+  // lo memorizza come ultimo tema: la schermata di accesso li usa prima del login.
+  useEffect(() => {
+    applyThemeToDocument(bgTheme);
+    if (!currentUser?.id) return;
+    markLastProfile(currentUser.id);
+    if (getProfileTheme(currentUser.id)) {
+      storeTheme(bgTheme.id, currentUser.id);
+    }
+  }, [bgTheme, currentUser?.id]);
 
   useEffect(() => {
     const handler = (e: Event) => setBgTheme(getThemeById((e as CustomEvent<string>).detail));
