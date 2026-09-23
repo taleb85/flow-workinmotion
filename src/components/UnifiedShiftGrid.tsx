@@ -63,6 +63,11 @@ function isFrozen(shift: Shift) {
     return (shift as any).approval_status === 'frozen';
   }
 
+/** Orario valido HH:MM — evita di salvare valori a metà digitazione. */
+function isValidHHMM(v: string) {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(v);
+}
+
 function splitDayGroupsBySlot(groups: DayShiftGroup[]) {
   const lunchGroups = groups.filter(g => getShiftSlotFromStartTime(g.shift.start_time ?? '10:00') === 'lunch');
   const eveningGroups = groups.filter(g => getShiftSlotFromStartTime(g.shift.start_time ?? '18:00') === 'evening');
@@ -737,14 +742,14 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   const [isAutoBreak, setIsAutoBreak] = useState(true);
   const editOutHourRef = useRef<HTMLInputElement>(null);
 
-  const initialValuesRef = useRef({ editStartTime: '', editEndTime: '', editIn: '', editOut: '', deductBreak: true, isAutoBreak: true });
+  const [initialValues, setInitialValues] = useState({ editStartTime: '', editEndTime: '', editIn: '', editOut: '', deductBreak: true, isAutoBreak: true });
   const hasUnsavedChanges = useMemo(() => {
     if (!drawerOpen) return false;
-    const iv = initialValuesRef.current;
+    const iv = initialValues;
     return iv.editStartTime !== editStartTime || iv.editEndTime !== editEndTime
         || iv.editIn !== editIn || iv.editOut !== editOut
         || iv.deductBreak !== deductBreak || iv.isAutoBreak !== isAutoBreak;
-  }, [drawerOpen, editStartTime, editEndTime, editIn, editOut, deductBreak, isAutoBreak]);
+  }, [drawerOpen, editStartTime, editEndTime, editIn, editOut, deductBreak, isAutoBreak, initialValues]);
 
   const handleCloseDrawer = useCallback(() => {
     // Con modifiche non salvate la chiusura non va mai bloccata in silenzio:
@@ -752,6 +757,57 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     if (hasUnsavedChanges && !window.confirm(t.shift_close_unsaved ?? 'Hai modifiche non salvate su questo turno. Chiudere senza salvare?')) return;
     setDrawerOpen(false);
   }, [hasUnsavedChanges, t]);
+
+  /**
+   * Auto-salvataggio del drawer: orari turno + pausa (solo turni in bozza, dove i campi
+   * sono attivi) e timbrature Entrata/Uscita. Il ritardo è gestito dall'effetto sotto.
+   */
+  const autoSaveDrawerChanges = useCallback(async () => {
+    const shift = selectedShift;
+    if (!shift) return;
+    const iv = initialValues;
+    const timesSavable = (iv.editStartTime !== editStartTime || iv.editEndTime !== editEndTime
+        || iv.deductBreak !== deductBreak || iv.isAutoBreak !== isAutoBreak)
+      && shift.approval_status === 'draft'
+      && isValidHHMM(editStartTime) && isValidHHMM(editEndTime) && editStartTime !== editEndTime;
+    const punchesSavable = (iv.editIn !== editIn || iv.editOut !== editOut)
+      && canEdit && !isFrozen(shift) && shift.approval_status !== 'approved'
+      && isValidHHMM(editIn) && isValidHHMM(editOut);
+    // Niente da scrivere (valori incompleti o campi non modificabili): nessuna chiamata.
+    if (!timesSavable && !punchesSavable) return;
+    setSaving(true);
+    try {
+      if (timesSavable) {
+        await updateShift(shift.id, {
+          start_time: editStartTime + ':00',
+          end_time: editEndTime + ':00',
+          deduct_break: deductBreak,
+          is_auto_break: isAutoBreak,
+        });
+        setInitialValues(prev => ({ ...prev, editStartTime, editEndTime, deductBreak, isAutoBreak }));
+      }
+      if (punchesSavable) {
+        const todayStr = today.toISOString().slice(0, 10);
+        const punchDate = shift.date <= todayStr ? shift.date : todayStr;
+        const existingIn = allPunchRecords.find(pr => pr.shift_id === shift.id && pr.type === 'in');
+        const existingOut = allPunchRecords.find(pr => pr.shift_id === shift.id && pr.type === 'out');
+        if (existingIn) await updatePunchRecord(existingIn.id, { timestamp: new Date(`${punchDate}T${editIn}:00`).toISOString() });
+        else await addPunchRecord(shift.user_id, 'in', { shift_id: shift.id, timestamp: `${punchDate}T${editIn}:00`, source: 'manual' });
+        if (existingOut) await updatePunchRecord(existingOut.id, { timestamp: new Date(`${punchDate}T${editOut}:00`).toISOString() });
+        else await addPunchRecord(shift.user_id, 'out', { shift_id: shift.id, timestamp: `${punchDate}T${editOut}:00`, source: 'manual' });
+        setInitialValues(prev => ({ ...prev, editIn, editOut }));
+      }
+    } catch { showError(t.punch_save_error ?? 'Errore nel salvataggio della timbratura.'); }
+    finally { setSaving(false); }
+  }, [selectedShift, initialValues, editStartTime, editEndTime, deductBreak, isAutoBreak, editIn, editOut, updateShift, updatePunchRecord, addPunchRecord, allPunchRecords, canEdit, today, showError, t]);
+
+  // Auto-salvataggio: salva le modifiche del drawer poco dopo l'ultima digitazione,
+  // così il pulsante X resta solo un pulsante di chiusura.
+  useEffect(() => {
+    if (!drawerOpen || !selectedShift || saving || !hasUnsavedChanges) return;
+    const timer = setTimeout(() => { void autoSaveDrawerChanges(); }, 800);
+    return () => clearTimeout(timer);
+  }, [drawerOpen, selectedShift, saving, hasUnsavedChanges, autoSaveDrawerChanges]);
 
   // ── ESC annulla azione corrente ──
   useEffect(() => {
@@ -1223,13 +1279,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         is_auto_break: isAutoBreak,
       });
       // Aggiorna i valori iniziali così hasUnsavedChanges torna false
-      initialValuesRef.current = {
-        ...initialValuesRef.current,
+      setInitialValues(prev => ({
+        ...prev,
         editStartTime,
         editEndTime,
         deductBreak,
         isAutoBreak,
-      };
+      }));
       showSuccess(t.shift_updated ?? 'Turno aggiornato.');
       // Chiudi automaticamente il drawer dopo salvataggio riuscito
       setDrawerOpen(false);
@@ -1280,7 +1336,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       });
       setSelectedShift(prev => prev && prev.id === shift.id ? { ...prev, approval_status: 'approved' as const } : prev);
       // Aggiorna i valori iniziali così hasUnsavedChanges torna false e la modale si può chiudere
-      initialValuesRef.current = { ...initialValuesRef.current, editIn, editOut };
+      setInitialValues(prev => ({ ...prev, editIn, editOut }));
       showSuccess(t.shift_approved ?? 'Turno approvato.');
       // Advance to next shift in review queue if available
       if (reviewQueue && reviewIdx < reviewQueue.length - 1) {
@@ -1486,16 +1542,15 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   // Modifica pausa non ancora salvata → mostra il pulsante "Salva" accanto alla spunta
   const breakUnsaved = useMemo(() => {
     if (!drawerOpen) return false;
-    const iv = initialValuesRef.current;
-    return iv.deductBreak !== deductBreak || iv.isAutoBreak !== isAutoBreak;
-  }, [drawerOpen, deductBreak, isAutoBreak]);
+    return initialValues.deductBreak !== deductBreak || initialValues.isAutoBreak !== isAutoBreak;
+  }, [drawerOpen, deductBreak, isAutoBreak, initialValues]);
 
   const handleSaveBreakSettings = useCallback(async () => {
     if (!selectedShift) return;
     setSaving(true);
     try {
       await updateShift(selectedShift.id, { deduct_break: deductBreak, is_auto_break: isAutoBreak });
-      initialValuesRef.current = { ...initialValuesRef.current, deductBreak, isAutoBreak };
+      setInitialValues(prev => ({ ...prev, deductBreak, isAutoBreak }));
       showSuccess((t as Record<string, string>).break_settings_saved ?? 'Impostazioni pausa aggiornate');
       // Chiudi la modale: nessuna modifica pendente, il pulsante Salva scompare
       setDrawerOpen(false);
@@ -1559,7 +1614,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     setEditStartTime(sv); setEditEndTime(ev);
     setEditIn(iv); setEditOut(ov);
     setDeductBreak(db); setIsAutoBreak(ab);
-    initialValuesRef.current = { editStartTime: sv, editEndTime: ev, editIn: iv, editOut: ov, deductBreak: db, isAutoBreak: ab };
+    setInitialValues({ editStartTime: sv, editEndTime: ev, editIn: iv, editOut: ov, deductBreak: db, isAutoBreak: ab });
     setDrawerOpen(true);
   }, [users, getPunchForShift, weekShifts]);
 
@@ -2539,7 +2594,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   <History className="h-4 w-4" />
                 </button>
               )}
-              <button type="button" onClick={handleCloseDrawer} className="flex-1 flex items-center justify-center rounded-lg bg-white/10 px-2 py-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors"><X className="h-4 w-4" /></button>
+              <button type="button" onClick={handleCloseDrawer} title={t.close ?? 'Chiudi'} aria-label={t.close ?? 'Chiudi'} className="flex-1 flex items-center justify-center rounded-lg bg-white/10 px-2 py-2 text-white/50 hover:text-white hover:bg-white/20 transition-colors"><X className="h-4 w-4" /></button>
             </div>
 
             {/* Riga principale: nome/data (mobile: sotto i pulsanti) */}
@@ -2620,7 +2675,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                   )}
                 </div>
                 <GradientIconButton
-                  label={t.cancel ?? 'Chiudi'}
+                  label={t.close ?? 'Chiudi'}
                   onClick={handleCloseDrawer}
                   gradientFrom="#94a3b8"
                   gradientTo="#475569"
