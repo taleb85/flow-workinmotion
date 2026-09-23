@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo, useLayoutEffect, memo, Fragment, type ReactNode } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo, useLayoutEffect, memo, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import {
   CalendarDays, AlertTriangle, Check, Lock, Plus, Clock,
@@ -252,7 +252,7 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
       </div>
 
       {isExpanded && (
-      <div className="space-y-2">
+      <div className="space-y-2 divide-y divide-white/10">
         {!hasShifts ? (
           <div
             role={canCreate ? 'button' : undefined}
@@ -285,11 +285,7 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
 
             const todayDate = isToday(day);
             return (
-              <Fragment key={dateStr}>
-              {/* Separatore tra i giorni: linea sottile a estremità arrotondate,
-                  presente anche quando il dipendente ha turni in un solo giorno. */}
-              <div className="mx-1 h-px rounded-full bg-white/10" aria-hidden />
-              <div
+              <div key={dateStr}
                 className={`flex items-start gap-3 p-2.5 rounded-xl ${todayDate ? 'ring-1 ring-white/20' : ''} ${dropTargetKey ===`${user.id}_${dateStr}` ? 'ring-2 ring-inset ring-amber-400/50' : ''}`}
                 onDragOver={(e) => onDragOver(e, `${user.id}_${dateStr}`)}
                 onDragLeave={onDragLeave}
@@ -332,7 +328,6 @@ const ShiftGridMobileCard = memo(function ShiftGridMobileCard({
                   })()}
                 </div>
               </div>
-              </Fragment>
             );
           })}
           {/* Un solo pulsante per aggiungere un turno in un altro giorno: la data si
