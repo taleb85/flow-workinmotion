@@ -2680,6 +2680,14 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                 {selectedShift && selectedShift.approval_status !== 'draft' && (() => {
                   const { in: punchIn, out: punchOut } = getPunchForShift(selectedShift);
                   const hasIn = !!punchIn; const hasOut = !!punchOut;
+                  // Orario del click (timestamp grezzo) vs orario valido per il calcolo (calculated_time):
+                  // per le entrate anticipate il secondo è l'inizio turno, quindi il click reale va mostrato a parte.
+                  const inRawT = punchIn ? punchTimeHHMM(punchIn.timestamp) : null;
+                  const outRawT = punchOut ? punchTimeHHMM(punchOut.timestamp) : null;
+                  const inEffectiveT = punchIn ? punchTimeHHMM(punchIn.calculated_time || punchIn.timestamp) : null;
+                  const outEffectiveT = punchOut ? punchTimeHHMM(punchOut.calculated_time || punchOut.timestamp) : null;
+                  const inClickAdjusted = !!inRawT && inRawT !== inEffectiveT;
+                  const outClickAdjusted = !!outRawT && outRawT !== outEffectiveT;
                   // Turno approvato: timbrature in sola lettura (nessuna modifica dal drawer).
                   const showEditFields = canEdit && !isFrozen(selectedShift) && selectedShift.approval_status !== 'approved';
                   return (
@@ -2702,6 +2710,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                           <TimeInputField value={editIn} onChange={setEditIn} size="md" disabled={!showEditFields}
                             onMinutesEnter={() => { editOutHourRef.current?.focus(); editOutHourRef.current?.select(); }}
                             className={`w-full ${editIn ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
+                          {inClickAdjusted && inRawT && (
+                            <p className="mt-1 text-[0.625rem] font-semibold text-white/45">
+                              {(t.punch_real_click ?? 'Click reale: {time}').replace('{time}', inRawT)}
+                            </p>
+                          )}
                         </div>
                         <div>
                           <label className="text-[0.625rem] font-bold uppercase tracking-wider text-white/50 block mb-1">
@@ -2709,6 +2722,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                           </label>
                           <TimeInputField value={editOut} onChange={setEditOut} size="md" disabled={!showEditFields} hourInputRef={editOutHourRef}
                             className={`w-full ${editOut ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/20 bg-white/10'}`} />
+                          {outClickAdjusted && outRawT && (
+                            <p className="mt-1 text-[0.625rem] font-semibold text-white/45">
+                              {(t.punch_real_click ?? 'Click reale: {time}').replace('{time}', outRawT)}
+                            </p>
+                          )}
                         </div>
                         <button type="button" onClick={() => void handleConfirmPunches()} disabled={!showEditFields || saving || (!editIn && !editOut)}
                           className="min-h-[2.75rem] w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[0.6875rem] font-bold text-white hover:bg-emerald-700 transition-colors uppercase tracking-wider disabled:opacity-40">
