@@ -817,7 +817,9 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       }
       if (punchesSavable) {
         // Solo i campi modificati; i turni futuri non salvano timbrature.
-        await persistPunchTimes(shift, editIn, editOut, iv, false);
+        // createMissing: completa la coppia entrata/uscita, altrimenti le ore del turno
+        // non risultano timbrate e i totali restano quelli pianificati.
+        await persistPunchTimes(shift, editIn, editOut, iv, true);
         setInitialValues(prev => ({ ...prev, editIn, editOut }));
       }
     } catch { showError(t.punch_save_error ?? 'Errore nel salvataggio della timbratura.'); }
@@ -2770,8 +2772,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
                           <span className="flex items-center gap-1 text-[0.6875rem] font-bold text-amber-400"><AlertTriangle className="h-3 w-3" />{t.not_clocked ?? 'Non timbrato'}</span>
                         ) : hasIn && !hasOut ? (
                           <span className="flex items-center gap-1 text-[0.6875rem] font-bold text-white"><Clock className="h-3 w-3" />{t.clocked_in_only ?? 'Solo entrata'}</span>
-                        ) : (
+                        ) : hasIn && hasOut ? (
                           <span className="flex items-center gap-1 text-[0.6875rem] font-bold text-emerald-400"><Check className="h-3 w-3" />{t.clocked_complete ?? 'Timbratura completa'}</span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-[0.6875rem] font-bold text-white"><Clock className="h-3 w-3" />{t.clocked_out_only ?? 'Solo uscita'}</span>
                         )}
                       </div>
                       <div className="rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-600/10 p-3 space-y-3">
@@ -2815,9 +2819,10 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               </div>
               {/* Componente unico in basso: riepilogo ore + detrae pausa */}
               {selectedShift && (() => {
-                // Riepilogo indipendente dallo stato del turno (bozza/pubblicato/approvato/congelato):
-                // sempre ore del turno (start→end) − pausa calcolata dalle regole pausa.
-                const grossMins = calculateShiftMinutesGross(selectedShift.start_time ?? '', selectedShift.end_time ?? '');
+                // Ore calcolate sugli orari risolti: timbrature reali se la coppia entrata/uscita
+                // è completa, altrimenti orari pianificati (stessa convenzione di statistiche e PDF).
+                const resolvedHours = getResolvedStartEndForHours(selectedShift, weekPunchRecords);
+                const grossMins = calculateShiftMinutesGross(resolvedHours.start, resolvedHours.end);
                 const shiftUser = users.find((u) => u.id === selectedShift.user_id);
                 const breakMins = getBreakMinutesForShift({ ...selectedShift, deduct_break: deductBreak }, grossMins, shiftUser ?? null, breakRules);
                 const netMins = Math.max(0, grossMins - breakMins);

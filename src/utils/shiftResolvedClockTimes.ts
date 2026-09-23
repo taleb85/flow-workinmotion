@@ -67,7 +67,9 @@ export function getPunchPairForShift(
         return isLunch ? pDate.getHours() < 16 : pDate.getHours() >= 16;
       });
 
-  const actualEndRaw = clockOutRaw ?? punchOut?.timestamp ?? null;
+  // L'orario efficace dell'uscita è calculated_time quando presente (correzione manuale),
+  // altrimenti timestamp (o clock_out_time salvato sull'entrata).
+  const actualEndRaw = clockOutRaw ?? punchOut?.calculated_time ?? punchOut?.timestamp ?? null;
 
   const actualStart = punchIn
     ? punchTimeHHMM((punchIn.calculated_time || punchIn.timestamp) as string) ?? plannedStart
