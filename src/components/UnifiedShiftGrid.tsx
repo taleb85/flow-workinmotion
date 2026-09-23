@@ -19,6 +19,7 @@ import { translateDepartmentValue } from '../utils/departmentLabels';
 import { formatMinutesToHoursAndMinutes, calculateShiftMinutesGross, hasShiftConflictSameDay } from '../utils/timeCalculations';
 import { getBreakMinutesForShift, getAutoBreakThresholdMinutes, getAutoBreakMinutesForGross, getAutoBreakTiers } from '../utils/breakRules';
 import { shiftPastPlannedEndWithoutClockIn, punchTimeHHMM, getResolvedStartEndForHours } from '../utils/shiftResolvedClockTimes';
+import { roundBreakWindow } from '../utils/punchRoundingRules';
 import { exportSchedulePDF } from '../utils/exportSchedulePDF';
 import { TimeInputField } from './ui/TimeInputField';
 import { GradientIconButton } from './ui/GradientIconButton';
@@ -471,7 +472,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
     deleteShift, deleteShifts, publishWeekShifts, publishShift,
     addPunchRecord, updatePunchRecord, addShift, updateShift,
   } = useAppData();
-  const { breakRules, featureFlags } = useAppConfig();
+  const { breakRules, featureFlags, punchRoundingRules } = useAppConfig();
   const { showSuccess, showError } = useAppOverlay();
   // Memoizzati: `today`/`locale` cambiavano riferimento a ogni render e invalidavano
   // tutte le useCallback che li citavano tra le dipendenze (→ funzioni ricreate
@@ -1137,13 +1138,21 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           if (!st || !en) return 0;
           const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
           if (toMin(en) <= toMin(st)) return 0;
-          // Finestra effettiva dalle timbrature quando disponibili, altrimenti quella pianificata
+          // Finestra effettiva dalle timbrature quando disponibili, altrimenti quella pianificata.
+          // Gli estremi possono essere arrotondati dalle regole di timbratura configurate.
           let wStart = st;
           let wEnd = en;
           if (punchIn && punchOut) {
             const fmt = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-            wStart = fmt(punchIn.calculated_time || punchIn.timestamp);
-            wEnd = fmt(punchOut.calculated_time || punchOut.timestamp);
+            const rounded = roundBreakWindow({
+              rules: punchRoundingRules,
+              startHHMM: fmt(punchIn.calculated_time || punchIn.timestamp),
+              endHHMM: fmt(punchOut.calculated_time || punchOut.timestamp),
+              shift,
+              user: shiftUser,
+            });
+            wStart = rounded.start;
+            wEnd = rounded.end;
           }
           return getBreakMinutesForShift(shift, gross, shiftUser, breakRules, { breakRuleWindow: { start: wStart, end: wEnd } });
         })();
@@ -1168,7 +1177,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       cache.set(key, groups);
     }
     return cache;
-  }, [shiftsByUserDate, shiftsByUser, weekPunchIndex, weekDateStrings, breakRules, violationChromeEnabled, effectiveWorkRules, getPunchForShift, users]);
+  }, [shiftsByUserDate, shiftsByUser, weekPunchIndex, weekDateStrings, breakRules, punchRoundingRules, violationChromeEnabled, effectiveWorkRules, getPunchForShift, users]);
 
   /**
    * Totali (pianificato/effettivo) per utente, calcolati UNA volta per dataset.

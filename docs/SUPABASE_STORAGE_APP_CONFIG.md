@@ -8,6 +8,7 @@ L’app può salvare in Storage (bucket **`app-config`**) questi file JSON:
 | `geofence.json` | Centro GPS timbrature (lat, lng, `radiusM`) — Profili → Impostazioni → «Salva su cloud» |
 | `work_rules.json` | Regole violazioni / ore |
 | `break_rules.json` | Regole pause |
+| `punch_rounding_rules.json` | Regole di arrotondamento degli orari di timbratura (Impostazioni → Arrotondamento timbrature) |
 | `role_feature_templates.json` | Template permessi per ruolo (Admin → Permessi ruoli) |
 | `admin_sheet_modules.json` | Moduli scheda Admin globali |
 | `departments.json` | Reparti (colori, etichette, custom) — stesso bucket, sync con altri dispositivi |

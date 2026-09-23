@@ -68,6 +68,7 @@ import { FEATURE_DEFINITIONS } from '../utils/featureFlags';
 import { TimeInputField } from './ui/TimeInputField';
 import { isAdminModuleEnabled } from '../utils/enabledFeatures';
 import { SettingsAccordionSection } from './ui/SettingsAccordionSection';
+import { PunchRoundingSettingsSection } from './ui/PunchRoundingSettingsSection';
 import { CenteredModalPortal } from './ui/CenteredModalPortal';
 import { GradientIconButton } from './ui/GradientIconButton';
 import { RoleFeatureTemplatesPanel } from './RoleFeatureTemplatesPage';
@@ -1805,6 +1806,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             )}
           </SettingsAccordionSection>
         )}
+
+        {/* ── Arrotondamento timbrature (solo Admin) ───────────────────────── */}
+        {adminOnly && <PunchRoundingSettingsSection />}
 
         {/* ── Template Settimana ───────────────────────────────────────────── */}
         {isManager && (
