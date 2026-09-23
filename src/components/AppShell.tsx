@@ -161,16 +161,16 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
   const [bgTheme, setBgTheme] = useState<BackgroundTheme>(() => getStoredTheme(currentUser?.id));
 
   // Applica il tema allo sfondo globale (skin v2: `--flow-background` / `--flow-mesh`).
-  // Ricorda inoltre il profilo attivo (anche dopo il logout) e, se ha scelto uno sfondo,
-  // lo memorizza come ultimo tema: la schermata di accesso li usa prima del login.
+  // Ricorda inoltre il profilo attivo (anche nome, e anche dopo il logout) e, se ha scelto
+  // uno sfondo, lo memorizza come ultimo tema: la schermata di accesso li usa prima del login.
   useEffect(() => {
     applyThemeToDocument(bgTheme);
     if (!currentUser?.id) return;
-    markLastProfile(currentUser.id);
+    markLastProfile(currentUser.id, `${currentUser.first_name} ${currentUser.last_name ?? ''}`.trim());
     if (getProfileTheme(currentUser.id)) {
       storeTheme(bgTheme.id, currentUser.id);
     }
-  }, [bgTheme, currentUser?.id]);
+  }, [bgTheme, currentUser?.id, currentUser?.first_name, currentUser?.last_name]);
 
   useEffect(() => {
     const handler = (e: Event) => setBgTheme(getThemeById((e as CustomEvent<string>).detail));

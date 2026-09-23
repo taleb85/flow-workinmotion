@@ -11,7 +11,7 @@ import { getTranslations } from '../utils/translations';
 import { applyUnauthenticatedDocumentTheme } from '../utils/theme';
 import { applyThemeToDocument, getLastUsedTheme } from '../utils/backgroundThemes';
 import { decodeProfiloAccessToken } from '../config/appPaths';
-import { APP_SESSION_STORAGE_KEY, FLOW_INVITE_NAME_STORAGE_KEY, FLOW_INVITE_PIN_STORAGE_KEY } from '../constants/appSession';
+import { APP_SESSION_STORAGE_KEY, FLOW_INVITE_NAME_STORAGE_KEY, FLOW_INVITE_PIN_STORAGE_KEY, readLastProfileId, readLastProfileName } from '../constants/appSession';
 import { getDeviceUiLanguage } from '../utils/uiLanguagePreference';
 import { resetAppLock } from '../utils/appLock';
 import {
@@ -96,6 +96,26 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   const [showForm, setShowForm] = useState(false);
   // Credenziali in attesa che il tenant carichi (fallback Option B)
   const [pendingCreds, setPendingCreds] = useState<{ name: string; pin: string } | null>(null);
+
+  /**
+   * Profilo già associato a questo dispositivo (ultimo accesso): il nome viene
+   * precompilato e all'utente resta da digitare solo il PIN.
+   */
+  const [lastProfile] = useState(() => {
+    const id = readLastProfileId();
+    const name = readLastProfileName();
+    return id || name ? { id, name } : null;
+  });
+  /** Nome lasciato da un link invito: ha la precedenza sul profilo del dispositivo. */
+  const hadStoredInviteName = useMemo(() => {
+    try {
+      return Boolean(localStorage.getItem(FLOW_INVITE_NAME_STORAGE_KEY));
+    } catch {
+      return false;
+    }
+  }, []);
+  /** True quando il nome è stato precompilato dal dispositivo (una sola volta). */
+  const deviceNamePrefilledRef = useRef(false);
 
   // Invite onboarding — il nuovo dipendente compila i campi mancanti
   const [inviteEmail, setInviteEmail] = useState('');
@@ -190,6 +210,21 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
   }, [inviteUserId, inviteNameFromUrl, invitePinFromUrl]);
 
   /**
+   * Dispositivo già associato a un profilo: precompila il nome (dall'anagrafica se
+   * disponibile, altrimenti dall'ultimo nome salvato). L'utente digita solo il PIN.
+   */
+  useEffect(() => {
+    if (deviceNamePrefilledRef.current || isInviteLink || hadStoredInviteName || !lastProfile) return;
+    const known = lastProfile.id ? users.find((u) => u.id === lastProfile.id) : undefined;
+    const name = known
+      ? `${known.first_name} ${known.last_name ?? ''}`.trim()
+      : (lastProfile.name ?? '');
+    if (!name) return;
+    deviceNamePrefilledRef.current = true;
+    setStaffName(name.toUpperCase());
+  }, [isInviteLink, hadStoredInviteName, lastProfile, users]);
+
+  /**
    * Quando il form diventa visibile (dopo "Tap to start"), sposta il focus sull'input giusto.
    * Prima gli input non sono montati: autoFocus da solo non basta, soprattutto su iOS.
    */
@@ -198,7 +233,9 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
     if (isInviteLink) return;
     const id = requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        staffNameInputRef.current?.focus();
+        // Profilo del dispositivo già riconosciuto: il nome è precompilato, tocca solo il PIN.
+        if (deviceNamePrefilledRef.current) pinInputRef.current?.focus();
+        else staffNameInputRef.current?.focus();
       });
     });
     return () => cancelAnimationFrame(id);

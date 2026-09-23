@@ -35,10 +35,17 @@ export const APP_LAST_ACTIVITY_STORAGE_KEY = 'app_last_activity_at';
  */
 export const LAST_PROFILE_STORAGE_KEY = 'flow_last_profile_id';
 
-export function markLastProfile(userId?: string | null): void {
+/**
+ * Nome dell'ultimo profilo che ha usato l'app su questo dispositivo: permette alla
+ * schermata di accesso di precompilare il nome (basta digitare il PIN).
+ */
+export const LAST_PROFILE_NAME_STORAGE_KEY = 'flow_last_profile_name';
+
+export function markLastProfile(userId?: string | null, displayName?: string | null): void {
   if (!userId) return;
   try {
     localStorage.setItem(LAST_PROFILE_STORAGE_KEY, userId);
+    if (displayName) localStorage.setItem(LAST_PROFILE_NAME_STORAGE_KEY, displayName);
   } catch {
     /* storage non disponibile */
   }
@@ -47,6 +54,14 @@ export function markLastProfile(userId?: string | null): void {
 export function readLastProfileId(): string | null {
   try {
     return localStorage.getItem(LAST_PROFILE_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function readLastProfileName(): string | null {
+  try {
+    return localStorage.getItem(LAST_PROFILE_NAME_STORAGE_KEY);
   } catch {
     return null;
   }
