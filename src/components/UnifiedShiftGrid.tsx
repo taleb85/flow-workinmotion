@@ -1277,6 +1277,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         actorName: actorFull ? `${actorFull.first_name} ${actorFull.last_name ?? ''}`.trim() : 'Sistema',
       });
       setSelectedShift(prev => prev && prev.id === shift.id ? { ...prev, approval_status: 'approved' as const } : prev);
+      // Aggiorna i valori iniziali così hasUnsavedChanges torna false e la modale si può chiudere
+      initialValuesRef.current = { ...initialValuesRef.current, editIn, editOut };
       showSuccess(t.shift_approved ?? 'Turno approvato.');
       // Advance to next shift in review queue if available
       if (reviewQueue && reviewIdx < reviewQueue.length - 1) {
