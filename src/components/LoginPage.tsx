@@ -725,7 +725,7 @@ export default memo(function LoginPage({ onLogin }: LoginPageProps) {
               {/* Contenitore visivo */}
               <div
                 data-pin-surface="true"
-                className={`w-full pl-10 pr-10 py-3.5 rounded-[var(--flow-radius-md)] flex items-center justify-center gap-5 transition-all cursor-text ${pinFocused ? 'ring-2 ring-white/50' : ''}`}
+                className={`w-full pl-10 pr-10 py-3.5 rounded-xl flex items-center justify-center gap-5 transition-all cursor-text ${pinFocused ? 'ring-2 ring-white/50' : ''}`}
                 style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.14)' }}
                 onClick={openPinKeypad}
               >
