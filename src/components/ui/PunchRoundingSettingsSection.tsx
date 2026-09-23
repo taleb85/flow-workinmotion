@@ -56,7 +56,7 @@ const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wide t
 const cardClass = 'space-y-3 rounded-xl border border-white/[0.14] bg-white/5 p-3';
 
 function chipClass(active: boolean): string {
-  return `cursor-pointer rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
+  return `cursor-pointer rounded-[var(--flow-radius-sm)] px-2.5 py-1 text-xs font-semibold transition-colors ${
     active
       ? 'border border-white/60 bg-white/25 text-white'
       : 'border border-white/20 text-white/70 hover:border-white/45 hover:bg-white/10 hover:text-white'

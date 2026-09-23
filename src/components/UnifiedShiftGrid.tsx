@@ -2213,7 +2213,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
               )}
             </div>
           )}
-          <div className="flex flex-1 md:flex-none min-w-0 items-center gap-1 rounded-full bg-white/5 p-0.5">
+          <div className="flex flex-1 md:flex-none min-w-0 items-center gap-1 rounded-[var(--flow-radius-sm)] bg-white/5 p-0.5">
             <button type="button" onClick={() => setViewMode('week')}
               aria-pressed={viewMode === 'week'}
               className={`flex-1 md:flex-none rounded-md border px-1.5 md:px-2.5 py-1.5 text-[0.625rem] md:text-[0.625rem] font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'border-white/40 bg-white/20 text-white' : 'border-transparent text-white/40 hover:text-white/70'}`}>

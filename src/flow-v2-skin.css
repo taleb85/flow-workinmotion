@@ -438,6 +438,15 @@ select option { background: #1c1c1e !important; color: #f5f5f7 !important; }
   color: #f5f5f7 !important;
 }
 
+/* ── PILLOLE RESIDUE: chip, badge e pulsanti larghi con `rounded-full` ──
+   Il padding orizzontale (`px-`) distingue una pillola da un elemento tondo:
+   avatar, FAB, pallini di stato, spinner e pulsanti-icona (che usano `p-`)
+   non hanno `px-`, quindi restano circolari. Raggio "small" come i chip:
+   questi elementi sono alti ~22-32px, 10px sarebbe metà altezza → capsula. */
+[class*="rounded-full"][class*="px-"] {
+  border-radius: var(--flow-radius-sm) !important;
+}
+
 /* ── DIVISORI più morbidi ── */
 [class*="divide-"] > :not([hidden]) ~ :not([hidden]) {
   border-color: rgba(255, 255, 255, 0.1) !important;

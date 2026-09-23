@@ -180,7 +180,7 @@ export default function MobileHome({
                 type="button"
                 disabled={punchBusy}
                 onClick={onEnd}
-                className="w-full h-12 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 transition-colors disabled:opacity-60"
+                className="w-full h-12 bg-red-600 hover:bg-red-700 text-white rounded-[var(--flow-radius-button)] flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 transition-colors disabled:opacity-60"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="text-sm font-bold uppercase tracking-wider">
@@ -193,7 +193,7 @@ export default function MobileHome({
               type="button"
               disabled={punchBusy}
               onClick={onStart}
-              className="w-full h-12 bg-brand hover:bg-blue-500 text-white rounded-full flex items-center justify-center gap-2 shadow-lg shadow-black/20 transition-colors disabled:opacity-60"
+              className="w-full h-12 bg-brand hover:bg-blue-500 text-white rounded-[var(--flow-radius-button)] flex items-center justify-center gap-2 shadow-lg shadow-black/20 transition-colors disabled:opacity-60"
             >
               <Play className="w-4 h-4 fill-current" />
               <span className="text-sm font-bold uppercase tracking-wider">
