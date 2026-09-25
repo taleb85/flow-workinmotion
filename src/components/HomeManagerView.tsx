@@ -451,12 +451,12 @@ export default memo(function HomeManagerView({
                 <p className="text-2xl font-bold text-white tabular-nums">{formatMinutesToHoursAndMinutes(weekMinutes)}</p>
               </div>
               <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] cursor-pointer" onClick={() => onNavigateToShifts?.()}>
-                <div className="flex items-center justify-between mb-2">
-                  <Calendar className="w-4 h-4 text-white/45" />
-                  <span className="text-[0.6875rem] text-white/55 font-semibold uppercase">{t.home_kpi_shifts_week}</span>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Calendar className="w-4 h-4 text-white/45 shrink-0" />
+                  <span className="text-[0.6875rem] text-white/55">{weekRangeLabel}</span>
+                  <span className="ml-auto text-[0.6875rem] text-white/55 font-semibold uppercase">{t.home_kpi_shifts_week}</span>
                 </div>
                 <p className="text-2xl font-bold text-white tabular-nums">{weekShiftsCount}</p>
-                <p className="text-[0.6875rem] text-white/55 mt-0.5">{weekRangeLabel}</p>
               </div>
             </div>
             )}

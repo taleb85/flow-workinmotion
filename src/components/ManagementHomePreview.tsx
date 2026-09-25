@@ -349,12 +349,12 @@ export default function ManagementHomePreview({
                 <p className="text-2xl font-bold text-white">{formatMinutesToHoursAndMinutes(weeklyMinutesDemo)}</p>
               </div>
               <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14]">
-                <div className="mb-2 flex items-center justify-between">
-                  <Calendar className="h-4 w-4 text-white/50" />
-                  <span className="text-[0.6875rem] font-semibold uppercase text-white/50">{t.home_kpi_shifts_week}</span>
+                <div className="mb-2 flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 shrink-0 text-white/50" />
+                  <span className="text-[0.6875rem] text-white/50">{weekRangeLabel}</span>
+                  <span className="ml-auto text-[0.6875rem] font-semibold uppercase text-white/50">{t.home_kpi_shifts_week}</span>
                 </div>
                 <p className="text-2xl font-bold text-white">{shiftsWeekDemo}</p>
-                <p className="mt-0.5 text-[0.6875rem] text-white/50">{weekRangeLabel}</p>
               </div>
             </div>
           </WidgetChrome>
