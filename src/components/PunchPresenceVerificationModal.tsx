@@ -4,6 +4,7 @@ import { Camera, X, Loader2 } from 'lucide-react';
 import type { Language } from '../types';
 import { getTranslations } from '../utils/translations';
 import { scanQrCodeFromCamera, stopActiveQrScanner } from '../utils/qrScanner';
+import { requestCameraAuthorization, rememberCameraGrant } from '../utils/cameraPermission';
 
 type Mode = 'qr' | 'error';
 
@@ -37,7 +38,19 @@ export default function PunchPresenceVerificationModal({
     setLocalError('');
     setBusy(true);
     try {
+      // Richiede l'autorizzazione alla fotocamera solo la prima volta: una volta
+      // concessa viene memorizzata e non viene più richiesta nelle timbrature successive.
+      const authorized = await requestCameraAuthorization();
+      if (!authorized) {
+        setBusy(false);
+        setLocalError(tr.punch_presence_camera_denied);
+        setMode('error');
+        await stopActiveQrScanner();
+        return;
+      }
       const text = await scanQrCodeFromCamera(qrContainerId);
+      // Autorizzazione confermata dall'uso effettivo della camera: memorizza.
+      rememberCameraGrant();
       setBusy(false);
       onVerifiedRef.current(text);
     } catch (e: unknown) {
