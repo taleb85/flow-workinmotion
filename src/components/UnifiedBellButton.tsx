@@ -28,14 +28,25 @@ export function UnifiedBellButton({
   const { messages, unreadCount: msgUnread, markAsRead, markAllAsRead, loadMessages, error, sendMessage, deleteMessage } = useMessages(userId, isAdmin);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [seenTick, setSeenTick] = useState(0);
   const t = getTranslations(effectiveLanguage);
+
+  // Le notifiche generate (turni/ferie) vengono marcate come "viste" quando si apre
+  // il centro notifiche, che emette l'evento `notifications-seen`. Senza questo
+  // listener il badge restava acceso anche dopo averle visualizzate.
+  useEffect(() => {
+    const onSeen = () => setSeenTick((x) => x + 1);
+    window.addEventListener('notifications-seen', onSeen);
+    return () => window.removeEventListener('notifications-seen', onSeen);
+  }, []);
 
   // Conteggio unificato: messaggi non letti + notifiche turni/ferie non lette
   const shiftNotifUnread = useMemo(() => {
     if (!currentUser) return 0;
+    void seenTick; // forza il ricalcolo quando cambia lo stato "visto"
     const t = getTranslations(effectiveLanguage);
     return countUnreadNotifications(currentUser, shifts, holidays, users, t, effectiveLanguage);
-  }, [currentUser, shifts, holidays, users, effectiveLanguage]);
+  }, [currentUser, shifts, holidays, users, effectiveLanguage, seenTick]);
 
   const totalUnread = msgUnread + shiftNotifUnread;
 
