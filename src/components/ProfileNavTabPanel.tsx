@@ -16,6 +16,8 @@ import { translateDepartmentValue } from '../utils/departmentLabels';
 import { PinPadModal } from './ui/PinPadModal';
 import { getAppLockStatus, type AppLockStatus } from '../utils/appLock';
 import { isCurrentDeviceRegistered, revokeCurrentDevice } from '../utils/userDevices';
+import { isCameraGrantRemembered, forgetCameraGrant } from '../utils/cameraPermission';
+import { clearAllCachedPresenceProofs } from '../utils/presenceProofCache';
 import { ProfileFormSelf, type ProfileFormSelfData } from './UserProfile';
 import ProfilePhotoSourceSheet from './profile/ProfilePhotoSourceSheet';
 import ProfilePhotoCropperModal from './profile/ProfilePhotoCropperModal';
@@ -344,6 +346,9 @@ export default function ProfileNavTabPanel({
   const [appLock, setAppLock] = useState<AppLockStatus | null>(null);
   const [deviceRegistered, setDeviceRegistered] = useState<boolean | null>(null);
   const [deviceBusy, setDeviceBusy] = useState(false);
+  // Autorizzazione fotocamera memorizzata (per la scansione QR in timbratura)
+  const [cameraGranted, setCameraGranted] = useState<boolean>(() => isCameraGrantRemembered());
+  const [cameraBusy, setCameraBusy] = useState(false);
 
   const refreshSecurityInfo = useCallback(async () => {
     if (!currentUser?.id) return;
@@ -353,6 +358,7 @@ export default function ProfileNavTabPanel({
     ]);
     setAppLock(status);
     setDeviceRegistered(device);
+    setCameraGranted(isCameraGrantRemembered());
   }, [currentUser?.id]);
 
   useEffect(() => {
@@ -374,6 +380,21 @@ export default function ProfileNavTabPanel({
       setDeviceBusy(false);
     }
   }, [currentUser, deviceBusy, tv, showSuccess, showError, t.save_error_retry]);
+
+  const handleResetCameraAuthorization = useCallback(() => {
+    if (cameraBusy) return;
+    setCameraBusy(true);
+    try {
+      // Dimentica l'autorizzazione memorizzata e invalida la prova QR in cache:
+      // alla prossima timbratura la fotocamera verrà richiesta di nuovo.
+      forgetCameraGrant();
+      clearAllCachedPresenceProofs();
+      setCameraGranted(false);
+      showSuccess(tv.profile_tab_camera_reset_ok ?? 'Autorizzazione fotocamera reimpostata.');
+    } finally {
+      setCameraBusy(false);
+    }
+  }, [cameraBusy, tv, showSuccess]);
 
   const [savedLang, setSavedLang] = useState<import('../types').Language | null>(() => readStoredUiLanguage());
   const [pendingLang, setPendingLang] = useState<import('../types').Language | null>(() => readStoredUiLanguage());
@@ -784,6 +805,32 @@ export default function ProfileNavTabPanel({
                         style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.20)' }}
                       >
                         {tv.profile_tab_device_revoke ?? 'Rimuovi'}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Autorizzazione fotocamera (timbratura con QR) */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)' }}>
+                      <Camera className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.85)' }} aria-hidden />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>{tv.profile_tab_camera_title ?? 'Autorizzazione fotocamera'}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                        {cameraGranted
+                          ? (tv.profile_tab_camera_desc_granted ?? 'Memorizzata: non viene richiesta a ogni timbratura.')
+                          : (tv.profile_tab_camera_desc_not ?? 'Non memorizzata: verrà richiesta alla prossima timbratura.')}
+                      </p>
+                    </div>
+                    {cameraGranted && (
+                      <button
+                        type="button"
+                        disabled={cameraBusy}
+                        onClick={handleResetCameraAuthorization}
+                        className="rounded-xl px-3 py-2 text-xs font-bold flex-shrink-0 disabled:opacity-50"
+                        style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.20)' }}
+                      >
+                        {tv.profile_tab_camera_reset ?? 'Reimposta'}
                       </button>
                     )}
                   </div>
