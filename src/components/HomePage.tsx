@@ -301,23 +301,23 @@ export default function HomePage({
     return { shift: s, user, isDinner, punchIn, punchOut, actualStart, actualEnd, scheduledStart, scheduledEnd, scheduledMins, actualMins, deltaMins, isLate, hasMissingOut, isApproved, canApprove, canClose };
   });
 
-  const inTurnoCount = todayAllShifts.filter((s) => {
-    if (s.approval_status === 'absent') return false;
-    const start = timeToMins((s.start_time || '').slice(0, 5));
-    const end = timeToMins((s.end_time || '23:59').slice(0, 5));
-    return nowMins >= start - 30 && nowMins <= end;
-  }).length;
+  // In turno oggi (team): turni di oggi, escluse assenze e bozze.
+  const inTurnoCount = todayAllShifts.filter(
+    (s) => s.approval_status !== 'absent' && s.approval_status !== 'draft'
+  ).length;
   const ritardiCount = todayShiftsEnriched.filter((e) => e.isLate).length;
-  const senzaTimbraturaCount = todayAllShifts.filter((s) => {
-    if (s.approval_status === 'absent') return false;
+  // Senza timbratura (team, settimana): solo turni già passati e senza timbratura d'ingresso.
+  const senzaTimbraturaCount = teamWeekShifts.filter((s) => {
+    if (s.approval_status === 'absent' || s.approval_status === 'draft') return false;
+    const endHHMM = (s.end_time || '23:59').slice(0, 5);
+    const endAt = new Date(`${s.date}T${endHHMM}:00`);
+    if (!isValid(endAt) || endAt.getTime() > now.getTime()) return false;
     const isDinner = timeToMins((s.start_time || '').slice(0, 5)) >= 16 * 60;
-    const { punchIn } = getPunchForShift(s.id, s.user_id, todayStr, !isDinner);
+    const { punchIn } = getPunchForShift(s.id, s.user_id, s.date, !isDinner);
     return !punchIn;
   }).length;
-  const approvatiCount = todayAllShifts.filter((s) => {
-    if (s.approval_status !== 'approved') return false;
-    return true;
-  }).length;
+  // Approvati (team, settimana): totale dei turni approvati della settimana corrente.
+  const approvatiCount = teamWeekShifts.filter((s) => s.approval_status === 'approved').length;
 
   const criticalShifts = todayShiftsEnriched.filter((e) => e.hasMissingOut || e.isLate || e.canApprove);
   const dinnerNeedsClose = todayShiftsEnriched.filter((e) => e.canClose);
