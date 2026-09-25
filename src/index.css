@@ -2586,10 +2586,11 @@ html[data-ios="1"] .ui-toolbar-page-band-presences .ui-toolbar-group {
    2. i backdrop-filter delle celle sticky della griglia, che si ricompongono a
       ogni frame di scroll (header, colonna dipendente, tfoot);
    3. le animazioni infinite di box-shadow, che ridipingono a ogni frame.
-   Su iPhone azzeriamo 1 e 2 (il fondo diventa un fill solido, resta leggibile)
-   e rendiamo statico il bagliore di 3: aspetto praticamente identico.
-   NB: la fascia toolbar resta fuori da questo blocco — è un elemento unico e
-   sempre visibile, togliergli il vetro la trasformerebbe in una banda nera. */
+   Su iPhone azzeriamo 1 e rendiamo statico il bagliore di 3.
+   Al punto 2 NON azzeriamo più il vetro con un fill solido: il fill nero faceva
+   comparire una banda nera (barra date e barra "In turno"). Come per la fascia
+   toolbar, riduciamo soltanto il blur: costo più basso ma l'effetto vetro resta
+   quando il contenuto scorre sotto. */
 html[data-ios="1"] .app-content-busy {
   filter: none !important;
 }
@@ -2597,15 +2598,16 @@ html[data-ios="1"] .overlay-fullscreen-blur {
   -webkit-backdrop-filter: blur(8px) !important;
   backdrop-filter: blur(8px) !important;
 }
-/* Fascia toolbar: NON toccata. È un elemento unico e sempre visibile, e
-   toglierle il vetro la trasformerebbe in una banda nera. */
+/* Celle sticky della griglia (barra date, colonna dipendente, barra "In turno"):
+   vetro con blur ridotto, come la fascia toolbar. Prima erano riempite con un
+   nero opaco, che le trasformava in bande nere. */
 html[data-ios="1"] .wst-header-scrolled th,
 html[data-ios="1"] .wst-col-scrolled.wst-col-scrolled,
 html[data-ios="1"] tfoot th.backdrop-blur-lg,
 html[data-ios="1"] tfoot td.backdrop-blur-lg {
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  background-color: rgba(10, 10, 12, 0.92) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+  background-color: transparent !important;
 }
 html[data-ios="1"] .animate-pulse-glow {
   animation: none !important;
