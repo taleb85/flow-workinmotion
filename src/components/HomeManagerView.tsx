@@ -63,8 +63,10 @@ interface HomeManagerViewProps {
   attendancePercent: number;
   hoursPercent: number;
   todayAllShiftsCount: number;
-  // Monthly/weekly data
-  weeklyMinutes: number;
+  // Weekly team data (dashboard gestionale: totali di tutto il team)
+  weekMinutes: number;
+  weekShiftsCount: number;
+  weekRangeLabel: string;
   // Holidays
   pendingHolidays: HolidayRequest[];
   holidays: HolidayRequest[];
@@ -124,7 +126,9 @@ export default memo(function HomeManagerView({
   attendancePercent,
   hoursPercent,
   todayAllShiftsCount: _todayAllShiftsCount,
-  weeklyMinutes,
+  weekMinutes,
+  weekShiftsCount,
+  weekRangeLabel,
   pendingHolidays,
   holidays,
   users,
@@ -448,15 +452,15 @@ export default memo(function HomeManagerView({
                   <TrendingUp className="w-4 h-4 text-white/45" />
                   <span className="text-[0.6875rem] text-white/55 font-semibold uppercase">{t.home_kpi_hours_week}</span>
                 </div>
-                <p className="text-2xl font-bold text-white tabular-nums">{formatMinutesToHoursAndMinutes(weeklyMinutes)}</p>
+                <p className="text-2xl font-bold text-white tabular-nums">{formatMinutesToHoursAndMinutes(weekMinutes)}</p>
               </div>
               <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] cursor-pointer" onClick={() => onNavigateToShifts?.()}>
                 <div className="flex items-center justify-between mb-2">
                   <Calendar className="w-4 h-4 text-white/45" />
                   <span className="text-[0.6875rem] text-white/55 font-semibold uppercase">{t.home_kpi_shifts_week}</span>
                 </div>
-                <p className="text-2xl font-bold text-white tabular-nums">{todayShiftsEnriched.length}</p>
-                <p className="text-[0.6875rem] text-white/55 mt-0.5">{t.home_today}</p>
+                <p className="text-2xl font-bold text-white tabular-nums">{weekShiftsCount}</p>
+                <p className="text-[0.6875rem] text-white/55 mt-0.5">{weekRangeLabel}</p>
               </div>
             </div>
             )}

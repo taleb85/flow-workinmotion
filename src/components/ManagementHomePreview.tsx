@@ -2,7 +2,7 @@
  * Anteprima visiva della Home gestionale (stesso layout di HomePage) per Admin → Cosa vede chi.
  * Dati dimostrativi fissi; i toggle rispettano ui_section_overrides sul profilo selezionato.
  */
-import { format } from 'date-fns';
+import { format, addDays, startOfWeek } from 'date-fns';
 import {
   Users,
   Clock,
@@ -97,6 +97,8 @@ export default function ManagementHomePreview({
   const hoursPercent = 0;
   const weeklyMinutesDemo = 0;
   const shiftsWeekDemo = 2;
+  const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+  const weekRangeLabel = `${format(weekStart, 'd MMM')} – ${format(addDays(weekStart, 6), 'd MMM')}`;
 
   const hiddenBadge = tv.profile_visibility_ui_hidden_badge ?? 'Nascosto';
 
@@ -356,7 +358,7 @@ export default function ManagementHomePreview({
                   <span className="text-[0.6875rem] font-semibold uppercase text-white/50">{t.home_kpi_shifts_week}</span>
                 </div>
                 <p className="text-2xl font-bold text-white">{shiftsWeekDemo}</p>
-                <p className="mt-0.5 text-[0.6875rem] text-white/50">{t.home_today}</p>
+                <p className="mt-0.5 text-[0.6875rem] text-white/50">{weekRangeLabel}</p>
               </div>
             </div>
           </WidgetChrome>

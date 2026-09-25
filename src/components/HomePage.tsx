@@ -191,6 +191,35 @@ export default function HomePage({
     );
   }, 0);
 
+  // ── Management home: totali della settimana corrente per il TEAM ────────────
+  // La dashboard dei ruoli gestionali (admin/manager/assistant) è orientata al team:
+  // le schede "Ore settimana" e "Turni questa settimana" mostrano i totali di tutto
+  // il team visibile, non solo i turni dell'utente collegato.
+  const teamWeekShifts = showTeamHome
+    ? shifts.filter((s) => {
+        if (s.notes?.startsWith('__OPEN__')) return false;
+        if (s.approval_status === 'draft') return false;
+        const d = parseISO(s.date);
+        if (!(d >= weekStart && d < weekEnd)) return false;
+        const u = users.find((x) => x.id === s.user_id);
+        return !u || isUserVisibleOnTeamSchedule(u, shifts);
+      })
+    : [];
+  const teamWeeklyMinutes = teamWeekShifts.reduce((sum, s) => {
+    if (s.approval_status === 'absent') return sum;
+    const u = users.find((x) => x.id === s.user_id) ?? currentUser;
+    if (s.approved_at && s.approved_start_time && s.approved_end_time) {
+      const { start, end } = getResolvedStartEndForHours(s, punchRecords);
+      return sum + getNetShiftMinutes(s, start, end, u, breakRules, breakComputeOpts);
+    }
+    return (
+      sum +
+      getNetShiftMinutes(s, (s.start_time || '').slice(0, 5), (s.end_time || '').slice(0, 5), u, breakRules, breakComputeOpts)
+    );
+  }, 0);
+  const teamWeekShiftsCount = teamWeekShifts.length;
+  const weekRangeLabel = `${format(weekStart, 'd MMM', { locale })} – ${format(addDays(weekStart, 6), 'd MMM', { locale })}`;
+
   const pendingHolidays = holidays.filter((h) => h.status === 'pending');
   const myApprovedHolidays = holidays
     .filter((h) => h.user_id === currentUser.id && h.status === 'approved' && new Date(h.end_date) >= new Date())
@@ -421,7 +450,9 @@ export default function HomePage({
       attendancePercent={attendancePercent}
       hoursPercent={hoursPercent}
       todayAllShiftsCount={todayAllShifts.length}
-      weeklyMinutes={weeklyMinutes}
+      weekMinutes={teamWeeklyMinutes}
+      weekShiftsCount={teamWeekShiftsCount}
+      weekRangeLabel={weekRangeLabel}
       pendingHolidays={pendingHolidays}
       holidays={holidays}
       users={users}
