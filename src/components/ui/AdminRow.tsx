@@ -8,6 +8,8 @@ export type AdminRowProps = {
   badge?: ReactNode;
   icon?: ReactNode;
   className?: string;
+  /** Rimuove l'effetto hover/active della riga (es. righe di sola configurazione, non cliccabili). */
+  disableHover?: boolean;
 };
 
 /**
@@ -20,10 +22,11 @@ const AdminRow = memo(function AdminRow({
   badge,
   icon,
   className = '',
+  disableHover = false,
 }: AdminRowProps) {
   return (
     <div
-      className={`flex min-h-[3.5rem] items-center justify-between gap-3 border-b border-white/10 px-4 py-3 transition-colors last:border-b-0 hover:bg-gray-50/50 ${className} active:bg-gray-50/80`}
+      className={`flex min-h-[3.5rem] items-center justify-between gap-3 border-b border-white/10 px-4 py-3 transition-colors last:border-b-0 ${disableHover ? '' : 'hover:bg-gray-50/50 active:bg-gray-50/80'} ${className}`}
     >
       <div className="flex min-w-0 flex-1 items-center gap-3 pr-2">
         {icon != null ? <span className="shrink-0 text-white/60 [&_svg]:block">{icon}</span> : null}

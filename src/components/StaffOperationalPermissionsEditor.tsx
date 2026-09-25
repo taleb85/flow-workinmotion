@@ -72,6 +72,7 @@ export default function StaffOperationalPermissionsEditor({ user, currentUser }:
             <AdminRow
               key={perm.key}
               className="!py-2.5 !px-4"
+              disableHover
               label={
                 <span
                   className={
