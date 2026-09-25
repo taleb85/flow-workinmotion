@@ -3,7 +3,6 @@ import { it } from 'date-fns/locale';
 import {
   Clock, Calendar, TrendingUp, Palmtree, X,
   Users, AlertCircle, UserCheck, Moon, LogOut as LogOutIcon,
-  ArrowRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { safeFormatDate } from '../utils/safeDateFormat';
@@ -365,9 +364,6 @@ export default memo(function HomeManagerView({
                 <Calendar className="w-4 h-4 text-white/55" />
                 <h2 className="text-sm font-bold text-white">{t.home_todays_shifts}</h2>
                 <span className="text-[0.6875rem] text-slate-200 ml-1">({todayShiftsEnriched.length})</span>
-<button type="button" onClick={() => onNavigateToShifts?.()} className="ml-auto text-xs font-semibold text-white flex items-center gap-0.5 hover:underline active:brightness-95 transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]">
-                  {t.home_see_all_shifts} <ArrowRight className="w-3 h-3" />
-                </button>
               </div>
               <div className="fluid-grid fluid-grid-2 gap-4">
                 {todayShiftsEnriched.map((e) => {

@@ -13,7 +13,6 @@ import {
   Palmtree,
   Megaphone,
   Pencil,
-  ArrowRight,
   Moon,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -251,9 +250,6 @@ export default function ManagementHomePreview({
               <Calendar className="h-4 w-4 text-white/60" />
               <h2 className="text-sm font-bold text-white/90">{t.home_todays_shifts}</h2>
               <span className="ml-1 text-[0.6875rem] text-white/50">(2)</span>
-              <span className="ml-auto flex items-center gap-0.5 text-xs font-semibold text-white/60">
-                {t.home_see_all_shifts} <ArrowRight className="h-3 w-3" />
-              </span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <HomeManagementShiftCard
