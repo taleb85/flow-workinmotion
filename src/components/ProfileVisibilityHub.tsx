@@ -24,7 +24,7 @@ import type { EnabledFeatures } from '../utils/enabledFeatures';
 import { translateRole } from '../utils/roles';
 import { isAdminOnly, isManagementRole } from '../utils/permissions';
 import { FEATURE_LABELS, type EnabledFeatureKey } from '../utils/enabledFeatures';
-import { type AppNavTab } from '../utils/enabledModules';
+import { type AppNavTab, getUnifiedNavTabs } from '../utils/enabledModules';
 import ProfileTabRichPreview from './profilePreview/ProfileTabRichPreview';
 import {
   PROFILE_VISIBILITY_FEATURE_KEYS,
@@ -218,10 +218,12 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
 
   const hubTabs = useMemo(() => {
     if (!previewUser) return [] as AppNavTab[];
-    // Per l'anteprima "Cosa vede chi", mostriamo sempre tutte le tab potenziali 
-    // per permettere all'admin di configurarle anche se al momento sono disattivate
-    return ['home', 'turni', 'ferie', 'timesheet', 'reports', 'profile', 'settings'] as AppNavTab[];
-  }, [previewUser]);
+    // Anteprima "Cosa vede chi": mostriamo esattamente le schede presenti nella
+    // barra di navigazione reale di questo profilo (Panoramica, Presenze, Ferie,
+    // Profilo, Admin se previsto). 'turni' e 'reports' non esistono più come
+    // schede: pianificazione e ore sono confluite in Presenze.
+    return getUnifiedNavTabs(previewUser, isMgmt, featureFlags);
+  }, [previewUser, isMgmt, featureFlags]);
 
   useEffect(() => {
     if (!previewUser || hubTabs.length === 0) return;

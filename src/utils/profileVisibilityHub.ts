@@ -15,12 +15,14 @@ const UI_SCREEN_GROUP_TO_PREVIEW_TAB: Record<string, AppNavTab> = {
   home_mgmt: 'home',
   home_compact: 'home',
   staff_home: 'home',
-  turni: 'turni',
-  staff_shifts: 'turni',
+  // Pianificazione (ex scheda "Turni") e ore (ex scheda "Statistiche") confluiscono
+  // nella scheda unificata "Presenze".
+  turni: 'timesheet',
+  staff_shifts: 'timesheet',
   ferie: 'ferie',
   staff_holidays: 'ferie',
   timesheet: 'timesheet',
-  stats: 'reports',
+  stats: 'timesheet',
   staff_profile: 'profile',
   global_popups: 'settings',
 };
@@ -37,11 +39,10 @@ export function featureKeyToPreviewTab(key: EnabledFeatureKey): AppNavTab {
     case 'team_view':
     case 'edit_shifts':
     case 'approve_shifts':
-      return 'turni';
     case 'export_pdf':
-      return 'turni';
     case 'view_stats':
-      return 'reports';
+      // Operatività turni e ore vivono tutte dentro la scheda "Presenze".
+      return 'timesheet';
     default:
       return 'settings';
   }

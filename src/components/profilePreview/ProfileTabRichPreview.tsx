@@ -50,12 +50,17 @@ export default function ProfileTabRichPreview({
   const omitKeys = new Set<string>();
   if (activeHubTab === 'home' && isMgmt && gm.has('home_mgmt')) omitKeys.add('home_mgmt');
   if (activeHubTab === 'home' && !isMgmt && gm.has('staff_home')) omitKeys.add(OMIT_STAFF_HOME);
-  if (activeHubTab === 'turni' && isMgmt && gm.has('turni')) omitKeys.add('turni');
-  if (activeHubTab === 'turni' && !isMgmt && gm.has('staff_shifts')) omitKeys.add(OMIT_STAFF_TURNI);
   if (activeHubTab === 'ferie' && isMgmt && gm.has('ferie')) omitKeys.add('ferie');
   if (activeHubTab === 'ferie' && !isMgmt && gm.has('staff_holidays')) omitKeys.add(OMIT_STAFF_FERIE);
-  if (activeHubTab === 'timesheet' && gm.has('timesheet')) omitKeys.add('timesheet');
-  if (activeHubTab === 'reports' && gm.has('stats')) omitKeys.add('stats');
+  // Presenze unifica pianificazione (ex scheda Turni), timbrature (Presenze) e
+  // ore (ex scheda Statistiche): questi blocchi hanno un'anteprima dedicata qui
+  // sotto, quindi non vanno duplicati nella colonna generica.
+  if (activeHubTab === 'timesheet') {
+    if (gm.has('turni')) omitKeys.add('turni');
+    if (gm.has(OMIT_STAFF_TURNI)) omitKeys.add(OMIT_STAFF_TURNI);
+    if (gm.has('timesheet')) omitKeys.add('timesheet');
+    if (gm.has('stats')) omitKeys.add('stats');
+  }
   if ((activeHubTab === 'settings' || activeHubTab === 'profile') && gm.has('staff_profile')) omitKeys.add('staff_profile');
   
   // SEMPRE OMETTI global_popups e turni.shift_modal e timesheet.punch_modal
@@ -92,7 +97,7 @@ export default function ProfileTabRichPreview({
       />
     );
   }
-  if (activeHubTab === 'turni' && isMgmt && gm.has('turni')) {
+  if (activeHubTab === 'timesheet' && isMgmt && gm.has('turni')) {
     blocks.push(
       <TurniMgmtPreview
         key="turni-mgmt"
@@ -103,7 +108,7 @@ export default function ProfileTabRichPreview({
       />
     );
   }
-  if (activeHubTab === 'turni' && !isMgmt && gm.has('staff_shifts')) {
+  if (activeHubTab === 'timesheet' && !isMgmt && gm.has('staff_shifts')) {
     blocks.push(
       <StaffShiftsPreview
         key="staff-shifts"
@@ -147,7 +152,7 @@ export default function ProfileTabRichPreview({
       />
     );
   }
-  if (activeHubTab === 'reports' && gm.has('stats')) {
+  if (activeHubTab === 'timesheet' && gm.has('stats')) {
     blocks.push(
       <StatisticsTabPreview
         key="stats"
