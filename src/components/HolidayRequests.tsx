@@ -254,7 +254,7 @@ export default function HolidayRequests({
         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
       >
       {/* ── Header: azione "nuova richiesta" + KPI per stato ─────────────── */}
-      {uiW('ferie.header') && (
+      {uiW(isAdmin ? 'ferie.header' : 'staff_holidays.header_actions') && (
       <div className="mb-5 mt-3 flex flex-col gap-3">
         <div className="flex items-center justify-end">
           <button
@@ -611,7 +611,7 @@ export default function HolidayRequests({
           )}
 
           {/* My requests list (staff only) */}
-          {!isAdmin && uiW('ferie.list') && (
+          {!isAdmin && uiW('staff_holidays.list') && (
             <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] overflow-hidden">
               <div className="px-5 py-4">
                 <h3 className="text-white font-semibold text-xl">{(t as Record<string, string>).my_holiday_requests ?? 'Le mie richieste'}</h3>
@@ -661,7 +661,7 @@ export default function HolidayRequests({
         <div className="w-full space-y-4">
 
           {/* Staff: my upcoming approved */}
-          {!isAdmin && uiW('ferie.list') && myHolidays.filter(h => h.status === 'approved' && new Date(h.end_date) >= new Date()).length > 0 && (
+          {!isAdmin && uiW('staff_holidays.list') && myHolidays.filter(h => h.status === 'approved' && new Date(h.end_date) >= new Date()).length > 0 && (
             <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] overflow-hidden">
               <div className="px-5 py-4">
                 <h3 className="text-white font-semibold text-xl">{t.home_upcoming_holidays}</h3>

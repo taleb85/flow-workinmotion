@@ -294,7 +294,7 @@ export const UI_SCREEN_WIDGETS: UiScreenWidgetDef[] = [
     audience: 'management',
     screenGroup: 'ferie',
     screenLabel: 'Ferie e permessi',
-    label: 'Intestazione e nuova richiesta',
+    label: 'Intestazione, KPI per stato (dropdown) e nuova richiesta',
   },
   {
     key: 'ferie.calendar',
@@ -302,13 +302,6 @@ export const UI_SCREEN_WIDGETS: UiScreenWidgetDef[] = [
     screenGroup: 'ferie',
     screenLabel: 'Ferie e permessi',
     label: 'Calendario mensile',
-  },
-  {
-    key: 'ferie.list',
-    audience: 'management',
-    screenGroup: 'ferie',
-    screenLabel: 'Ferie e permessi',
-    label: 'Elenco richieste / dettagli',
   },
 
   // ── Menu a popup e interazioni speciali ──────────────────────────────
