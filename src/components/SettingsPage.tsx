@@ -1716,7 +1716,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
             title={t.settings_auto_breaks_section}
             subtitle={
               breakRules.length > 0
-                ? `${breakRules.length} regol${breakRules.length === 1 ? 'a' : 'e'} configurat${breakRules.length === 1 ? 'a' : 'e'}`
+                ? formatTrans(t.settings_break_rules_count, { n: breakRules.length })
                 : t.settings_break_empty
             }
             defaultOpen={false}
@@ -1990,7 +1990,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                     className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-2 py-1 text-[0.6875rem] font-bold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/10 active:brightness-95"
                   >
                     <Plus className="h-3 w-3" aria-hidden />
-                    Nuova regola
+                    {t.settings_period_new_rule}
                   </button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -2082,7 +2082,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                         onClick={handleCreatePeriodRule}
                         className="flex-1 rounded-xl bg-[rgba(255,255,255,0.18)] py-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:bg-[rgba(255,255,255,0.26)] disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Crea regola
+                        {t.settings_period_create_rule}
                       </button>
                       <button
                         type="button"
@@ -2256,8 +2256,8 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
         {isManager && (
           <SettingsAccordionSection
             storageKey="osteria_settings_acc_holiday_email"
-            title="Email richieste ferie"
-            subtitle={holidayEmail ? holidayEmail : 'Nessuna email configurata'}
+            title={t.settings_holiday_email_section}
+            subtitle={holidayEmail ? holidayEmail : t.settings_holiday_email_none}
             defaultOpen={false}
             attached
           >
