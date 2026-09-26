@@ -2,7 +2,7 @@ import pkg from 'pg';
 const { Pool } = pkg;
 
 const pool = new Pool({
-  connectionString: 'postgresql://postgres:zocpub-vutba8-namVat@db.xzfcxjcwsyigdlsfmwwv.supabase.co:5432/postgres',
+  connectionString: 'postgresql://postgres.iuvfkxygwjbdunwqumcb:yPVcQrOjZbKx74xyPWyoQIjL2exJ0Oe@aws-1-eu-west-1.pooler.supabase.com:5432/postgres',
   ssl: { rejectUnauthorized: false }
 });
 

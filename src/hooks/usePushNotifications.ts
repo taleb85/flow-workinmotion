@@ -4,7 +4,7 @@ import { useEffect, useCallback, useState, useRef } from 'react';
  * Chiave pubblica VAPID per Web Push.
  * La chiave privata è conservata come segreto Supabase (VAPID_PRIVATE_KEY).
  */
-const VAPID_PUBLIC_KEY = 'BIcuwW889Xi8wQ_4s323vl86eCIYDxsjQNilZBY_q-XcDy-Nrjx3xPMq7TMJp1pbToofg7rk9zHOdctAlMrKB7k';
+const VAPID_PUBLIC_KEY = 'BAsiCEWpS4A9fBFrpEjKUORVS4jV10wfshE4DX2Cg95gUSH-hWvoMSdYq9jcamtDzmDkYhQkFu5vFya-pus1Lgo';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);

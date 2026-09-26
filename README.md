@@ -2,12 +2,12 @@
 
 Applicazione web (React, Vite, Supabase) per turni, ferie, presenze e gestione staff.
 
-**Repository:** [github.com/taleb85/osteria-basilico-app](https://github.com/taleb85/osteria-basilico-app) · **Produzione (default):** [flow-workinmotion.vercel.app](https://flow-workinmotion.vercel.app) — hosting **Vercel** (override con `VITE_PUBLIC_APP_ORIGIN`).
+**Repository:** [github.com/taleb85/flow-workinmotion](https://github.com/taleb85/flow-workinmotion) · **Produzione (default):** [flow-workinmotion.vercel.app](https://flow-workinmotion.vercel.app) — hosting **Vercel** (override con `VITE_PUBLIC_APP_ORIGIN`).
 
 ## Prerequisiti
 
 - Node.js 18+
-- Progetto Supabase: copia `.env.example` in `.env` e inserisci URL e chiave anon (il file `.env` non va mai committato).
+- Progetto Supabase: `iuvfkxygwjbdunwqumcb` (region West EU · Ireland) → `https://iuvfkxygwjbdunwqumcb.supabase.co`. Copia `.env.example` in `.env` / `.env.local` e inserisci URL e chiave anon (i file env non vanno committati). In produzione le stesse `VITE_*` sono impostate su **Vercel** (environments Production + Preview).
 
 ## Sviluppo
 
@@ -22,7 +22,7 @@ npm run dev
 
 - Build: `npm run build` → output in `dist`
 - Anteprima locale: `npm run preview`
-- Pubblicazione: **[DEPLOY.md](./DEPLOY.md)** (Cloudflare Pages, `npm run deploy`)
+- Pubblicazione: **Vercel** (`npm run deploy` → `vercel --prod`); il deploy avviene anche al push su `main`
 
 ## Repository Git
 

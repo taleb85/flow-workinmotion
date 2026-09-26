@@ -1,7 +1,7 @@
 -- Push turni via payload allineato ai Database Webhook Supabase (docs: Database Webhooks).
 -- pg_net accoda la POST in modo asincrono: non blocca il commit e non richiede l’app aperta.
 --
--- URL destinazione: https://xzfcxjcwsyigdlsfmwwv.supabase.co/functions/v1/shift-change-webhook
+-- URL destinazione: https://iuvfkxygwjbdunwqumcb.supabase.co/functions/v1/shift-change-webhook
 -- La edge function è deployata con --no-verify-jwt e usa la propria service role key in
 -- ambiente, quindi il trigger non ha bisogno di header Authorization né di GUC custom.
 --
@@ -27,7 +27,7 @@ DECLARE
   _url  text;
   _payload jsonb;
 BEGIN
-  _url := 'https://xzfcxjcwsyigdlsfmwwv.supabase.co/functions/v1/shift-change-webhook';
+  _url := 'https://iuvfkxygwjbdunwqumcb.supabase.co/functions/v1/shift-change-webhook';
 
   IF TG_OP = 'INSERT' THEN
     IF NEW.approval_status IS NOT DISTINCT FROM 'draft'::text THEN
