@@ -387,12 +387,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     mainViewRestoredUserIdRef.current = currentUser.id;
     const u = new URL(window.location.href);
     const open = u.pathname.startsWith('/app') ? u.searchParams.get('open') : null;
-    if (open === 'punch_exit' && visibleNavTabs.includes('timesheet')) {
-      u.searchParams.delete('open');
-      window.history.replaceState({}, '', u.pathname + (u.search || '') + u.hash);
-      prevTabRef.current = 'timesheet';
-      setActiveTab('timesheet');
-    } else if (open === 'turni' && visibleNavTabs.includes('turni')) {
+    if (open === 'turni' && visibleNavTabs.includes('turni')) {
       u.searchParams.delete('open');
       window.history.replaceState({}, '', u.pathname + (u.search || '') + u.hash);
       prevTabRef.current = 'turni';
@@ -413,11 +408,6 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
   useEffect(() => {
     const onSw = (event: MessageEvent) => {
       const t = event.data?.type;
-      if (t === 'OPEN_PUNCH_EXIT') {
-        if (!visibleNavTabs.includes('timesheet')) return;
-        void handleTabChange('timesheet');
-        return;
-      }
       if (t === 'OPEN_TURNI') {
         if (!visibleNavTabs.includes('turni')) return;
         void handleTabChange('turni');
@@ -444,11 +434,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
     const u = new URL(window.location.href);
     if (!u.pathname.startsWith('/app')) return;
     const o = u.searchParams.get('open');
-    if (o === 'punch_exit' && visibleNavTabs.includes('timesheet')) {
-      u.searchParams.delete('open');
-      window.history.replaceState({}, '', u.pathname + (u.search || '') + u.hash);
-      void handleTabChange('timesheet');
-    } else if (o === 'turni' && visibleNavTabs.includes('turni')) {
+    if (o === 'turni' && visibleNavTabs.includes('turni')) {
       u.searchParams.delete('open');
       window.history.replaceState({}, '', u.pathname + (u.search || '') + u.hash);
       void handleTabChange('turni');

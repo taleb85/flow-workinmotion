@@ -84,8 +84,7 @@
     var openUrl =
       pathFromData.indexOf('http') === 0 ? pathFromData : baseUrl + pathFromData;
     var openMsgType = 'OPEN_NOTIFICATIONS';
-    if (data.type === 'punch_exit_reminder') openMsgType = 'OPEN_PUNCH_EXIT';
-    else if (data.type === 'schedule_week_available' || data.type === 'shift_change')
+    if (data.type === 'schedule_week_available' || data.type === 'shift_change')
       openMsgType = 'OPEN_TURNI';
 
     event.waitUntil(
