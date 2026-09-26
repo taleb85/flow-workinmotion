@@ -278,15 +278,19 @@ export default function HolidayRequests({
                 key={kpi.key}
                 onClick={() => setOpenKpi((v) => (v === kpi.key ? null : kpi.key))}
                 aria-expanded={isOpen}
-                className={`flex flex-col items-center gap-1 rounded-2xl border p-3 transition-all ${kpi.bg} ${kpi.border} ${
+                className={`relative flex flex-col items-center gap-1 overflow-hidden rounded-2xl border p-3 transition-all ${kpi.bg} ${kpi.border} ${
                   isOpen ? 'ring-2 ring-white/40' : 'hover:brightness-110'
                 }`}
               >
+                <ChevronDown
+                  className={`absolute right-2 top-2 h-3 w-3 transition-transform ${kpi.color} ${isOpen ? 'rotate-180' : 'opacity-60'}`}
+                  aria-hidden
+                />
                 <kpi.icon className={`h-4 w-4 ${kpi.color}`} aria-hidden />
                 <span className="text-lg font-black leading-none text-white tabular-nums">{kpi.count}</span>
-                <span className={`flex items-center gap-1 text-center text-[0.625rem] font-bold uppercase leading-tight tracking-wider ${kpi.color}`}>
+                {/* Descrizione su una sola riga */}
+                <span className={`block w-full whitespace-nowrap text-center text-[0.625rem] font-bold uppercase leading-tight tracking-wide ${kpi.color}`}>
                   {kpi.label}
-                  <ChevronDown className={`h-3 w-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} aria-hidden />
                 </span>
               </button>
             );
