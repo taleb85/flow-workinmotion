@@ -8,7 +8,7 @@ import { isUiWidgetVisible } from '../../utils/uiScreenWidgets';
 import HeaderTodayCoworkersCard from '../HeaderTodayCoworkersCard';
 import { usePullToRefresh } from '../../hooks/usePullToRefresh';
 import { format, parseISO, type Locale } from 'date-fns';
-import type { Shift } from '../../types';
+import type { Shift, User } from '../../types';
 import type { EnrichedShift } from '../../hooks/useSmartPunchAction';
 
 export interface MobileHomeProps {
@@ -36,6 +36,8 @@ export interface MobileHomeProps {
   /** Full list of user shifts — used to build the weekly preview */
   myShifts?: Shift[];
   locale?: Locale;
+  /** Utente di cui rispettare la visibilità delle sezioni (anteprima admin). Default: utente della sessione. */
+  visibilityUser?: User;
 }
 
 /** TS → "HH:MM" */
@@ -72,16 +74,18 @@ export default function MobileHome({
   todayWorkShifts,
   myShifts = [],
   locale,
+  visibilityUser,
 }: MobileHomeProps) {
 
   const { pullDistance, isRefreshing, isTriggered, indicatorOpacity, indicatorRotation } =
     usePullToRefresh({ onRefresh: onRefresh ?? (() => {}), disabled: true });
   const t = useT();
   const { effectiveLanguage, currentUser } = useAppUser();
+  const visUser = visibilityUser ?? currentUser;
   const calLocale = locale ?? getDateLocale(effectiveLanguage);
 
   // Sezioni UI per-utente (Admin → “Cosa vede chi”). Senza utente → nessun effetto.
-  const uiW = (key: string) => (currentUser ? isUiWidgetVisible(currentUser, key) : true);
+  const uiW = (key: string) => (visUser ? isUiWidgetVisible(visUser, key) : true);
 
   const today = todayStr ?? format(new Date(), 'yyyy-MM-dd');
 

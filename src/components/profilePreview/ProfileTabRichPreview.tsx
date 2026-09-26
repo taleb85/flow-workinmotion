@@ -2,13 +2,10 @@ import type { ReactNode } from 'react';
 import type { User, Language } from '../../types';
 import type { FeatureFlags } from '../../utils/featureFlags';
 import type { AppNavTab } from '../../utils/enabledModules';
-import { isStaffRequestsFeatureEnabled } from '../../utils/enabledModules';
-import type { UiScreenWidgetDef } from '../../utils/uiScreenWidgets';
+import { isUiWidgetVisible, widgetAppliesToUser, type UiScreenWidgetDef } from '../../utils/uiScreenWidgets';
 import { getTranslations } from '../../utils/translations';
-import ManagementHomePreview from '../ManagementHomePreview';
 import GenericWidgetsColumn from './GenericWidgetsColumn';
-import CompactHomePreview from './CompactHomePreview';
-import StaffHomePreview from './StaffHomePreview';
+import HomeLivePreview from './HomeLivePreview';
 import TurniMgmtPreview from './TurniMgmtPreview';
 import FerieMgmtPreview from './FerieMgmtPreview';
 import StaffHolidaysPreview from './StaffHolidaysPreview';
@@ -17,6 +14,8 @@ import StatisticsTabPreview from './StatisticsTabPreview';
 import ProfileTabPanelPreview from './ProfileTabPanelPreview';
 import SettingsAdminPreview from './SettingsAdminPreview';
 import { GlobalPopupsPreview } from './SettingsTabPreview';
+import ToggleSwitch from '../ui/toggle-switch-glass';
+import { previewWidgetLabel } from './previewWidgetLabel';
 import { getEffectiveFeaturesForUser } from '../../utils/profileVisibilityHub';
 
 const OMIT_STAFF_HOME = 'staff_home';
@@ -30,7 +29,6 @@ export default function ProfileTabRichPreview({
   previewUser,
   language,
   isSelectedAdmin,
-  featureFlags,
   onUiToggle,
   navLabel,
   children,
@@ -51,8 +49,20 @@ export default function ProfileTabRichPreview({
 
   const teamViewOn = getEffectiveFeaturesForUser(previewUser)['team_view'] === true;
 
-  // Ogni scheda ha un mock dedicato (in base al ruolo): i gruppi generici
-  // corrispondenti vengono omessi per non duplicare i blocchi.
+  // Blocchi della Panoramica realmente mostrati nella copia live: servono per
+  // esporre i toggle sotto l'anteprima (stati da `ui_section_overrides`).
+  const activeHomeScreenGroup = !isMgmt ? 'staff_home' : teamViewOn ? 'home_mgmt' : 'home_compact';
+  const homeToggleWidgets: UiScreenWidgetDef[] =
+    activeHubTab === 'home'
+      ? layoutGroups
+          .filter((g) => g.groupKey === activeHomeScreenGroup)
+          .flatMap((g) => g.widgets)
+          .filter((w) => widgetAppliesToUser(w, previewUser.role))
+      : [];
+
+  // Ogni scheda ha una vista dedicata (live per la Panoramica, mock per le
+  // altre): i gruppi generici corrispondenti vengono omessi per non duplicare
+  // i blocchi.
   const omitKeys = new Set<string>();
   if (activeHubTab === 'home') {
     if (isMgmt) {
@@ -84,38 +94,56 @@ export default function ProfileTabRichPreview({
   const blocks: ReactNode[] = [];
 
   // ── Panoramica (Home) ───────────────────────────────────────────────
+  // Copia esatta della schermata reale: i componenti veri (MobileHome /
+  // HomeManagerView / HomeStaffView) sono alimentati con dati dimostrativi.
   if (activeHubTab === 'home') {
-    if (!isMgmt) {
+    blocks.push(
+      <HomeLivePreview
+        key="home-live"
+        previewUser={previewUser}
+        language={language}
+        isSelectedAdmin={isSelectedAdmin}
+        onUiToggle={onUiToggle}
+        isMgmt={isMgmt}
+      />
+    );
+
+    // Toggle dei blocchi mostrati: i componenti reali reagiscono dal vivo a
+    // `ui_section_overrides` tramite `uiW`, qui l'admin li commuta.
+    if (homeToggleWidgets.length > 0) {
       blocks.push(
-        <StaffHomePreview
-          key="staff-home"
-          previewUser={previewUser}
-          language={language}
-          isSelectedAdmin={isSelectedAdmin}
-          onUiToggle={onUiToggle}
-        />
-      );
-    } else if (teamViewOn) {
-      blocks.push(
-        <ManagementHomePreview
-          key="home-mgmt"
-          previewUser={previewUser}
-          language={language}
-          isSelectedAdmin={isSelectedAdmin}
-          staffRequestsEnabled={isStaffRequestsFeatureEnabled(featureFlags)}
-          onUiToggle={onUiToggle}
-          embedded
-        />
-      );
-    } else {
-      blocks.push(
-        <CompactHomePreview
-          key="home-compact"
-          previewUser={previewUser}
-          language={language}
-          isSelectedAdmin={isSelectedAdmin}
-          onUiToggle={onUiToggle}
-        />
+        <div
+          key="home-widget-toggles"
+          className="rounded-xl border border-white/[0.14] px-3 py-3"
+        >
+          <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">
+            {tv.profile_visibility_home_blocks_title ?? 'Blocchi della Panoramica'}
+          </p>
+          <div className="flex flex-col gap-1.5">
+            {homeToggleWidgets.map((w) => {
+              const visible = isUiWidgetVisible(previewUser, w.key);
+              return (
+                <div key={w.key} className="flex items-center justify-between gap-3">
+                  <span
+                    className="min-w-0 flex-1 truncate text-xs text-white/80"
+                    title={w.label}
+                  >
+                    {previewWidgetLabel(w.key)}
+                  </span>
+                  <ToggleSwitch
+                    isActive={visible}
+                    onChange={(next) => {
+                      if (!isSelectedAdmin) onUiToggle(w.key, next);
+                    }}
+                    size="sm"
+                    darkMode
+                    className={`shrink-0 ${isSelectedAdmin ? 'pointer-events-none' : ''}`}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
       );
     }
   }
