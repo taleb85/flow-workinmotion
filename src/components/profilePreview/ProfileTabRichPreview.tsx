@@ -358,7 +358,7 @@ export default function ProfileTabRichPreview({
   return (
     <div className="w-full">
       <div className="rounded-xl border border-white/[0.14] overflow-hidden ring-1 ring-slate-900/[0.04]">
-        <div className="border-b border-white/10 bg-slate-50/90 px-4 py-3 md:px-5 md:py-3.5">
+        <div className="border-b border-white/10 bg-white/[0.06] px-4 py-3 md:px-5 md:py-3.5">
           <h3 className="text-base font-bold tracking-tight text-white md:text-lg">{navLabel}</h3>
           <p className="mt-1.5 text-xs leading-relaxed text-white/70 md:text-sm">
             {tv.profile_visibility_mock_hint_realistic ?? tv.profile_visibility_mock_hint ?? ''}

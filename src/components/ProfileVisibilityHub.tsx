@@ -474,7 +474,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
 
         {!previewUser && (
         <div className="md:col-span-8 space-y-6">
-            <div className="rounded-2xl border border-dashed border-white/[0.14] bg-slate-50/80 px-6 py-16 text-center">
+            <div className="rounded-2xl border border-dashed border-white/[0.14] bg-white/[0.04] px-6 py-16 text-center">
               <LayoutList className="mx-auto mb-3 h-10 w-10 text-slate-300" />
               <p className="text-sm font-medium text-white/70">
                 {tv.profile_visibility_pick_user ?? 'Seleziona un profilo dall’elenco.'}
@@ -641,7 +641,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-3
                       {featuresForActiveTab.length > 0 && (
                         <details
                           key={`perm-${previewUser.id}-${activeHubTab}`}
-                          className="group rounded-xl border border-white/[0.14] open:border-white/[0.14] bg-slate-50/50 open:bg-slate-50/80"
+                          className="group rounded-xl border border-white/[0.14] open:border-white/[0.14] bg-white/[0.04] open:bg-white/[0.06]"
                           open={permDetailsOpen}
                           onToggle={(e) => setPermDetailsOpen(e.currentTarget.open)}
                         >
