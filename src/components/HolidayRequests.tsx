@@ -337,6 +337,45 @@ export default function HolidayRequests({
                               {h.reason && ` · ${h.reason}`}
                             </p>
                           </div>
+                          {/* Azioni Approva/Rifiuta solo per le richieste in attesa e per chi approva */}
+                          {isAdmin && activeKpi.key === 'pending' && (
+                            <div className="ml-3 flex flex-shrink-0 items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleStatusChange(h.id, 'approved')}
+                                disabled={updatingId === h.id}
+                                aria-label={t.approve}
+                                className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                                style={{ background: '#10b981' }}
+                              >
+                                {updatingId === h.id ? (
+                                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                ) : (
+                                  <>
+                                    <Check className="h-3 w-3" strokeWidth={3} />
+                                    {t.approve}
+                                  </>
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleStatusChange(h.id, 'rejected')}
+                                disabled={updatingId === h.id}
+                                aria-label={t.rejected}
+                                className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                                style={{ background: '#ef4444' }}
+                              >
+                                {updatingId === h.id ? (
+                                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                ) : (
+                                  <>
+                                    <X className="h-3 w-3" strokeWidth={3} />
+                                    {t.rejected}
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
