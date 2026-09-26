@@ -5787,6 +5787,31 @@ export function translate(key: string, lang?: Language): string {
   return translations[language]?.[key] || translations.it[key] || key;
 }
 
+/* Titoli "canonici" delle regole pausa predefinite (Pranzo/Cena in IT/EN/ES/FR).
+   Servono per riconoscere i titoli predefiniti in qualsiasi lingua e tradurli. */
+const BREAK_RULE_TITLE_TR_KEYS: Record<string, string> = {
+  pranzo: 'settings_break_icon_lunch',
+  lunch: 'settings_break_icon_lunch',
+  almuerzo: 'settings_break_icon_lunch',
+  déjeuner: 'settings_break_icon_lunch',
+  dejeuner: 'settings_break_icon_lunch',
+  cena: 'settings_break_icon_dinner',
+  dinner: 'settings_break_icon_dinner',
+  dîner: 'settings_break_icon_dinner',
+  diner: 'settings_break_icon_dinner',
+};
+
+/** Chiave i18n se `title` è un titolo pausa predefinito (Pranzo/Cena in IT/EN/ES/FR); altrimenti `undefined`. */
+export function canonicalBreakRuleTitleKey(title: string): string | undefined {
+  return BREAK_RULE_TITLE_TR_KEYS[String(title ?? '').trim().toLowerCase()];
+}
+
+/** Titolo regola pausa localizzato nella lingua attiva: traduce solo i titoli predefiniti, lascia invariati gli altri. */
+export function localizeBreakRuleTitle(title: string, lang?: Language): string {
+  const key = canonicalBreakRuleTitleKey(title);
+  return key ? translate(key, lang) : title;
+}
+
 export function getTranslations(language: Language) {
   const lang = (language ?? 'it') as Language;
   return translations[lang] || translations.it;

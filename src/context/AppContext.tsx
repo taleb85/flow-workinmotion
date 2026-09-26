@@ -35,7 +35,7 @@ function consumeFrozenDeleteAuth(shiftId: string): boolean {
 }
 import Toast from '../components/Toast';
 import { DevMissingEnvBanner } from '../components/DevMissingEnvBanner';
-import { formatTrans, getTranslations } from '../utils/translations';
+import { formatTrans, getTranslations, localizeBreakRuleTitle } from '../utils/translations';
 import { countUnreadNotifications } from '../utils/notifications';
 import { setAppLauncherBadgeUnreadCountAsync } from '../utils/appIconBadge';
 import { logHistory, logShiftEdit } from '../utils/scheduleHistory';
@@ -2542,6 +2542,26 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     const rev = await bumpClientSyncRevisionOnSupabase();
     if (rev != null) writeAckClientSyncRevision(rev);
   }, [markManagementDataTouched]);
+
+  // Quando l'utente cambia lingua, riscrive i titoli predefiniti delle regole pausa
+  // (Pranzo/Cena) nella lingua scelta e li persiste: il valore salvato segue la lingua
+  // selezionata, non solo la resa a schermo. Solo su un cambio effettivo (non al mount).
+  const breakRuleTitleLangRef = useRef<Language | null>(null);
+  useEffect(() => {
+    const prevLang = breakRuleTitleLangRef.current;
+    breakRuleTitleLangRef.current = effectiveLanguage;
+    if (prevLang === null || prevLang === effectiveLanguage || breakRules.length === 0) return;
+    let changed = false;
+    const localized = breakRules.map((r) => {
+      const nextTitle = localizeBreakRuleTitle(r.title, effectiveLanguage);
+      if (nextTitle !== r.title) {
+        changed = true;
+        return { ...r, title: nextTitle };
+      }
+      return r;
+    });
+    if (changed) void setBreakRules(localized);
+  }, [effectiveLanguage, breakRules, setBreakRules]);
 
   const setPunchRoundingRules = useCallback(async (rules: PunchRoundingRules) => {
     const sanitized = sanitizePunchRoundingRules(rules);
