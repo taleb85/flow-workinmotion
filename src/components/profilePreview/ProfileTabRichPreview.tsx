@@ -9,7 +9,7 @@ import HomeLivePreview from './HomeLivePreview';
 import TimesheetLivePreview from './TimesheetLivePreview';
 import FerieLivePreview from './FerieLivePreview';
 import ProfileTabPanelPreview from './ProfileTabPanelPreview';
-import SettingsAdminPreview from './SettingsAdminPreview';
+import AdminLivePreview from './AdminLivePreview';
 import { GlobalPopupsPreview } from './SettingsTabPreview';
 import ToggleSwitch from '../ui/toggle-switch-glass';
 import { previewWidgetLabel } from './previewWidgetLabel';
@@ -286,7 +286,7 @@ export default function ProfileTabRichPreview({
   // ── Admin (Impostazioni, globale) ───────────────────────────────────
   if (activeHubTab === 'settings') {
     blocks.push(
-      <SettingsAdminPreview
+      <AdminLivePreview
         key="settings"
         previewUser={previewUser}
         language={language}
