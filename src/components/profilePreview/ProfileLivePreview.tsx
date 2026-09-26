@@ -22,6 +22,7 @@ export default function ProfileLivePreview({
 }) {
   return (
     <div
+      role="group"
       className="pointer-events-none select-none"
       aria-label="Anteprima scheda Profilo (sola lettura)"
     >

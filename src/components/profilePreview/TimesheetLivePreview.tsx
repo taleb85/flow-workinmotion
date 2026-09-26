@@ -125,6 +125,7 @@ export default function TimesheetLivePreview({
     return (
       <div
         className="w-full pointer-events-none select-none"
+        role="group"
         aria-label={tv.profile_visibility_timesheet_readonly ?? 'Anteprima Presenze (sola lettura)'}
       >
         <UnifiedShiftsPage visibilityUser={previewUser} />

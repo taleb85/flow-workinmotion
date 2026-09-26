@@ -111,6 +111,7 @@ export default function FerieLivePreview({
   return (
     <div
       className="pointer-events-none select-none"
+      role="group"
       aria-label={t.profile_visibility_readonly_preview ?? 'Solo lettura'}
     >
       <HolidayRequests

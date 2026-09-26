@@ -24,6 +24,7 @@ export default function AdminLivePreview(_props: {
 }) {
   return (
     <div
+      role="group"
       className="pointer-events-none select-none"
       aria-label="Anteprima scheda Admin (sola lettura)"
     >
