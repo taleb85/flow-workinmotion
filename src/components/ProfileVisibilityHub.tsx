@@ -43,8 +43,6 @@ import {
 } from '../utils/uiScreenWidgets';
 import AdminRow from './ui/AdminRow';
 
-const ACCENT = 'var(--brand)';
-
 const PREVIEW_TAB_ICONS: Record<AppNavTab, typeof Home> = {
   home: Home,
   turni: Calendar,
@@ -78,7 +76,7 @@ function NavPreviewBar({
   const iconSz = fs ? 'w-7 h-7 md:w-8 md:h-8' : hub ? 'w-[1.125rem] h-[1.125rem] md:w-5 md:h-5' : 'w-4 h-4';
   const labelSz = fs ? 'text-[0.6875rem] md:text-xs' : hub ? 'text-[0.6875rem] md:text-[0.6875rem]' : 'text-[0.6875rem]';
   return (
-    <div className={`rounded-[1.25rem] border border-white/[0.14] shadow-inner ${pad}`} style={{ backgroundColor: ACCENT }}>
+    <div className={`rounded-[1.25rem] border border-white/[0.14] shadow-inner backdrop-blur-lg ${pad}`} style={{ backgroundColor: 'rgba(255,255,255,0.10)' }}>
       <div className={`flex justify-between items-stretch gap-1 md:gap-2 ${rowMin}`}>
         {tabs.map((id) => {
           const Icon = PREVIEW_TAB_ICONS[id];
@@ -555,7 +553,7 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
           <div className="flex-1 min-h-0 overflow-y-auto app-horizontal-pad py-4 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))]">
             <div className="mx-auto w-full max-w-[96rem] space-y-4">
               <div className="rounded-xl border border-white/[0.14] overflow-hidden">
-                <div className="border-b border-white/10 bg-slate-50 px-3 py-2">
+                <div className="border-b border-white/10 bg-white/5 px-3 py-2">
                   <p className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider">
                     {tv.profile_visibility_preview_banner ?? 'Anteprima navigazione'}
                   </p>
