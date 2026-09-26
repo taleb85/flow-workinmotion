@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
-<head><title>Generate Flow Splashes</title></head>
+<head><title>Generate Flow Splashes (neutre)</title></head>
 <body>
 <script>
+/* Genera le splash iOS con sfondo NEUTRO scuro (senza logo), coerenti con
+   scripts/generate-splashes.mjs. Scarica i PNG e sostituisci quelli in public/splash/. */
 const sizes = [
   [750,1334],[1125,2436],[828,1792],[1170,2532],
   [1179,2556],[1536,2048],[1668,2388],[2048,2732]
@@ -11,15 +13,15 @@ sizes.forEach(([w,h]) => {
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#0a0a0c';
+  const g = ctx.createRadialGradient(w/2, h*0.38, 0, w/2, h*0.38, Math.max(w,h)*0.8);
+  g.addColorStop(0, '#17171c');
+  g.addColorStop(0.6, '#101014');
+  g.addColorStop(1, '#0b0b0e');
+  ctx.fillStyle = g;
   ctx.fillRect(0,0,w,h);
-  ctx.fillStyle = '#ffffff';
-  ctx.font = `bold ${w*0.08}px system-ui`;
-  ctx.textAlign = 'center';
-  ctx.fillText('FLOW', w/2, h/2);
   const a = document.createElement('a');
   a.download = `splash-${w}x${h}.png`;
-  a.href = canvas.toDataURL();
+  a.href = canvas.toDataURL('image/png');
   a.textContent = `Download ${w}x${h}`;
   document.body.appendChild(a);
   document.body.appendChild(document.createElement('br'));
