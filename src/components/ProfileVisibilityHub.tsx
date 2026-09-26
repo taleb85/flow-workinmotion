@@ -3,18 +3,12 @@ import { createPortal } from 'react-dom';
 import ToggleSwitch from './ui/toggle-switch-glass';
 import {
   Search,
-  Home,
-  Calendar,
-  ClipboardList,
-  Clock,
-  ShieldCheck,
   LayoutList,
   RotateCcw,
   X,
-  Palmtree,
   ChevronDown,
-  User as UserIconLucide,
 } from 'lucide-react';
+import { tabIcons as NAV_TAB_ICONS } from '../utils/navTabIcons';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppConfig } from '../context/appSliceContexts';
 import { useAppOverlay } from '../context/appSliceContexts';
@@ -43,16 +37,6 @@ import {
 } from '../utils/uiScreenWidgets';
 import AdminRow from './ui/AdminRow';
 
-const PREVIEW_TAB_ICONS: Record<AppNavTab, typeof Home> = {
-  home: Home,
-  turni: Calendar,
-  ferie: Palmtree,
-  timesheet: ClipboardList,
-  reports: Clock,
-  profile: UserIconLucide,
-  settings: ShieldCheck,
-};
-
 function NavPreviewBar({
   tabs,
   labels,
@@ -79,7 +63,7 @@ function NavPreviewBar({
     <div className={`rounded-[1.25rem] border border-white/[0.14] shadow-inner backdrop-blur-lg ${pad}`} style={{ backgroundColor: 'rgba(255,255,255,0.10)' }}>
       <div className={`flex justify-between items-stretch gap-1 md:gap-2 ${rowMin}`}>
         {tabs.map((id) => {
-          const Icon = PREVIEW_TAB_ICONS[id];
+          const Icon = NAV_TAB_ICONS[id];
           const selected = interactive && activeTab === id;
           const cls = `flex-1 min-w-0 flex flex-col items-center justify-center text-white/90 ${gap} rounded-xl transition-colors ${
             selected ? 'bg-white/20 ring-2 ring-white/80 shadow-inner' : ''
@@ -237,13 +221,14 @@ export default function ProfileVisibilityHub({ initialSelectedUserId, onClose }:
   }, [previewUser?.id, activeHubTab]);
 
   const navLabels: Record<AppNavTab, string> = {
-    home: t.sidebar_dashboard,
+    // Stesse etichette della barra reale (TopTabBar).
+    home: tv.home_dashboard_title ?? 'Panoramica',
     turni: t.sidebar_shifts,
     ferie: t.sidebar_holidays,
-    timesheet: t.sidebar_attendance,
+    timesheet: tv.timesheet_title ?? 'Presenze',
     reports: t.sidebar_statistics,
-    profile: (t as Record<string, string>).bottom_nav_profile ?? t.sidebar_profile,
-    settings: (t as { bottom_nav_settings_short?: string }).bottom_nav_settings_short || t.sidebar_admin,
+    profile: tv.bottom_nav_profile ?? t.sidebar_profile,
+    settings: tv.bottom_nav_settings_title ?? 'Impostazioni',
   };
 
   const handleFeatureToggle = useCallback(

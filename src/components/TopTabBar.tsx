@@ -1,23 +1,13 @@
 import { useRef } from 'react';
 import { useT } from '../hooks/useT';
 import type { AppNavTab } from '../utils/enabledModules';
-import { LayoutDashboard, CalendarDays, Clock, Palmtree, User, Settings, type LucideIcon } from 'lucide-react';
+import { tabIcons } from '../utils/navTabIcons';
 
 interface TopTabBarProps {
   activeTab: AppNavTab;
   onTabChange: (tab: AppNavTab) => void;
   visibleTabs: AppNavTab[];
 }
-
-const tabIcons: Record<AppNavTab, LucideIcon> = {
-  home: LayoutDashboard,
-  turni: CalendarDays,
-  timesheet: Clock,
-  ferie: Palmtree,
-  profile: User,
-  reports: Clock,
-  settings: Settings,
-};
 
 export default function TopTabBar({ activeTab, onTabChange, visibleTabs }: TopTabBarProps) {
   const t = useT();
