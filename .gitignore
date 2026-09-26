@@ -50,3 +50,6 @@ Users/
 
 # TRAE html share artifacts
 .trae-html-share-packages/
+
+# Backup locale dati (contiene dati personali) — NON committare
+backup_vecchio_supabase_*/
