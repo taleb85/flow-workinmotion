@@ -6,11 +6,9 @@ import { isUiWidgetVisible, widgetAppliesToUser, type UiScreenWidgetDef } from '
 import { getTranslations } from '../../utils/translations';
 import GenericWidgetsColumn from './GenericWidgetsColumn';
 import HomeLivePreview from './HomeLivePreview';
-import TurniMgmtPreview from './TurniMgmtPreview';
+import TimesheetLivePreview from './TimesheetLivePreview';
 import FerieMgmtPreview from './FerieMgmtPreview';
 import StaffHolidaysPreview from './StaffHolidaysPreview';
-import StaffTimesheetPreview from './StaffTimesheetPreview';
-import StatisticsTabPreview from './StatisticsTabPreview';
 import ProfileTabPanelPreview from './ProfileTabPanelPreview';
 import SettingsAdminPreview from './SettingsAdminPreview';
 import { GlobalPopupsPreview } from './SettingsTabPreview';
@@ -149,35 +147,63 @@ export default function ProfileTabRichPreview({
   }
 
   // ── Presenze (pianificazione + timbrature + ore) ────────────────────
+  // Copia esatta della schermata reale: gestione → UnifiedShiftsPage,
+  // staff → MobileStatsCards + ManagementMobileTimesheet (dati demo).
   if (activeHubTab === 'timesheet') {
-    if (isMgmt) {
+    blocks.push(
+      <TimesheetLivePreview
+        key="timesheet-live"
+        previewUser={previewUser}
+        language={language}
+        isSelectedAdmin={isSelectedAdmin}
+        onUiToggle={onUiToggle}
+        isMgmt={isMgmt}
+      />
+    );
+
+    // Toggle dei blocchi realmente mostrati nella copia live.
+    // Gestione → solo il tabellone (`turni`); staff → `timesheet` + `stats`.
+    const timesheetToggleGroupKeys = isMgmt ? ['turni'] : ['timesheet', 'stats'];
+    const timesheetToggleWidgets: UiScreenWidgetDef[] = layoutGroups
+      .filter((g) => timesheetToggleGroupKeys.includes(g.groupKey))
+      .flatMap((g) => g.widgets)
+      .filter((w) => widgetAppliesToUser(w, previewUser.role));
+
+    if (timesheetToggleWidgets.length > 0) {
       blocks.push(
-        <TurniMgmtPreview
-          key="turni-mgmt"
-          previewUser={previewUser}
-          language={language}
-          isSelectedAdmin={isSelectedAdmin}
-          onUiToggle={onUiToggle}
-        />
-      );
-      blocks.push(
-        <StatisticsTabPreview
-          key="stats"
-          previewUser={previewUser}
-          language={language}
-          isSelectedAdmin={isSelectedAdmin}
-          onUiToggle={onUiToggle}
-        />
-      );
-    } else {
-      blocks.push(
-        <StaffTimesheetPreview
-          key="staff-ts"
-          previewUser={previewUser}
-          language={language}
-          isSelectedAdmin={isSelectedAdmin}
-          onUiToggle={onUiToggle}
-        />
+        <div
+          key="timesheet-widget-toggles"
+          className="rounded-xl border border-white/[0.14] px-3 py-3"
+        >
+          <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">
+            {tv.profile_visibility_timesheet_blocks_title ?? 'Blocchi delle Presenze'}
+          </p>
+          <div className="flex flex-col gap-1.5">
+            {timesheetToggleWidgets.map((w) => {
+              const visible = isUiWidgetVisible(previewUser, w.key);
+              return (
+                <div key={w.key} className="flex items-center justify-between gap-3">
+                  <span
+                    className="min-w-0 flex-1 truncate text-xs text-white/80"
+                    title={w.label}
+                  >
+                    {previewWidgetLabel(w.key)}
+                  </span>
+                  <ToggleSwitch
+                    isActive={visible}
+                    onChange={(next) => {
+                      if (!isSelectedAdmin) onUiToggle(w.key, next);
+                    }}
+                    size="sm"
+                    darkMode
+                    disabled={isSelectedAdmin}
+                    className="shrink-0"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
       );
     }
   }

@@ -3,8 +3,9 @@ import { Users } from 'lucide-react';
 import UnifiedShiftGrid from './UnifiedShiftGrid';
 import { useT } from '../hooks/useT';
 import { useAppUser } from '../context/AppContext';
+import type { User } from '../types';
 
-export default function UnifiedShiftsPage() {
+export default function UnifiedShiftsPage({ visibilityUser }: { visibilityUser?: User }) {
   const _t = useT();
   const { currentUser, isSessionElevated } = useAppUser();
 
@@ -35,6 +36,7 @@ export default function UnifiedShiftsPage() {
       <UnifiedShiftGrid
         mode="realtime"
         onModeChange={() => {}}
+        visibilityUser={visibilityUser}
       />
     </motion.div>
   );

@@ -498,7 +498,7 @@ type ShiftGridDesktopRowProps = {
   onReviewClick: (user: User) => void;
 };
 
-export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, filterUserId }: { mode: GridMode; onModeChange: (m: GridMode) => void; filterUserId?: string }) {
+export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, filterUserId, visibilityUser }: { mode: GridMode; onModeChange: (m: GridMode) => void; filterUserId?: string; visibilityUser?: User }) {
   const t = useT();
   const { currentUser, users, effectiveLanguage, isSessionElevated, setIsSessionElevated: _setIsSessionElevated, globalPinSessionId, reorderUsers } = useAppUser();
   const sessionActive = isSessionElevated || !!globalPinSessionId;
@@ -534,8 +534,13 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   }, [canEdit, isMgmt, sessionActive]);
   const effectiveWorkRules = DEFAULT_WORK_RULES;
   const violationChromeEnabled = featureFlags?.violation_rules !== false;
-  /** Sezione UI visibile per l'utente corrente (Admin → "Cosa vede chi"). */
-  const uiW = (key: string) => (currentUser ? isUiWidgetVisible(currentUser, key) : true);
+  /**
+   * Sezione UI visibile per l'utente corrente (Admin → "Cosa vede chi").
+   * In anteprima il chiamante può forzare un `visibilityUser`: la griglia
+   * risponde così agli override del dipendente mostrato, non dell'admin.
+   */
+  const uiResolverUser = visibilityUser ?? currentUser;
+  const uiW = (key: string) => (uiResolverUser ? isUiWidgetVisible(uiResolverUser, key) : true);
 
   /** DEBUG — conta turni totali caricati (solo quando cambia il dataset, non a ogni render) */
   useEffect(() => {
