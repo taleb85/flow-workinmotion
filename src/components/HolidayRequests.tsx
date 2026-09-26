@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Calendar, Check, X, Palmtree, Trash2, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { Calendar, Check, X, Palmtree, Trash2, AlertCircle, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppData } from '../context/appSliceContexts';
@@ -9,7 +9,7 @@ import { useAppConfig } from '../context/appSliceContexts';
 import { useT } from '../hooks/useT';
 import { canApproveShiftActions } from '../utils/permissions';
 import { isUiWidgetVisible } from '../utils/uiScreenWidgets';
-import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday, isBefore, startOfDay } from 'date-fns';
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday, isBefore, startOfDay, addMonths, subMonths } from 'date-fns';
 import { getDateLocale } from '../utils/translations';
 import type { HolidayRequest, User } from '../types';
 import { safeFormatDate } from '../utils/safeDateFormat';
@@ -59,6 +59,8 @@ export default function HolidayRequests({
   const [reason, setReason]           = useState('');
   /** KPI selezionata: apre il dropdown con l'elenco delle richieste di quello stato. */
   const [openKpi, setOpenKpi]         = useState<'pending' | 'approved' | 'rejected' | null>(null);
+  /** Mese visualizzato nel calendario (navigazione indipendente). */
+  const [viewMonth, setViewMonth]     = useState<Date>(() => startOfMonth(new Date()));
 
   const t = useT();
 
@@ -100,9 +102,9 @@ export default function HolidayRequests({
   const realHolidays   = holidays.filter((h) => h.type !== 'indisponibilita');
 
   // ── Calendar helpers ──────────────────────────────────────────────────────
-  const now        = new Date();
-  const monthStart = startOfMonth(now);
-  const monthEnd   = endOfMonth(now);
+  // `viewMonth` guida il mese mostrato (navigazione con le frecce); di default è il mese corrente.
+  const monthStart = startOfMonth(viewMonth);
+  const monthEnd   = endOfMonth(viewMonth);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const emptyDays   = Array.from({ length: getDay(monthStart) === 0 ? 6 : getDay(monthStart) - 1 });
   const calLocale = getDateLocale(effectiveLanguage);
@@ -253,19 +255,9 @@ export default function HolidayRequests({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
       >
-      {/* ── Header: azione "nuova richiesta" + KPI per stato ─────────────── */}
+      {/* ── Header: KPI per stato (il pulsante "Richiedi ferie" è nel calendario) ── */}
       {uiW(isAdmin ? 'ferie.header' : 'staff_holidays.header_actions') && (
-      <div className="mb-5 mt-3 flex flex-col gap-3">
-        <div className="flex items-center justify-end">
-          <button
-            type="button"
-            onClick={() => setShowForm(true)}
-            className="gap-1.5 px-3 py-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-80"
-            style={{ background: 'transparent', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.20)', borderRadius: '0.5rem' }}
-          >
-            {t.request_holiday}
-          </button>
-        </div>
+      <div className="mb-4 mt-3 flex flex-col gap-3">
         <div className="grid grid-cols-3 gap-2">
           {HOLIDAY_KPI.map((kpi) => {
             const isOpen = openKpi === kpi.key;
@@ -546,13 +538,47 @@ export default function HolidayRequests({
         <div className={`${isAdmin ? 'w-full' : 'w-full max-w-xl'} flex flex-col gap-4`}>
           {uiW('ferie.calendar') && (
           <div className="group w-full rounded-xl border px-2 py-2 text-left border-white/[0.14]">
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="font-semibold text-base uppercase" style={{ color: '#ffffff' }}>
-                {format(now, 'MMMM yyyy', { locale: calLocale })}
-              </h2>
-              <div className="flex items-center gap-1.5 text-[0.625rem]" style={{ color: '#ffffff' }}>
+            {/* Intestazione calendario: pulsante a sinistra, mese centrato con navigazione, legenda a destra */}
+            <div className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+              {/* Sinistra: nuova richiesta */}
+              {uiW(isAdmin ? 'ferie.header' : 'staff_holidays.header_actions') && (
+                <button
+                  type="button"
+                  onClick={() => setShowForm(true)}
+                  className="order-1 shrink-0 px-3 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-80"
+                  style={{ background: 'transparent', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.20)', borderRadius: '0.5rem' }}
+                >
+                  {t.request_holiday}
+                </button>
+              )}
+
+              {/* Destra: legenda stato */}
+              <div className="order-2 ml-auto flex shrink-0 items-center gap-1.5 text-[0.625rem] sm:order-3" style={{ color: '#ffffff' }}>
                 <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />{t.pending}</span>
                 <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500 inline-block" />{t.status_approved}</span>
+              </div>
+
+              {/* Centro: navigazione mese (su mobile va a capo, sempre centrato) */}
+              <div className="order-3 flex w-full items-center justify-center gap-1 sm:order-2 sm:w-auto sm:flex-1">
+                <button
+                  type="button"
+                  onClick={() => setViewMonth((m) => subMonths(m, 1))}
+                  aria-label={t.month_prev}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white/80 transition-colors hover:bg-white/10 hover:text-white active:bg-white/80"
+                >
+                  <ChevronLeft className="h-4 w-4" aria-hidden />
+                </button>
+                <h2 className="whitespace-nowrap px-1 text-center font-semibold text-base uppercase" style={{ color: '#ffffff' }}>
+                  {format(monthStart, 'MMMM yyyy', { locale: calLocale })}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setViewMonth((m) => addMonths(m, 1))}
+                  aria-label={t.month_next}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white/80 transition-colors hover:bg-white/10 hover:text-white active:bg-white/80"
+                >
+                  <ChevronRight className="h-4 w-4" aria-hidden />
+                </button>
               </div>
             </div>
 

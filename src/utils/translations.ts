@@ -155,6 +155,8 @@ const baseIt = {
   email_sent: 'Email inviata.',
   holiday_saved_email_sent: 'Richiesta salvata e email inviata.',
   request_holiday: 'Richiedi ferie',
+  month_prev: 'Mese precedente',
+  month_next: 'Mese successivo',
 
   // BottomNav
 
@@ -1637,6 +1639,8 @@ const baseEn: Record<string, string> = {
   email_sent: 'Email sent.',
   holiday_saved_email_sent: 'Request saved and email sent.',
   request_holiday: 'Request Holiday',
+  month_prev: 'Previous month',
+  month_next: 'Next month',
   save_error_retry: 'Save error. Please retry.',
   edit_employee_title: 'Edit employee',
   create_employee_title: 'New employee',
@@ -3070,6 +3074,8 @@ const baseEs: Record<string, string> = {
   email_sent: 'Email enviado.',
   holiday_saved_email_sent: 'Solicitud guardada y email enviado.',
   request_holiday: 'Solicitar vacaciones',
+  month_prev: 'Mes anterior',
+  month_next: 'Mes siguiente',
   save_error_retry: 'Error al guardar. Reintentar.',
   edit_employee_title: 'Editar empleado',
   create_employee_title: 'Nuevo empleado',
@@ -5306,6 +5312,8 @@ const baseFr: Record<string, string> = {
   publish_shift: 'Publier le service',
   shift_published: 'Service publié.',
   request_holiday: 'Demander un congé',
+  month_prev: 'Mois précédent',
+  month_next: 'Mois suivant',
   restore: 'Restaurer',
   role: 'Rôle',
   role_admin: 'Administrateur',

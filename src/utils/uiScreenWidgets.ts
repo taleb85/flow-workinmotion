@@ -188,7 +188,7 @@ export const UI_SCREEN_WIDGETS: UiScreenWidgetDef[] = [
     audience: 'staff',
     screenGroup: 'staff_holidays',
     screenLabel: 'Ferie (personale)',
-    label: 'Intestazione e nuova richiesta',
+    label: 'Pulsante "Richiedi ferie"',
   },
   {
     key: 'staff_holidays.list',
@@ -294,14 +294,14 @@ export const UI_SCREEN_WIDGETS: UiScreenWidgetDef[] = [
     audience: 'management',
     screenGroup: 'ferie',
     screenLabel: 'Ferie e permessi',
-    label: 'Intestazione, KPI per stato (dropdown) e nuova richiesta',
+    label: 'KPI per stato (dropdown)',
   },
   {
     key: 'ferie.calendar',
     audience: 'management',
     screenGroup: 'ferie',
     screenLabel: 'Ferie e permessi',
-    label: 'Calendario mensile',
+    label: 'Calendario mensile, navigazione mese e nuova richiesta',
   },
 
   // ── Menu a popup e interazioni speciali ──────────────────────────────
