@@ -25,6 +25,13 @@ import { TenantProvider } from './context/TenantContext';
 import './index.css';
 // FLOW v2 · Skin Apple (System dark) — layer di layout sopra index.css
 import './flow-v2-skin.css';
+import { applyThemeToDocument, getLastUsedTheme } from './utils/backgroundThemes';
+
+// ── Sfondo di avvio ─────────────────────────────────────────────────────────
+// Applica l'ultimo sfondo scelto dall'utente PRIMA del primo render: così la splash
+// di boot (e le schermate di accesso) usano lo sfondo dell'utente e non quello
+// ufficiale di default. Aggiorna anche lo snapshot letto dallo script inline in index.html.
+applyThemeToDocument(getLastUsedTheme());
 
 // ── Rilevamento aggiornamento Service Worker ─────────────────────────────────
 // Quando un nuovo SW prende il controllo (dopo un deploy):

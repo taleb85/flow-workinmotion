@@ -152,6 +152,32 @@
       })();
     </script>
     <script>
+      /* Sfondo di avvio: applica subito l'ultimo sfondo scelto dall'utente (snapshot
+         `flow_bg_boot` scritto da utils/backgroundThemes.ts), così la splash di boot
+         non mostra lo sfondo ufficiale di default. Gira prima del bundle/React. */
+      (function () {
+        try {
+          var raw = localStorage.getItem('flow_bg_boot');
+          if (!raw) return;
+          var s = JSON.parse(raw);
+          if (!s || !s.bg) return;
+          var el = document.documentElement;
+          el.style.setProperty('--flow-background', s.bg);
+          if (s.mesh) el.style.setProperty('--flow-mesh', s.mesh);
+          el.style.background = s.bg;
+          if (document.body) document.body.style.background = s.bg;
+          var m = /^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/.exec(s.bg);
+          if (m) {
+            el.style.setProperty('--app-bg-r', String(parseInt(m[1], 16)));
+            el.style.setProperty('--app-bg-g', String(parseInt(m[2], 16)));
+            el.style.setProperty('--app-bg-b', String(parseInt(m[3], 16)));
+          }
+          var tc = document.querySelector('meta[name="theme-color"]');
+          if (tc) tc.setAttribute('content', s.bg);
+        } catch (e) {}
+      })();
+    </script>
+    <script>
       /* Forza reload quando il nuovo service worker prende controllo — fix iOS PWA stuck on old version */
       (function () {
         if (!('serviceWorker' in navigator)) return;

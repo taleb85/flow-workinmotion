@@ -220,4 +220,22 @@ export function applyThemeToDocument(theme: BackgroundTheme): void {
   root.style.setProperty('--app-bg-b', String(b));
   root.style.background = theme.appBg;
   if (document.body) document.body.style.background = theme.appBg;
+  /* Allinea la status bar (Android) allo sfondo scelto. */
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+  if (themeColor) themeColor.setAttribute('content', theme.appBg);
+  storeBootBackground(theme);
+}
+
+/** Chiave dello "snapshot" di avvio: sfondo già calcolato, letto dallo script inline in `index.html`. */
+const BOOT_BG_KEY = 'flow_bg_boot';
+
+/**
+ * Salva uno snapshot dello sfondo attivo (colore + mesh) in localStorage, così lo script
+ * inline in `index.html` può applicarlo **prima** del bundle, evitando che la splash di
+ * boot mostri lo sfondo ufficiale di default invece di quello scelto dall'utente.
+ */
+export function storeBootBackground(theme: BackgroundTheme): void {
+  try {
+    localStorage.setItem(BOOT_BG_KEY, JSON.stringify({ bg: theme.appBg, mesh: themeMesh(theme) }));
+  } catch { /* storage non disponibile */ }
 }
