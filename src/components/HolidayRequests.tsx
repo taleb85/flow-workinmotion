@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Calendar, Check, X, Palmtree, Trash2 } from 'lucide-react';
+import { Calendar, Check, X, Palmtree, Trash2, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppData } from '../context/appSliceContexts';
@@ -112,6 +112,14 @@ export default function HolidayRequests({
   );
 
   const calHolidays = isAdmin ? realHolidays : myHolidays;
+
+  // KPI per stato. Scope = stesso della vista: tutte le richieste per chi approva
+  // (Admin / can_approve_shifts), le proprie per lo staff.
+  const HOLIDAY_KPI = [
+    { key: 'pending',  label: t.holidays_kpi_pending,  count: calHolidays.filter((h) => h.status === 'pending').length,  icon: AlertCircle,  color: 'text-amber-400',   bg: 'bg-amber-500/15',   border: 'border-amber-500/30' },
+    { key: 'approved', label: t.holidays_kpi_approved, count: calHolidays.filter((h) => h.status === 'approved').length, icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/30' },
+    { key: 'rejected', label: t.holidays_kpi_rejected, count: calHolidays.filter((h) => h.status === 'rejected').length, icon: XCircle,      color: 'text-red-400',     bg: 'bg-red-500/15',     border: 'border-red-500/30' },
+  ] as const;
 
   const getDayStatus = (day: Date): HolidayRequest['status'] | null => {
     const ds = format(day, 'yyyy-MM-dd');
@@ -237,28 +245,33 @@ export default function HolidayRequests({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
       >
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      {/* ── Header: azione "nuova richiesta" + KPI per stato ─────────────── */}
       {uiW('ferie.header') && (
-      <div className="mb-5 mt-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          {isAdmin && pendingAll.length > 0 && (
-            <span className="inline-flex items-center justify-center min-w-[1.375rem] h-[1.375rem] px-1.5 rounded-full text-[0.6875rem] font-bold"
-              style={{ background: 'rgba(245,158,11,0.25)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.35)' }}>
-              {pendingAll.length}
-            </span>
-          )}
-          <p className="ui-section-title">
-            {isAdmin ? t.pending : `${myHolidays.length} ${t.request_holiday}`}
-          </p>
+      <div className="mb-5 mt-3 flex flex-col gap-3">
+        <div className="flex items-center justify-end">
+          <button
+            type="button"
+            onClick={() => setShowForm(true)}
+            className="gap-1.5 px-3 py-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-80"
+            style={{ background: 'transparent', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.20)', borderRadius: '0.5rem' }}
+          >
+            {t.request_holiday}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowForm(true)}
-          className="gap-1.5 px-3 py-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-80"
-          style={{ background: 'transparent', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.20)', borderRadius: '0.5rem' }}
-        >
-          {t.request_holiday}
-        </button>
+        <div className="grid grid-cols-3 gap-2">
+          {HOLIDAY_KPI.map((kpi) => (
+            <div
+              key={kpi.key}
+              className={`flex flex-col items-center gap-1 rounded-2xl border p-3 ${kpi.bg} ${kpi.border}`}
+            >
+              <kpi.icon className={`h-4 w-4 ${kpi.color}`} aria-hidden />
+              <span className="text-lg font-black leading-none text-white tabular-nums">{kpi.count}</span>
+              <span className={`text-center text-[0.625rem] font-bold uppercase leading-tight tracking-wider ${kpi.color}`}>
+                {kpi.label}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
       )}
 
