@@ -2462,7 +2462,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   <div className="flex flex-col items-center gap-2 rounded-xl border border-white/[0.14] bg-white/5 py-3 px-3">
                     <Lock className="h-5 w-5 text-white/40" />
                     <p className="text-[0.75rem] text-center text-white/55 leading-snug">
-                      Sezione protetta.<br/>Inserisci il tuo PIN per sbloccare.
+                      {t.settings_data_tools_protected}<br/>{t.settings_data_tools_protected_sub}
                     </p>
                     <button
                       type="button"
@@ -2470,7 +2470,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       className="flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/15 px-4 py-2 text-[0.75rem] font-semibold text-white shadow-sm hover:bg-white/25 transition-colors"
                     >
                       <KeyRound className="h-3.5 w-3.5" />
-                      Sblocca con PIN
+                      {t.settings_data_tools_unlock_pin}
                     </button>
                   </div>
                 ) : (
@@ -2478,14 +2478,14 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[0.6875rem] font-semibold text-emerald-600 flex items-center gap-1">
-                        <Unlock className="h-3 w-3" /> Sbloccato
+                        <Unlock className="h-3 w-3" /> {t.settings_data_tools_unlocked}
                       </span>
                       <button
                         type="button"
                         onClick={() => setDataToolsLocked(true)}
                         className="text-[0.6875rem] text-white/60 hover:text-white/70 transition-colors active:text-white/70"
                       >
-                        Blocca di nuovo
+                        {t.settings_data_tools_lock_again}
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -2522,7 +2522,7 @@ className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-m
                     setShowDataToolsPinPad(false);
                     setDataToolsPin('');
                   } else {
-                    setDataToolsPinError('PIN non corretto');
+                    setDataToolsPinError(t.settings_data_tools_pin_wrong);
                     setDataToolsPin('');
                     setTimeout(() => setDataToolsPinError(''), 2000);
                   }
