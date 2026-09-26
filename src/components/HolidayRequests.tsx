@@ -415,7 +415,7 @@ export default function HolidayRequests({
         {/* Calendario + richieste (in colonna) */}
         <div className={`${isAdmin ? 'w-full' : 'w-full max-w-xl'} flex flex-col gap-4`}>
           {uiW('ferie.calendar') && (
-          <div className="group w-full rounded-xl border px-2 py-2 text-left border-white/[0.14]">
+          <div className="group mt-5 w-full rounded-xl border px-2 py-2 text-left border-white/[0.14]">
             {/* Intestazione calendario: pulsante a sinistra, mese centrato con navigazione, legenda a destra */}
             <div className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
               {/* Sinistra: nuova richiesta */}
