@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Calendar, Check, X, Palmtree, Trash2, AlertCircle, CheckCircle2, XCircle, ChevronDown } from 'lucide-react';
+import { Calendar, Check, X, Palmtree, Trash2, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppData } from '../context/appSliceContexts';
@@ -278,18 +278,14 @@ export default function HolidayRequests({
                 key={kpi.key}
                 onClick={() => setOpenKpi((v) => (v === kpi.key ? null : kpi.key))}
                 aria-expanded={isOpen}
-                className={`relative flex flex-col items-center gap-1 overflow-hidden rounded-2xl border p-3 transition-all ${kpi.bg} ${kpi.border} ${
+                className={`flex items-center justify-center gap-1.5 overflow-hidden rounded-2xl border px-2 py-2.5 transition-all ${kpi.bg} ${kpi.border} ${
                   isOpen ? 'ring-2 ring-white/40' : 'hover:brightness-110'
                 }`}
               >
-                <ChevronDown
-                  className={`absolute right-2 top-2 h-3 w-3 transition-transform ${kpi.color} ${isOpen ? 'rotate-180' : 'opacity-60'}`}
-                  aria-hidden
-                />
-                <kpi.icon className={`h-4 w-4 ${kpi.color}`} aria-hidden />
-                <span className="text-lg font-black leading-none text-white tabular-nums">{kpi.count}</span>
-                {/* Descrizione su una sola riga */}
-                <span className={`block w-full whitespace-nowrap text-center text-[0.625rem] font-bold uppercase leading-tight tracking-wide ${kpi.color}`}>
+                {/* Ordine richiesto: icona → numero → etichetta */}
+                <kpi.icon className={`h-4 w-4 shrink-0 ${kpi.color}`} aria-hidden />
+                <span className="text-base font-black leading-none text-white tabular-nums">{kpi.count}</span>
+                <span className={`whitespace-nowrap text-[0.5625rem] font-bold uppercase leading-none tracking-tight ${kpi.color}`}>
                   {kpi.label}
                 </span>
               </button>
