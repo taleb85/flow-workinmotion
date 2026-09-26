@@ -415,7 +415,7 @@ export default function HolidayRequests({
         {/* Calendario + richieste (in colonna) */}
         <div className={`${isAdmin ? 'w-full' : 'w-full max-w-xl'} flex flex-col gap-4`}>
           {uiW('ferie.calendar') && (
-          <div className="group w-full rounded-xl border px-2 pt-2 pb-4 text-left border-white/[0.14]">
+          <div className="group w-full rounded-xl border px-2 py-2 text-left border-white/[0.14]">
             {/* Intestazione calendario: pulsante a sinistra, mese centrato con navigazione, legenda a destra */}
             <div className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
               {/* Sinistra: nuova richiesta */}
@@ -516,7 +516,7 @@ export default function HolidayRequests({
 
           {/* ── KPI per stato (sotto il calendario) ────────────────────────── */}
           {uiW(isAdmin ? 'ferie.header' : 'staff_holidays.header_actions') && (
-          <div className="flex flex-col gap-3">
+          <div className="mt-3 flex flex-col gap-3">
             <div className="grid grid-cols-3 gap-2">
               {HOLIDAY_KPI.map((kpi) => {
                 const isOpen = openKpi === kpi.key;
