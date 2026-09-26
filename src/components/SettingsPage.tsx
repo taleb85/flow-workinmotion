@@ -96,6 +96,11 @@ function getBreakRuleIconComponent(iconKey?: string): LucideIcon {
   return (iconKey && BREAK_RULE_ICONS[iconKey]) || Sun;
 }
 
+/* Ripristino dati (import distruttivo: cancella turni/utenti non-admin prima di importare).
+   Disattivato per sicurezza: la sezione "Strumenti avanzati (Admin)" espone solo il Backup JSON.
+   Per riabilitarlo, portare questa costante a `true`. */
+const ENABLE_DATA_RESTORE = false;
+
 function _readTeamSectionExpanded(): boolean {
   if (typeof window === 'undefined') return true;
   return window.localStorage.getItem(SETTINGS_TEAM_EXPANDED_KEY) !== '0';
@@ -783,6 +788,9 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
 
   // Tratta l'utente come admin se è in sessione elevata o ha elevated_role (null-safe: usato dagli hook sotto)
   const adminOnly = isAdminOnly(currentUser) || isSessionElevated || !!currentUser?.elevated_role;
+  // Admin "primario": solo il ruolo Admin vero (esclude sessioni elevate e ruoli elevati).
+  // Usato per le funzioni più delicate (es. Strumenti avanzati / Backup).
+  const isPrimaryAdmin = isAdminOnly(currentUser);
   const canEdit = canUserEdit(currentUser) || adminOnly;
   const canSeeSuspended = canViewSuspended(currentUser) || adminOnly;
 
@@ -2447,7 +2455,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
           </SettingsAccordionSection>
         )}
 
-        {adminOnly && (
+        {isPrimaryAdmin && (
           <SettingsAccordionSection
             storageKey="osteria_settings_acc_admin_advanced"
             title={t.settings_advanced_tools_admin}
@@ -2489,13 +2497,15 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={handleImportClick}
-className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-medium uppercase text-white/70 surface-ghost-interactive transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
-                      >
-                        {t.restore}
-                      </button>
+                      {ENABLE_DATA_RESTORE && (
+                        <button
+                          type="button"
+                          onClick={handleImportClick}
+                          className="rounded-lg rounded-xl border border-white/20 px-3 py-2 text-xs font-medium uppercase text-white/70 surface-ghost-interactive transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"
+                        >
+                          {t.restore}
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => exportToJSON({ users, shifts, punchRecords, holidays })}
