@@ -11,5 +11,4 @@ Repository pubblico: **[github.com/taleb85/flow-workinmotion](https://github.com
 | Pages ↔ GitHub | [CONNESSIONE_GIT_CLOUDFLARE.md](./CONNESSIONE_GIT_CLOUDFLARE.md) (nomenclatura file storica) |
 | Variabili `VITE_*` su Pages | Da verificare in Cloudflare → progetto → Environment variables (build) |
 | Supabase (URL produzione, RLS) | Progetto `iuvfkxygwjbdunwqumcb` (West EU · Ireland) — `https://iuvfkxygwjbdunwqumcb.supabase.co` |
-| Cron promemoria uscita | `pg_cron` ogni ora (06–20 UTC) → [CRON_PROMEMORIA_USCITA.md](./CRON_PROMEMORIA_USCITA.md) |
 | Verifica “tutto” passo-passo | [CHECKLIST_VERIFICA_COMPLETA.md](./CHECKLIST_VERIFICA_COMPLETA.md) |
