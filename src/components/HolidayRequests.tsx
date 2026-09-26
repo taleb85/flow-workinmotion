@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Calendar, Check, X, Palmtree, Trash2, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { Calendar, Check, X, Palmtree, Trash2, AlertCircle, CheckCircle2, XCircle, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppUser } from '../context/appSliceContexts';
 import { useAppData } from '../context/appSliceContexts';
@@ -57,6 +57,8 @@ export default function HolidayRequests({
   const [startDate, setStartDate]     = useState('');
   const [endDate, setEndDate]         = useState('');
   const [reason, setReason]           = useState('');
+  /** KPI selezionata: apre il dropdown con l'elenco delle richieste di quello stato. */
+  const [openKpi, setOpenKpi]         = useState<'pending' | 'approved' | 'rejected' | null>(null);
 
   const t = useT();
 
@@ -120,6 +122,15 @@ export default function HolidayRequests({
     { key: 'approved', label: t.holidays_kpi_approved, count: calHolidays.filter((h) => h.status === 'approved').length, icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/30' },
     { key: 'rejected', label: t.holidays_kpi_rejected, count: calHolidays.filter((h) => h.status === 'rejected').length, icon: XCircle,      color: 'text-red-400',     bg: 'bg-red-500/15',     border: 'border-red-500/30' },
   ] as const;
+
+  /** KPI attualmente selezionata (apre il dropdown con l'elenco). */
+  const activeKpi = HOLIDAY_KPI.find((k) => k.key === openKpi);
+  /** Richieste della KPI selezionata (stesso scope della vista), in ordine di data inizio. */
+  const kpiList = openKpi
+    ? calHolidays
+        .filter((h) => h.status === openKpi)
+        .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+    : [];
 
   const getDayStatus = (day: Date): HolidayRequest['status'] | null => {
     const ds = format(day, 'yyyy-MM-dd');
@@ -259,19 +270,82 @@ export default function HolidayRequests({
           </button>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          {HOLIDAY_KPI.map((kpi) => (
-            <div
-              key={kpi.key}
-              className={`flex flex-col items-center gap-1 rounded-2xl border p-3 ${kpi.bg} ${kpi.border}`}
-            >
-              <kpi.icon className={`h-4 w-4 ${kpi.color}`} aria-hidden />
-              <span className="text-lg font-black leading-none text-white tabular-nums">{kpi.count}</span>
-              <span className={`text-center text-[0.625rem] font-bold uppercase leading-tight tracking-wider ${kpi.color}`}>
-                {kpi.label}
-              </span>
-            </div>
-          ))}
+          {HOLIDAY_KPI.map((kpi) => {
+            const isOpen = openKpi === kpi.key;
+            return (
+              <button
+                type="button"
+                key={kpi.key}
+                onClick={() => setOpenKpi((v) => (v === kpi.key ? null : kpi.key))}
+                aria-expanded={isOpen}
+                className={`flex flex-col items-center gap-1 rounded-2xl border p-3 transition-all ${kpi.bg} ${kpi.border} ${
+                  isOpen ? 'ring-2 ring-white/40' : 'hover:brightness-110'
+                }`}
+              >
+                <kpi.icon className={`h-4 w-4 ${kpi.color}`} aria-hidden />
+                <span className="text-lg font-black leading-none text-white tabular-nums">{kpi.count}</span>
+                <span className={`flex items-center gap-1 text-center text-[0.625rem] font-bold uppercase leading-tight tracking-wider ${kpi.color}`}>
+                  {kpi.label}
+                  <ChevronDown className={`h-3 w-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} aria-hidden />
+                </span>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Dropdown: elenco richieste dello stato selezionato */}
+        <AnimatePresence initial={false}>
+          {activeKpi && (
+            <motion.div
+              key={activeKpi.key}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="overflow-hidden rounded-2xl border border-white/[0.14] bg-white/[0.04]">
+                <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2.5">
+                  <span className={`text-[0.6875rem] font-bold uppercase tracking-wider ${activeKpi.color}`}>
+                    {activeKpi.label} · {activeKpi.count}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setOpenKpi(null)}
+                    aria-label={t.close ?? 'Chiudi'}
+                    className="flex h-6 w-6 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden />
+                  </button>
+                </div>
+                {kpiList.length === 0 ? (
+                  <p className="px-4 py-3 text-xs text-white/60">{t.no_holidays_yet}</p>
+                ) : (
+                  <div className="max-h-72 divide-y divide-white/5 overflow-y-auto">
+                    {kpiList.map((h) => {
+                      const u = users.find((x) => x.id === h.user_id);
+                      return (
+                        <div key={h.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                          <div className="min-w-0">
+                            {isAdmin && (
+                              <p className="truncate text-sm font-semibold text-white">
+                                {`${u?.first_name ?? ''} ${u?.last_name ?? ''}`.trim() || '—'}
+                              </p>
+                            )}
+                            <p className="text-xs text-white/70">
+                              {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
+                              {h.reason && ` · ${h.reason}`}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       )}
 
