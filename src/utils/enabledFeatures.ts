@@ -58,6 +58,16 @@ export const FEATURE_LABELS_TAB_FIRST: Record<EnabledFeatureKey, string> = {
   admin_tab: 'Scheda Admin — impostazioni e profili',
 };
 
+/** Etichetta tradotta di un permesso/funzione (fallback IT se manca la lingua). */
+export function getFeatureLabel(t: Record<string, string>, key: EnabledFeatureKey): string {
+  return t[`feature_label_${key}`] ?? FEATURE_LABELS[key];
+}
+
+/** Etichetta tradotta in stile "scheda" (fallback IT se manca la lingua). */
+export function getFeatureLabelTabFirst(t: Record<string, string>, key: EnabledFeatureKey): string {
+  return t[`feature_label_tab_${key}`] ?? t[`feature_label_${key}`] ?? FEATURE_LABELS_TAB_FIRST[key];
+}
+
 export type RoleTemplateRow = { kind: 'feature'; key: EnabledFeatureKey };
 
 export type RoleTemplateSectionId = 'tabs_nav' | 'shift_ops' | 'other';

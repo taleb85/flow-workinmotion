@@ -11,14 +11,15 @@ import { canEditRoleFeatureTemplates } from '../utils/permissions';
 import {
   ADMIN_MODULE_KEYS,
   ROLE_TEMPLATE_FEATURE_SECTIONS,
-  FEATURE_LABELS,
-  FEATURE_LABELS_TAB_FIRST,
+  ENABLED_FEATURE_KEYS,
   type EnabledFeatures,
   type EnabledFeatureKey,
   type AdminModuleKey,
   buildMergedAdminModulesForAdminEditor,
   getEnabledFeatures,
   getCodeDefaultsForTemplateGroup,
+  getFeatureLabel,
+  getFeatureLabelTabFirst,
   type SettingsOperationalPermKey,
 } from '../utils/enabledFeatures';
 import {
@@ -144,6 +145,16 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   const t = useT();
   const tv = t as Record<string, string>;
   const permRows = useMemo(() => buildSettingsPermissionRows(t as Record<string, string>), [t]);
+
+  /** Etichette permessi tradotte nella lingua corrente (fallback IT). */
+  const FEATURE_LABELS = useMemo(
+    () => Object.fromEntries(ENABLED_FEATURE_KEYS.map((k) => [k, getFeatureLabel(tv, k)])) as Record<EnabledFeatureKey, string>,
+    [tv]
+  );
+  const FEATURE_LABELS_TAB_FIRST = useMemo(
+    () => Object.fromEntries(ENABLED_FEATURE_KEYS.map((k) => [k, getFeatureLabelTabFirst(tv, k)])) as Record<EnabledFeatureKey, string>,
+    [tv]
+  );
 
   // ─── Utenti non-admin attivi come colonne ────────────────────────────────
   const nonAdminUsers = useMemo(() =>

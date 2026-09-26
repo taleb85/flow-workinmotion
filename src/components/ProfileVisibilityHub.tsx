@@ -17,7 +17,7 @@ import type { User } from '../types';
 import type { EnabledFeatures } from '../utils/enabledFeatures';
 import { translateRole } from '../utils/roles';
 import { isAdminOnly, isManagementRole } from '../utils/permissions';
-import { FEATURE_LABELS, type EnabledFeatureKey } from '../utils/enabledFeatures';
+import { getFeatureLabel, type EnabledFeatureKey } from '../utils/enabledFeatures';
 import { type AppNavTab, getUnifiedNavTabs } from '../utils/enabledModules';
 import ProfileTabRichPreview from './profilePreview/ProfileTabRichPreview';
 import {
@@ -674,7 +674,7 @@ className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-3
                                 <AdminRow
                                   key={key}
                                   className="rounded-lg border border-white/[0.14] !border-b-0 !p-2"
-                                  label={FEATURE_LABELS[key]}
+                                  label={getFeatureLabel(tv, key)}
                                   description={desc}
                                   action={
                                     <ToggleSwitch
