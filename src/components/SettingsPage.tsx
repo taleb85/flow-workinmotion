@@ -92,6 +92,26 @@ function getBreakRuleIconLabel(key: string, t: Record<string, string>): string {
   return key === 'moon' ? (t.settings_break_icon_dinner ?? 'Cena') : (t.settings_break_icon_lunch ?? 'Pranzo');
 }
 
+/* Titoli "canonici" delle regole pausa predefinite (Pranzo/Cena): mappati alla chiave i18n
+   per mostrarli tradotti. I titoli personalizzati restano invariati. */
+const BREAK_RULE_TITLE_TR_KEYS: Record<string, string> = {
+  pranzo: 'settings_break_icon_lunch',
+  lunch: 'settings_break_icon_lunch',
+  almuerzo: 'settings_break_icon_lunch',
+  déjeuner: 'settings_break_icon_lunch',
+  dejeuner: 'settings_break_icon_lunch',
+  cena: 'settings_break_icon_dinner',
+  dinner: 'settings_break_icon_dinner',
+  dîner: 'settings_break_icon_dinner',
+  diner: 'settings_break_icon_dinner',
+};
+
+/** Titolo regola pausa mostrato nella lingua attiva (solo per i titoli predefiniti Pranzo/Cena). */
+function getBreakRuleTitleLabel(title: string, t: Record<string, string>): string {
+  const trKey = BREAK_RULE_TITLE_TR_KEYS[title.trim().toLowerCase()];
+  return trKey ? (t[trKey] ?? title) : title;
+}
+
 function getBreakRuleIconComponent(iconKey?: string): LucideIcon {
   return (iconKey && BREAK_RULE_ICONS[iconKey]) || Sun;
 }
@@ -1749,7 +1769,7 @@ export default function SettingsPage({ view }: { view?: 'profili' | 'regole' } =
                       </span>
                       <h3
                         className={`flex-1 truncate text-xs font-bold uppercase tracking-wider ${isEnabled ? 'text-white' : 'text-white/40'}`}
-                       title={rule.title}>{rule.title}
+                       title={getBreakRuleTitleLabel(rule.title, t)}>{getBreakRuleTitleLabel(rule.title, t)}
                       </h3>
                       <div className="flex flex-shrink-0 items-center gap-1">
                         <span className="text-[0.6875rem] font-medium text-white/70">{t.settings_toggle_on}</span>
