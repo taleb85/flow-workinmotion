@@ -32,6 +32,7 @@ import {
   TIMESHEET_GRID_PLANNED_ONLY_KEY,
   getTimesheetGridPrivacyMode,
 } from '../utils/timesheetGridPrivacy';
+import { UI_SCREEN_WIDGETS, widgetAppliesToUser } from '../utils/uiScreenWidgets';
 import type { User } from '../types';
 
 export type RoleFeatureTemplatesPanelVariant = 'page' | 'embedded';
@@ -49,15 +50,24 @@ function buildUserPermissionPayload(
   features: EnabledFeatures | undefined,
   op: Record<SettingsOperationalPermKey, boolean> | undefined,
   teamVisible: boolean,
-  plannedOnly: boolean
+  plannedOnly: boolean,
+  uiSections?: Record<string, boolean>
 ): Partial<User> {
   const mergedFeatures: Record<string, boolean> = { ...(features ?? {}) };
   if (plannedOnly) mergedFeatures[TIMESHEET_GRID_PLANNED_ONLY_KEY] = true;
   else delete mergedFeatures[TIMESHEET_GRID_PLANNED_ONLY_KEY];
+  // Solo le sezioni nascoste generano un override; visibile = chiave assente.
+  const uiOverrides: Record<string, boolean> = {};
+  if (uiSections) {
+    for (const [k, visible] of Object.entries(uiSections)) {
+      if (visible === false) uiOverrides[k] = false;
+    }
+  }
   return {
     hide_from_team_schedule: !teamVisible,
     ...((op ?? {}) as Partial<User>),
     enabled_features: mergedFeatures,
+    ui_section_overrides: uiOverrides,
   };
 }
 
@@ -67,9 +77,10 @@ function panelStateSignature(
   op: Record<string, Record<SettingsOperationalPermKey, boolean>>,
   teamVisible: Record<string, boolean>,
   plannedOnly: Record<string, boolean>,
+  uiSections: Record<string, Record<string, boolean>>,
   mods: Record<AdminModuleKey, boolean>
 ): string {
-  return JSON.stringify({ f: features, o: op, t: teamVisible, p: plannedOnly, m: mods });
+  return JSON.stringify({ f: features, o: op, t: teamVisible, p: plannedOnly, u: uiSections, m: mods });
 }
 
 function roleColor(role: string): string {
@@ -165,6 +176,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
     const ops: Record<string, Record<SettingsOperationalPermKey, boolean>> = {};
     const teamVis: Record<string, boolean> = {};
     const plannedOnly: Record<string, boolean> = {};
+    const uiSections: Record<string, Record<string, boolean>> = {};
     for (const u of nonAdminUsers) {
       features[u.id] = getEnabledFeatures(u);
       ops[u.id] = {
@@ -175,8 +187,12 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       };
       teamVis[u.id] = !(u.hide_from_team_schedule === true);
       plannedOnly[u.id] = getTimesheetGridPrivacyMode(u) === 'planned_only';
+      const ov = u.ui_section_overrides;
+      const map: Record<string, boolean> = {};
+      for (const w of UI_SCREEN_WIDGETS) map[w.key] = ov?.[w.key] !== false;
+      uiSections[u.id] = map;
     }
-    return { features, ops, teamVis, plannedOnly };
+    return { features, ops, teamVis, plannedOnly, uiSections };
   };
 
   const initialPermState = useMemo(computePermState, [nonAdminUsers]);
@@ -185,6 +201,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   const [userOp, setUserOp] = useState<Record<string, Record<SettingsOperationalPermKey, boolean>>>(() => initialPermState.ops);
   const [userTeamVisible, setUserTeamVisible] = useState<Record<string, boolean>>(() => initialPermState.teamVis);
   const [userPlannedOnly, setUserPlannedOnly] = useState<Record<string, boolean>>(() => initialPermState.plannedOnly);
+  const [userUiSections, setUserUiSections] = useState<Record<string, Record<string, boolean>>>(() => initialPermState.uiSections);
 
   // ─── Selezione utente mobile ─────────────────────────────────────────────
   const [mobileSelectedUserId, setMobileSelectedUserId] = useState<string | null>(null);
@@ -212,23 +229,24 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
 
   useEffect(() => {
     latestStateSignatureRef.current = panelStateSignature(
-      userFeatures, userOp, userTeamVisible, userPlannedOnly, mods
+      userFeatures, userOp, userTeamVisible, userPlannedOnly, userUiSections, mods
     );
-  }, [userFeatures, userOp, userTeamVisible, userPlannedOnly, mods]);
+  }, [userFeatures, userOp, userTeamVisible, userPlannedOnly, userUiSections, mods]);
 
   // Inizializza/riallinea stato dai dati utente (quando non ci sono modifiche pendenti)
   useEffect(() => {
     if (templatePanelDirtyRef.current) return;
-    const { features, ops, teamVis, plannedOnly } = computePermState();
+    const { features, ops, teamVis, plannedOnly, uiSections } = computePermState();
     setUserFeatures(features);
     setUserOp(ops);
     setUserTeamVisible(teamVis);
     setUserPlannedOnly(plannedOnly);
+    setUserUiSections(uiSections);
     // Snapshot = stato appena letto: l'autosave riscriverà solo ciò che cambia.
     const snapshot: Record<string, string> = {};
     for (const u of nonAdminUsers) {
       snapshot[u.id] = JSON.stringify(
-        buildUserPermissionPayload(features[u.id], ops[u.id], teamVis[u.id] ?? true, plannedOnly[u.id] ?? false)
+        buildUserPermissionPayload(features[u.id], ops[u.id], teamVis[u.id] ?? true, plannedOnly[u.id] ?? false, uiSections[u.id])
       );
     }
     savedPayloadRef.current = snapshot;
@@ -269,6 +287,15 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
     setUserPlannedOnly((prev) => ({ ...prev, [userId]: !(prev[userId] ?? false) }));
   }, [markDirty]);
 
+  const toggleUiSection = useCallback((userId: string, key: string) => {
+    markDirty();
+    setUserUiSections((prev) => {
+      const cur = prev[userId] ?? {};
+      // Default = visibile; il toggle inverte rispetto allo stato corrente.
+      return { ...prev, [userId]: { ...cur, [key]: cur[key] === false } };
+    });
+  }, [markDirty]);
+
   const toggleMod = useCallback((key: AdminModuleKey) => {
     markDirty();
     setMods((m) => ({ ...m, [key]: !m[key] }));
@@ -282,14 +309,15 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
   // ─── Salva (autosave differenziale) ──────────────────────────────────────
   const handleSave = async () => {
     const signatureAtStart = panelStateSignature(
-      userFeatures, userOp, userTeamVisible, userPlannedOnly, mods
+      userFeatures, userOp, userTeamVisible, userPlannedOnly, userUiSections, mods
     );
     const payloads = nonAdminUsers.map((u) => {
       const payload = buildUserPermissionPayload(
         userFeatures[u.id],
         userOp[u.id],
         userTeamVisible[u.id] ?? true,
-        userPlannedOnly[u.id] ?? false
+        userPlannedOnly[u.id] ?? false,
+        userUiSections[u.id]
       );
       return { id: u.id, payload, key: JSON.stringify(payload) };
     });
@@ -364,7 +392,7 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- l'effetto deve ripartire a ogni cambio di stato del pannello
-  }, [userFeatures, userOp, userTeamVisible, userPlannedOnly, mods, saving]);
+  }, [userFeatures, userOp, userTeamVisible, userPlannedOnly, userUiSections, mods, saving]);
 
   // ─── Azzera tutto ────────────────────────────────────────────────────────
   const handleResetAll = async () => {
@@ -384,13 +412,14 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
         const nullPayload = Object.fromEntries(
           Object.keys(defaultOp).map((k) => [k, null])
         ) as Record<string, null>;
-        await updateUser(u.id, { ...nullPayload, enabled_features: undefined } as Parameters<typeof updateUser>[1]);
+        await updateUser(u.id, { ...nullPayload, enabled_features: undefined, ui_section_overrides: {} } as Parameters<typeof updateUser>[1]);
       }
 
       // 4. Ricarica UI dai default codice
       const features: Record<string, EnabledFeatures> = {};
       const ops: Record<string, Record<SettingsOperationalPermKey, boolean>> = {};
       const teamVis: Record<string, boolean> = {};
+      const uiSectionsReset: Record<string, Record<string, boolean>> = {};
       for (const u of nonAdminUsers) {
         const grp = u.role === 'manager' ? 'management'
           : u.role === 'assistant_manager' ? 'assistant_manager'
@@ -398,6 +427,9 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
         features[u.id] = getCodeDefaultsForTemplateGroup(grp as RoleTemplateGroup);
         ops[u.id] = { ...defaultOp };
         teamVis[u.id] = true;
+        const map: Record<string, boolean> = {};
+        for (const w of UI_SCREEN_WIDGETS) map[w.key] = true;
+        uiSectionsReset[u.id] = map;
       }
       const plannedOnlyReset: Record<string, boolean> = {};
       for (const u of nonAdminUsers) plannedOnlyReset[u.id] = false;
@@ -405,13 +437,14 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
       setUserOp(ops);
       setUserTeamVisible(teamVis);
       setUserPlannedOnly(plannedOnlyReset);
+      setUserUiSections(uiSectionsReset);
       setMods(Object.fromEntries(ADMIN_MODULE_KEYS.map((k) => [k, true])) as Record<AdminModuleKey, boolean>);
 
       // Snapshot allineato a quanto appena scritto: nessun autosave immediato dopo il reset.
       const snapshot: Record<string, string> = {};
       for (const u of nonAdminUsers) {
         snapshot[u.id] = JSON.stringify(
-          buildUserPermissionPayload(features[u.id], ops[u.id], true, false)
+          buildUserPermissionPayload(features[u.id], ops[u.id], true, false, uiSectionsReset[u.id])
         );
       }
       savedPayloadRef.current = snapshot;
@@ -886,6 +919,18 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
             enabled={userTeamVisible[mobileUser.id] ?? true}
             onToggle={() => toggleTeamVisible(mobileUser.id)}
           />
+
+          {/* Sezioni interfaccia (visibilità per profilo) */}
+          <MobileSectionHeader title={tv.role_templates_ui_sections_heading ?? 'Sezioni interfaccia (visibilità)'} />
+          {UI_SCREEN_WIDGETS.filter((w) => widgetAppliesToUser(w, mobileUser.role)).map((w) => (
+            <MobileRow
+              key={w.key}
+              label={w.label}
+              sublabel={w.screenLabel}
+              enabled={userUiSections[mobileUser.id]?.[w.key] !== false}
+              onToggle={() => toggleUiSection(mobileUser.id, w.key)}
+            />
+          ))}
         </div>
       )}
 
@@ -1107,6 +1152,29 @@ export function RoleFeatureTemplatesPanel({ variant = 'page' }: Props) {
                 </td>
               ))}
             </tr>
+
+            {/* ── Sezioni interfaccia (visibilità per profilo) ── */}
+            <SectionHeader title={tv.role_templates_ui_sections_heading ?? 'Sezioni interfaccia (visibilità)'} />
+            {UI_SCREEN_WIDGETS.filter((w) => nonAdminUsers.some((u) => widgetAppliesToUser(w, u.role))).map((w) => (
+              <tr key={w.key} className="odd:bg-transparent even:bg-white/[0.04] hover:bg-white/10 transition-colors active:bg-white/10">
+                <td className="sticky left-0 z-10 px-4 py-2.5">
+                  <div className="text-[0.8125rem] text-white/80">{w.label}</div>
+                  <div className="text-[0.6875rem] text-white/50 leading-snug mt-0.5">{w.screenLabel}</div>
+                </td>
+                {nonAdminUsers.map((u) => (
+                  <td key={u.id} className="px-2 py-2.5 text-center">
+                    {widgetAppliesToUser(w, u.role) ? (
+                      <MatrixToggle
+                        enabled={userUiSections[u.id]?.[w.key] !== false}
+                        onToggle={() => toggleUiSection(u.id, w.key)}
+                      />
+                    ) : (
+                      <span className="text-[0.6875rem] text-white/25" aria-hidden>—</span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
 
             {/* ── Moduli Scheda Admin (globale) ── */}
             <SectionHeader title={tv.role_templates_admin_modules_heading ?? 'Moduli Scheda Admin (globale)'} />
