@@ -255,128 +255,6 @@ export default function HolidayRequests({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
       >
-      {/* ── Header: KPI per stato (il pulsante "Richiedi ferie" è nel calendario) ── */}
-      {uiW(isAdmin ? 'ferie.header' : 'staff_holidays.header_actions') && (
-      <div className="mb-4 mt-3 flex flex-col gap-3">
-        <div className="grid grid-cols-3 gap-2">
-          {HOLIDAY_KPI.map((kpi) => {
-            const isOpen = openKpi === kpi.key;
-            return (
-              <button
-                type="button"
-                key={kpi.key}
-                onClick={() => setOpenKpi((v) => (v === kpi.key ? null : kpi.key))}
-                aria-expanded={isOpen}
-                className={`flex items-center justify-center gap-1.5 overflow-hidden rounded-2xl border px-2 py-2.5 transition-all ${kpi.bg} ${kpi.border} ${
-                  isOpen ? 'ring-2 ring-white/40' : 'hover:brightness-110'
-                }`}
-              >
-                {/* Ordine richiesto: icona → numero → etichetta */}
-                <kpi.icon className={`h-4 w-4 shrink-0 ${kpi.color}`} aria-hidden />
-                <span className="text-base font-black leading-none text-white tabular-nums">{kpi.count}</span>
-                <span className={`whitespace-nowrap text-[0.5625rem] font-bold uppercase leading-none tracking-tight ${kpi.color}`}>
-                  {kpi.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Dropdown: elenco richieste dello stato selezionato */}
-        <AnimatePresence initial={false}>
-          {activeKpi && (
-            <motion.div
-              key={activeKpi.key}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.22, ease: 'easeInOut' }}
-              className="overflow-hidden"
-            >
-              <div className="overflow-hidden rounded-2xl border border-white/[0.14] bg-white/[0.04]">
-                <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2.5">
-                  <span className={`text-[0.6875rem] font-bold uppercase tracking-wider ${activeKpi.color}`}>
-                    {activeKpi.label} · {activeKpi.count}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setOpenKpi(null)}
-                    aria-label={t.close ?? 'Chiudi'}
-                    className="flex h-6 w-6 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white"
-                  >
-                    <X className="h-3.5 w-3.5" aria-hidden />
-                  </button>
-                </div>
-                {kpiList.length === 0 ? (
-                  <p className="px-4 py-3 text-xs text-white/60">{t.no_holidays_yet}</p>
-                ) : (
-                  <div className="max-h-72 divide-y divide-white/5 overflow-y-auto">
-                    {kpiList.map((h) => {
-                      const u = users.find((x) => x.id === h.user_id);
-                      return (
-                        <div key={h.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                          <div className="min-w-0">
-                            {isAdmin && (
-                              <p className="truncate text-sm font-semibold text-white">
-                                {`${u?.first_name ?? ''} ${u?.last_name ?? ''}`.trim() || '—'}
-                              </p>
-                            )}
-                            <p className="text-xs text-white/70">
-                              {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
-                              {h.reason && ` · ${h.reason}`}
-                            </p>
-                          </div>
-                          {/* Azioni Approva/Rifiuta solo per le richieste in attesa e per chi approva */}
-                          {isAdmin && activeKpi.key === 'pending' && (
-                            <div className="ml-3 flex flex-shrink-0 items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => handleStatusChange(h.id, 'approved')}
-                                disabled={updatingId === h.id}
-                                aria-label={t.approve}
-                                className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                                style={{ background: '#10b981' }}
-                              >
-                                {updatingId === h.id ? (
-                                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                ) : (
-                                  <>
-                                    <Check className="h-3 w-3" strokeWidth={3} />
-                                    {t.approve}
-                                  </>
-                                )}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleStatusChange(h.id, 'rejected')}
-                                disabled={updatingId === h.id}
-                                aria-label={t.rejected}
-                                className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                                style={{ background: '#ef4444' }}
-                              >
-                                {updatingId === h.id ? (
-                                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                ) : (
-                                  <>
-                                    <X className="h-3 w-3" strokeWidth={3} />
-                                    {t.rejected}
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-      )}
-
       {/* ── New request modal ─────────────────────────────────────────────── */}
       {showForm && createPortal(
         <AnimatePresence>
@@ -633,6 +511,128 @@ export default function HolidayRequests({
                 );
               })}
             </div>
+          </div>
+          )}
+
+          {/* ── KPI per stato (sotto il calendario) ────────────────────────── */}
+          {uiW(isAdmin ? 'ferie.header' : 'staff_holidays.header_actions') && (
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-3 gap-2">
+              {HOLIDAY_KPI.map((kpi) => {
+                const isOpen = openKpi === kpi.key;
+                return (
+                  <button
+                    type="button"
+                    key={kpi.key}
+                    onClick={() => setOpenKpi((v) => (v === kpi.key ? null : kpi.key))}
+                    aria-expanded={isOpen}
+                    className={`flex items-center justify-center gap-1.5 overflow-hidden rounded-2xl border px-2 py-2.5 transition-all ${kpi.bg} ${kpi.border} ${
+                      isOpen ? 'ring-2 ring-white/40' : 'hover:brightness-110'
+                    }`}
+                  >
+                    {/* Ordine richiesto: icona → numero → etichetta */}
+                    <kpi.icon className={`h-4 w-4 shrink-0 ${kpi.color}`} aria-hidden />
+                    <span className="text-base font-black leading-none text-white tabular-nums">{kpi.count}</span>
+                    <span className={`whitespace-nowrap text-[0.5625rem] font-bold uppercase leading-none tracking-tight ${kpi.color}`}>
+                      {kpi.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Dropdown: elenco richieste dello stato selezionato */}
+            <AnimatePresence initial={false}>
+              {activeKpi && (
+                <motion.div
+                  key={activeKpi.key}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.22, ease: 'easeInOut' }}
+                  className="overflow-hidden"
+                >
+                  <div className="overflow-hidden rounded-2xl border border-white/[0.14] bg-white/[0.04]">
+                    <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2.5">
+                      <span className={`text-[0.6875rem] font-bold uppercase tracking-wider ${activeKpi.color}`}>
+                        {activeKpi.label} · {activeKpi.count}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setOpenKpi(null)}
+                        aria-label={t.close ?? 'Chiudi'}
+                        className="flex h-6 w-6 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+                      >
+                        <X className="h-3.5 w-3.5" aria-hidden />
+                      </button>
+                    </div>
+                    {kpiList.length === 0 ? (
+                      <p className="px-4 py-3 text-xs text-white/60">{t.no_holidays_yet}</p>
+                    ) : (
+                      <div className="max-h-72 divide-y divide-white/5 overflow-y-auto">
+                        {kpiList.map((h) => {
+                          const u = users.find((x) => x.id === h.user_id);
+                          return (
+                            <div key={h.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                              <div className="min-w-0">
+                                {isAdmin && (
+                                  <p className="truncate text-sm font-semibold text-white">
+                                    {`${u?.first_name ?? ''} ${u?.last_name ?? ''}`.trim() || '—'}
+                                  </p>
+                                )}
+                                <p className="text-xs text-white/70">
+                                  {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
+                                  {h.reason && ` · ${h.reason}`}
+                                </p>
+                              </div>
+                              {/* Azioni Approva/Rifiuta solo per le richieste in attesa e per chi approva */}
+                              {isAdmin && activeKpi.key === 'pending' && (
+                                <div className="ml-3 flex flex-shrink-0 items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStatusChange(h.id, 'approved')}
+                                    disabled={updatingId === h.id}
+                                    aria-label={t.approve}
+                                    className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                                    style={{ background: '#10b981' }}
+                                  >
+                                    {updatingId === h.id ? (
+                                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                    ) : (
+                                      <>
+                                        <Check className="h-3 w-3" strokeWidth={3} />
+                                        {t.approve}
+                                      </>
+                                    )}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStatusChange(h.id, 'rejected')}
+                                    disabled={updatingId === h.id}
+                                    aria-label={t.rejected}
+                                    className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                                    style={{ background: '#ef4444' }}
+                                  >
+                                    {updatingId === h.id ? (
+                                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                    ) : (
+                                      <>
+                                        <X className="h-3 w-3" strokeWidth={3} />
+                                        {t.rejected}
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           )}
 
