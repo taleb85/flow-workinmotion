@@ -98,9 +98,6 @@ export default function HolidayRequests({
 
   const myHolidays     = holidays.filter((h) => h.user_id === currentUser.id && h.type !== 'indisponibilita');
   const realHolidays   = holidays.filter((h) => h.type !== 'indisponibilita');
-  const pendingAll     = realHolidays.filter((h) => h.status === 'pending');
-  const approvedFuture = realHolidays.filter((h) => h.status === 'approved' && new Date(h.end_date) >= new Date());
-  const rejectedAll    = realHolidays.filter((h) => h.status === 'rejected');
 
   // ── Calendar helpers ──────────────────────────────────────────────────────
   const now        = new Date();
@@ -660,145 +657,8 @@ export default function HolidayRequests({
           )}
         </div>
 
-        {/* Admin panels (in colonna) */}
+        {/* Elenco staff (in colonna) */}
         <div className="w-full space-y-4">
-
-          {/* Pending (manager) */}
-          {isAdmin && uiW('ferie.list') && pendingAll.length > 0 && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] overflow-hidden">
-              <div className="px-5 py-4 flex items-center justify-between">
-                <h3 className="text-white font-semibold text-xl">{t.pending}</h3>
-                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/80">{pendingAll.length}</span>
-              </div>
-              <div>
-                {pendingAll.map((h) => {
-                  const u = users.find((u) => u.id === h.user_id);
-                  return (
-                    <div key={h.id} className="flex items-center justify-between px-5 py-3.5">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="min-w-0">
-                          <p className="text-white text-sm font-semibold truncate" title={u?.first_name}>{u?.first_name} {u?.last_name}</p>
-                          <p className="text-white/70 text-xs">
-                            {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
-                            {h.reason && ` · ${h.reason}`}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="ml-3 flex flex-shrink-0 items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => handleStatusChange(h.id, 'approved')}
-                          disabled={updatingId === h.id}
-                          className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white disabled:cursor-not-allowed disabled:opacity-50 transition-colors hover:opacity-90"
-                          style={{ background: '#10b981' }}
-                        >
-                          {updatingId === h.id ? (
-                            <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                          ) : (
-                            <>
-                              <Check className="h-3 w-3" strokeWidth={3} />
-                              {t.approve}
-                            </>
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleStatusChange(h.id, 'rejected')}
-                          disabled={updatingId === h.id}
-                          className="gap-1 inline-flex items-center rounded-lg px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white disabled:cursor-not-allowed disabled:opacity-50 transition-colors hover:opacity-90"
-                          style={{ background: '#ef4444' }}
-                        >
-                          {updatingId === h.id ? (
-                            <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <>
-                              <X className="w-3 h-3" strokeWidth={3} />
-                              {t.rejected}
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Upcoming approved */}
-          {isAdmin && uiW('ferie.list') && approvedFuture.length > 0 && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] overflow-hidden">
-              <div className="px-4 py-3">
-                <h3 className="text-white font-semibold text-xl">{t.home_upcoming_holidays}</h3>
-              </div>
-              <div className="max-h-80 overflow-y-auto">
-                {approvedFuture
-                  .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
-                  .map((h) => {
-                    const u = users.find((u) => u.id === h.user_id);
-                    return (
-                      <div key={h.id} className="flex items-center justify-between px-5 py-3.5">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <Palmtree className="w-4 h-4 text-white/60 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-white text-sm font-semibold truncate" title={u?.first_name}>{u?.first_name} {u?.last_name}</p>
-                            <p className="text-white/70 text-xs">
-                              {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
-                            </p>
-                          </div>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-full bg-neutral-500/15 text-white/70 text-xs font-semibold uppercase border border-white/20">
-                          {t.status_approved}
-                        </span>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-
-          {/* Rejected (admin) */}
-          {isAdmin && uiW('ferie.list') && rejectedAll.length > 0 && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] overflow-hidden">
-              <div className="px-5 py-4 flex items-center justify-between">
-                <h3 className="text-white font-semibold text-xl">{t.rejected}</h3>
-                <span className="px-2 py-0.5 rounded-[var(--flow-radius-sm)] bg-red-100 text-red-700 text-xs font-bold border border-red-200/80">{rejectedAll.length}</span>
-              </div>
-              <div>
-                {rejectedAll
-                  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                  .map((h) => {
-                    const u = users.find((u) => u.id === h.user_id);
-                    return (
-                      <div key={h.id} className="flex items-center justify-between px-5 py-3.5">
-                        <div className="min-w-0">
-                          <p className="text-white text-sm font-semibold truncate" title={u?.first_name}>{u?.first_name} {u?.last_name}</p>
-                          <p className="text-white/70 text-xs">
-                            {safeFormatDate(h.start_date, 'd MMM', { locale: calLocale })} – {safeFormatDate(h.end_date, 'd MMM yyyy', { locale: calLocale })}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => void deleteHolidayRequest(h.id)}
-                          className="ml-3 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 active:bg-red-500/80"
-                          title={t.holiday_delete_request}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} />
-                        </button>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-
-          {/* Empty state */}
-          {isAdmin && uiW('ferie.list') && pendingAll.length === 0 && approvedFuture.length === 0 && (
-            <div className="group w-full rounded-xl border px-3 py-2.5 text-left border-white/[0.14] p-12 flex flex-col items-center justify-center text-center">
-              <Palmtree className="w-10 h-10 text-white/60 mb-3 opacity-90" />
-              <p className="text-white/70 text-sm">{t.no_holidays_yet}</p>
-            </div>
-          )}
 
           {/* Staff: my upcoming approved */}
           {!isAdmin && uiW('ferie.list') && myHolidays.filter(h => h.status === 'approved' && new Date(h.end_date) >= new Date()).length > 0 && (
