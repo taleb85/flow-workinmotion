@@ -314,46 +314,6 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
 
   const [activeTab, setActiveTab] = useState<AppNavTab>('home');
 
-  /**
-   * Bottom nav "vetro dinamico": il blur/bordo/ombra compaiono SOLO quando del
-   * contenuto scorre dietro la barra (sovrapposizione). Se la pagina non è
-   * scrollabile (contenuto più corto della viewport) oppure si è arrivati in fondo
-   * (l'ultimo contenuto resta sopra la barra grazie a `.pb-content`), la barra
-   * risulta completamente trasparente.
-   * Il contenitore scrollabile dell'app è `#root` (vedi getAppRootScrollY).
-   */
-  const [navOverContent, setNavOverContent] = useState(true);
-  useLayoutEffect(() => {
-    const measure = () => {
-      const el = document.getElementById('root');
-      if (!el) { setNavOverContent(true); return; }
-      const scrollable = el.scrollHeight - el.clientHeight > 2;
-      const contentBelow = el.scrollTop + el.clientHeight < el.scrollHeight - 2;
-      setNavOverContent(scrollable && contentBelow);
-    };
-    let raf = 0;
-    const schedule = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => { raf = 0; measure(); });
-    };
-    const el = document.getElementById('root');
-    measure();
-    el?.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule);
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
-    if (ro && el) {
-      ro.observe(el);
-      const inner = el.firstElementChild;
-      if (inner instanceof Element) ro.observe(inner);
-    }
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-      el?.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', schedule);
-      ro?.disconnect();
-    };
-  }, [activeTab, bottomNavTabs.length, currentUser?.id]);
-
   // Forza background trasparente per la griglia presenze in dark mode
   useEffect(() => {
     const grid = document.getElementById('timesheet-section-main-grid');
@@ -949,7 +909,7 @@ function MainApp({ onLogout }: { onLogout: () => void }) {
       {/* ── Bottom Tab Bar ── */}
       {!noNavTabs && (
         <div
-          className={`fixed bottom-0 left-0 right-0 z-[10040] shrink-0 bottom-nav-glass-edge${navOverContent ? ' bottom-nav-glass-edge--over' : ''}`}
+          className="fixed bottom-0 left-0 right-0 z-[10040] shrink-0 bottom-nav-glass-edge"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
           <TopTabBar

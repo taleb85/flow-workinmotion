@@ -2560,9 +2560,8 @@ td, th {
   }
 }
 
-/* iOS: blur ridotto (prestazioni, vedi gruppo modal-glass più sotto).
-   Solo in sovrapposizione: fuori da quel caso la barra resta trasparente. */
-html[data-ios="1"] .bottom-nav-glass-edge--over {
+/* iOS: blur ridotto (prestazioni, vedi gruppo modal-glass più sotto) */
+html[data-ios="1"] .bottom-nav-glass-edge {
   -webkit-backdrop-filter: blur(10px) !important;
   backdrop-filter: blur(10px) !important;
 }

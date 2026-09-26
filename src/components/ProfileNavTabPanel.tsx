@@ -502,7 +502,11 @@ export default function ProfileNavTabPanel({
   const roleDisplay = translateRole(currentUser.role ?? '', effectiveLanguage);
 
   return (
-    <div className="w-full max-w-lg mx-auto pb-content font-sans h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem)-3rem)] md:h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem))] overflow-y-auto overscroll-contain scrollbar-none">
+    /* Scroll gestito a livello di pagina (#root) come nelle altre tab: così il
+       contenuto scorre DIETRO l'header e il vetro trasparente (blur) resta
+       visibile. Prima era un contenitore a scroll interno: nulla passava sotto
+       la barra e l'header sembrava pieno/opaco. */
+    <div className="w-full max-w-lg mx-auto pb-content font-sans min-h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem)-3rem)] md:min-h-[calc(var(--app-vh,100dvh)-var(--app-sticky-header-offset,5rem))]">
       {/* Photo crop modal */}
       {cropObjectUrl ? (
         <ProfilePhotoCropperModal
