@@ -7,8 +7,7 @@ import { getTranslations } from '../../utils/translations';
 import GenericWidgetsColumn from './GenericWidgetsColumn';
 import HomeLivePreview from './HomeLivePreview';
 import TimesheetLivePreview from './TimesheetLivePreview';
-import FerieMgmtPreview from './FerieMgmtPreview';
-import StaffHolidaysPreview from './StaffHolidaysPreview';
+import FerieLivePreview from './FerieLivePreview';
 import ProfileTabPanelPreview from './ProfileTabPanelPreview';
 import SettingsAdminPreview from './SettingsAdminPreview';
 import { GlobalPopupsPreview } from './SettingsTabPreview';
@@ -209,26 +208,64 @@ export default function ProfileTabRichPreview({
   }
 
   // ── Ferie ───────────────────────────────────────────────────────────
+  // Copia esatta della schermata reale: il componente vero `HolidayRequests`
+  // (dentro `FerieLivePreview`) è alimentato con dati dimostrativi sia per la
+  // gestione sia per lo staff.
   if (activeHubTab === 'ferie') {
-    if (isMgmt) {
+    blocks.push(
+      <FerieLivePreview
+        key="ferie-live"
+        previewUser={previewUser}
+        language={language}
+        isSelectedAdmin={isSelectedAdmin}
+        onUiToggle={onUiToggle}
+        isMgmt={isMgmt}
+      />
+    );
+
+    // Toggle dei blocchi realmente mostrati nella copia live.
+    // Gestione → gruppo `ferie`; staff → gruppo `staff_holidays`.
+    const ferieToggleGroupKeys = isMgmt ? ['ferie'] : [OMIT_STAFF_FERIE];
+    const ferieToggleWidgets: UiScreenWidgetDef[] = layoutGroups
+      .filter((g) => ferieToggleGroupKeys.includes(g.groupKey))
+      .flatMap((g) => g.widgets)
+      .filter((w) => widgetAppliesToUser(w, previewUser.role));
+
+    if (ferieToggleWidgets.length > 0) {
       blocks.push(
-        <FerieMgmtPreview
-          key="ferie-mgmt"
-          previewUser={previewUser}
-          language={language}
-          isSelectedAdmin={isSelectedAdmin}
-          onUiToggle={onUiToggle}
-        />
-      );
-    } else {
-      blocks.push(
-        <StaffHolidaysPreview
-          key="staff-ferie"
-          previewUser={previewUser}
-          language={language}
-          isSelectedAdmin={isSelectedAdmin}
-          onUiToggle={onUiToggle}
-        />
+        <div
+          key="ferie-widget-toggles"
+          className="rounded-xl border border-white/[0.14] px-3 py-3"
+        >
+          <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">
+            {tv.profile_visibility_ferie_blocks_title ?? 'Blocchi delle Ferie'}
+          </p>
+          <div className="flex flex-col gap-1.5">
+            {ferieToggleWidgets.map((w) => {
+              const visible = isUiWidgetVisible(previewUser, w.key);
+              return (
+                <div key={w.key} className="flex items-center justify-between gap-3">
+                  <span
+                    className="min-w-0 flex-1 truncate text-xs text-white/80"
+                    title={w.label}
+                  >
+                    {previewWidgetLabel(w.key)}
+                  </span>
+                  <ToggleSwitch
+                    isActive={visible}
+                    onChange={(next) => {
+                      if (!isSelectedAdmin) onUiToggle(w.key, next);
+                    }}
+                    size="sm"
+                    darkMode
+                    disabled={isSelectedAdmin}
+                    className="shrink-0"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
       );
     }
   }

@@ -11,27 +11,45 @@ import { canApproveShiftActions } from '../utils/permissions';
 import { isUiWidgetVisible } from '../utils/uiScreenWidgets';
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday, isBefore, startOfDay } from 'date-fns';
 import { getDateLocale } from '../utils/translations';
-import type { HolidayRequest } from '../types';
+import type { HolidayRequest, User } from '../types';
 import { safeFormatDate } from '../utils/safeDateFormat';
 import DatePickerField from './DatePickerField';
 
 // ─── Status helpers ────────────────────────────────────────────────────────────
 // STATUS_CONFIG is built inside the component to use translations
 
-export default function HolidayRequests({ embedded = false }: { embedded?: boolean } = {}) {
-  const { currentUser, users, effectiveLanguage } = useAppUser();
-  const { holidays, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest } = useAppData();
+export default function HolidayRequests({
+  embedded = false,
+  overrideUser,
+  overrideHolidays,
+  skipAutoRefresh,
+}: {
+  embedded?: boolean;
+  overrideUser?: User;
+  overrideHolidays?: HolidayRequest[];
+  skipAutoRefresh?: boolean;
+} = {}) {
+  const { currentUser: ctxUser, users, effectiveLanguage } = useAppUser();
+  const { holidays: ctxHolidays, addHolidayRequest, updateHolidayStatus, deleteHolidayRequest } = useAppData();
   const { showSuccess, silentRefreshData } = useAppOverlay();
   const { featureFlags } = useAppConfig();
+
+  // Shadowing: i due alias `ctxUser`/`ctxHolidays` permettono di alimentare
+  // l'anteprima "Cosa vede chi" con un utente/elenco dimostrativi senza toccare
+  // il resto del componente, che continua a riferirsi a `currentUser`/`holidays`.
+  const currentUser = overrideUser ?? ctxUser;
+  const holidays = overrideHolidays ?? ctxHolidays;
 
   /**
    * Aggiorna turni/ferie/timbrature da DB aprendo la scheda.
    * `skipRemoteRevisionCheck`: evita di innescare `forceGlobalRefresh` + overlay PIN / main `pointer-events-none`
    * solo perché la revisione cloud è avanti rispetto all’ack locale (comportamento da “app bloccata”).
+   * `skipAutoRefresh`: l'anteprima amministrativa è di sola lettura e con dati demo → nessun refresh reale.
    */
   useEffect(() => {
+    if (skipAutoRefresh) return;
     void silentRefreshData({ skipRemoteRevisionCheck: true });
-  }, [silentRefreshData]);
+  }, [silentRefreshData, skipAutoRefresh]);
 
   const [showForm, setShowForm]       = useState(false);
   const [selectedH, setSelectedH]     = useState<HolidayRequest | null>(null);

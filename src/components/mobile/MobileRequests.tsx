@@ -1,5 +1,5 @@
 import { Palmtree, Plus, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
-import type { HolidayRequest } from '../../types';
+import type { HolidayRequest, User } from '../../types';
 import { safeFormatDate } from '../../utils/safeDateFormat';
 import { getDateLocale } from '../../utils/translations';
 import { useAppUser } from '../../context/AppContext';
@@ -9,14 +9,17 @@ interface MobileRequestsProps {
   requests: HolidayRequest[];
   onRequestNew: () => void;
   t?: Record<string, string>;
+  /** Utente di cui valutare la visibilità dei blocchi (anteprima "Cosa vede chi"). */
+  visibilityUser?: User;
 }
 
-export default function MobileRequests({ requests, onRequestNew, t = {} }: MobileRequestsProps) {
+export default function MobileRequests({ requests, onRequestNew, t = {}, visibilityUser }: MobileRequestsProps) {
   const { effectiveLanguage, currentUser } = useAppUser();
   const locale = getDateLocale(effectiveLanguage);
 
   // Sezioni UI per-utente (Admin → “Cosa vede chi”). Senza utente → nessun effetto.
-  const uiW = (key: string) => (currentUser ? isUiWidgetVisible(currentUser, key) : true);
+  const visUser = visibilityUser ?? currentUser;
+  const uiW = (key: string) => (visUser ? isUiWidgetVisible(visUser, key) : true);
 
   const STATUS_CONFIG = {
     approved: {
