@@ -18,6 +18,7 @@ import { getAppLockStatus, type AppLockStatus } from '../utils/appLock';
 import { isCurrentDeviceRegistered, revokeCurrentDevice } from '../utils/userDevices';
 import { isCameraGrantRemembered, forgetCameraGrant } from '../utils/cameraPermission';
 import { clearAllCachedPresenceProofs } from '../utils/presenceProofCache';
+import type { User } from '../types';
 import { ProfileFormSelf, type ProfileFormSelfData } from './UserProfile';
 import ProfilePhotoSourceSheet from './profile/ProfilePhotoSourceSheet';
 import ProfilePhotoCropperModal from './profile/ProfilePhotoCropperModal';
@@ -49,11 +50,16 @@ function serializeProfileForm(fd: ProfileFormSelfData): string {
 export default function ProfileNavTabPanel({
   onLogout,
   onGoToSettings,
+  overrideUser,
 }: {
   onLogout: () => void;
   onGoToSettings?: () => void;
+  /** Anteprima admin "Cosa vede chi": rende il pannello come se l'utente fosse questo. */
+  overrideUser?: User;
 }) {
-  const { currentUser, effectiveLanguage, setLanguage, clearLanguage, updateUser, isSessionElevated } = useAppUser();
+  const { currentUser: ctxUser, effectiveLanguage, setLanguage, clearLanguage, updateUser, isSessionElevated } = useAppUser();
+  // Anteprima: usa l'utente selezionato; in app resta l'utente di sessione.
+  const currentUser = overrideUser ?? ctxUser;
   const { showError, showSuccess } = useAppOverlay();
   const profileLeaveGuardRef = useProfileLeaveGuardRef();
   const navigate = useNavigate();

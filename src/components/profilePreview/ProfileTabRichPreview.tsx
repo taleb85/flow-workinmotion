@@ -8,7 +8,7 @@ import GenericWidgetsColumn from './GenericWidgetsColumn';
 import HomeLivePreview from './HomeLivePreview';
 import TimesheetLivePreview from './TimesheetLivePreview';
 import FerieLivePreview from './FerieLivePreview';
-import ProfileTabPanelPreview from './ProfileTabPanelPreview';
+import ProfileLivePreview from './ProfileLivePreview';
 import AdminLivePreview from './AdminLivePreview';
 import { GlobalPopupsPreview } from './SettingsTabPreview';
 import ToggleSwitch from '../ui/toggle-switch-glass';
@@ -271,16 +271,61 @@ export default function ProfileTabRichPreview({
   }
 
   // ── Profilo ─────────────────────────────────────────────────────────
+  // Copia esatta: componente reale `ProfileNavTabPanel` (in sola lettura),
+  // reso come l'utente selezionato.
   if (activeHubTab === 'profile') {
     blocks.push(
-      <ProfileTabPanelPreview
-        key="profile"
+      <ProfileLivePreview
+        key="profile-live"
         previewUser={previewUser}
         language={language}
         isSelectedAdmin={isSelectedAdmin}
         onUiToggle={onUiToggle}
       />
     );
+
+    const profileToggleWidgets: UiScreenWidgetDef[] = layoutGroups
+      .filter((g) => g.groupKey === 'staff_profile')
+      .flatMap((g) => g.widgets)
+      .filter((w) => widgetAppliesToUser(w, previewUser.role));
+
+    if (profileToggleWidgets.length > 0) {
+      blocks.push(
+        <div
+          key="profile-widget-toggles"
+          className="rounded-xl border border-white/[0.14] px-3 py-3"
+        >
+          <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wider text-white/60">
+            {tv.profile_visibility_profile_blocks_title ?? 'Blocchi del Profilo'}
+          </p>
+          <div className="flex flex-col gap-1.5">
+            {profileToggleWidgets.map((w) => {
+              const visible = isUiWidgetVisible(previewUser, w.key);
+              return (
+                <div key={w.key} className="flex items-center justify-between gap-3">
+                  <span
+                    className="min-w-0 flex-1 truncate text-xs text-white/80"
+                    title={w.label}
+                  >
+                    {previewWidgetLabel(w.key)}
+                  </span>
+                  <ToggleSwitch
+                    isActive={visible}
+                    onChange={(next) => {
+                      if (!isSelectedAdmin) onUiToggle(w.key, next);
+                    }}
+                    size="sm"
+                    darkMode
+                    disabled={isSelectedAdmin}
+                    className="shrink-0"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
   }
 
   // ── Admin (Impostazioni, globale) ───────────────────────────────────
