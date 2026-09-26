@@ -136,41 +136,41 @@ export const UI_SCREEN_WIDGETS: UiScreenWidgetDef[] = [
     label: 'Prossime ferie approvate',
   },
 
-  // ── Staff: tab Home ────────────────────────────────────────────────────
+  // ── Staff: tab Home (Panoramica) ───────────────────────────────────────
   {
-    key: 'staff_home.header_kpi',
+    key: 'staff_home.greeting',
     audience: 'staff',
     screenGroup: 'staff_home',
     screenLabel: 'Home personale',
-    label: 'Riepilogo in testa (data, ore settimana, turni)',
+    label: 'Saluto e data',
   },
   {
-    key: 'staff_home.month_hours',
+    key: 'staff_home.punch_card',
     audience: 'staff',
     screenGroup: 'staff_home',
     screenLabel: 'Home personale',
-    label: 'Card ore mese confermate',
+    label: 'Card timbratura (entrata / uscita)',
   },
   {
     key: 'staff_home.today_shift',
     audience: 'staff',
     screenGroup: 'staff_home',
     screenLabel: 'Home personale',
-    label: 'Card turno di oggi',
+    label: 'Turno di oggi',
   },
   {
     key: 'staff_home.upcoming',
     audience: 'staff',
     screenGroup: 'staff_home',
     screenLabel: 'Home personale',
-    label: 'Lista prossimi turni',
+    label: 'Prossimi turni',
   },
   {
-    key: 'staff_home.holidays_button',
+    key: 'staff_home.coworkers',
     audience: 'staff',
     screenGroup: 'staff_home',
     screenLabel: 'Home personale',
-    label: 'Pulsante / accesso ferie',
+    label: 'Colleghi in turno oggi',
   },
 
   // ── Staff: tab Turni ─────────────────────────────────────────────────

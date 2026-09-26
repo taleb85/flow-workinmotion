@@ -7,14 +7,18 @@ import type { UiScreenWidgetDef } from '../../utils/uiScreenWidgets';
 import { getTranslations } from '../../utils/translations';
 import ManagementHomePreview from '../ManagementHomePreview';
 import GenericWidgetsColumn from './GenericWidgetsColumn';
+import CompactHomePreview from './CompactHomePreview';
 import StaffHomePreview from './StaffHomePreview';
 import TurniMgmtPreview from './TurniMgmtPreview';
-import StaffShiftsPreview from './StaffShiftsPreview';
 import FerieMgmtPreview from './FerieMgmtPreview';
 import StaffHolidaysPreview from './StaffHolidaysPreview';
 import TimesheetTabPreview from './TimesheetTabPreview';
+import StaffTimesheetPreview from './StaffTimesheetPreview';
 import StatisticsTabPreview from './StatisticsTabPreview';
-import SettingsTabPreview, { GlobalPopupsPreview } from './SettingsTabPreview';
+import ProfileTabPanelPreview from './ProfileTabPanelPreview';
+import SettingsAdminPreview from './SettingsAdminPreview';
+import { GlobalPopupsPreview } from './SettingsTabPreview';
+import { getEffectiveFeaturesForUser } from '../../utils/profileVisibilityHub';
 
 const OMIT_STAFF_HOME = 'staff_home';
 const OMIT_STAFF_TURNI = 'staff_shifts';
@@ -45,128 +49,164 @@ export default function ProfileTabRichPreview({
 }) {
   const t = getTranslations(language);
   const tv = t as Record<string, string>;
-  const gm = new Map(layoutGroups.map((g) => [g.groupKey, g] as const));
 
+  const teamViewOn = getEffectiveFeaturesForUser(previewUser)['team_view'] === true;
+
+  // Ogni scheda ha un mock dedicato (in base al ruolo): i gruppi generici
+  // corrispondenti vengono omessi per non duplicare i blocchi.
   const omitKeys = new Set<string>();
-  if (activeHubTab === 'home' && isMgmt && gm.has('home_mgmt')) omitKeys.add('home_mgmt');
-  if (activeHubTab === 'home' && !isMgmt && gm.has('staff_home')) omitKeys.add(OMIT_STAFF_HOME);
-  if (activeHubTab === 'ferie' && isMgmt && gm.has('ferie')) omitKeys.add('ferie');
-  if (activeHubTab === 'ferie' && !isMgmt && gm.has('staff_holidays')) omitKeys.add(OMIT_STAFF_FERIE);
-  // Presenze unifica pianificazione (ex scheda Turni), timbrature (Presenze) e
-  // ore (ex scheda Statistiche): questi blocchi hanno un'anteprima dedicata qui
-  // sotto, quindi non vanno duplicati nella colonna generica.
-  if (activeHubTab === 'timesheet') {
-    if (gm.has('turni')) omitKeys.add('turni');
-    if (gm.has(OMIT_STAFF_TURNI)) omitKeys.add(OMIT_STAFF_TURNI);
-    if (gm.has('timesheet')) omitKeys.add('timesheet');
-    if (gm.has('stats')) omitKeys.add('stats');
+  if (activeHubTab === 'home') {
+    if (isMgmt) {
+      omitKeys.add('home_mgmt');
+      omitKeys.add('home_compact');
+    } else {
+      omitKeys.add(OMIT_STAFF_HOME);
+    }
   }
-  if ((activeHubTab === 'settings' || activeHubTab === 'profile') && gm.has('staff_profile')) omitKeys.add('staff_profile');
-  
-  // SEMPRE OMETTI global_popups e turni.shift_modal e timesheet.punch_modal
-  // perché vengono renderizzati esplicitamente in fondo a ProfileTabRichPreview (o dentro i componenti preview)
-  if (gm.has('global_popups')) omitKeys.add('global_popups');
-  // turni.shift_modal è gestito dentro TurniMgmtPreview
-  // timesheet.punch_modal è gestito dentro TimesheetTabPreview
+  if (activeHubTab === 'ferie') {
+    omitKeys.add('ferie');
+    omitKeys.add(OMIT_STAFF_FERIE);
+  }
+  // Presenze unifica pianificazione (ex Turni), timbrature e ore (ex Statistiche).
+  if (activeHubTab === 'timesheet') {
+    omitKeys.add('turni');
+    omitKeys.add(OMIT_STAFF_TURNI);
+    omitKeys.add('timesheet');
+    omitKeys.add('stats');
+  }
+  if (activeHubTab === 'profile' || activeHubTab === 'settings') {
+    omitKeys.add('staff_profile');
+  }
+  // global_popups è sempre renderizzato in fondo (GlobalPopupsPreview).
+  omitKeys.add('global_popups');
 
   const remainder = layoutGroups.filter((g) => !omitKeys.has(g.groupKey));
 
   const blocks: ReactNode[] = [];
 
-  if (activeHubTab === 'home' && isMgmt && gm.has('home_mgmt')) {
+  // ── Panoramica (Home) ───────────────────────────────────────────────
+  if (activeHubTab === 'home') {
+    if (!isMgmt) {
+      blocks.push(
+        <StaffHomePreview
+          key="staff-home"
+          previewUser={previewUser}
+          language={language}
+          isSelectedAdmin={isSelectedAdmin}
+          onUiToggle={onUiToggle}
+        />
+      );
+    } else if (teamViewOn) {
+      blocks.push(
+        <ManagementHomePreview
+          key="home-mgmt"
+          previewUser={previewUser}
+          language={language}
+          isSelectedAdmin={isSelectedAdmin}
+          staffRequestsEnabled={isStaffRequestsFeatureEnabled(featureFlags)}
+          onUiToggle={onUiToggle}
+          embedded
+        />
+      );
+    } else {
+      blocks.push(
+        <CompactHomePreview
+          key="home-compact"
+          previewUser={previewUser}
+          language={language}
+          isSelectedAdmin={isSelectedAdmin}
+          onUiToggle={onUiToggle}
+        />
+      );
+    }
+  }
+
+  // ── Presenze (pianificazione + timbrature + ore) ────────────────────
+  if (activeHubTab === 'timesheet') {
+    if (isMgmt) {
+      blocks.push(
+        <TurniMgmtPreview
+          key="turni-mgmt"
+          previewUser={previewUser}
+          language={language}
+          isSelectedAdmin={isSelectedAdmin}
+          onUiToggle={onUiToggle}
+        />
+      );
+      blocks.push(
+        <TimesheetTabPreview
+          key="ts"
+          previewUser={previewUser}
+          language={language}
+          isSelectedAdmin={isSelectedAdmin}
+          onUiToggle={onUiToggle}
+        />
+      );
+      blocks.push(
+        <StatisticsTabPreview
+          key="stats"
+          previewUser={previewUser}
+          language={language}
+          isSelectedAdmin={isSelectedAdmin}
+          onUiToggle={onUiToggle}
+        />
+      );
+    } else {
+      blocks.push(
+        <StaffTimesheetPreview
+          key="staff-ts"
+          previewUser={previewUser}
+          language={language}
+          isSelectedAdmin={isSelectedAdmin}
+          onUiToggle={onUiToggle}
+        />
+      );
+    }
+  }
+
+  // ── Ferie ───────────────────────────────────────────────────────────
+  if (activeHubTab === 'ferie') {
+    if (isMgmt) {
+      blocks.push(
+        <FerieMgmtPreview
+          key="ferie-mgmt"
+          previewUser={previewUser}
+          language={language}
+          isSelectedAdmin={isSelectedAdmin}
+          onUiToggle={onUiToggle}
+        />
+      );
+    } else {
+      blocks.push(
+        <StaffHolidaysPreview
+          key="staff-ferie"
+          previewUser={previewUser}
+          language={language}
+          isSelectedAdmin={isSelectedAdmin}
+          onUiToggle={onUiToggle}
+        />
+      );
+    }
+  }
+
+  // ── Profilo ─────────────────────────────────────────────────────────
+  if (activeHubTab === 'profile') {
     blocks.push(
-      <ManagementHomePreview
-        key="home-mgmt"
+      <ProfileTabPanelPreview
+        key="profile"
         previewUser={previewUser}
         language={language}
         isSelectedAdmin={isSelectedAdmin}
-        staffRequestsEnabled={isStaffRequestsFeatureEnabled(featureFlags)}
-        onUiToggle={onUiToggle}
-        embedded
-      />
-    );
-  }
-  if (activeHubTab === 'home' && !isMgmt && gm.has('staff_home')) {
-    blocks.push(
-      <StaffHomePreview
-        key="staff-home"
-        previewUser={previewUser}
-        language={language}
-        isSelectedAdmin={isSelectedAdmin}
         onUiToggle={onUiToggle}
       />
     );
   }
-  if (activeHubTab === 'timesheet' && isMgmt && gm.has('turni')) {
+
+  // ── Admin (Impostazioni, globale) ───────────────────────────────────
+  if (activeHubTab === 'settings') {
     blocks.push(
-      <TurniMgmtPreview
-        key="turni-mgmt"
-        previewUser={previewUser}
-        language={language}
-        isSelectedAdmin={isSelectedAdmin}
-        onUiToggle={onUiToggle}
-      />
-    );
-  }
-  if (activeHubTab === 'timesheet' && !isMgmt && gm.has('staff_shifts')) {
-    blocks.push(
-      <StaffShiftsPreview
-        key="staff-shifts"
-        previewUser={previewUser}
-        language={language}
-        isSelectedAdmin={isSelectedAdmin}
-        onUiToggle={onUiToggle}
-      />
-    );
-  }
-  if (activeHubTab === 'ferie' && isMgmt && gm.has('ferie')) {
-    blocks.push(
-      <FerieMgmtPreview
-        key="ferie-mgmt"
-        previewUser={previewUser}
-        language={language}
-        isSelectedAdmin={isSelectedAdmin}
-        onUiToggle={onUiToggle}
-      />
-    );
-  }
-  if (activeHubTab === 'ferie' && !isMgmt && gm.has('staff_holidays')) {
-    blocks.push(
-      <StaffHolidaysPreview
-        key="staff-ferie"
-        previewUser={previewUser}
-        language={language}
-        isSelectedAdmin={isSelectedAdmin}
-        onUiToggle={onUiToggle}
-      />
-    );
-  }
-  if (activeHubTab === 'timesheet' && gm.has('timesheet')) {
-    blocks.push(
-      <TimesheetTabPreview
-        key="ts"
-        previewUser={previewUser}
-        language={language}
-        isSelectedAdmin={isSelectedAdmin}
-        onUiToggle={onUiToggle}
-      />
-    );
-  }
-  if (activeHubTab === 'timesheet' && gm.has('stats')) {
-    blocks.push(
-      <StatisticsTabPreview
-        key="stats"
-        previewUser={previewUser}
-        language={language}
-        isSelectedAdmin={isSelectedAdmin}
-        onUiToggle={onUiToggle}
-      />
-    );
-  }
-  if ((activeHubTab === 'settings' || activeHubTab === 'profile') && gm.has('staff_profile')) {
-    blocks.push(
-      <SettingsTabPreview
-        key={activeHubTab === 'profile' ? 'profile' : 'settings'}
+      <SettingsAdminPreview
+        key="settings"
         previewUser={previewUser}
         language={language}
         isSelectedAdmin={isSelectedAdmin}
