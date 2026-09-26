@@ -436,8 +436,8 @@ export default function HolidayRequests({
                 <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500 inline-block" />{t.status_approved}</span>
               </div>
 
-              {/* Centro: navigazione mese (su mobile va a capo, sempre centrato) */}
-              <div className="order-3 flex w-full items-center justify-center gap-1 sm:order-2 sm:w-auto sm:flex-1">
+              {/* Centro: navigazione mese (frecce verso i bordi, mese sempre centrato) */}
+              <div className="order-3 flex w-full items-center justify-between gap-1 sm:order-2 sm:w-auto sm:flex-1">
                 <button
                   type="button"
                   onClick={() => setViewMonth((m) => subMonths(m, 1))}
@@ -446,7 +446,7 @@ export default function HolidayRequests({
                 >
                   <ChevronLeft className="h-4 w-4" aria-hidden />
                 </button>
-                <h2 className="whitespace-nowrap px-1 text-center font-semibold text-base uppercase" style={{ color: '#ffffff' }}>
+                <h2 className="flex-1 whitespace-nowrap px-1 text-center font-semibold text-base uppercase" style={{ color: '#ffffff' }}>
                   {format(monthStart, 'MMMM yyyy', { locale: calLocale })}
                 </h2>
                 <button
