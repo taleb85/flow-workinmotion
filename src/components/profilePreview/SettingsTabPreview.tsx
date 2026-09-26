@@ -1,4 +1,4 @@
-import { Bell, Globe, ShieldCheck, User as UserIcon, Users } from 'lucide-react';
+import { Bell, Globe, ShieldCheck, User as UserIcon } from 'lucide-react';
 import type { User, Language } from '../../types';
 import { getTranslations } from '../../utils/translations';
 import { WidgetChrome } from './WidgetChrome';
@@ -77,24 +77,6 @@ export function GlobalPopupsPreview({
     <div className="space-y-2 mt-4 pt-4 border-t border-white/10">
       <p className="px-1 text-[0.5625rem] font-bold uppercase tracking-wider text-white/60">{t.pv_global_menu_popups}</p>
       
-      <WidgetChrome
-        widgetKey="global.quick_switch"
-        previewUser={previewUser}
-        isSelectedAdmin={isSelectedAdmin}
-        onUiToggle={onUiToggle}
-        hiddenBadge={hiddenBadge}
-      >
-        <div className="rounded-xl border border-white/[0.14] flex items-center gap-3 px-4 py-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-            <Users className="h-5 w-5 text-white/60" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white/90">{t.pv_quick_switch_user}</p>
-            <p className="mt-0.5 text-[0.625rem] leading-relaxed text-white/60">{t.pv_quick_switch_hint}</p>
-          </div>
-        </div>
-      </WidgetChrome>
-
       <WidgetChrome
         widgetKey="global.notifications"
         previewUser={previewUser}

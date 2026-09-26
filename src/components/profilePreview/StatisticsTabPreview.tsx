@@ -1,4 +1,4 @@
-import { BarChart3, Filter } from 'lucide-react';
+import { BarChart3, Filter, ChevronDown } from 'lucide-react';
 import type { User, Language } from '../../types';
 import { getTranslations } from '../../utils/translations';
 import { uiWidgetKeyAppliesToUser } from '../../utils/uiScreenWidgets';
@@ -67,6 +67,52 @@ export default function StatisticsTabPreview({
                 PDF Export
               </span>
             </div>
+          </div>
+        </div>
+      </WidgetChrome>
+      )}
+
+      {show('stats.mgmt_kpi_cards') && (
+      <WidgetChrome
+        widgetKey="stats.mgmt_kpi_cards"
+        previewUser={previewUser}
+        isSelectedAdmin={isSelectedAdmin}
+        onUiToggle={onUiToggle}
+        hiddenBadge={hiddenBadge}
+      >
+        <div className="fluid-grid fluid-grid-3 gap-2">
+          <div className="rounded-xl border border-white/[0.14] p-3 shadow-sm">
+            <p className="text-[0.625rem] font-bold uppercase text-white/50">{t.stats_approved_hours}</p>
+            <p className="text-xl font-bold text-white">128:30</p>
+          </div>
+          <div className="rounded-xl border border-white/[0.14] p-3 shadow-sm">
+            <p className="text-[0.625rem] font-bold uppercase text-white/50">{t.stats_estimated_cost}</p>
+            <p className="text-xl font-bold text-white">—</p>
+          </div>
+          <div className="rounded-xl border border-white/[0.14] p-3 shadow-sm">
+            <p className="text-[0.625rem] font-bold uppercase text-white/50">{t.pending}</p>
+            <p className="text-xl font-bold text-amber-800">3</p>
+          </div>
+        </div>
+      </WidgetChrome>
+      )}
+
+      {show('stats.detail_panels') && (
+      <WidgetChrome
+        widgetKey="stats.detail_panels"
+        previewUser={previewUser}
+        isSelectedAdmin={isSelectedAdmin}
+        onUiToggle={onUiToggle}
+        hiddenBadge={hiddenBadge}
+      >
+        <div className="space-y-2">
+          <div className="flex items-center justify-between rounded-xl border border-white/[0.14] bg-slate-50 px-3 py-2.5 text-sm font-semibold text-white/90">
+            <span>{t.mod_stats_hours}</span>
+            <ChevronDown className="h-4 w-4 text-white/50" />
+          </div>
+          <div className="flex items-center justify-between rounded-xl border border-white/[0.14] px-3 py-2.5 text-sm font-semibold text-white/90">
+            <span>{t.sidebar_shifts}</span>
+            <ChevronDown className="h-4 w-4 text-white/50" />
           </div>
         </div>
       </WidgetChrome>

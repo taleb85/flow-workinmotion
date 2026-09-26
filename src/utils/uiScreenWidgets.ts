@@ -173,22 +173,6 @@ export const UI_SCREEN_WIDGETS: UiScreenWidgetDef[] = [
     label: 'Colleghi in turno oggi',
   },
 
-  // ── Staff: tab Turni ─────────────────────────────────────────────────
-  {
-    key: 'staff_shifts.summary',
-    audience: 'staff',
-    screenGroup: 'staff_shifts',
-    screenLabel: 'Turni (personale)',
-    label: 'Riepilogo ore approvate',
-  },
-  {
-    key: 'staff_shifts.table',
-    audience: 'staff',
-    screenGroup: 'staff_shifts',
-    screenLabel: 'Turni (personale)',
-    label: 'Tabellone turni',
-  },
-
   // ── Staff: tab Profilo ────────────────────────────────────────────────
   {
     key: 'staff_profile.panel',
@@ -297,34 +281,6 @@ export const UI_SCREEN_WIDGETS: UiScreenWidgetDef[] = [
     label: 'Intestazione, periodo, navigazione',
   },
   {
-    key: 'timesheet.stats_today',
-    audience: 'management',
-    screenGroup: 'timesheet',
-    screenLabel: 'Presenze',
-    label: 'Card indicatori giornalieri (Presenze)',
-  },
-  {
-    key: 'timesheet.dinner_close',
-    audience: 'management',
-    screenGroup: 'timesheet',
-    screenLabel: 'Presenze',
-    label: 'Sezione chiusura turni sera',
-  },
-  {
-    key: 'timesheet.main_grid',
-    audience: 'all',
-    screenGroup: 'timesheet',
-    screenLabel: 'Presenze',
-    label: 'Tabella / schede presenze',
-  },
-  {
-    key: 'timesheet.punch_modal',
-    audience: 'management',
-    screenGroup: 'timesheet',
-    screenLabel: 'Presenze',
-    label: 'Popup revisione timbratura (conferma ore)',
-  },
-  {
     key: 'timesheet.staff_summary_box',
     audience: 'staff',
     screenGroup: 'timesheet',
@@ -356,13 +312,6 @@ export const UI_SCREEN_WIDGETS: UiScreenWidgetDef[] = [
   },
 
   // ── Menu a popup e interazioni speciali ──────────────────────────────
-  {
-    key: 'global.quick_switch',
-    audience: 'all',
-    screenGroup: 'global_popups',
-    screenLabel: 'Menu e Popup',
-    label: 'Cambio rapido utente (pressione lunga su Profilo)',
-  },
   {
     key: 'global.notifications',
     audience: 'all',

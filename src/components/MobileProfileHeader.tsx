@@ -8,8 +8,7 @@ import { getAppNavTabTitle, type AppNavTab } from '../utils/enabledModules';
 import { UnifiedBellButton } from './UnifiedBellButton';
 import { GradientIconButton } from './ui/GradientIconButton';
 import { useState, useEffect, useRef } from 'react';
-// import { isUiWidgetVisible } from '../utils/uiScreenWidgets'; // unused
-// import { useMessages } from '../hooks/useMessages'; // unused
+import { isUiWidgetVisible } from '../utils/uiScreenWidgets';
 import { useMultisensorialFeedback } from '../hooks/useMultisensorialFeedback';
 interface MobileProfileHeaderProps {
   onLogout?: () => void;
@@ -77,6 +76,9 @@ export default function MobileProfileHeader({
   const t = useT();
   if (!currentUser) return null;
 
+  /** Sezione UI visibile per l'utente corrente (Admin → "Cosa vede chi"). */
+  const uiW = (key: string) => isUiWidgetVisible(currentUser, key);
+
   const _pageTitle = getAppNavTabTitle(t, activeTab);
 
   const shellClass = `w-full ${showOnDesktop ? '' : 'md:hidden'}`;
@@ -141,11 +143,13 @@ export default function MobileProfileHeader({
         {rightExtra}
 
         {/* Campanella */}
+        {uiW('global.notifications') && (
         <UnifiedBellButton
           userId={currentUser?.id}
           effectiveLanguage={effectiveLanguage}
           onMessageClick={(messageId) => { void messageId; }}
         />
+        )}
 
         {/* Logout */}
         {onLogout && !hideHeaderLogout && (

@@ -545,8 +545,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
       >
         {/* ── Toolbar 4-tab (tutti gli utenti) ──────────────────────── */}
-        {/* eslint-disable-next-line no-constant-binary-expression */}
-        {true && (
+        {uiW('stats.mgmt_filters') && (
           <>
             <div className="ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 w-full max-w-full relative z-[1000] mb-5">
               <div className="relative z-[1001] flex min-h-0 w-full min-w-0 flex-1 flex-row flex-nowrap items-center justify-start gap-2 overflow-x-auto overscroll-x-contain [scrollbar-gutter:stable]">
@@ -793,6 +792,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
 
         {showManagementStatsChrome && (
           <div className="mb-5 space-y-4">
+            {uiW('stats.title') && (
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-[0.6875rem] font-bold uppercase tracking-widest text-white/70">
                 {tv.stats_analytics_title ?? 'Analytics'}
@@ -806,6 +806,8 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 {tv.stats_export_csv ?? 'Export CSV'}
               </button>
             </div>
+            )}
+            {uiW('stats.mgmt_kpi_cards') && (
             <div className="fluid-grid fluid-grid-4 gap-3">
               <div
                 className="rounded-2xl border border-white/[0.14] px-3 py-3"
@@ -850,6 +852,8 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 <p className="mt-1 text-lg font-bold tabular-nums text-white">{kpiActiveToday}</p>
               </div>
             </div>
+            )}
+            {uiW('stats.detail_panels') && (
             <div
               className="rounded-2xl border border-white/[0.14] p-4"
               style={{ background: 'rgba(255,255,255,0.05)' }}
@@ -913,6 +917,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
                 ))}
               </div>
             </div>
+            )}
           </div>
         )}
 
@@ -938,7 +943,7 @@ export default memo(function Statistics({ anchorDate = null }: { anchorDate?: st
         )}
 
         {/* ── Tabella ore: solo card (stesso stile “Le tue ore nell’intervallo…”), niente scroll orizzontale ─ */}
-        {!showManagementStatsChrome && (
+        {!showManagementStatsChrome && uiW('stats.staff_summary') && (
           <div className="mb-8 md:mb-6">
 
             {/* ── DESKTOP: card unica con tabella (invariato) ── */}

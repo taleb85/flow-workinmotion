@@ -17,6 +17,7 @@ import {
 } from '../../utils/periodConfig';
 import { getNetShiftMinutes } from '../../utils/breakRules';
 import { getResolvedStartEndForHours } from '../../utils/shiftResolvedClockTimes';
+import { isUiWidgetVisible } from '../../utils/uiScreenWidgets';
 import { useAppConfig } from '../../context/AppContext';
 import MobileStatsCards from './MobileStatsCards';
 
@@ -636,6 +637,8 @@ export default function ManagementMobileTimesheet({
     () => ({ autoBreaksFeatureEnabled: featureFlags['auto_breaks'] !== false }),
     [featureFlags],
   );
+  /** Sezione UI visibile per l'utente (Admin → "Cosa vede chi"). */
+  const uiW = (key: string) => (currentUser ? isUiWidgetVisible(currentUser, key) : true);
 
   const [navMode, _setNavMode] = useState<NavMode>('period');
   const [navOffset, setNavOffset] = useState(() => {
@@ -776,6 +779,7 @@ export default function ManagementMobileTimesheet({
 
       {!embedded && (
         <>
+          {uiW('timesheet.header') && (
           <div className="flex items-center gap-1.5 mb-4 px-4">
             {(['presence', 'stats'] as const).map((v) => {
               const label = v === 'presence' ? (t.tab_attendance ?? 'Presenze') : (t.tab_statistics ?? 'Statistiche');
@@ -796,6 +800,7 @@ export default function ManagementMobileTimesheet({
               );
             })}
           </div>
+          )}
           {tsView === 'stats' && (
             <div className="min-h-0 overflow-y-auto pb-1">
               <Suspense fallback={null}>
@@ -827,7 +832,7 @@ export default function ManagementMobileTimesheet({
       )}
 
       {/* Barra navigazione periodo (nascosta in modalità embedded controllata) */}
-      {!hideNavBar && (
+      {!hideNavBar && uiW('timesheet.header') && (
       <div className="flex items-center gap-1.5 md:gap-2 mb-5 px-4">
         <button type="button" onClick={() => setNavOffset(0)}
           className="h-8 md:h-9 inline-flex items-center px-2 md:px-3 rounded-2xl border border-white/20 text-white/70 text-[0.625rem] md:text-[0.6875rem] font-black uppercase tracking-widest shrink-0 active:bg-white/10 transition-colors">
@@ -853,6 +858,7 @@ export default function ManagementMobileTimesheet({
       <div className="flex flex-col gap-8 px-4">
 
         {/* I miei turni */}
+        {uiW('timesheet.staff_summary_box') && (
         <section>
           {!hideSectionLabel && (
             <div className="flex items-center gap-2 mb-3">
@@ -861,6 +867,7 @@ export default function ManagementMobileTimesheet({
           )}
           <MyTimesheetSection myShifts={myShifts} myPunches={myPunches} locale={locale} dayLetters={dayLetters} language={language} t={t} plannedOnly={plannedOnly} forceExpanded={forceExpanded} embedded={embedded} currentUser={currentUser} />
         </section>
+        )}
 
         {/* Team — solo in vista gestione standalone, non nella Presenze personale */}
         {!embedded && (

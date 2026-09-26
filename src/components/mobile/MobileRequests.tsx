@@ -3,6 +3,7 @@ import type { HolidayRequest } from '../../types';
 import { safeFormatDate } from '../../utils/safeDateFormat';
 import { getDateLocale } from '../../utils/translations';
 import { useAppUser } from '../../context/AppContext';
+import { isUiWidgetVisible } from '../../utils/uiScreenWidgets';
 
 interface MobileRequestsProps {
   requests: HolidayRequest[];
@@ -11,8 +12,11 @@ interface MobileRequestsProps {
 }
 
 export default function MobileRequests({ requests, onRequestNew, t = {} }: MobileRequestsProps) {
-  const { effectiveLanguage } = useAppUser();
+  const { effectiveLanguage, currentUser } = useAppUser();
   const locale = getDateLocale(effectiveLanguage);
+
+  // Sezioni UI per-utente (Admin → “Cosa vede chi”). Senza utente → nessun effetto.
+  const uiW = (key: string) => (currentUser ? isUiWidgetVisible(currentUser, key) : true);
 
   const STATUS_CONFIG = {
     approved: {
@@ -39,7 +43,8 @@ export default function MobileRequests({ requests, onRequestNew, t = {} }: Mobil
   } as const;
 
   if (requests.length === 0) {
-    return (
+    // Intestazione + azione “nuova richiesta” (stato vuoto)
+    return uiW('staff_holidays.header_actions') ? (
       <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
         <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4">
           <Palmtree className="w-8 h-8 text-white/50" />
@@ -53,11 +58,12 @@ export default function MobileRequests({ requests, onRequestNew, t = {} }: Mobil
           {t.new_request ?? 'Nuova Richiesta'}
         </button>
       </div>
-    );
+    ) : null;
   }
 
   return (
     <div className="relative min-h-[60vh] px-4 pb-32">
+      {uiW('staff_holidays.list') && (
       <div className="flex flex-col gap-3">
         {requests.map((req) => {
           const config = STATUS_CONFIG[req.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
@@ -100,8 +106,10 @@ export default function MobileRequests({ requests, onRequestNew, t = {} }: Mobil
           );
         })}
       </div>
+      )}
 
-      {/* Floating Action Button */}
+      {/* Floating Action Button — azione “nuova richiesta” */}
+      {uiW('staff_holidays.header_actions') && (
       <button
         onClick={onRequestNew}
         className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-white/15 text-white shadow-2xl flex items-center justify-center transition-transform z-40"
@@ -109,6 +117,7 @@ export default function MobileRequests({ requests, onRequestNew, t = {} }: Mobil
       >
         <Plus className="w-7 h-7" strokeWidth={3} />
       </button>
+      )}
     </div>
   );
 }

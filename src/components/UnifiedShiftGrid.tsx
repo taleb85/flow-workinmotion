@@ -30,6 +30,7 @@ import { isManagementRole, canEditTeamShifts, canPublishScheduleDrafts, canAppro
 import { getShiftViolations, DEFAULT_WORK_RULES } from '../utils/workRules';
 import { isShiftPayrollFrozen } from '../utils/timesheetFreezeCriteria';
 import { logShiftAudit, formatAuditDate } from '../utils/shiftAuditLog';
+import { isUiWidgetVisible } from '../utils/uiScreenWidgets';
 import { PinPadModal } from './ui/PinPadModal';
 import PeriodPickerPopover from './ui/PeriodPickerPopover';
 import {
@@ -533,6 +534,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
   }, [canEdit, isMgmt, sessionActive]);
   const effectiveWorkRules = DEFAULT_WORK_RULES;
   const violationChromeEnabled = featureFlags?.violation_rules !== false;
+  /** Sezione UI visibile per l'utente corrente (Admin → "Cosa vede chi"). */
+  const uiW = (key: string) => (currentUser ? isUiWidgetVisible(currentUser, key) : true);
 
   /** DEBUG — conta turni totali caricati (solo quando cambia il dataset, non a ogni render) */
   useEffect(() => {
@@ -2172,6 +2175,8 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
         className={`ui-toolbar-page-band ui-toolbar-page-band-presences !h-auto !max-h-none min-h-0 mt-3 mb-4 w-full min-w-0 sticky top-[calc(var(--app-sticky-header-offset,5rem)_+_0.75rem)] z-50 py-2 md:overflow-x-auto ${toolbarOverlapping ? 'toolbar-band-over-content' : ''}`}
         data-toolbar-mode={mode}>
         {/* MOBILE: ◀ e ▶ occupano lo spazio ai lati; Oggi + data al centro */}
+        {uiW('turni.date_nav_bar') && (
+        <>
         <div className="flex w-full min-w-0 items-center gap-1.5 md:hidden">
           <button type="button" onClick={prevWeek} aria-label={prevNavLabel}
             className="flex min-w-0 flex-1 items-center justify-center rounded-lg bg-white/10 px-3 py-2 text-white/60 hover:text-white transition-colors hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.15)]"><ChevronLeft className="h-5 w-5" /></button>
@@ -2225,9 +2230,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
             </span>
           )}
         </div>
+        </>
+        )}
 
         {/* Mobile: filtri su una riga sola (filtro | sett/periodo | data periodo);
             desktop: riga flessibile allineata a destra */}
+        {uiW('turni.toolbar_block') && (
         <div className="flex w-full min-w-0 items-center gap-1.5 md:ml-auto md:h-10 md:max-h-10 md:w-auto md:shrink-0 md:flex-nowrap md:justify-end md:gap-2">
           {departments.length > 1 && (
             <div className="shrink-0 md:flex-none relative">
@@ -2517,6 +2525,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           </>
           )}
         </div>
+        )}
       </div>
 
       {/* ── Period Popover ── */}
@@ -2531,6 +2540,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       )}
 
       {/* ── Mobile Card View (card memoizzate: si ri-renderizzano solo se le loro props cambiano) ── */}
+      {uiW('turni.schedule_grid') && (
       <div className="md:hidden space-y-4 pb-content">
         {visibleUsers.map((user) => (
           <ShiftGridMobileCard
@@ -2556,9 +2566,11 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           />
         ))}
       </div>
+      )}
       </div>
 
       {/* ── Desktop Grid ── */}
+      {uiW('turni.schedule_grid') && (
       <div
         ref={tableScrollRef}
         className="hidden md:flex flex-col min-h-0 overflow-auto overscroll-contain rounded-2xl border border-white/[0.14]"
@@ -2660,11 +2672,12 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
           </tfoot>
         </table>
       </div>
+      )}
 
       {/* ── Detail Drawer ── (`pt-14` sul contenitore: la scheda sta un po' sotto il centro) */}
       {createPortal(
         <AnimatePresence>
-          {drawerOpen && selectedShift && (
+          {uiW('turni.shift_modal') && drawerOpen && selectedShift && (
         <div className="fixed inset-0 z-[10050] flex items-center justify-center px-4 pt-14" onClick={handleCloseDrawer}>
           <motion.div className="absolute inset-0 bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
           <motion.div
@@ -3202,7 +3215,7 @@ export default function UnifiedShiftGrid({ mode, onModeChange: _onModeChange, fi
       {/* ── Create Shift Modal ── */}
       {createPortal(
         <AnimatePresence>
-          {createModal && (
+          {uiW('turni.shift_modal') && createModal && (
         <div className="fixed inset-0 z-[10050] flex items-center justify-center" onClick={() => setCreateModal(null)}>
           <motion.div className="fixed inset-0 bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
           <motion.div

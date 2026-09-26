@@ -183,6 +183,7 @@ export default memo(function HomeManagerView({
           className="flex flex-col gap-4">
 
           {/* ── Saluto + data/ora ─────────────────────────────────────── */}
+          {uiW('home_mgmt.header') && (
           <div className="pt-3 md:pt-6 flex items-baseline justify-between gap-3">
             <h1 className="text-xl font-extrabold tracking-tight leading-tight text-white">
               {t.home_greeting.replace('{name}', currentUser.first_name)}
@@ -194,6 +195,7 @@ export default memo(function HomeManagerView({
               {greetingDateLabel}
             </span>
           </div>
+          )}
 
           {/* ── Profilo amministratore (solo Admin) ───────────────────── */}
           {uiW('home_mgmt.admin_banner') && isPurelyManagementRole(currentUser.role) && (

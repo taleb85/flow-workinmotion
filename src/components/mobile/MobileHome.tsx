@@ -4,6 +4,7 @@ import { useT } from '../../hooks/useT';
 import { groupShiftsByDay } from '../../utils/timeCalculations';
 import { useAppUser } from '../../context/AppContext';
 import { getDateLocale, formatTrans } from '../../utils/translations';
+import { isUiWidgetVisible } from '../../utils/uiScreenWidgets';
 import HeaderTodayCoworkersCard from '../HeaderTodayCoworkersCard';
 import { usePullToRefresh } from '../../hooks/usePullToRefresh';
 import { format, parseISO, type Locale } from 'date-fns';
@@ -76,8 +77,11 @@ export default function MobileHome({
   const { pullDistance, isRefreshing, isTriggered, indicatorOpacity, indicatorRotation } =
     usePullToRefresh({ onRefresh: onRefresh ?? (() => {}), disabled: true });
   const t = useT();
-  const { effectiveLanguage } = useAppUser();
+  const { effectiveLanguage, currentUser } = useAppUser();
   const calLocale = locale ?? getDateLocale(effectiveLanguage);
+
+  // Sezioni UI per-utente (Admin → “Cosa vede chi”). Senza utente → nessun effetto.
+  const uiW = (key: string) => (currentUser ? isUiWidgetVisible(currentUser, key) : true);
 
   const today = todayStr ?? format(new Date(), 'yyyy-MM-dd');
 
@@ -144,6 +148,7 @@ export default function MobileHome({
       )}
 
       {/* ── Saluto (page-title) ─────────────────────────────────────── */}
+      {uiW('staff_home.greeting') && (
       <div className="mt-5 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="page-title text-white">{greetingText}</h1>
@@ -155,8 +160,10 @@ export default function MobileHome({
           </div>
         )}
       </div>
+      )}
 
       {/* ── Card timbratura dominante ───────────────────────────────── */}
+      {uiW('staff_home.punch_card') && (
       <section className="flow-card" data-tour="punch">
         <div className="flex items-center justify-between gap-2">
           <span className="flow-section-label">{t.mobile_punch_section}</span>
@@ -207,8 +214,10 @@ export default function MobileHome({
           )}
         </div>
       </section>
+      )}
 
       {/* ── Turno di oggi: tutti i turni, evidenziato quello in corso ── */}
+      {uiW('staff_home.today_shift') && (
       <section className="flow-card" aria-label={t.mobile_today_shift}>
         <span className="flow-section-label">{t.mobile_today_shift}</span>
         {todayWorkShifts.length > 0 ? (
@@ -239,8 +248,10 @@ export default function MobileHome({
           <p className="text-base font-medium text-white/50 mt-2">{noShiftsHint}</p>
         )}
       </section>
+      )}
 
       {/* ── Prossimi turni: un blocco per giorno ────────────────────── */}
+      {uiW('staff_home.upcoming') && (
       <section className="flow-card" aria-label={t.upcoming_shifts}>
         <span className="flow-section-label">{t.upcoming_shifts}</span>
         {nextShifts.length === 0 ? (
@@ -280,9 +291,12 @@ export default function MobileHome({
           </div>
         )}
       </section>
+      )}
 
       {/* ── Colleghi in turno oggi ──────────────────────────────────── */}
+      {uiW('staff_home.coworkers') && (
       <HeaderTodayCoworkersCard />
+      )}
 
     </div>
   );

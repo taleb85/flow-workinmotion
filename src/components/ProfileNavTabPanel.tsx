@@ -32,6 +32,7 @@ import {
   type AvatarFocus,
 } from '../utils/profilePhotoStorage';
 import { splitPhoneForForm, joinPhone, DEFAULT_PHONE_PREFIX } from '../utils/phonePrefix';
+import { isUiWidgetVisible } from '../utils/uiScreenWidgets';
 import type { Language } from '../types';
 function serializeProfileForm(fd: ProfileFormSelfData): string {
   return JSON.stringify({
@@ -437,6 +438,10 @@ export default function ProfileNavTabPanel({
   }, [_langSaved]);
 
   if (!currentUser) return null;
+
+  // Sezione “Pannello profilo” per-utente (Admin → “Cosa vede chi”): se nascosta, non renderizza nulla.
+  const uiW = (key: string) => isUiWidgetVisible(currentUser, key);
+  if (!uiW('staff_profile.panel')) return null;
 
   const fullName = [currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ').trim()
     || currentUser.email?.split('@')[0] || 'Utente';

@@ -12,7 +12,6 @@ import StaffHomePreview from './StaffHomePreview';
 import TurniMgmtPreview from './TurniMgmtPreview';
 import FerieMgmtPreview from './FerieMgmtPreview';
 import StaffHolidaysPreview from './StaffHolidaysPreview';
-import TimesheetTabPreview from './TimesheetTabPreview';
 import StaffTimesheetPreview from './StaffTimesheetPreview';
 import StatisticsTabPreview from './StatisticsTabPreview';
 import ProfileTabPanelPreview from './ProfileTabPanelPreview';
@@ -127,15 +126,6 @@ export default function ProfileTabRichPreview({
       blocks.push(
         <TurniMgmtPreview
           key="turni-mgmt"
-          previewUser={previewUser}
-          language={language}
-          isSelectedAdmin={isSelectedAdmin}
-          onUiToggle={onUiToggle}
-        />
-      );
-      blocks.push(
-        <TimesheetTabPreview
-          key="ts"
           previewUser={previewUser}
           language={language}
           isSelectedAdmin={isSelectedAdmin}
