@@ -2,7 +2,7 @@
  * Anteprima "Cosa vede chi" — scheda Ferie.
  *
  * A differenza dei vecchi mock statici (`FerieMgmtPreview` /
- * `StaffHolidaysPreview`, che restano nel repo), questa anteprima riusa il
+ * `StaffHolidaysPreview`, ora rimossi), questa anteprima riusa il
  * componente VERO `HolidayRequests`, alimentato con dati dimostrativi tramite
  * gli override `overrideUser` / `overrideHolidays` e `skipAutoRefresh`.
  *
