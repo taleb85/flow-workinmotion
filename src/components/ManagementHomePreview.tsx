@@ -18,7 +18,7 @@ import {
 import { motion } from 'framer-motion';
 import type { User, Language } from '../types';
 import { isPurelyManagementRole } from '../utils/permissions';
-import { getTranslations } from '../utils/translations';
+import { getTranslations, getDateLocale } from '../utils/translations';
 import { formatMinutesToHoursAndMinutes } from '../utils/timeCalculations';
 import { HomeManagementShiftCard, type HomeManagementShiftCardProps } from './HomeManagementShiftCard';
 import { WidgetChrome } from './profilePreview/WidgetChrome';
@@ -45,6 +45,7 @@ export default function ManagementHomePreview({
   const tv = t as Record<string, string>;
   const now = new Date();
   const todayStr = format(now, 'yyyy-MM-dd');
+  const greetingDateLabel = format(now, 'EEEE d MMMM', { locale: getDateLocale(language) });
 
   const styleApproved: HomeManagementShiftCardProps['style'] = {
     border: 'border-l-white/30',
@@ -110,7 +111,14 @@ export default function ManagementHomePreview({
           onUiToggle={onUiToggle}
           hiddenBadge={hiddenBadge}
         >
-          <div className="pt-1 min-h-[0.125rem]" aria-hidden />
+          <div className="pt-1 flex items-baseline justify-between gap-3">
+            <h1 className="text-xl font-extrabold tracking-tight leading-tight text-white">
+              {t.home_greeting.replace('{name}', previewUser.first_name ?? '')}
+            </h1>
+            <span className="text-[0.6875rem] font-medium whitespace-nowrap capitalize tabular-nums text-white/60">
+              {greetingDateLabel}
+            </span>
+          </div>
         </WidgetChrome>
 
         {isPurelyManagementRole(previewUser.role) && (

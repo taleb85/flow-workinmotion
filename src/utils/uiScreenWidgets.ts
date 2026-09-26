@@ -26,7 +26,7 @@ export const UI_SCREEN_WIDGETS: UiScreenWidgetDef[] = [
     audience: 'management',
     screenGroup: 'home_mgmt',
     screenLabel: 'Home — Dashboard gestionale',
-    label: 'Intestazione desktop (titolo + data)',
+    label: 'Saluto e data',
   },
   {
     key: 'home_mgmt.admin_banner',
